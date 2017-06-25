@@ -8,10 +8,12 @@ Ohayo is the first editor for a newly discovered family of programming languages
 You can use ohayo at http://ohayo.computer or download <a href="https://github.com/breck7/ohayo">Ohayo on GitHub.</a>
 
 
-Warning - There will be Bugs!
-=============================
+Warning - There will be Bugs and Breaks!
+========================================
 
 This is still "Day 1" of Ohayo, and Tree Notation and ETNs in general, so there will be bugs!
+
+Over the next few weeks, there will also be frequent breaking changes.
 
 By using Ohayo, and providing feedback to us, you can help us make Ohayo better.
 
