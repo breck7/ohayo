@@ -1,3 +1,7 @@
+1.2.3 2017-6-28
+---------------
+- General: bug fixes and more tests
+
 1.2.1 2017-6-26
 ---------------
 - New: Last mounted program is now restored when you refresh the page
