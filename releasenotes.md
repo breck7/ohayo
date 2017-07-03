@@ -1,3 +1,7 @@
+1.2.4 2017-7-2
+--------------
+- General: bug fixes, tests, and speed improvements
+
 1.2.3 2017-6-28
 ---------------
 - General: bug fixes and more tests
