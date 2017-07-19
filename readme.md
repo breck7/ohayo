@@ -38,9 +38,9 @@ Email is the best way to send us feedback.
 
 Please use this template:
 
-to: feedback@ohayo.computer
-Subject: I rate Ohayo a [0 - 10]
-Body: [why you gave it that rating and anything else you want to say]
+- To: feedback@ohayo.computer
+- Subject: I rate Ohayo a [0 - 10]
+- Body: [why you gave it that rating and anything else you want to say]
 
 In your subject, please rate Ohayo on a scale of 0 - 10. 10 means you love Ohayo and are highly likely to recommend it to your friends. 0 means you HATE Ohayo but are giving feedback out of pity.
 
