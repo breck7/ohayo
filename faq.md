@@ -45,12 +45,11 @@ In this early release, just to local storage. More persistence options coming so
 
 Just about. You can get the TN source here: https://github.com/breck7/treenotation/ and the minified
 version of Ohayo here https://github.com/breck7/ohayo . With the latter you can run and modify Ohayo
-locally or on your own servers. The full source is coming soon. Just need to get some sleep and
-give it a few more edits.
+locally or on your own servers. The full source is coming soon, pending a few more refactors.
 
 #### How can I support Ohayo?
 
-Thanks for asking! By providing feedback, buying a token, or even contributing code. Details in the
+Thanks for asking! By providing feedback or even contributing code. Details in the
 readme on GitHub.
 
 
