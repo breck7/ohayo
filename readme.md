@@ -38,39 +38,13 @@ Email is the best way to send us feedback.
 
 Please use this template:
 
-Subject: include just a number between 0 and 10 which states how likely you are to recommend
-Ohayo to a friend. 10 means you love Ohayo and are highly likely to recommend it. 0 means you HATE Ohayo
-but are giving feedback out of pity.
+to: feedback@ohayo.computer
+Subject: I rate Ohayo a [0 - 10]
+Body: [why you gave it that rating and anything else you want to say]
 
-Body: say why you gave that score and whatever else you want to say.
-
-feedback@ohayo.computer
+In your subject, please rate Ohayo on a scale of 0 - 10. 10 means you love Ohayo and are highly likely to recommend it to your friends. 0 means you HATE Ohayo but are giving feedback out of pity.
 
 Thank you for your feedback!
-
-Please Buy an Ohayo Token
-=========================
-
-Do you use Ohayo, but have no money? No problem. Use Ohayo as much as you want for free.
-
-If you use Ohayo and have a little money to spare, please consider buying a token.
-
-Buying an Ohayo token helps make Ohayo better by supporting the people and projects that do the
-research, design and engineering that makes the Ohayo software work.
-
-A token lasts one year and costs $10.
-
-Token purchases are final and have no cash value. Ohayo works the same whether you have a token or not.
-
-However, when you buy a token, you'll get a thank you email which will include your token #.
-In addition, whenever someone buys a token whose number is evenly divisible by 100, they will also
-receive an email with a custom original joke. Funniness not guaranteed.
-
-To buy a token, PayPal $10 to tokens@ohayo.computer
-
-Do you love Ohayo? Consider giving a token to all your friends, employees, coworkers, neighbors, relatives (living or deceased) and pets. Just PayPal $10 * the number of tokens you want to tokens@ohayo.computer
-
-Thank you for your support!
 
 Copyright & License
 -------------------
