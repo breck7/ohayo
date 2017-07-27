@@ -51,8 +51,3 @@ locally or on your own servers. The full source is coming soon, pending a few mo
 
 Thanks for asking! By providing feedback or even contributing code. Details in the
 readme on GitHub.
-
-
-
-
-

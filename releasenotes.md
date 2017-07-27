@@ -1,3 +1,16 @@
+2.0.0 2017-7-27
+---------------
+- New: added "Hello World" fire example
+- New: added shift+v keyboard shortcut to visualize a program
+- New: added shift+e shortcut to execute a program
+- New: Flow. added "echo" block
+- New: Flow. added "wordcloud" block
+- Under-the-hood: replaced HTML and DOM operations with Stump ETN and Willow.
+- Breaking: Flow. renamed "out" block to "dump"
+- Breaking: Fire. Renamed lots of node types "fn" is now "=fn", "." is now "=.>>", "call" is now ">>".
+- General: updated Tree Notation library to 5.0
+- General: bug fixes and more tests
+
 1.2.4 2017-7-2
 --------------
 - General: bug fixes, tests, and speed improvements
