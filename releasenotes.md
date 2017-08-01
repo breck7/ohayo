@@ -1,3 +1,12 @@
+2.1.0 2017-7-31
+---------------
+- New: added >settings block, which by default is hidden and includes program settings like layout
+- New: shift+m shortcut to generate mini map
+- Breaking: changed "layout" property in flow to be a sub property of the settings block node
+- Fix: resize and move block bug fixes
+- Fix: shift+v fix when you are analyzing a program that contains an unknown node type
+- General: more tests and fixes.
+
 2.0.0 2017-7-27
 ---------------
 - New: added "Hello World" fire example
