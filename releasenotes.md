@@ -1,3 +1,21 @@
+3.0.0 2017-8-8
+--------------
+- New: replaced textarea source editor with full fledged codemirror editor
+- New: added console output to gutter and load on open
+- New: source editor starts open
+- New: press Command+s to save and render blocks visualization of code in source editor
+- New: press Command+enter to build and execute the selected tree in source editor
+- New: press Command+shift+enter to build and print the selected tree to the console
+- New: autocomplete in source editor using ctrl+spacebar
+- Fix: lots of rendering and other bug fixes
+- Removed: removed the search/open program input box
+
+2.2.0 2017-8-04
+---------------
+- Breaking: flow. removed ">output" block. Use ">dump"
+- Breaking: flow. removed ">echo" block. Use ">text".
+- New: flow. Added "replacer" block.
+
 2.1.0 2017-7-31
 ---------------
 - New: added >settings block, which by default is hidden and includes program settings like layout
@@ -20,8 +38,8 @@
 - General: updated Tree Notation library to 5.0
 - General: bug fixes and more tests
 
-1.2.4 2017-7-2
---------------
+1.2.4 2017-7-02
+---------------
 - General: bug fixes, tests, and speed improvements
 
 1.2.3 2017-6-28
