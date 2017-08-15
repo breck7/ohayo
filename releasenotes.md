@@ -1,3 +1,11 @@
+3.1.0 2017-8-15
+---------------
+- New: added categories to keyboard shortcuts
+- Fix: row parsing bug fixes
+- Fix: node editor bug fixes
+- Infra: Switched to Dictionary from Blueprints
+- Infra: EOL Electron
+
 3.0.0 2017-8-8
 --------------
 - New: replaced textarea source editor with full fledged codemirror editor
