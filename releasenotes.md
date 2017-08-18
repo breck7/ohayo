@@ -1,4 +1,4 @@
-3.1.2 2017-8-18
+3.1.1 2017-8-18
 ---------------
 - Fix: flow bugs in row parsing
 - Fix: bugs in 3d vis
