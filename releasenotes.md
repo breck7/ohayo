@@ -1,3 +1,11 @@
+3.1.2 2017-8-18
+---------------
+- Fix: flow bugs in row parsing
+- Fix: bugs in 3d vis
+- Fix: word cloud fix
+- New: language detection
+- Infra: modularization
+
 3.1.0 2017-8-15
 ---------------
 - New: added categories to keyboard shortcuts
