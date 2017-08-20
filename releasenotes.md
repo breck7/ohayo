@@ -1,3 +1,9 @@
+3.1.3 2017-8-20
+---------------
+- New: changed "File" dropdown to "New" dropdown, removed open dropdown, and moved other "File" commands to program contextmenu
+- Fix: fixed recursive "pin" bug reported by DZ.
+- Infra: updated Tree Notation; switched to Tuples; removed structPath; dictionary instruction renaming; dictionary parsing work
+
 3.1.1 2017-8-18
 ---------------
 - Fix: flow bugs in row parsing
