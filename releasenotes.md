@@ -1,3 +1,19 @@
+3.1.4 2017-8-22
+---------------
+- New: added "New from URL" command
+- New: cork theme
+- New: cmd+\ shortcut in the code editor to clear console
+- New: added >flights and >delays cogs to flow
+- New: many flow cogs are now hidden by default
+- New: 3d vis of programs now keeps z-index at 1 for words, also dotSize param added, and better tag/type/slots
+- Fix: edits via toolbar not immediately reflected (thanks DZ)
+- Fix: changing corkboard layout of a program now generates a log message
+- Fix: log messages are now rendered as they come in
+- Fix: cmd+a select all now shows border
+- Breaking: most fire cogs renamed (ie: ::$ to log$, =# to set#)
+- Breaking: >editor cog in flow is now >coder
+- Infra: blocks to cogs, slots, swarm, mash, dictionary improvements, corkboard, desktop routes
+
 3.1.3 2017-8-20
 ---------------
 - New: changed "File" dropdown to "New" dropdown, removed open dropdown, and moved other "File" commands to program contextmenu
