@@ -1,3 +1,7 @@
+3.1.5 2017-8-22
+---------------
+- Fix: update to hello world demo fire program
+
 3.1.4 2017-8-22
 ---------------
 - New: added "New from URL" command
