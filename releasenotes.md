@@ -1,3 +1,10 @@
+3.1.6 2017-8-23
+---------------
+- New: drag and drop files to create programs
+- Breaking: flow removed >input cog
+- Breaking: fire removed class and subclass
+- Infra: merged wall into swarm, stumpprogram, willowprogram, removed WithChildren usage, collapsedNode, stump/bern/monad
+
 3.1.5 2017-8-22
 ---------------
 - Fix: update to hello world demo fire program
