@@ -1,3 +1,12 @@
+3.2.1 2017-8-23
+---------------
+- New: drag and drop CSV support
+- New: program names cannot have spaces
+- New: groupBy now will group empty groups
+- Fix: Blank lines are now not visible by default
+- Fix: fix to some google charts
+- Infra: flows folder, line count & dashboard, ProgramRunner, dictionary compilation, more swarm files
+
 3.1.6 2017-8-23
 ---------------
 - New: drag and drop files to create programs
