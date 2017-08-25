@@ -1,3 +1,10 @@
+3.2.2 2017-8-24
+---------------
+- New: better typing output in flow
+- Breaking: in flow ">slots" is now ">tags"
+- Breaking: in fire "set$+" is now "join"
+- Infra: Upgrade to Tree 6.0.0, dictionary improvements (frequency, compiled, parameters, variable arity), cli improvements, swarm static
+
 3.2.1 2017-8-23
 ---------------
 - New: drag and drop CSV support
