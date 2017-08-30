@@ -1,3 +1,7 @@
+4.0.0 2017-8-30
+---------------
+- Infra: SnapProgram Split, Wall, Tabs, Tiles, TileProcess, Dictionary improvements, Swarm Improvements, Details, App state storage, Commanders, Metrics, Gopher, 79%
+
 3.2.2 2017-8-24
 ---------------
 - New: better typing output in flow
