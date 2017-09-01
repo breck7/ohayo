@@ -1,3 +1,9 @@
+4.1.0 2017-8-31
+---------------
+- Fix: heatcal and other flow tile fixes
+- Breaking: changed "pin" to width/height/top/left
+- Infra: 82%
+
 4.0.0 2017-8-30
 ---------------
 - Infra: SnapProgram Split, Wall, Tabs, Tiles, TileProcess, Dictionary improvements, Swarm Improvements, Details, App state storage, Commanders, Metrics, Gopher, 79%
