@@ -1,4 +1,4 @@
-4.1.2 2017-9-1
+4.1.1 2017-9-1
 --------------
 - New: shift+c type checking command
 - Infra: better support for typed ETNs
