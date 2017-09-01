@@ -14,14 +14,17 @@ with even the best 1-dimensional languages like Javascript, C, Java, Python, Lis
 
 #### What can I do with ETN editors that I can't do with normal code editors?
 
-ETNs define one right way to write code. Humans and machines write code in the same style.
-Because of this, ETNs let machines augment the programmer in ways never before possible. ETN editors let you do powerful things that 1D-editors cannot, like alternate between programming visually and textually. This document
+ETNs do not use BNF grammars. ETNs only use geometry to give a program structure. This makes things much simpler.
+
+It is much easier to write development tools for ETNs than for BNF languages. It is easy for machines to write great ETN code.
+
+Things that are nearly impossible with BNF languages become easy with ETNs, such as visual programming. This document, for example,
 is a program written in an ETN called Flow. You can edit the source by hand or visually with ohayo.
 
 #### Who is ohayo for?
 
-ohayo is built for all programmers. Right now, it's for researchers and dreamers, but soon will be
-good enough for busy profressionals.
+ohayo is built for all programmers. Right now, it's for researchers but soon will be
+good enough for busy professionals.
 
 #### What can I build with ohayo?
 
@@ -30,8 +33,7 @@ and we will do our best to prioritize the most popular requests.
 
 #### What ETNs does ohayo currently support?
 
-Right now, ohayo ships with 2 ETNs. "Flow", an ETN for data science and data visualization,
-and "Fire", an ETN that compiles to Javascript.
+Right now, ohayo ships with 3 ETNs. "Flow", an ETN for data science and data visualization, "Fire", is an ETN that compiles to Javascript, and "Turtle" is an ETN that compiles to Logo.
 
 #### Does ohayo work in all browsers?
 

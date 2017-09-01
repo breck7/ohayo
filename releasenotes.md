@@ -1,3 +1,8 @@
+4.1.2 2017-9-1
+--------------
+- New: shift+c type checking command
+- Infra: better support for typed ETNs
+
 4.1.0 2017-8-31
 ---------------
 - Fix: heatcal and other flow tile fixes
