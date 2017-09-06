@@ -1,3 +1,17 @@
+4.2.0 2017-9-6
+--------------
+- New: create turtle or rusty files
+- New: ETNs now always in tree layout
+- New: line count block in flow
+- New: server storage for desktop app
+- Breaking: removed text, coder blocks in flow
+- Fix: html escape fix in data block
+- Fix: close last tab render fix
+- Fix: close all tabs render fix
+- Fix: fix to Fib example compilation in fire
+- Fix: tab change tiles not appearing render fix
+- Infra: FlexWall, Files & Folders, Removed Diff & JSSHA, Tests & Diagnostics
+
 4.1.1 2017-9-1
 --------------
 - New: shift+c type checking command
