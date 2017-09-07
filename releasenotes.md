@@ -1,3 +1,7 @@
+4.2.1 2017-9-6
+--------------
+- Fix: fixed bug where deleting tiles other than newest was not updating source editor
+
 4.2.0 2017-9-6
 --------------
 - New: create turtle or rusty files
