@@ -1,3 +1,13 @@
+5.0.0 2017-9-14
+---------------
+- New: color word type highlighting for all languages
+- New: scoped autocomplete for all languages
+- New: 100% word type checking for all languages
+- New: 300% perf improvement when loading multiple programs
+- Breaking: removed a number of tiles from flow and updated others
+- Infra: Grammar CC, Blaze VM, sublime syntax, Tree 7, removed monad, auto to improvs, slot types, program errors
+- More infra: gopher & swarm improvements, Inspect, Profile, async/await, tape to tap, remove details, settings
+
 4.2.1 2017-9-6
 --------------
 - Fix: fixed bug where deleting tiles other than newest was not updating source editor
