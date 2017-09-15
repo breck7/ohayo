@@ -1,3 +1,9 @@
+5.0.1 2017-9-15
+---------------
+- Fix: fixed regression in loading of 3D vis
+- Fix: parse subsettings correctly in flow
+- Infra: updated Tree to 7.1
+
 5.0.0 2017-9-14
 ---------------
 - New: color word type highlighting for all languages
