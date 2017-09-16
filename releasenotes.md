@@ -1,3 +1,9 @@
+5.1.0 2017-9-16
+---------------
+- New: improved autocomplete
+- New: improved flow grammar highlighting
+- Breaking: >tags keyword in flow is now >types
+
 5.0.1 2017-9-15
 ---------------
 - Fix: fixed regression in loading of 3D vis
