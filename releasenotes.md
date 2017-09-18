@@ -1,3 +1,8 @@
+5.1.1 2017-9-17
+---------------
+- Fix: some code mirror color highlighting fixes
+- Infra: grammar type checking, swarm grammar, grammar grammar, upgrade language, other fixes
+
 5.1.0 2017-9-16
 ---------------
 - New: improved autocomplete
