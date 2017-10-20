@@ -8,7 +8,7 @@ Tree Languages don't have parentheses, quotes, semicolons, brackets, et cetera. 
 
 #### Why would I want to use Tree Languages?
 
-It has been predicted, once tooling for Tree Languages matures, that in the years ahead Tree Languages will let you design, develop and debug software more than 10x faster than you can with even the best 1-dimensional languages like Javascript, C, Java, Python, Lisp, R, Arc, Go, Rust, etc.
+Our prediction is, once tooling for Tree Languages matures, that in the years ahead Tree Languages will let you design, develop and debug software more than 10x faster than you can with even the best 1-dimensional languages like Javascript, C, Java, Python, Lisp, R, Arc, Go, Rust, etc. We could be wrong! But we could be right too!
 
 #### When will I be able to rely on ohayo to build things?
 

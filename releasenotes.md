@@ -1,3 +1,8 @@
+5.1.3 2017-10-19
+----------------
+- Fix: changed some dangling ETN references to Tree Languages
+- Infra: some code cleanup to prepare for new TP library
+
 5.1.2 2017-9-22
 ---------------
 - Infra: grammar file cleanup and prep work for v6.0 and more tests.
