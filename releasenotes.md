@@ -1,3 +1,7 @@
+5.2.0 2017-10-28
+----------------
+- Infra: updated to Tree 8
+
 5.1.4 2017-10-28
 ----------------
 - Infra: code cleanup for TP 8
