@@ -1,3 +1,7 @@
+5.1.4 2017-10-28
+----------------
+- Infra: code cleanup for TP 8
+
 5.1.3 2017-10-19
 ----------------
 - Fix: changed some dangling ETN references to Tree Languages
