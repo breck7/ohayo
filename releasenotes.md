@@ -1,3 +1,7 @@
+5.2.1 2017-11-2
+---------------
+- Infra: updated to Tree 9
+
 5.2.0 2017-10-28
 ----------------
 - Infra: updated to Tree 8
