@@ -1,3 +1,8 @@
+5.3.0 2017-11-8
+---------------
+- Infra: Updated to otree
+- Changes: removed rusty and turtle support for now
+
 5.2.1 2017-11-2
 ---------------
 - Infra: updated to Tree 9
