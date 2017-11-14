@@ -6,7 +6,7 @@ Ohayo is a tool for building programs in Tree Languages. This is a preview relea
 Tree Languages
 ==============
 
-Ohayo is the first editor for a newly discovered family of programming languages called Tree Languages. These languages use a new universal syntax called <a href="https://github.com/breck7/otree">Tree Notation</a>.
+Ohayo is the first editor for a newly discovered family of programming languages called Tree Languages. These languages use a new universal syntax called <a href="https://github.com/breck7/jtree">Tree Notation</a>.
 
 Tree Languages don't have parentheses, quotes, semicolons, brackets, et cetera. Tree Languages just use geometry (whitespace) to give your programs structure. The technical explanation is that Tree Languages extend Tree Notation, a newly discovered universal syntax, and that they use Tree Grammars and not BNF Grammars.
 

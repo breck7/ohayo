@@ -1,3 +1,7 @@
+5.4.0 2017-11-13
+----------------
+- Infra: updated to jtree
+
 5.3.0 2017-11-8
 ---------------
 - Infra: Updated to otree
