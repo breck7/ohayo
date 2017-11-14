@@ -1,3 +1,7 @@
+6.0.0 2017-11-14
+----------------
+- New: switched focus to only data dashboards now that Tree Languages moved to JTree project
+
 5.4.1 2017-11-13
 ----------------
 - Fix: >morph tile regression fix
