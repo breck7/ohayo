@@ -1,3 +1,7 @@
+5.4.1 2017-11-13
+----------------
+- Fix: >morph tile regression fix
+
 5.4.0 2017-11-13
 ----------------
 - Infra: updated to jtree
