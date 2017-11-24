@@ -1,3 +1,8 @@
+6.0.1 2017-11-24
+----------------
+- New: >img and >fuzz tiles
+- Fix: morph and other fixes
+
 6.0.0 2017-11-14
 ----------------
 - New: switched focus to only data dashboards now that Tree Languages moved to JTree project
