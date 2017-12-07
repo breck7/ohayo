@@ -1,3 +1,7 @@
+7.0.0 2017-12-7
+---------------
+- New: added npm install ohayo and ohayo cli command
+
 6.0.1 2017-11-24
 ----------------
 - New: >img and >fuzz tiles

@@ -1,0 +1,32 @@
+{
+  "name": "ohayo",
+  "version": "7.0.0",
+  "description": "ohayo desktop version",
+  "main": "cli.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "bin": {
+    "ohayo": "./cli.js"
+  },
+  "dependencies": {
+    "recursive-readdir": "*",
+    "mz": "^2.7.0",
+    "recursive-readdir-sync": "*"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/breck7/ohayo.git"
+  },
+  "keywords": ["ohayo"],
+  "author": "Breck Yunits",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/breck7/ohayo/issues"
+  },
+  "homepage": "https://github.com/breck7/ohayo#readme"
+}
