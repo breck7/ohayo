@@ -1,3 +1,10 @@
+7.1.0 2019-01-04
+----------------
+- Fix: fixed selection, editor, presidents, and other bugs
+- New: added iris, mtcars, and populations tiles
+- New: display improvements to morph tile
+- New: insert tile and reset ohayo keyboard shortcuts
+
 7.0.0 2017-12-7
 ---------------
 - New: added npm install ohayo and ohayo cli command

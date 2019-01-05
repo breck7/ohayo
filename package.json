@@ -1,13 +1,13 @@
 {
   "name": "ohayo",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "ohayo desktop version",
-  "main": "cli.js",
+  "main": "app.js",
   "directories": {
     "lib": "lib"
   },
   "bin": {
-    "ohayo": "./cli.js"
+    "ohayo": "./app.js"
   },
   "dependencies": {
     "recursive-readdir": "*",

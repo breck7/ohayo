@@ -1,10 +1,5 @@
 const DiskReader = require("./DiskReader.js")
 const fs = require("fs")
-const os = require("os")
-
-const storageFolder = os.homedir() + "/ohayo-programs/"
-
-if (!fs.existsSync(storageFolder)) fs.mkdirSync(storageFolder)
 
 const util = {}
 
@@ -32,6 +27,10 @@ util.getAvailablePermalink = (permalink, doesFileExistSyncFn) => {
 }
 
 module.exports = app => {
+  const storageFolder = app.config.storageFolder
+
+  if (!fs.existsSync(storageFolder)) fs.mkdirSync(storageFolder)
+
   app.get("/serverStorage.list", async (req, res) => {
     const options = {
       path: storageFolder,

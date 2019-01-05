@@ -1,8 +1,8 @@
 #! /usr/local/bin/node
 
 const express = require("express")
-const fs = require("fs")
 const bodyParser = require("body-parser")
+
 const app = express()
 
 app.use(bodyParser.urlencoded({ extended: false }))
@@ -15,11 +15,18 @@ app.use(
   })
 )
 
+app.config = require("./server/config.js")
+
 require("./server/shell.js")(app)
 require("./server/dir.js")(app)
 require("./server/serverStorage.js")(app)
 
-const port = 8007
-app.listen(port, () => {
-  console.log(`Running ohayo. cmd+dblclick: http://localhost:${port}/`)
-})
+module.exports = app
+
+if (!module.parent) {
+  const port = process.argv[2] || 8007
+
+  app.listen(port, () => {
+    console.log(`Running ohayo. cmd+dblclick: http://localhost:${port}/`)
+  })
+}
