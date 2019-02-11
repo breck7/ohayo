@@ -1,3 +1,12 @@
+8.0.0 2019-02-10
+----------------
+- New: all previous versions of Ohayo accessible at v1/v2/vN.ohayo.computer
+- Breaking: all tile names are new. This version implements namespacing.
+- New: web get, post, and dump tiles.
+- New: better didyoumean tiles
+- New: added right click on tile and export to tree file option
+- Infra: updated jtree for perf gains
+
 7.1.0 2019-01-04
 ----------------
 - Fix: fixed selection, editor, presidents, and other bugs
