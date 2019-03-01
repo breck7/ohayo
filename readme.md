@@ -8,7 +8,7 @@ You can try ohayo at http://ohayo.computer or download <a href="https://github.c
 How to Give Feedback
 ====================
 
-Open an issue or sent feedback to feedback@ohayo.computer
+Open an issue or send feedback to feedback@ohayo.computer
 
 Copyright & License
 -------------------

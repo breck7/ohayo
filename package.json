@@ -1,6 +1,6 @@
 {
   "name": "ohayo",
-  "version": "7.1.0",
+  "version": "8.1.0",
   "description": "ohayo desktop version",
   "main": "app.js",
   "directories": {
@@ -10,8 +10,10 @@
     "ohayo": "./app.js"
   },
   "dependencies": {
-    "recursive-readdir": "*",
+    "express": "^4.16.4",
+    "lodash": "^4.17.11",
     "mz": "^2.7.0",
+    "recursive-readdir": "*",
     "recursive-readdir-sync": "*"
   },
   "devDependencies": {},
@@ -22,7 +24,9 @@
     "type": "git",
     "url": "git+https://github.com/breck7/ohayo.git"
   },
-  "keywords": ["ohayo"],
+  "keywords": [
+    "ohayo"
+  ],
   "author": "Breck Yunits",
   "license": "MIT",
   "bugs": {

@@ -24,7 +24,7 @@ require("./server/serverStorage.js")(app)
 module.exports = app
 
 if (!module.parent) {
-  const port = process.argv[2] || 8007
+  const port = process.argv[2] || 1111
 
   app.listen(port, () => {
     console.log(`Running ohayo. cmd+dblclick: http://localhost:${port}/`)

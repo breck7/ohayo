@@ -1,3 +1,19 @@
+8.1.0 2019-2-28
+---------------
+- New: autocomplete now opens on keypress
+- New: data.local> tile
+- New: url tiles default to caching
+- New: error message indicator on url tiles
+- New: default theme is now "workshop"
+- New: file drop now uses local data tile
+- New: improved table styling
+- New: Google tiles now have dummy data
+- Breaking: changed default local server port to 1111 from 8008
+- Breaking: data.auto> is now data.inline>
+- Fix: npm missing package dependencies fix
+- Fix: editor color fixes across themes
+- Fix: to advanced (HOT) table
+
 8.0.0 2019-02-10
 ----------------
 - New: all previous versions of Ohayo accessible at v1/v2/vN.ohayo.computer
