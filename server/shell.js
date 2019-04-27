@@ -14,8 +14,11 @@ module.exports = app => {
     if (!actualCommand) return res.send("unsupported command")
     const cwd = req.query.cwd || __dirname
 
-    exec(actualCommand, { cwd: cwd }, (err, out, stderr) => {
-      if (err) return res.send(err)
+    exec(actualCommand, { cwd: cwd, maxBuffer: 1024 * 10000 }, (err, out, stderr) => {
+      if (err) {
+        console.log(err)
+        return res.status(400).send(err)
+      }
       res.send(out)
     })
   })

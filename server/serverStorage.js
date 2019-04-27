@@ -27,15 +27,11 @@ util.getAvailablePermalink = (permalink, doesFileExistSyncFn) => {
 }
 
 module.exports = app => {
-  const storageFolder = app.config.storageFolder
-
-  if (!fs.existsSync(storageFolder)) fs.mkdirSync(storageFolder)
-
   app.get("/serverStorage.list", async (req, res) => {
     const options = {
-      path: storageFolder,
+      path: req.query.folder,
       stats: true,
-      readAll: true,
+      readAll: true, // todo: this is bad. what if you have a big binary?
       recursive: false
     }
     const files = await new DiskReader(options).getFilesArray()
@@ -43,34 +39,23 @@ module.exports = app => {
   })
 
   app.post("/serverStorage.delete", (req, res) => {
-    const filename = storageFolder + req.body.filename
-    fs.unlink(filename, () => res.send("ok"))
+    fs.unlink(req.body.fullPath, () => res.send("ok"))
   })
 
   app.post("/serverStorage.exists", (req, res) => {
-    const filename = storageFolder + req.body.filename
-    fs.exists(filename, result => res.send(result))
-  })
-
-  app.post("/serverStorage.move", (req, res) => {
-    const oldName = storageFolder + req.body.oldName
-    const newName = storageFolder + req.body.newName
-    fs.rename(oldName, newName, () => res.send("ok"))
+    fs.exists(req.body.fullPath, result => res.send(result))
   })
 
   app.post("/serverStorage.read", (req, res) => {
-    const filename = storageFolder + req.body.filename
-    fs.readFile(filename, "utf8", (err, data) => res.send(data))
+    fs.readFile(req.body.fullPath, "utf8", (err, data) => res.send(data))
   })
 
   app.post("/serverStorage.getAvailablePermalink", (req, res) => {
-    res.send(util.getAvailablePermalink(req.body.permalink, filename => fs.existsSync(storageFolder + filename)))
+    res.send(util.getAvailablePermalink(req.body.permalink, fullPath => fs.existsSync(fullPath)))
   })
 
   app.post("/serverStorage.write", (req, res) => {
-    const filename = storageFolder + req.body.filename
-    const newVersion = req.body.newVersion
-    fs.writeFile(filename, newVersion, "utf8", (err, data) => {
+    fs.writeFile(req.body.fullPath, req.body.newVersion, "utf8", (err, data) => {
       res.send("ok")
     })
   })

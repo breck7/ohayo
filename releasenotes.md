@@ -1,3 +1,45 @@
+9.0.0 2019-4-26
+---------------
+- New: sublime syntax highlighting for Flow
+- New: autocomplete for more words
+- New: improved CodeMirror syntax highlighting
+- New: filter tiles
+- New: introduced "working folder"
+- New: desktop app now has ability to open any file/folder. You can also switch between disk and localStorage
+- New: disk.read tile
+- New: "column" and "tiled" layout options
+- New: flowSamples folder and more data samples
+- New: more sample tiles including kaggle tile
+- New: columns and rows tiles
+- Breaking: ALL tiles now do not contain a trailing ">"
+- Breaking: slang property to content
+- Breaking: @wall to @settings
+- Breaking: apply.filter> to filter.advanced
+- Breaking: apply.group> to group.by
+- Breaking: samples.iris> to samples.tinyIris
+- Breaking: misc.flights> to airtraffic.flights and misc.delays> to airtraffic.delays
+- Breaking: misc.youtube> to youtube.play and misc.3d> to treenotation.3d
+- Breaking: social.reddit> to reddit.all, social.subreddits> to reddit.subs, social.subreddit> to reddit.sub
+- Breaking: social.hn> to hackernews.top
+- Breaking: apply.join> to join.by
+- Breaking: apply.types> to treenotation.wordTypes
+- Breaking: apply.fuzz> to match.fuzzy
+- Breaking: apply.convert apply.extend apply.parse removed
+- Breaking: stats.summary to columns.describe, stats.lc to text.lc stats.wc to text.wc
+- Breaking: charts.wordcloud to text.wordcloud
+- Breaking: views.markdwon to markdown.basic, views.outline to treenotation.outline, views.dotline to treenotation.dotline
+- Breaking: system.commands is now editor.commandHistory
+- Fix: fixed update bugs previously requiring manual reloading of tiles
+- Fix: text select bug fix
+- Fix: fixed bug previously requiring a reload after a file rename
+- Fix: tree layout works better
+- Fix: fixed web.get bug when a blank url is fetched
+- Fix: fixed bug where tile z-index stacking was reversed
+- Fix: when a tile has an error during rendering we catch it and display an error tile
+- Infra: file/folder/disk refactor
+- Infra: upgraded to jtree 19+ for new autocomplete and syntax highlighter
+- Infra: many more tests, @examples, @descriptions and tile quality checking
+
 8.1.0 2019-2-28
 ---------------
 - New: autocomplete now opens on keypress

@@ -15,10 +15,9 @@ app.use(
   })
 )
 
-app.config = require("./server/config.js")
-
 require("./server/shell.js")(app)
 require("./server/dir.js")(app)
+require("./server/proxy.js")(app)
 require("./server/serverStorage.js")(app)
 
 module.exports = app

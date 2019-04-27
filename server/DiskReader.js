@@ -77,6 +77,12 @@ class DiskReader {
     return Promise.all(files.map(this._getFileStats))
   }
 
+  static _getExtension(path) {
+    // todo: handle no extension.
+    const fileName = path.split("/").pop()
+    return fileName.includes(".") ? fileName.split(".").pop() : ""
+  }
+
   async _getFileStats(abspath) {
     const stat = await fs.stat(abspath)
     const obj = {}
@@ -84,7 +90,7 @@ class DiskReader {
     obj.path = abspath
     obj.link = "file://" + abspath
     obj.isDirectory = stat.isDirectory()
-    obj.extension = obj.isDirectory ? "directory" : abspath.split(".").pop()
+    obj.extension = obj.isDirectory ? "directory" : DiskReader._getExtension(abspath)
     obj.atime = stat.atime
     obj.mtime = stat.mtime
     obj.ctime = stat.ctime
