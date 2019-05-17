@@ -1,3 +1,45 @@
+10.0.0 2019-5-16
+----------------
+- New: column autocomplete
+- New: vega tiles
+- New: filter.where tile, text.split, debug.parserTest, many more sample tiles
+- New: rows.dropMissing tile
+- New: rows.countBy tile
+- New: "Copy data as Javascript" context menu option
+- New: added "reduce" setting for group.by tiles in place of columnsObject
+- New: close all files except open file menu option
+- New: new tile stubs: datatables, dcjs, amazon, fitbit
+- New: removed Google Analytics
+- New: tables.basic now takes a title inline
+- New: support for dropping multiple-table csv files
+- New: default layout is now tiled
+- Breaking: charts.kpi is now "show.{reduction} columnName Title words"
+- Breaking: "x" is now "xColumn" and "y" is "yColumn" tile wide
+- Breaking: gender is now genderColumn
+- Breaking: "visible false" is now "hidden"
+- Breaking: "data.local" is now "data.localStorage"
+- Breaking: "maximize true" is now "maximized"
+- Breaking: date.expand is now date.addColumns
+- Breaking: tables.advanced is now handsontable.basic
+- Breaking: filter.has and filter.includes are now filter.with
+- Breaking: filter.no is now filter.without
+- Breaking: removed filter.advanced tile
+- Breaking: limit property is now rowLimit and columnsLimit is now columnLimit
+- Breaking: remove columns property from table tiles. Use columns.keep
+- Breaking: removed columnsObject
+- Breaking: charts.heatcal is now date.heatcal
+- Breaking: "average" renamed to "mean" app-wide (in reductions)
+- Fix: rendering performance improvements
+- Fix: better parsing of Javascript dataTables
+- Fix: better tile error message handling
+- Fix: prevent back button navigation on left scroll overflow
+- Fix: better tile sizing in layouts
+- Fix: change parent fixed
+- Fix: fixes to column type parsing including USD and dates
+- Infra: binder moved to separate typescript project
+- Infra: plugins folder for easier plugin development and support for TypeScript tiles
+- Infra: updated to Jtree 22+
+
 9.0.0 2019-4-26
 ---------------
 - New: sublime syntax highlighting for Flow

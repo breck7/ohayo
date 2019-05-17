@@ -1,17 +1,14 @@
-Ohayo
-=====
+# Ohayo
 
 Ohayo is an interactive data dashboard builder.
 
 You can try ohayo at http://ohayo.computer or download <a href="https://github.com/breck7/ohayo">Ohayo on GitHub.</a>
 
-How to Give Feedback
-====================
+# How to Give Feedback
 
-Open an issue or send feedback to feedback@ohayo.computer
+Open an issue or send feedback to breck7@gmail.com
 
-Copyright & License
--------------------
+## Copyright & License
 
 Copyright (C) 2019 Breck Yunits - Released under the MIT License.
 

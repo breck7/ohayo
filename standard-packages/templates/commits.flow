@@ -1,0 +1,29 @@
+web.get http://localhost:2222/shell?command=gitlog&cwd=/aientist/
+ date.addColumns
+  group.by day
+   group.by month
+    vega.line
+     title Deploy Trends
+     xColumn month
+     yColumn count
+    vega.bar
+     xColumn month
+     yColumn count
+     title Days worked by month
+   date.heatcal
+    count count
+   show.median count Per Day
+   show.count count Days Worked
+  group.by dayName
+   vega.bar
+    xColumn dayName
+    yColumn count
+    title By day of week
+  group.by timeOfDay
+   vega.bar
+    xColumn timeOfDay
+    yColumn count
+ show.count author Total
+ show.max time Most Recent
+@settings
+ layout bin

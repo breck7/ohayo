@@ -1,0 +1,15 @@
+reddit.all
+ hidden
+ columns.keep title created_utc score subreddit url
+  hidden
+  tables.basic Top Stories on Reddit
+   orderBy -score
+  vega.scatter
+   yColumn score
+   xColumn created_utc
+  goog.pie
+   title Top Stories on Reddit Right Now
+   value score
+   label title
+@settings
+ layout bin
