@@ -19,5 +19,4 @@ web.get http://localhost:2222/shell?command=gitlog&cwd=/aientist/
  show.count author Total Commits
  show.max time Most Recent Commit
  show.min time First Commit
-@settings
- layout bin
+layout bin

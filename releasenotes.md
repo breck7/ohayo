@@ -1,3 +1,22 @@
+10.1.0 2019-5-18
+----------------
+- New: now works as an npm dependency
+- New: now have rename and move file commands
+- New: hn tiles
+- New: proxy cache in desktop version
+- Breaking: instead of "@settings layout" it is now just "layout"
+- Breaking: html.h2-h6, p, pre, tiles removed in favor of html.text and html.printAs
+- Breaking: html tiles have been refactored to be less ambiguous. Should be okay unless relying on undocumented behavior.
+- Breaking: editor.hello is now editor.helloWorld
+- Breaking: removed web.cache. LocalStorage has <7MB of space available, so not so useful. In memory cache + proxy cache + browser's normal cache still here.
+- Breaking: remove airtraffic tiles
+- Fix: fixed bug in filtering on string columns
+- Fix: added missing npm packages to package.json
+- Fix: better error reporting when server side write fails
+- Fix: correctly set server side cwd
+- Infra: HTTPResponse code cleanup
+- Infra: added "es6" to compiled min file routes
+
 10.0.0 2019-5-16
 ----------------
 - New: column autocomplete

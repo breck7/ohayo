@@ -20,5 +20,4 @@ web.get /disk?path=/aientist/client&lineStats=true&recursive=true
         title Words
         value words
        tables.basic Top Extensions
-@settings
- layout tree
+layout tree

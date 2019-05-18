@@ -25,5 +25,4 @@ web.get http://localhost:2222/shell?command=gitlog&cwd=/aientist/
     yColumn count
  show.count author Total
  show.max time Most Recent
-@settings
- layout bin
+layout bin

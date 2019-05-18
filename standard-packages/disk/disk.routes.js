@@ -4,8 +4,6 @@ const DiskReader = require("./DiskReader.js")
 const DiskConstants = {}
 DiskConstants.getPath = "/disk"
 DiskConstants.readPath = "/disk.read"
-DiskConstants.cwdPath = "/disk.cwd.js"
-DiskConstants.ServerCurrentWorkingDirectory = "ServerCurrentWorkingDirectory"
 
 module.exports = app => {
   app.get(DiskConstants.getPath, async (req, res) => {
@@ -25,11 +23,6 @@ module.exports = app => {
       res.status(400).send(err)
     }
   })
-
-  // todo: change mime type?
-  app.get(DiskConstants.cwdPath, (req, res) =>
-    res.send(`const ${DiskConstants.ServerCurrentWorkingDirectory} = "${app.cwd}"\n`)
-  )
 
   app.get(DiskConstants.readPath, (req, res) => res.sendFile(req.query.path))
 }

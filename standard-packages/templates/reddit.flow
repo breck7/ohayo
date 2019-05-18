@@ -11,5 +11,4 @@ reddit.all
    title Top Stories on Reddit Right Now
    value score
    label title
-@settings
- layout bin
+layout bin

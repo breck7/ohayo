@@ -1,6 +1,6 @@
 {
   "name": "ohayo",
-  "version": "10.0.0",
+  "version": "10.1.0",
   "description": "ohayo desktop version",
   "main": "OhayoServerApp.js",
   "directories": {
@@ -10,11 +10,15 @@
     "ohayo": "./cli/cli.js"
   },
   "dependencies": {
+    "body-parser": "^1.18.3",
     "express": "^4.16.4",
+    "glob": "^7.1.3",
+    "jtree": "^22.3.0",
     "lodash": "^4.17.11",
     "mz": "^2.7.0",
     "recursive-readdir": "*",
-    "recursive-readdir-sync": "*"
+    "recursive-readdir-sync": "*",
+    "superagent": "^3.6.0"
   },
   "devDependencies": {},
   "scripts": {},
