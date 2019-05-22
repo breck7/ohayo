@@ -1,3 +1,21 @@
+10.2.0 2019-5-22
+----------------
+- New: startup is ~75ms faster (due to grammar parsing speed up in Jtree)
+- New: style improvements to html and show tiles
+- New: style changes to make console easier to read
+- New: heat calendar tile now has hover info
+- New: match.columnsFuzzy now takes column name params
+- Fix: filter tiles now don't re-add dropped columns
+- Fix: changes made to tiles directly in UI should now correctly update themselves and dependents
+- Fix: source code visualizer works better with correct cell type parsing now
+- Fix: syntax highlighting fixes from new jtree
+- Fix: when changing layout, console message appears correctly now
+- Fix: match.columnsFuzzy now outputs correct confidence score
+- Breaking: match.fuzzy is now match.columnsFuzzy
+- Infra: updated to jtree 24
+- Infra: moved column predictions to binder and improvs is now columnPredictionHints
+- Infra: updated swarm/trooper/gopher
+
 10.1.0 2019-5-18
 ----------------
 - New: now works as an npm dependency
