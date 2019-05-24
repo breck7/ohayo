@@ -1,3 +1,4 @@
+html.h1 Desktop Only: Trends in Git Commits
 web.get http://localhost:2222/shell?command=gitlog&cwd=/aientist/
  date.addColumns
   group.by day

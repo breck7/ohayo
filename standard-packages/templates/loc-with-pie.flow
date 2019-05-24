@@ -1,3 +1,4 @@
+html.h1 Desktop Only: Analyze lines of code in a folder
 web.get /disk?path=/aientist/client&lineStats=true&recursive=true
  hidden
  filter.without .DS_Store

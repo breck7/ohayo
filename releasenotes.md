@@ -1,3 +1,13 @@
+10.3.0 2019-5-24
+----------------
+- New: loading messages will appear for long-loading tiles
+- New: deleting a tile now shifts its children left instead of deleting them as well
+- New: hakon and stump editing support
+- New: added templates tile to homepage
+- New: trends in baby name template
+- Fix: lots of async fixes and more tests
+- Infra: debug.tiles
+
 10.2.0 2019-5-22
 ----------------
 - New: startup is ~75ms faster (due to grammar parsing speed up in Jtree)

@@ -1,4 +1,4 @@
-html.h1 Statistics for Local Git Repo
+html.h1 Desktop Only: Statistics for Local Git Repo
 web.get http://localhost:2222/shell?command=gitlog&cwd=/aientist/
  date.addColumns
   group.by day

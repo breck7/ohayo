@@ -1,0 +1,8 @@
+html.h1 Trends in Baby Names
+web.get https://raw.githubusercontent.com/hadley/data-baby-names/master/baby-names.csv
+ filter.where name = Aria
+  filter.where sex = girl
+   vega.line
+    xColumn year
+    yColumn percent
+layout column
