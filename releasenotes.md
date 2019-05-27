@@ -1,3 +1,13 @@
+10.4.0 2019-5-26
+----------------
+- New: improved scrolling behavior so only wall scrolls while editor and tabs stay
+- New: instant loading of new tabs
+- New: text.substring tile
+- New: filter now supports types
+- New: improved error highlighting
+- Fixes: web post, delete selection regression fix, date parsing fix, shift+selection regression, picker tile regression fix
+- Infra: increased branch coverage
+
 10.3.0 2019-5-24
 ----------------
 - New: loading messages will appear for long-loading tiles
