@@ -1,3 +1,20 @@
+11.0.0 2019-5-30
+----------------
+- New: flow now has comments
+- New: codeeditor now some inline parameter hinting, inline error messages, inline error suggestion fixes
+- New: codeeditor now has error coloring for extra word errors
+- New: parameter hints on tile toolbar
+- New: improved styling for most tile default states
+- Breaking: filter.with and filter.without now search for words one at a time, instead of as searching for a joined string
+- Breaking: changed datatables.basic to dtjs.basic
+- Fix: fixed non-flow language basic tile loading regression and added tests
+- Fix: fixed tree layout incorrect top computation
+- Fix: fixed bug where clearing an input in the WallUI did not update source
+- Fix: restored proper code editor and console heights
+- Fix: deleting selection that had both parent and child didnt delete child fix and added test
+- Infra: package.json dependencies cleanup
+- Infra: updated jtree to 25.1.0
+
 10.4.0 2019-5-26
 ----------------
 - New: improved scrolling behavior so only wall scrolls while editor and tabs stay

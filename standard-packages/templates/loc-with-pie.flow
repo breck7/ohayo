@@ -1,24 +1,19 @@
 html.h1 Desktop Only: Analyze lines of code in a folder
 web.get /disk?path=/aientist/client&lineStats=true&recursive=true
- hidden
- filter.without .DS_Store
-  filter.without .compiled.js
-   filter.without node_modules
-    filter.without ignore
-     filter.without package-lock.json
-      show.sum lines Total LoC
-      columns.keep name extension lines words bytes wordsPerLine
-       tables.basic Files in client
-        orderBy -lines
-      group.by extension
-       reduce words sum words
-       reduce bytes sum bytes
-       reduce lines sum lines
-       goog.pie
-        title Lines of Code
-        value lines
-       goog.pie
-        title Words
-        value words
-       tables.basic Top Extensions
-layout tree
+ filter.without .DS_Store min.js node_modules ignore package-lock.json
+  show.sum lines Total LoC
+  columns.keep name extension lines words bytes wordsPerLine
+   tables.basic Files in client
+    orderBy -lines
+  group.by extension
+   reduce words sum words
+   reduce bytes sum bytes
+   reduce lines sum lines
+   goog.pie
+    title Lines of Code
+    value lines
+   goog.pie
+    title Words
+    value words
+   tables.basic Top Extensions
+layout column
