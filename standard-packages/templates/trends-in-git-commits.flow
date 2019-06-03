@@ -3,23 +3,20 @@ web.get http://localhost:2222/shell?command=gitlog&cwd=/aientist/
  date.addColumns
   group.by day
    group.by month
-    vega.line
-     title Deploy Trends
+    vega.line Deploy Trends
      xColumn month
      yColumn count
-    vega.bar
+    vega.bar Days worked by month
      xColumn month
      yColumn count
-     title Days worked by month
    date.heatcal
     count count
    show.median count Per Day
    show.count count Days Worked
   group.by dayName
-   vega.bar
+   vega.bar By day of week
     xColumn dayName
     yColumn count
-    title By day of week
   group.by timeOfDay
    vega.bar
     xColumn timeOfDay

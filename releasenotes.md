@@ -1,3 +1,24 @@
+12.0.0 2019-6-03
+----------------
+- New: new tiles including rows.sortBy, rows.reverse, rows.shuffle, samples.babyNames
+- New: new condensed and more minimal style for provider and transformer tiles
+- New: deep links
+- New: all Tiles must have all code locally, and cannot fetch&eval remote js code
+- New: added rowDisplayLimit on chart tiles.
+- New: working dir and version # moved to top of help
+- New: vega charts accept title inline
+- New: now node tiles can do fs.readFile for shipped local datasets for better perf and testing
+- New: add answers to challenges inline
+- Breaking: removed "orderBy" property. use rows.sortBy and rows.reverse to achieve same behavior
+- Breaking: removed "rowLimit" property. use rows.first OR use rowDisplayLimit on chart tiles.
+- Breaking: removed "title" property. use inline title where available.
+- Breaking: removed "goog" tiles
+- Breaking: removed "youtube" tiles
+- Breaking: rows.countBy is now rows.addIndexColumn
+- Fix: fix for tiles downstream of columns.keep regetting those columns
+- Infra: updated jtree to 25.2 to fix flakey tests
+- Infra: Added debugTile grammarTree tile
+
 11.0.0 2019-5-30
 ----------------
 - New: flow now has comments
