@@ -1,3 +1,9 @@
+12.1.0 2019-6-03
+----------------
+- New: when appending a snippet, new tile should scroll into view
+- New: updated homepage title
+- Fix: text in markdown and other text tiles now selectable
+
 12.0.0 2019-6-03
 ----------------
 - New: new tiles including rows.sortBy, rows.reverse, rows.shuffle, samples.babyNames

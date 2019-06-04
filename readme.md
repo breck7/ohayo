@@ -1,6 +1,6 @@
 # Ohayo
 
-Ohayo is an interactive data dashboard builder.
+Ohayo is a fast and free data science studio. My goal is to enable people to do data science at the speed of thought.
 
 You can try ohayo at http://ohayo.computer or download <a href="https://github.com/breck7/ohayo">Ohayo on GitHub.</a>
 
