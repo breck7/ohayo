@@ -1,0 +1,20 @@
+html.h1 Amazon Purchase History
+# Delete the below line and replace with your data
+amazon.history
+ columns.keep Category ItemTotal OrderDate Title
+  tables.basic All Amazon Purchases
+  group.by Category
+   reduce ItemTotal sum sum
+   vega.bar Amount Spent by Category
+    xColumn Category
+    yColumn sum
+  date.addColumns year
+   group.by year
+    reduce ItemTotal sum totalSpent
+    vega.bar Amount Spent by Year
+     yColumn totalSpent
+     xColumn year
+    vega.bar Items Purchases by Year
+     yColumn count
+     xColumn year
+layout column

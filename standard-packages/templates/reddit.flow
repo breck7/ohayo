@@ -3,12 +3,11 @@ reddit.all
  hidden
  columns.keep title created_utc score subreddit url
   hidden
-  rows.sortBy score
-   rows.reverse
-    tables.basic Top Stories on Reddit
+  rows.sortByReverse score
+   tables.basic Top Stories on Reddit
   vega.scatter
    yColumn score
    xColumn created_utc
   vega.bar Top Stories on Reddit Right Now
    yColumn score
-layout bin
+layout column

@@ -1,3 +1,12 @@
+12.2.0 2019-6-04
+----------------
+- New: new tiles including rows.sortByReverse, text.length, text.toLowerCase
+- New: new templates including word cloud, cancer, and amazon
+- New: onsave in code editor will scroll current tile into view
+- New: ctrl+s in code editor now saves on Linux/Windows
+- Breaking: text.lc is now text.lineCount and text.wc is now text.wordCount
+- Fix: wordcloud sizing fix
+
 12.1.0 2019-6-03
 ----------------
 - New: when appending a snippet, new tile should scroll into view

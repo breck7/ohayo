@@ -1,0 +1,10 @@
+html.h1 Word Cloud
+layout column
+data.inline
+ text.wordCount
+  text.wordcloud
+  rows.sortByReverse count
+   tables.basic
+ format text
+ content
+  If you put some text here, you will make yourself a word cloud. The more text you add, the better it will be. So keep writing, writing, writing, and you will get something that looks good.

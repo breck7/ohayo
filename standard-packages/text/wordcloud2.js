@@ -96,6 +96,9 @@ if (!window.clearImmediate) {
     }
 
     var ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return false;
+    }
     if (!ctx.getImageData) {
       return false;
     }
@@ -147,7 +150,7 @@ if (!window.clearImmediate) {
   // Based on http://jsfromhell.com/array/shuffle
   var shuffleArray = function shuffleArray(arr) {
     for (var j, x, i = arr.length; i;
-      j = Math.floor(settings.random() * i),
+      j = Math.floor(Math.random() * i),
       x = arr[--i], arr[i] = arr[j],
       arr[j] = x) {}
     return arr;
@@ -203,7 +206,6 @@ if (!window.clearImmediate) {
 
       shuffle: true,
       rotateRatio: 0.1,
-      random: Math.random,
 
       shape: 'circle',
       ellipticity: 0.65,
@@ -259,13 +261,23 @@ if (!window.clearImmediate) {
         */
 
         case 'diamond':
-        case 'square':
           // http://www.wolframalpha.com/input/?i=plot+r+%3D+1%2F%28cos%28mod+
           // %28t%2C+PI%2F2%29%29%2Bsin%28mod+%28t%2C+PI%2F2%29%29%29%2C+t+%3D
           // +0+..+2*PI
           settings.shape = function shapeSquare(theta) {
             var thetaPrime = theta % (2 * Math.PI / 4);
             return 1 / (Math.cos(thetaPrime) + Math.sin(thetaPrime));
+          };
+          break;
+
+        case 'square':
+          // http://www.wolframalpha.com/input/?i=plot+r+%3D+min(1%2Fabs(cos(t
+          // )),1%2Fabs(sin(t)))),+t+%3D+0+..+2*PI
+          settings.shape = function shapeSquare(theta) {
+            return Math.min(
+              1 / Math.abs(Math.cos(theta)),
+              1 / Math.abs(Math.sin(theta))
+            );
           };
           break;
 
@@ -337,9 +349,9 @@ if (!window.clearImmediate) {
     var getTextColor;
     function random_hsl_color(min, max) {
       return 'hsl(' +
-        (settings.random() * 360).toFixed() + ',' +
-        (settings.random() * 30 + 70).toFixed() + '%,' +
-        (settings.random() * (max - min) + min).toFixed() + '%)';
+        (Math.random() * 360).toFixed() + ',' +
+        (Math.random() * 30 + 70).toFixed() + '%,' +
+        (Math.random() * (max - min) + min).toFixed() + '%)';
     }
     switch (settings.color) {
       case 'random-dark':
@@ -359,6 +371,12 @@ if (!window.clearImmediate) {
           getTextColor = settings.color;
         }
         break;
+    }
+
+    /* function for getting the font-weight of the text */
+    var getTextFontWeight;
+    if (typeof settings.fontWeight === 'function') {
+      getTextFontWeight = settings.fontWeight;
     }
 
     /* function for getting the classes of the text */
@@ -472,7 +490,7 @@ if (!window.clearImmediate) {
         return 0;
       }
 
-      if (settings.random() > settings.rotateRatio) {
+      if (Math.random() > settings.rotateRatio) {
         return 0;
       }
 
@@ -481,12 +499,13 @@ if (!window.clearImmediate) {
       }
 
       if (rotationSteps > 0) {
-        return minRotation + 
-          (1 / Math.floor((settings.random() * rotationSteps) + 1)) *
-          rotationRange;
+        // Min rotation + zero or more steps * span of one step
+        return minRotation +
+          Math.floor(Math.random() * rotationSteps) *
+          rotationRange / (rotationSteps - 1);
       }
       else {
-        return minRotation + settings.random() * rotationRange;
+        return minRotation + Math.random() * rotationRange;
       }
     };
 
@@ -514,10 +533,18 @@ if (!window.clearImmediate) {
         })();
       }
 
+      // Get fontWeight that will be used to set fctx.font
+      var fontWeight;
+      if (getTextFontWeight) {
+        fontWeight = getTextFontWeight(word, weight, fontSize);
+      } else {
+        fontWeight = settings.fontWeight;
+      }
+
       var fcanvas = document.createElement('canvas');
       var fctx = fcanvas.getContext('2d', { willReadFrequently: true });
 
-      fctx.font = settings.fontWeight + ' ' +
+      fctx.font = fontWeight + ' ' +
         (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
 
       // Estimate the dimension of the text with measureText().
@@ -570,7 +597,7 @@ if (!window.clearImmediate) {
 
       // Once the width/height is set, ctx info will be reset.
       // Set it again here.
-      fctx.font = settings.fontWeight + ' ' +
+      fctx.font = fontWeight + ' ' +
         (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
 
       // Fill the text into the fcanvas.
@@ -701,9 +728,17 @@ if (!window.clearImmediate) {
         color = settings.color;
       }
 
+      // get fontWeight that will be used to set ctx.font and font style rule
+      var fontWeight;
+      if (getTextFontWeight) {
+        fontWeight = getTextFontWeight(word, weight, fontSize);
+      } else {
+        fontWeight = settings.fontWeight;
+      }
+
       var classes;
       if (getTextClasses) {
-        classes = getTextClasses(word, weight, fontSize, distance, theta);
+        classes = getTextClasses(word, weight, fontSize);
       } else {
         classes = settings.classes;
       }
@@ -726,7 +761,7 @@ if (!window.clearImmediate) {
           ctx.save();
           ctx.scale(1 / mu, 1 / mu);
 
-          ctx.font = settings.fontWeight + ' ' +
+          ctx.font = fontWeight + ' ' +
                      (fontSize * mu).toString(10) + 'px ' + settings.fontFamily;
           ctx.fillStyle = color;
 
@@ -769,7 +804,7 @@ if (!window.clearImmediate) {
           var styleRules = {
             'position': 'absolute',
             'display': 'block',
-            'font': settings.fontWeight + ' ' +
+            'font': fontWeight + ' ' +
                     (fontSize * info.mu) + 'px ' + settings.fontFamily,
             'left': ((gx + info.gw / 2) * g + info.fillTextOffsetX) + 'px',
             'top': ((gy + info.gh / 2) * g + info.fillTextOffsetY) + 'px',
@@ -952,18 +987,20 @@ if (!window.clearImmediate) {
 
     /* Send DOM event to all elements. Will stop sending event and return
        if the previous one is canceled (for cancelable events). */
-    var sendEvent = function sendEvent(type, cancelable, detail) {
+    var sendEvent = function sendEvent(type, cancelable, details) {
       if (cancelable) {
         return !elements.some(function(el) {
-          var evt = document.createEvent('CustomEvent');
-          evt.initCustomEvent(type, true, cancelable, detail || {});
-          return !el.dispatchEvent(evt);
+          var event = new CustomEvent(type, {
+            detail: details || {}
+          });
+          return !el.dispatchEvent(event);
         }, this);
       } else {
         elements.forEach(function(el) {
-          var evt = document.createEvent('CustomEvent');
-          evt.initCustomEvent(type, true, cancelable, detail || {});
-          el.dispatchEvent(evt);
+          var event = new CustomEvent(type, {
+            detail: details || {}
+          });
+          el.dispatchEvent(event);
         }, this);
       }
     };
@@ -1086,10 +1123,6 @@ if (!window.clearImmediate) {
 
         if (settings.click) {
           canvas.addEventListener('click', wordcloudclick);
-          canvas.addEventListener('touchstart', wordcloudclick);
-          canvas.addEventListener('touchend', function (e) {
-            e.preventDefault();
-          });
           canvas.style.webkitTapHighlightColor = 'rgba(0, 0, 0, 0)';
         }
 

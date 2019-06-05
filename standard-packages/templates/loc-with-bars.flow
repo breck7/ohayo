@@ -3,9 +3,8 @@ web.get /disk?path=/aientist/client&lineStats=true&recursive=true
  filter.without .DS_Store min.js node_modules ignore package-lock.json
   show.sum lines Total LoC
   columns.keep name extension lines words bytes wordsPerLine
-   rows.sortBy lines
-    rows.reverse
-     tables.basic Files in client
+   rows.sortByReverse lines
+    tables.basic All files
   group.by extension
    reduce words sum words
    reduce bytes sum bytes
