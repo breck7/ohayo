@@ -1,0 +1,69 @@
+software	linesOfCode	details	notes	source1	sourceLink	source2
+iOS app - simple game	10000	app	10,000 LOC. Imangi is a word game app, same people also made Temple Run	iPhoneDevSDK	http://iphonedevsdk.com/forum/iphone-sdk-development/3948-average-time-spent-creating-an-app-poll.html	
+Unix v 1.0 (1971)	10000		10000		http://www.thegamersblog.com/10-facts-you-may-not-know-about-world-of-warcraft/	
+Win32/Simile virus	10000	virus	a metamorphic (very complex) computer virus, released 2002 had 14000 LOC	Wikipedia, Security Response	http://en.wikipedia.org/wiki/Computer_virus	http://securityresponse.symantec.com/avcenter/reference/simile.pdf
+iOS app - photo editing	40000	app	39,924 LOC. Camera Genius is a photo editing app.	CodeGoo	http://blog.codegoo.com/post/2794720594/whats-involved-in-building-an-iphone-app	
+Pacemaker	80000	the software in a heart pacemaker	80000	Coverity infographic, MathWorks.com	http://insideevs.com/infographic-chevy-volt-has-10-million-lines-of-code-f-22-raptor-only-has-1-7-million/	http://www.mathworks.co.uk/company/newsletters/articles/university-of-pennsylvania-develops-electrophysiological-heart-model-for-real-time-closed-loop-testing-of-pacemakers.html
+Photoshop v1 (1990)	120000			Slashdot	http://developers.slashdot.org/story/13/02/14/1323254/for-your-inspection-source-code-for-photoshop-10	
+Camino	200000	browser		Ohloh	http://www.ohloh.net/p/mozilla/analyses/latest/languages_summary	
+Quake 3 engine	310000	computer game	310000 LOC computer game.	Quora	http://www.quora.com/Computer-Programming/About-how-many-lines-of-code-is-a-typical-computer-game-such-as-Starcraft-or-Counter-Strike	
+Space Shuttle	400000		primary flight software	Nasa	www.nasa.gov/mission_pages/shuttle/.../flyfeature_shuttlecomputers.html‎	
+18000 pages of printed text	1000000		on typical 20-pound paper, would be a stack 6 feet tall	Embedded	http://www.embedded.com/electronics-blogs/break-points/4026827/A-Million-Lines-of-Code	
+Crysis	1000000	game		Quora	http://www.quora.com/Computer-Programming/About-how-many-lines-of-code-is-a-typical-computer-game-such-as-Starcraft-or-Counter-Strike	
+War And Peace x 14, Ulysses x 25, The Catcher in The Rye x 63	1000000			Embedded	http://www.embedded.com/electronics-blogs/break-points/4026827/A-Million-Lines-of-Code	
+Syphilis	1140000		Treponema pallidum, the bacteria that causes Syphilis (1039 genes and 1,138,011 base pairs)	Kimball's Biology Pages	http://users.rcn.com/jkimball.ma.ultranet/BiologyPages/G/GenomeSizes.html	
+Age of Empires Online	1200000			Wikipedia	http://en.wikipedia.org/wiki/Age_of_Empires_Online	
+CESM Community Earth System Model	1200000		Climate model from the National Center for Atmospheric Research	Daily Camera	http://www.dailycamera.com/news/ci_15820781	
+F-22 Raptor	1700000			Coverity inforgraphic	http://insideevs.com/infographic-chevy-volt-has-10-million-lines-of-code-f-22-raptor-only-has-1-7-million/	
+Linux Kernel 2.2.0 (1999)	1800000	increase in code relative to previous version: 289%		Wikipedia	http://en.wikipedia.org/wiki/Linux_kernel	
+Hubble Space Telescope	2000000			NYTImes	http://www.nytimes.com/1989/02/19/us/excitement-and-dismay-at-space-telescope-center.html?src=pm	
+Unreal Engine 3	2000000	game		Quora	http://www.quora.com/Computer-Programming/About-how-many-lines-of-code-is-a-typical-computer-game-such-as-Starcraft-or-Counter-Strike	
+Lines of code de-bugged in the Jurassic Park network by Dennis Nedry	2000000		He's totally unappreciated in his time	Jurassic Park		
+Windows 3.1 (1992)	2500000			CNET	http://news.cnet.com/The-root-of-the-problem-Bad-software/2008-1082_3-276316.html	
+Drones (control software)	3500000			Wired	http://www.wired.com/dangerroom/2012/11/navy-killer-drone/	
+ROOT software (at the LHC)	3500000		ROOT, a software program used by CERN's physicists to store, analyze, and visualize petabytes of data about the LHC experiment	Coverity	http://www.coverity.com/company/press-releases/read/cern-chooses-coverity-to-ensure-accuracy-of-large-hadron-collider-software-html	
+Photoshop CS 6 (2012)	4500000			PC World	http://www.pcworld.com/article/2028315/computer-history-museum-shares-original-photoshop-code.html	http://scottkelby.com/2012/photoshop-cs6-from-the-inside/
+Windows NT 3.1 (1993)	4500000	operating system		Knowing .net	http://www.knowing.net/index.php/2005/12/06/how-many-lines-of-code-in-windows/	
+HD DVD Players on XBox	4700000			Microsoft Blog	http://blogs.msdn.com/b/xboxteam/archive/2006/11/03/emergence-day.aspx	
+HealthCare.gov - needed to repair	5000000	website	"Obamacare online enrollment system might actually need 5 million lines of code to be rewritten just to repair the problems encountered on the site"	Examiner	http://www.examiner.com/article/code-blue-obamacare-online-system-needs-massive-re-write-to-work?cid=rss	
+Mars Curiosity Rover	5000000			Slashdot	http://slashdot.org/topic/bi/mars-rover-curiosity-less-brainpower-than-apples-iphone-5/	
+Linux kernel 2.6.0 (2003)	5200000	operating system	only wiki source	Wikipedia	http://en.wikipedia.org/wiki/Source_lines_of_code	
+Google Chrome (estimate 2) (2011)	5400000	browser			http://www.quora.com/Google-Chrome/How-many-lines-of-code-is-Google-Chrome	
+World of WarCraft (Server)	5500000	game		GamesspotUK	http://uk.gamespot.com/news/blizzard-outlines-massive-effort-behind-world-of-warcraft-6228615	
+Windows XP Service Pack 1	6100000			Microsoft Blog	https://www.google.co.uk/url?sa=t&rct=j&q=&esrc=s&source=web&cd=10&ved=0CH4QFjAJ&url=https%3A%2F%2Fblogs.msdn.com%2Fcfs-filesystemfile.ashx%2F__key%2Fcommunityserver-components-postattachments%2F00-01-37-62-23%2FAPSECVer4.doc&ei=EvprUvHPEYnX7Abo6oGYBA&usg=AFQjCNHfjdSfZAYMsMFoMKy1eSk482RKeA&sig2=J2mxvNHzAqVdA8SX3XPAsQ&bvm=bv.55123115,d.ZGU&cad=rja	
+Boeing 787	6500000		Avionics and online support systems	Coverity inforgraphic	http://insideevs.com/infographic-chevy-volt-has-10-million-lines-of-code-f-22-raptor-only-has-1-7-million/	
+Google Chrome	6700000	browser	6677875	Ohloh	http://www.ohloh.net/p/chrome/analyses/latest/languages_summary	
+Windows NT 3.5 (1994)	7500000	increase in code relative to previous version: 166%		Knowing .net	http://www.knowing.net/index.php/2005/12/06/how-many-lines-of-code-in-windows/	
+Windows NT 3.51 (1995)	9500000	operating system		Knowing .net	http://www.knowing.net/index.php/2005/12/06/how-many-lines-of-code-in-windows/	
+Firefox	9700000	browser		Ohloh	http://www.ohloh.net/p/mozilla/analyses/latest/languages_summary	
+Chevy Volt (electric car)	10000000			Coverity inforgraphic, SmartPlanet	http://insideevs.com/infographic-chevy-volt-has-10-million-lines-of-code-f-22-raptor-only-has-1-7-million/	http://www.smartplanet.com/blog/smart-takes/gms-volt-10-million-lines-of-code/12006
+Intuit Quickbooks	10000000			Slashdot	http://developers.slashdot.org/story/12/07/31/0052230/how-intuit-manages-10-million-lines-of-code	
+Windows NT 4.0 (1996)	11500000	operating system. increase in code relative to previous version: 153%		Knowing .net	http://www.knowing.net/index.php/2005/12/06/how-many-lines-of-code-in-windows/	
+Android	12000000	operating system	including 3 million lines of XML, 2.8 million lines of C, 2.1 million lines of Java, and 1.75 million lines of C++	XDA Developers Forum	http://forum.xda-developers.com/wiki/Android	
+Mozilla Core	12500000	code libraries used by all Mozilla apps like Firefox	12528368	Ohloh	http://www.ohloh.net/p/mozilla/analyses/latest/languages_summary	
+MySQL	12500000	database format		Ohloh	http://www.ohloh.net/p/mozilla/analyses/latest/languages_summary	
+Boeing 787, total flight software	14000000		Total flight software	NYC Aviator	http://www.nycaviation.com/2011/09/fun-facts-revealed-at-boeings-787-technical-panel/	
+Android (upper estimate)	15000000					
+Linux 3.1 (recent version, 2013)	15000000	increase in code relative to previous version: 288%		CNET	http://news.cnet.com/8301-1035_3-57603216-94/linux-development-by-the-numbers-big-and-getting-bigger/	
+Apache Open Office	23000000	open source office productivity software		Ohloh	http://www.ohloh.net/p/mozilla/analyses/latest/languages_summary	
+F-35 Fighter	24000000		NYT says 3.5m. Wired says 24 million (http://www.wired.com/dangerroom/2012/11/marines-jsf/)	NYTImes	http://www.nytimes.com/2004/11/28/business/yourmoney/28lock.html?adxnnl=1&pagewanted=print&adxnnlx=1382805279-iJ9/V1NXb4+48FP0fFa2OA	
+Microsoft Office (2001)	25000000			CNET	http://news.cnet.com/Microsoft-to-release-Mac-OS-X-Office-in-fall/2100-1040_3-250792.html	
+Windows 2000 (2000)	29000000	increase in code relative to previous version: 1160%	or more	Knowing .net	http://www.knowing.net/index.php/2005/12/06/how-many-lines-of-code-in-windows/	
+Microsoft Office for Mac (2006)	30000000	office productivity software for use with Mac		MSDN Blog	http://blogs.msdn.com/b/macmojo/archive/2006/11/03/it-s-all-in-the-numbers.aspx	
+Symbian	37600000	mobile phone programming language		Ohloh	http://www.ohloh.net/p/mozilla/analyses/latest/languages_summary	
+Windows 7	40000000	operating system		Quora	http://www.quora.com/Windows-8/How-many-lines-of-code-is-in-Microsoft-Windows-8	
+Windows XP (2001)	40000000	operating system. increase in code relative to previous version: 138%		Knowing .net	http://www.knowing.net/index.php/2005/12/06/how-many-lines-of-code-in-windows/	
+Microsoft Office (2013)	45000000	office productivity software for use with Windows		PC Mag	http://www.pcmag.com/article2/0,2817,2418117,00.asp	
+Large Hadron Collider	50000000			Coverity	http://www.coverity.com/company/press-releases/read/cern-chooses-coverity-to-ensure-accuracy-of-large-hadron-collider-software-html	http://www.theregister.co.uk/2011/09/22/cern_coverity/
+Microsoft Visual Studio 2012	50000000			Microsoft Blog	http://blogs.msdn.com/b/visualstudio/archive/2012/06/20/the-visual-studio-2012-feedback-tool-a-better-way-to-submit-bugs.aspx	
+Windows Vista (2007)	50000000	increase in code relative to previous version: 125%		NYTImes	http://www.nytimes.com/2006/03/27/technology/27soft.html?adxnnl=1&pagewanted=all&adxnnlx=1382805118-0jnNRGXEVPip3xoW+BDp8Q	
+Facebook (without backend code)	62000000		note from the source: "The new count includes the entire git repository: data, binaries, third-party and all. Thanks to Adam Hupp for pointing this out to me. The number is from running git ls-files"	Quora	http://www.quora.com/Facebook-Engineering/How-many-lines-of-code-is-Facebook	
+US Army's Future Combat System	63800000			Wired	http://www.wired.com/dangerroom/2008/01/army-futures-so/	
+Debian 5.0 codebase	68000000					
+Mac OS X 10.4	86000000	operating system		Engadget	http://www.engadget.com/2006/08/07/live-from-wwdc-2006-steve-jobs-keynote/	
+Software in typical new car, 2013	100000000			Wired	http://www.wired.com/autopia/2012/12/automotive-os-war/	
+Debian 5.0 (all software in package)	324000000	operating system	Debain is an operating system which is composed of free software	Debain Counting	http://debian-counting.libresoft.es/	
+Healthcare.gov	500000000			NY Times	http://www.nytimes.com/2013/10/21/us/insurance-site-seen-needing-weeks-to-fix.html?pagewanted=all&_r=0	
+Google	2000000000	website		Wired	http://www.wired.com/2015/09/google-2-billion-lines-codeand-one-place/	
+LibreOffice	9080000			BlackDuck	https://www.openhub.net/p/libreoffice	
+OpenOffice	11300000			BlackDuck	https://www.openhub.net/p/openoffice	

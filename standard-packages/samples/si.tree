@@ -54,7 +54,7 @@ baseUnits 7
 derivedUnitsWithSpecialNames
  description 20 derived units with special names.
  source https://en.wikipedia.org/wiki/SI_derived_unit
- format ssv
+ parser ssv
  units name symbol equivalents baseUnitEquivalents
   hertz Hz frequency 1/s s^-1
   radian rad angle m/m dimensionless

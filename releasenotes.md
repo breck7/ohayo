@@ -1,3 +1,22 @@
+13.0.0 2019-6-09
+----------------
+- New: bar tile now has colorColumn support
+- New: scatter tile now has colorColumn and shapeColumn support
+- New: filter comparisons now work for dates
+- New: groupBy multiple columns in pivot tables
+- New: math.log and rows.addOne tiles
+- New: improvements to tab styles, code editor style, web tile styles, provider shows output columns
+- New: show output columns in tile toolbar
+- Breaking: format property is now "parser"
+- Breaking: wordCount output column is now "word" instead of "name"
+- Breaking: show.count is now show.rowCount and there is no column param
+- Fix: removed some keyboard shortcuts so that hard refresh again works on Linux
+- Fix: large number of parsing and type fixed with new JTable code
+- Fix: missing columns bug when parsing tree rows
+- Fix: vega time unit fixes
+- Fix: persisting of column types after transformations
+- Infra: binder to JTable
+
 12.2.0 2019-6-04
 ----------------
 - New: new tiles including rows.sortByReverse, text.length, text.toLowerCase
