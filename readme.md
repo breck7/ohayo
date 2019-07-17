@@ -4,6 +4,10 @@ Ohayo is a fast and free data science studio. My goal is to enable people to do 
 
 You can try ohayo at [https://ohayo.computer](https://ohayo.computer), [download Ohayo on GitHub](https://github.com/breck7/ohayo), try Ohayo [hosted on GitHub](https://breck7.github.io/ohayo/), or install it using `npm install ohayo`.
 
+## Ohayo, Tree Notation and Flow
+
+This project includes a data science web application AND a new dataflow programming language for data science that I currently call Flow. Flow is a Tree Language, built using [Tree Notation](http://treenotation.org/).
+
 ## BETA!
 
 Ohayo is still beta, and we are still iterating quickly. We encourage you to use it and send feedback, but it may not be stable until 2020.
