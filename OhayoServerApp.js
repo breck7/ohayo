@@ -7,7 +7,7 @@ const fs = require("fs")
 
 const OhayoServerAppConstants = {}
 OhayoServerAppConstants.routeFileGlob = "/*/*.routes.js"
-OhayoServerAppConstants.standardPackagesFolder = "/standard-packages/"
+OhayoServerAppConstants.standardPackagesFolder = "standard-packages/"
 OhayoServerAppConstants.appName = "ohayo"
 
 class OhayoServerApp {
@@ -111,10 +111,7 @@ class OhayoServerApp {
 
   start() {
     this.app.listen(this._port, () => {
-      console.log(
-        `Running ${this._getAppName()} in folder '${this.getCwd()}'. cmd+dblclick: ${this._getUrlBase() +
-          this._getHomePage()}`
-      )
+      console.log(`Running ${this._getAppName()} in folder '${this.getCwd()}'. cmd+dblclick: ${this._getUrlBase() + this._getHomePage()}`)
     })
   }
 }
