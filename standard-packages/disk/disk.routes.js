@@ -1,4 +1,4 @@
-const jtree = require("jtree")
+const { jtree } = require("jtree")
 const DiskReader = require("./DiskReader.js")
 
 const DiskConstants = {}

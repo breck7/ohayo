@@ -1,7 +1,6 @@
 const recursive = require("recursive-readdir")
 const recursiveReadSync = require("recursive-readdir-sync")
 const fs = require("mz/fs")
-const lodash = require("lodash")
 
 // todo: add tests
 class DiskReader {
@@ -69,7 +68,7 @@ class DiskReader {
     const words = str.split(/\b/g)
     file.lines = lines ? lines.length : 1
     file.words = words ? Math.round(words.length / 2) : 0
-    file.wordsPerLine = lodash.round(file.words / file.lines, 1)
+    file.wordsPerLine = (file.words / file.lines).toFixed(1)
     return file
   }
 

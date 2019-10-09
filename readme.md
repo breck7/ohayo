@@ -27,25 +27,34 @@ Ohayo is still beta, and we are still iterating quickly. We encourage you to use
 
 |Name|Website|Year|WikipediaPage|
 |-|-|-|-|
+|Grid Studio|https://github.com/ricklamers/gridstudio|2019||
 |Observable|https://observablehq.com/|2017||
 |Google Data Studio|https://datastudio.google.com/overview|2016|https://de.wikipedia.org/wiki/Google_Data_Studio|
 |Vega Editor|https://vega.github.io/editor/|2015||
 |Amazon QuickSight|https://aws.amazon.com/quicksight/|2015||
 |JupyterLab|https://github.com/jupyterlab/jupyterlab|2014|https://en.wikipedia.org/wiki/Project_Jupyter|
+|xlwings|https://www.xlwings.org/|2013||
 |Julia|https://julialang.org/|2012|https://en.wikipedia.org/wiki/Julia_(programming_language)|
 |Looker|https://looker.com/|2012|https://en.wikipedia.org/wiki/Looker_(company)|
 |AirTable|https://airtable.com/|2012|https://en.wikipedia.org/wiki/Airtable|
 |RStudio|https://www.rstudio.com/|2011|https://en.wikipedia.org/wiki/RStudio|
 |Microsoft PowerBI|https://powerbi.microsoft.com/en-us/|2011|https://en.wikipedia.org/wiki/Power_BI|
 |d3|https://d3js.org/|2011|https://en.wikipedia.org/wiki/D3.js|
-|Google's Kaggle|https://www.kaggle.com/|2010|https://en.wikipedia.org/wiki/Kaggle|
+|Google Kaggle|https://www.kaggle.com/|2010|https://en.wikipedia.org/wiki/Kaggle|
 |ChartIO|https://chartio.com/|2010||
+|Google BigQuery|https://cloud.google.com/bigquery/|2015|https://en.wikipedia.org/wiki/BigQuery|
 |LucidChart|https://www.lucidchart.com/|2008|https://en.wikipedia.org/wiki/Lucidchart|
+|Pandas|https://pandas.pydata.org/|2008|https://en.wikipedia.org/wiki/Pandas_(software)
 |Apple Numbers|https://www.apple.com/numbers/|2007|https://en.wikipedia.org/wiki/Numbers_(spreadsheet)|
+|scikit-learn|https://scikit-learn.org/stable/|2007|https://en.wikipedia.org/wiki/Scikit-learn|
 |Smartsheet|https://www.smartsheet.com/|2006|https://en.wikipedia.org/wiki/Smartsheet|
 |Google Sheets|https://www.google.com/sheets/about/|2006|https://en.wikipedia.org/wiki/Google_Sheets|
+|Sisense|https://www.sisense.com/|2004|https://en.wikipedia.org/wiki/Sisense|
+|Matplotlib|https://matplotlib.org/|2003|https://en.wikipedia.org/wiki/Matplotlib|
 |Tableau|https://www.tableau.com/|2003|https://en.wikipedia.org/wiki/Tableau_Software|
 |Visual-Paradigm Chart Maker|https://online.visual-paradigm.com/features/chart-maker/pyramid-chart-maker/|2002|https://en.wikipedia.org/wiki/Visual_Paradigm|
+|NumPy|https://www.numpy.org/|1995||https://en.wikipedia.org/wiki/NumPy|
+|Qlik|https://www.qlik.com/|1993|https://en.wikipedia.org/wiki/Qlik|
 |Mathematica|http://www.wolfram.com/mathematica/|1988|https://en.wikipedia.org/wiki/Wolfram_Mathematica|
 |Microsoft Excel|https://products.office.com/en-us/excel|1987|https://en.wikipedia.org/wiki/Microsoft_Excel|
 |MATLAB|http://mathworks.com/products/matlab|1984|https://en.wikipedia.org/wiki/MATLAB|
