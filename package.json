@@ -25,7 +25,7 @@
     "glob": "^7.1.4",
     "jquery-ui-dist": "^1.12.1",
     "jtree": "^44.0.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "marked": "^0.6.3",
     "moment": "^2.24.0",
     "moment-parseformat": "^2.2.1",
