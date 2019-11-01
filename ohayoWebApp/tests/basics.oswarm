@@ -1,0 +1,45 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test deleteTile
+ createNewBlankProgramCommand
+  appendTileCommand show.sum
+   appendTileCommand text.wordCount
+    assertLengthIs getRenderedTilesDiagnostic 2
+    assertStringIncludes getStumpNodeString showSumNode
+    selectFirstTileCommand
+     deleteSelectionCommand
+      assertLengthIs getRenderedTilesDiagnostic 1
+      assertStringExcludes getStumpNodeString showSumNode
+      assertStringIncludes getStumpNodeString WordCount
+test cloneTile
+ createNewBlankProgramCommand
+  assertStringExcludes getStumpNodeString zooop
+  pasteCommand
+   withParagraph
+    html.h1 zooop
+   assertLengthIs getRenderedTilesDiagnostic 1
+   assertStringIncludes getStumpNodeString zooop
+   selectAllTilesCommand
+    executeCommandOnFirstSelectedTileCommand cloneTileCommand
+     assertLengthIs getRenderedTilesDiagnostic 2
+test deleteAllTiles
+ createNewBlankProgramCommand
+  assertLengthIs getRenderedTilesDiagnostic 0
+  pasteCommand
+   withParagraph
+    samples.iris
+     tables.basic
+   assertLengthIs getRenderedTilesDiagnostic 2
+   selectAllTilesCommand
+    deleteSelectionCommand
+     assertLengthIs getRenderedTilesDiagnostic 0
+test deleteParentTile
+ createNewBlankProgramCommand
+  assertLengthIs getRenderedTilesDiagnostic 0
+  pasteCommand
+   withParagraph
+    samples.iris
+     tables.basic
+   assertLengthIs getRenderedTilesDiagnostic 2
+   selectFirstTileCommand
+    deleteSelectionCommand
+     assertLengthIs getRenderedTilesDiagnostic 1

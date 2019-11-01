@@ -1,0 +1,8 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test speedTest
+ _runSpeedTestCommand
+  assertTypeIs getMountedTab object
+test _doTileQualityCheckCommand
+ createNewBlankProgramCommand
+  _doTileQualityCheckCommand
+   assertTypeIs getMountedTab object

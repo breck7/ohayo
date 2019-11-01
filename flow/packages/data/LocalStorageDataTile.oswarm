@@ -1,0 +1,5 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test
+ createNewBlankProgramCommand
+  appendTileCommand data.localStorage
+   assertStringIncludes getStumpNodeString will be saved

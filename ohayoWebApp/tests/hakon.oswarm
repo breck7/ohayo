@@ -1,0 +1,14 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test compileHakon
+ createNewBlankProgramCommand hello-world.hakon
+  assertStringIncludes getWillowProgram.getPageHtml hello-world
+  pasteCommand
+   withParagraph
+    body
+     color orange
+   assertLengthIs getRenderedTilesDiagnostic 2
+   assertStringExcludes getStumpNodeString errors
+   cellCheckProgramCommand
+    assertStringIncludes getStumpNodeString errors
+    clearTabMessagesCommand
+     executeProgramCommand

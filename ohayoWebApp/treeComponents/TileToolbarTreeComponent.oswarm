@@ -1,0 +1,30 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test changeParentCommand
+ createNewBlankProgramCommand
+  pasteCommand samples.iris
+   executeCommandOnFirstSelectedTileCommand changeParentCommand 
+    pasteCommand tables.basic
+     executeCommandOnFirstSelectedTileCommand changeParentCommand 0
+test newFromExample
+ createNewBlankProgramCommand
+  appendTileCommand tables.basic
+   selectAllTilesCommand
+    assertLengthIs getFocusedPanel.getTabs 1
+    executeCommandOnFirstSelectedTileCommand toggleToolbarCommand
+     executeCommandOnFirstSelectedTileCommand createProgramFromTileExampleCommand
+      assertLengthIs getFocusedPanel.getTabs 2
+test toolbars
+ createNewBlankProgramCommand
+  appendTileCommand samples.presidents
+   selectAllTilesCommand
+    appendTileCommand group.by
+     selectAllTilesCommand
+      assertLengthIs getMountedTilesProgram.getTiles 2
+      assertStringExcludes getStumpNodeString columnName
+      assertStringExcludes getStumpNodeString example
+      executeCommandOnLastSelectedTileCommand toggleToolbarCommand
+       assertStringIncludes getStumpNodeString columnName
+       assertStringIncludes getStumpNodeString example
+       assertLengthIs getFocusedPanel.getTabs 1
+       executeCommandOnFirstSelectedTileCommand inspectTileCommand
+        executeCommandOnFirstSelectedTileCommand changeTileTypeCommand data.inline

@@ -1,0 +1,146 @@
+tooling onsave jtree build produceFlowGrammar
+abstractChartNode
+ inScope rowDisplayLimitNode
+ int rowDisplayLimit 10000
+ extends abstractFlowTileNode
+ abstract
+ javascript
+  getTileFooterStumpCode() {
+   const table = this.getParentOrDummyTable()
+   return `${this.getTileToolbarButtonStumpCode()}
+  span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
+  }
+  toDisplayString(value, columnName) {
+   // todo: remove.
+   if (value === undefined) return ""
+   return this.getParentOrDummyTable()
+    .getTableColumnByName(columnName)
+    .toDisplayString(value)
+  }
+  _getRowDisplayLimit() {
+   const limitStr = this.getSettingsStruct()[this.rowDisplayLimitKey] || this.rowDisplayLimit
+   const limit = parseInt(limitStr)
+   if (!limitStr || isNaN(limit)) return undefined
+   return limit
+  }
+  getRowsWithRowDisplayLimit() {
+   return this.getParentOrDummyTable()
+    .getRows()
+    .slice(0, this._getRowDisplayLimit())
+  }
+abstractBodyOnlyTileNode
+ abstract
+ extends abstractChartNode
+ int headerHeight 0
+ int footerHeight 0
+ javascript
+  toStumpCode() {
+   // todo: just use super and modify?
+   return `div
+   class ${this.getCssClassNames().join(" ")}
+   id ${this.getTreeComponentId()}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div
+    class TileBody BodyOnly${this._getBodyStumpCodeCache()}
+   div
+    class TileFooter TileFooterLess${jtree.TreeNode.nest(this.getTileToolbarButtonStumpCode(), 2)}
+   div
+    class TileGrabber`
+  }
+abstractHeaderlessChartTileNode
+ abstract
+ extends abstractChartNode
+ int headerHeight 0
+ javascript
+  toStumpCode() {
+   // todo: just use super and modify?
+   return `div
+   class ${this.getCssClassNames().join(" ")}
+   id ${this.getTreeComponentId()}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div
+    class TileBody HeaderLess${this._getBodyStumpCodeCache()}
+   div
+    class TileFooter${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
+   div
+    class TileGrabber`
+  }
+abstractTextNode
+ catchAllCellType stringCell
+ frequency 0
+ description Prints a message
+ inScope contentNode
+ javascript
+  getTileBodyStumpCode() {
+   const content = this.getDefinition().getConstantsObject().content
+   return `div
+   class TileSelectable
+   bern${jtree.TreeNode.nest(content ? jtree.Utils.linkify(content) : "", 2)}`
+  }
+ extends abstractChartNode
+ abstract
+abstractSnippetGalleryNode
+ string tileSize 600 240
+ extends abstractBodyOnlyTileNode
+ abstract
+ javascript
+  getGalleryNodes() {}
+  getTileBodyStumpCode() {
+   const constants = this.getDefinition().getConstantsObject()
+   const itemFormat = constants.itemFormat
+   const options = this.getGalleryNodes()
+    .map(
+     node => `li
+   a ${node.evalTemplateString(itemFormat)}
+    value ${node.get("id")}
+    class appendSnippetButton
+    stumpOnClickCommand appendSnippetTemplateCommand`
+    )
+    .join("\n")
+   const code = `h4 ${constants.title}
+  ol
+   class TileSelectable
+  ${new jtree.TreeNode(options).toString(1)}`
+   return code
+  }
+abstractTemplateGalleryNode
+ extends abstractSnippetGalleryNode
+ abstract
+ javascript
+  getGalleryNodes() {}
+  getTileBodyStumpCode() {
+   const constants = this.getDefinition().getConstantsObject()
+   const itemFormat = constants.itemFormat
+   const options = this.getGalleryNodes()
+    .map(
+     node => ` li
+    a ${node.evalTemplateString(itemFormat)}
+     value ${node.get("id")}
+     class createProgramButton
+     stumpOnClickCommand createProgramFromTemplateCommand`
+    )
+    .join("\n")
+   const code = `h4 ${constants.title}
+  ol
+   class TileSelectable
+  ${options}`
+   return code
+  }
+abstractInstructionsNode
+ string tileSize 600 240
+ string content Instructions go here.
+ extends abstractTextNode
+ abstract
+abstractComingSoonNode
+ frequency 0
+ description Coming soon
+ string tileSize 600 240
+ string content Instructions go here.
+ extends abstractTextNode
+ abstract

@@ -1,4 +1,0 @@
-command paramOne paramTwo description
-help   Show this help
-start port=1111  Start an Ohayo server on this port in the current directory
-version   Show version number

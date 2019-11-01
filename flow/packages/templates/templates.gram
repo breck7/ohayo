@@ -1,0 +1,39 @@
+tooling onsave jtree build produceFlowGrammar
+templatesListNode
+ description View templates
+ frequency .11
+ string title All templates:
+ string itemFormat {description}
+ extends abstractTemplateGalleryNode
+ crux templates.list
+ javascript
+  getGalleryNodes() {
+   // todo: cleanup.
+   return new jtree.TreeNode(
+    this._getTheTemplates().map(node => {
+     const id = node
+      .getWord(1)
+      .replace("templates/", "")
+      .replace(this.flowFileExtensionKey, "")
+     return {
+      id: id,
+      description: node
+       .getNode("data")
+       .getChildren()[0]
+       .getWordsFrom(1)
+       .join(" ")
+     }
+    })
+   )
+  }
+  _getTheTemplates() {
+   // todo: trim?
+   return typeof TemplatesStamp === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/templates/Templates.stamp").trim() : new jtree.TreeNode(TemplatesStamp).trim()
+  }
+  getProgramTemplate(id) {
+   const node = this._getTheTemplates().filter(node => node.getContent() === `templates/${id}${this.flowFileExtensionKey}`)[0]
+   return {
+    template: node.getNode("data").childrenToString(),
+    name: id + this.flowFileExtensionKey
+   }
+  }

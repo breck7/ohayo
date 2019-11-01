@@ -1,0 +1,13 @@
+html.h1 UCIMLR Dataset Overview
+layout column
+ucimlr.datasets
+ show.rowCount Total Datasets
+ group.by Category
+  vega.bar
+ comment  Filter out missing data:
+ filter.where Year > 1910
+  group.by Year
+   columns.setType Year year
+    vega.bar
+     xColumn Year
+     yColumn count

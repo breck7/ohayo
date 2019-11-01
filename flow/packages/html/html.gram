@@ -1,0 +1,115 @@
+tooling onsave jtree build produceFlowGrammar
+htmlTextTagCell
+ enum div pre p h1 h2 h3 h4 h5 h6
+htmlCell
+ highlightScope string
+abstractHtmlNode
+ catchAllCellType htmlCell
+ frequency 0
+ description An HTML element
+ inScope styleNode contentNode
+ extends abstractBodyOnlyTileNode
+ abstract
+ javascript
+  getTileFooterStumpCode() {
+   return this.getTileToolbarButtonStumpCode()
+  }
+  async fetchTableInputs() {
+   return { rows: [{ text: this.getHtmlContent() }] }
+  }
+  getHtmlContent() {
+   return this.getWordsFrom(2).join(" ") || "No html content to show."
+  }
+  getTag() {
+   return this.getWord(1) || "div" // todo: verify this is legal tag.
+  }
+  getSrc() {
+   return this.getSettingsStruct().src
+  }
+  getTileBodyStumpCode() {
+   const obj = this.getDefinition().getConstantsObject()
+   return `${this.getTag()}
+   ${obj.style ? `style ${obj.style}` : "stumpNoOp"}
+   ${this.getSrc() ? `src ${this.getSrc()}` : "stumpNoOp"}
+   bern${jtree.TreeNode.nest(this.getHtmlContent(), 2)}`
+  }
+htmlTextNode
+ description Displays fixed text in the given HTML element.
+ cells tileKeywordCell htmlTextTagCell
+ catchAllCellType htmlCell
+ frequency .002
+ extends abstractHtmlNode
+ crux html.text
+htmlPrintAsNode
+ description Displays input table in the given HTML element.
+ cells tileKeywordCell htmlTextTagCell
+ frequency .002
+ javascript
+  getHtmlContent() {
+   return this.getPipishInput()
+  }
+ extends abstractHtmlNode
+ crux html.printAs
+abstractHTMLFixedTagTileNode
+ abstract
+ extends abstractHtmlNode
+ javascript
+  getHtmlContent() {
+   return this.getContent()
+  }
+  getTag() {
+   return this.getDefinition().getConstantsObject().htmlTag
+  }
+htmlH1Node
+ catchAllCellType htmlCell
+ description Displays an H1 Header with fixed text
+ example A title
+  html.h1 Hello world
+ frequency .002
+ string tileSize 600 75
+ string htmlTag h1
+ string style text-align:center;
+ extends abstractHTMLFixedTagTileNode
+ crux html.h1
+abstractHTMLContentIsSrcTileNode
+ abstract
+ extends abstractHTMLFixedTagTileNode
+ javascript
+  getHtmlContent() {
+   return ""
+  }
+  getSrc() {
+   return this.getContent() || super.getSrc()
+  }
+htmlImgNode
+ description Displays an image from given url.
+ cells tileKeywordCell urlCell
+ frequency .002
+ string htmlTag img
+ string style width:100%;
+ extends abstractHTMLContentIsSrcTileNode
+ crux html.img
+htmlIframeNode
+ description Displays an iframe from given url.
+ cells tileKeywordCell urlCell
+ string htmlTag iframe
+ extends abstractHTMLContentIsSrcTileNode
+ crux html.iframe
+htmlCustomNode
+ description Display custom HTML.
+ example Hello world
+  html.custom
+   content
+    <h1>Hello world</h1>
+ inScope contentNode
+ extends abstractBodyOnlyTileNode
+ crux html.custom
+ javascript
+  getTileBodyStumpCode() {
+   // https://meta.stackexchange.com/questions/1777/what-html-tags-are-allowed-on-stack-exchange-sites
+   // todo: sanitize tags
+   const contentNode = this.getNode("content")
+   const content = contentNode ? contentNode.childrenToString() : "No HTML content to show"
+   return `div
+  bern${jtree.TreeNode.nest(content, 2)}`
+  }

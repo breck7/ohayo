@@ -1,0 +1,12 @@
+tooling onsave jtree build produceTilesGrammar
+layoutOptionCell
+ enum custom bin tree column tiled
+ highlightScope constant
+documentSettingNameCell
+ highlightScope entity.name.tag
+abstractDocumentSettingNode
+ abstract
+layoutNode
+ cells documentSettingNameCell layoutOptionCell
+ extends abstractDocumentSettingNode
+ crux layout

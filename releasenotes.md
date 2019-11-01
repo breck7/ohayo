@@ -1,3 +1,13 @@
+14.0.0 2019-11-01
+-----------------
+- New: Flow now works on the command line too
+- New: full source code released
+- Breaking: keyword for comment is now comment and not #
+- Infra: JTable moved to Jtree
+- Infra: Updated to TreeComponentFramework
+- Infra: Updated to Jtree 44.0.0 from 25.2.0
+- Infra: now compiled product is only 1 unminified js file
+
 13.0.0 2019-6-09
 ----------------
 - New: bar tile now has colorColumn support

@@ -1,0 +1,13 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test challengeRegressionCountShouldBe10
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    samples.declaration
+     text.toLowerCase text
+      text.wordCount
+       filter.where word = people
+        show.max count Count
+    layout column
+   assertLengthIs getRenderedTilesDiagnostic 5
+   assertStringIncludes getStumpNodeStringWithoutCssAndSvg h3 10

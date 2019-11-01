@@ -1,0 +1,17 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test basics
+ toggleHelpCommand
+  toggleHelpCommand
+   assertTypeIs getMountedTab undefined
+   createNewBlankProgramCommand
+    assertTypeIs getMountedTab object
+    toggleAutoSaveCommand
+     toggleAutoSaveCommand
+      appendTileCommand samples.presidents
+       assertParagraphIs getMountedTilesProgram.childrenToString
+        samples.presidents
+       selectAllTilesCommand
+        appendTileCommand date.heatcal
+         assertParagraphIs getMountedTilesProgram.childrenToString
+          samples.presidents
+           date.heatcal

@@ -1,0 +1,339 @@
+tooling onsave jtree build produceTilesGrammar
+tileNameCell
+ highlightScope variable.function
+abstractTileTreeComponentNode
+ abstract
+ cells tileNameCell
+ _extendsJsClass AbstractTreeComponent
+ inScope hashBangNode abstractTileTreeComponentNode hiddenNode maximizedNode abstractPagePositionNode commentNode
+ catchAllNodeType catchAllErrorNode
+ int headerHeight 30
+ int footerHeight 30
+ string hiddenKey hidden
+ javascript
+  getProgramTemplate(id) {}
+  getSnippetTemplate(id) {}
+  getExampleTemplate(index) {
+   // todo: right now we only have 1 example per tile.
+   const exampleNode = this.getDefinition().getNode(jtree.GrammarConstants.example)
+   return exampleNode ? exampleNode.childrenToString() : ""
+  }
+  emitLogMessage(message) {
+   const tab = this.getTab()
+   if (tab) tab.addStumpCodeMessageToLog(message)
+   else if (this.isNodeJs()) console.log(message)
+  }
+  getTheme() {
+   return this.getTab().getTheme()
+  }
+  scrollIntoView() {
+   const el = this.getStumpNode()
+    .getShadow()
+    .getShadowElement()
+   if (el) el.scrollIntoView()
+  }
+  async loadRequirements() {
+   const loadingMap = this.getTab().getRootNode().getDefinitionLoadingPromiseMap()
+   if (!loadingMap.has(this.constructor))
+    loadingMap.set(this.constructor, this._makeLoadRequirementsPromise(loadingMap))
+   await loadingMap.get(this.constructor)
+  }
+  async _makeLoadRequirementsPromise(loadingMap) {
+   const app = this.getWebApp()
+   const cssScript = this[TilesConstants.tileCssScript]
+   if (cssScript) this._loadTileCss(cssScript)
+   const scriptPath = this[TilesConstants.tileScript]
+   if (scriptPath) await app.getWillowProgram().appendScript(scriptPath)
+   loadingMap.set(this.constructor, true)
+  }
+  _loadTileCss(css) {
+   const app = this.getWebApp()
+   app
+    .getWillowProgram()
+    .getBodyStumpNode()
+    .insertChildNode(
+     css
+      .split(" ")
+      .map(
+       url => `link
+   rel stylesheet
+   media screen
+   href ${url}`
+      )
+      .join("\n")
+    )
+  }
+  _hasRequirements() {
+    const def = this.getDefinition()
+    const constants = def.getConstantsObject()
+    return constants[TilesConstants.tileScript]
+  }
+  _areRequirementsLoaded() {
+    const loadingMap = this.getTab().getRootNode().getDefinitionLoadingPromiseMap()
+    return !this._hasRequirements() || loadingMap.get(this.constructor) === true
+  }
+  isLoaded() {
+   return this._areRequirementsLoaded()
+  }
+  getErrorMessageHtml() {
+   const errors = Object.values(this.getRunTimePhaseErrors())
+   return errors.length ? ` <span style="color: ${this.getTheme().errorColor};">${errors.join(" ")}</span>` : "" //todo: cleanup
+  }
+  toStumpErrorStateCode(err) {
+    const errorMessage = `Error on tile '${this.getFirstWord()}'. ${err}`
+    return `div
+   class ${this.getCssClassNames().join(" ")}
+   id ${this.getTreeComponentId()}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div ERROR
+    class TileHeader
+   div
+    class TileBody${jtree.TreeNode.nest(`div ` + errorMessage, 2)}
+   div
+    class TileFooter${jtree.TreeNode.nest(this.getTileToolbarButtonStumpCode(), 2)}
+   div
+    class TileGrabber`
+  }
+  getCommander() {
+   const TileCommander = this.require("TileCommander", this._getProjectRootDir() + "ohayoWebApp/commanders/TileCommander.js")
+   return new TileCommander(this)
+  }
+  // todo: delete this
+  makeDirty() {
+   delete this._cache_settingsObject
+   delete this._bodyStumpCodeCache // todo: cleanup
+   this._setLastRenderedTime(0)
+  }
+  toggleToolbar() {
+   if (!this._tileToolbar) {
+    const TileToolbarTreeComponent = this.require("TileToolbarTreeComponent", this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileToolbarTreeComponent.js")
+    this._tileToolbar = new TileToolbarTreeComponent("", undefined, this)
+    this._tileToolbar.renderAndGetRenderReport(this.getStumpNode())
+   } else this._tileToolbar = this._tileToolbar.unmount()
+  }
+  getAllTileSettingsDefinitions() {
+   const def = this.getDefinition()
+   return Object.values(def.getFirstWordMapWithDefinitions()).filter(def => def.isOrExtendsANodeTypeInScope([TilesConstants.abstractTileSetting]))
+  }
+  getTab() {
+   return this.getRootNode().getTab()
+  }
+  getChildTiles() {
+   return this.getChildInstancesOfNodeTypeId("abstractTileTreeComponentNode")
+  }
+  selectTile() {
+   this.selectNode()
+   if (this.isMounted()) this.getStumpNode().addClassToStumpNode(TilesConstants.selectedClass)
+  }
+  unselectNode() {
+   super.unselectNode()
+   if (this.isMounted()) this.getStumpNode().removeClassFromStumpNode(TilesConstants.selectedClass)
+  }
+  getCssClassNames() {
+   const classNames = super.getCssClassNames()
+   if (this._isMaximized())
+    classNames.push("TileMaximized")
+   return classNames
+  }
+  toStumpCode() {
+   return `div
+   class ${this.getCssClassNames().join(" ")}
+   id ${this.getTreeComponentId()}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div ${this.getTileHeaderBern()}
+    class TileHeader
+   div
+    style ${this.customBodyStyle || ""}
+    class TileBody${this._getBodyStumpCodeCache()}
+   div
+    class TileFooter${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
+   div
+    class TileGrabber`
+  }
+  _getBodyStumpCodeCache() {
+   if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = jtree.TreeNode.nest(this.getTileBodyStumpCode(), 2)
+   return this._bodyStumpCodeCache
+  }
+  getTileHeaderBern() {
+   return `${this.getFirstWord()}`
+  }
+  cloneAndOffset() {
+   const clone = this.duplicate()
+   const left = this.getLeft()
+   const _top = this.getTop()
+   if (left) clone.touchNode(TilesConstants.left).setContent(parseInt(left) + 1)
+   if (_top) clone.touchNode(TilesConstants.top).setContent(parseInt(_top) + 1)
+   return clone
+  }
+  getTileBodyStumpCode() {
+   return ``
+  }
+  _getCss() {
+   const selector = "#" + this.getTreeComponentId()
+   const theme = this.getTheme()
+   const visibleCss = this.isVisible() ? "" : "display: none"
+   const dimensions = this.getTileDimensionIfAny()
+   const dimensionCss = dimensions ? dimensions.toCss() : ""
+   return `${selector} { ${visibleCss} ${dimensionCss} }
+        ${theme.hakonToCss(this.toHakonCode())}`
+  }
+  getContextMenuStumpCode() {
+   return ""
+  }
+  handleTileError(err) {
+   if (!this._errorCount) this._errorCount = 0
+   this._errorCount++
+   this.getRootNode().goRed(err)
+  }
+  getWall() {
+   return this.getWebApp().getAppWall()
+  }
+  getWebApp() {
+   return this.getTab().getRootNode()
+  }
+  getTileDimensionIfAny() {
+   const dimensions = this.getWall().getWallViewPortDimensions()
+   return this.getRootNode()
+    .getTileDimensionMap(dimensions.width, dimensions.height)
+    .get(this)
+  }
+  getTileBodyDimension() {
+   const dimension = this.getTileDimensionIfAny()
+   dimension.height = dimension.height - this.headerHeight - this.footerHeight
+   return dimension
+  }
+  getDependencies() {
+   return []
+  }
+  async runAndrenderAndGetRenderReport() {
+   await this.execute()
+   return this.renderAndGetRenderReport()
+  }
+  getTimeToLoad() {
+   return this._timeToLoad || 0
+  }
+  toHakonCode() {
+   return ""
+  }
+  getTileFooterStumpCode() {
+   return this.getTileToolbarButtonStumpCode()
+  }
+  getTileToolbarButtonStumpCode() {
+   return `span ${Icons("pencil", 16)}
+   class TilePencilButton
+   stumpOnClickCommand toggleToolbarCommand`
+  }
+  getDefinedOrSuggestedSize() {
+   const size = this.getSuggestedSize()
+   const width = this.getWidth()
+   const height = this.getHeight()
+   return {
+    width: width ? width * 20 : size.width,
+    height: height ? height * 20 : size.height
+   }
+  }
+  getSuggestedSize() {
+   const tileSize = this.tileSize || "280 220"
+   const parts = tileSize.split(" ").map(tileSize => parseInt(tileSize))
+   return {
+    width: parts[0],
+    height: parts[1]
+   }
+  }
+  getRequiredDimensionsForTreeLayout(padding = 0) {
+   const size = {
+    width: 0,
+    height: 0
+   }
+   const children = this.getChildTiles()
+   const suggestedSize = this.getDefinedOrSuggestedSize()
+   children.forEach(child => {
+    const childSize = child.getRequiredDimensionsForTreeLayout(padding)
+    size.width += childSize.width
+    size.height = childSize.height > size.height ? childSize.height : size.height
+   })
+   size.width += children.length * padding
+   size.width = Math.max(size.width, suggestedSize.width)
+   size.height = suggestedSize.height + (children.length ? padding + size.height : 0)
+   return size
+  }
+  getLeft() {
+   return this.get(TilesConstants.left)
+  }
+  getTop() {
+   return this.get(TilesConstants.top)
+  }
+  getWidth() {
+   return this.get(TilesConstants.width)
+  }
+  getHeight() {
+   return this.get(TilesConstants.height)
+  }
+  // Tile child rendering is done at the wall flex level.
+  _getChildTreeComponents() {
+   return []
+  }
+  getStumpNodeForChildren() {
+   // We render all Tiles on the Wall.
+   return this.getStumpNode().getParent()
+  }
+  treeComponentDidMount() {
+   super.treeComponentDidMount()
+   if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
+  }
+  _treeComponentDidUpdate() {
+   if (this.isLoaded()) this.treeComponentDidUpdate()
+  }
+  _treeComponentDidMount() {
+   if (this.isLoaded()) this.treeComponentDidMount()
+  }
+  toInspection() {
+   const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
+   const settingsDefinitions = this.getAllTileSettingsDefinitions()
+    .map(setting => `${setting.getFirstWord()} ${setting.getDescription()}`)
+    .join("\n")
+   const parentTile = this.getParent().getFirstWord()
+   return `div TileConstructor: ${this.constructor.name} Parent: ${parentTile}
+  div Messages:
+  ol
+   ${messages}
+  div Tree:
+  pre
+   bern${jtree.TreeNode.nest(this.toString(), 2)}
+  div All Tile Settings:
+  pre
+   bern${jtree.TreeNode.nest(settingsDefinitions, 2)}`
+  }
+  isVisible() {
+   return !this.has(this.hiddenKey)
+  }
+  _isMaximized() {
+   return this.has(TilesConstants.maximized)
+  }
+  async _executeChildNodes() {
+   await this._runChildTiles()
+  }
+  async _runChildTiles() {
+   await Promise.all(this.getChildTiles().map(tile => tile.execute()))
+  }
+  async execute() {
+   try {
+    this.setRunTimePhaseError("execute")
+    await this._executeChildNodes()
+   } catch (err) {
+    this.setRunTimePhaseError("execute", err)
+    console.error(err)
+    const theme = this.getTheme()
+    this.emitLogMessage(`div
+     bern
+      Error occurred. See console.
+     style color: ${theme.errorColor};`)
+   }
+   return this
+  }

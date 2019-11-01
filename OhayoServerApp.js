@@ -5,10 +5,11 @@ const bodyParser = require("body-parser")
 const glob = require("glob")
 const fs = require("fs")
 
+const { jtree } = require("jtree")
+
 const OhayoServerAppConstants = {}
 OhayoServerAppConstants.routeFileGlob = "/*/*.routes.js"
-OhayoServerAppConstants.standardPackagesFolder = "standard-packages/"
-OhayoServerAppConstants.appName = "ohayo"
+OhayoServerAppConstants.flowPackagesFolder = "/flow/packages/"
 
 class OhayoServerApp {
   constructor(port = 1111, cwd = process.cwd(), hostname = "localhost", protocol = "http") {
@@ -30,16 +31,17 @@ class OhayoServerApp {
 
   _addCurrentWorkingDirectory(content, cwd) {
     return content.replace(
-      `<script>const DefaultServerCurrentWorkingDirectory = "/";</script>`,
-      `<script>const DefaultServerCurrentWorkingDirectory = "${cwd}";</script>`
+      `const DefaultServerCurrentWorkingDirectory = "/"`,
+      `const isOhayoDesktop = true;\nconst DefaultServerCurrentWorkingDirectory = "${cwd}"`
     )
   }
 
   _getPackageDirectories() {
-    return [__dirname + OhayoServerAppConstants.standardPackagesFolder]
+    return [__dirname + OhayoServerAppConstants.flowPackagesFolder]
   }
 
   _getStaticRoutes() {
+    // this dir and whatever folder someone started it in for plugins
     return [__dirname + "/", this.getCwd()]
   }
 
@@ -86,10 +88,6 @@ class OhayoServerApp {
       })
   }
 
-  _getAppName() {
-    return OhayoServerAppConstants.appName
-  }
-
   _getUrlBase() {
     return `${this._protocol}://${this._hostname}:${this._port}/`
   }
@@ -98,24 +96,79 @@ class OhayoServerApp {
     return "index.html"
   }
 
-  _getIndexFilePath() {
-    return __dirname + "/index.html"
-  }
-
   _addHomeRoute() {
     this.app.get("/" + this._getHomePage(), (req, res) => {
       // Avoid cacheing
-      res.send(this._addCurrentWorkingDirectory(fs.readFileSync(this._getIndexFilePath(), "utf8"), this.getCwd()))
+      res.send(this._addCurrentWorkingDirectory(fs.readFileSync(__dirname + "/" + this._getHomePage(), "utf8"), this.getCwd()))
     })
   }
 
   start() {
     this.app.listen(this._port, () => {
-      console.log(`Running ${this._getAppName()} in folder '${this.getCwd()}'. cmd+dblclick: ${this._getUrlBase() + this._getHomePage()}`)
+      console.log(`Running ${this.constructor.name} in folder '${this.getCwd()}'. cmd+dblclick: ${this._getUrlBase()}${this._getHomePage()}`)
     })
   }
 }
 
-module.exports = OhayoServerApp
+class FabServer extends OhayoServerApp {
+  _onFileChange(event, filename) {
+    return "todo: restore"
+    const { Builder } = require("./builder.ts")
+    // Note: if this ever becomes a load problem we can look for changes
+    // Note: do we want this? What if it fails? What if its partial?
+    if (filename.includes("node_modules/") || filename.includes("ignore/")) return true
+    console.log(`Changes to 'ohayoWebApp/${filename}' detected. Building fab.html...`)
+    new Builder().produceFabHtml()
+  }
 
-if (!module.parent) new OhayoServerApp(process.argv[2]).start()
+  listenForFileChanges() {
+    fs.watch("ohayoWebApp/", { recursive: true }, (event, filename) => this._onFileChange(event, filename))
+    fs.watch("flow/", { recursive: true }, (event, filename) => this._onFileChange(event, filename))
+    return this
+  }
+
+  _getHomePage() {
+    return "fab.html"
+  }
+
+  _addOtherRoutes() {
+    const sendFabMessage = (req, res) => res.send(`This is fab server. Visit ${this._getHomePage()} instead.`)
+
+    this.app.get("/index.html", sendFabMessage)
+    this.app.get("/", sendFabMessage)
+
+    const { TypeScriptRewriter } = require("jtree/products/TypeScriptRewriter.js")
+    // todo; cleanup
+    const treeLangExtensions = "grammar drums tree stamp".split(" ")
+    const isTreeFile = filename => treeLangExtensions.indexOf(jtree.Utils.getFileExtension(filename)) > -1
+
+    const serveDevFile = (req, res, next) => {
+      const filename = __dirname + req.path
+      fs.readFile(filename, "utf8", (err, file) => {
+        if (err) {
+          console.log(err)
+          return res.status(400).send(err)
+        } else if (isTreeFile(filename)) res.send(TypeScriptRewriter.treeToJs(filename, file))
+        else if (filename.endsWith(".js")) {
+          res.send(
+            new TypeScriptRewriter(file)
+              .removeRequires()
+              .changeNodeExportsToWindowExports()
+              .changeDefaultExportsToWindowExports()
+              .removeTsGeneratedCrap()
+              .removeNodeJsOnly()
+              .removeImports()
+              .removeExports()
+              .addUseStrictIfNotPresent()
+              .getString()
+          )
+        } else res.send(file)
+      })
+    }
+
+    this.app.get(/.*(ohayoWebApp|flow)\/.*\.(js|grammar|drums|tree|stamp)/, serveDevFile)
+    return this
+  }
+}
+
+module.exports = { OhayoServerApp, FabServer }

@@ -1,0 +1,10 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test PickerTile
+ createNewBlankProgramCommand
+  assertStringExcludes getStumpNodeStringWithoutCssAndSvg waterBill
+  insertPickerTileCommand
+   assertLengthIs getRenderedTilesDiagnostic 1
+   assertStringExcludes getStumpNodeStringWithoutCssAndSvg Loading
+   assertStringIncludes getStumpNodeStringWithoutCssAndSvg waterBill
+   deleteSelectionCommand
+    assertLengthIs getRenderedTilesDiagnostic 0

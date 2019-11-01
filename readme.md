@@ -2,11 +2,11 @@
 
 Ohayo is a fast and free data science studio. My goal is to enable people to do data science at the speed of thought.
 
-You can try ohayo at [https://ohayo.computer](https://ohayo.computer), [download Ohayo on GitHub](https://github.com/breck7/ohayo), try Ohayo [hosted on GitHub](https://breck7.github.io/ohayo/), or install it using `npm install ohayo`.
+You can try ohayo at [https://ohayo.computer](https://ohayo.computer), [download Ohayo on GitHub](https://github.com/treenotation/ohayo), try Ohayo [hosted on GitHub](https://treenotation.github.io/ohayo/), or install it using `npm install ohayo`.
 
 ## Ohayo, Tree Notation and Flow
 
-This project includes a data science web application AND a new dataflow programming language for data science that I currently call Flow. Flow is a Tree Language, built using [Tree Notation](http://treenotation.org/).
+This project includes a data science web application AND a new dataflow programming language for data science that I currently call Flow. Flow is a Tree Language, built using [Tree Notation](https://treenotation.org/).
 
 ## BETA!
 
@@ -32,12 +32,14 @@ Ohayo is still beta, and we are still iterating quickly. We encourage you to use
 |Google Data Studio|https://datastudio.google.com/overview|2016|https://de.wikipedia.org/wiki/Google_Data_Studio|
 |Vega Editor|https://vega.github.io/editor/|2015||
 |Amazon QuickSight|https://aws.amazon.com/quicksight/|2015||
+|xsv|https://github.com/BurntSushi/xsv|2014||
 |JupyterLab|https://github.com/jupyterlab/jupyterlab|2014|https://en.wikipedia.org/wiki/Project_Jupyter|
 |xlwings|https://www.xlwings.org/|2013||
 |Julia|https://julialang.org/|2012|https://en.wikipedia.org/wiki/Julia_(programming_language)|
 |Looker|https://looker.com/|2012|https://en.wikipedia.org/wiki/Looker_(company)|
 |AirTable|https://airtable.com/|2012|https://en.wikipedia.org/wiki/Airtable|
 |RStudio|https://www.rstudio.com/|2011|https://en.wikipedia.org/wiki/RStudio|
+|Microsoft SandDance|https://github.com/microsoft/SandDance|2011|https://en.wikipedia.org/wiki/Microsoft_Garage|
 |Microsoft PowerBI|https://powerbi.microsoft.com/en-us/|2011|https://en.wikipedia.org/wiki/Power_BI|
 |d3|https://d3js.org/|2011|https://en.wikipedia.org/wiki/D3.js|
 |Google Kaggle|https://www.kaggle.com/|2010|https://en.wikipedia.org/wiki/Kaggle|
@@ -63,11 +65,11 @@ Ohayo is still beta, and we are still iterating quickly. We encourage you to use
 
 ## How to Give Feedback
 
-Open an issue, post to the [Tree Notation subreddit](https://www.reddit.com/r/treenotation/) or email breck7@gmail.com.
+Open an issue, post to the [Tree Notation subreddit](https://www.reddit.com/r/treenotation/) or email ohayo@treenotation.org.
 
 ## Copyright & License
 
-Copyright (C) 2019 Breck Yunits - Released under the MIT License.
+Copyright (C) 2019 Tree Notation Lab - Released under the MIT License.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

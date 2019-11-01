@@ -1,0 +1,8 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test templates
+ createNewBlankProgramCommand
+  assertStringExcludes getStumpNodeString Baby Names
+  appendTileCommand templates.list
+   assertStringIncludes getStumpNodeString Baby Names
+   executeStumpNodeCommandByStumpNodeClassCommand stumpOnClickCommand createProgramButton
+    assertStringIs getMountedTab.getFileName amazon-purchase-history.flow

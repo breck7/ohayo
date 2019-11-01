@@ -1,0 +1,11 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test theme
+ toggleThemeCommand
+  assertLengthIs getCommandsBuffer 0
+  toggleHelpCommand
+   closeModalCommand
+    toggleThemeCommand
+     toggleThemeCommand
+      toggleThemeCommand
+       toggleThemeCommand
+       assertLengthIs getCommandsBuffer 0

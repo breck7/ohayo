@@ -1,0 +1,34 @@
+tooling onsave jtree build produceTilesGrammar
+basicRecursiveTileNode
+ extends abstractTileTreeComponentNode
+ javascript
+  toHakonCode() {
+   const theme = this.getTheme()
+   return `.BasicRecursiveTile
+   input
+   textarea
+    border 0
+    font-size 14px
+    height 100%
+    width 100%`
+  }
+  getTileBodyStumpCode() {
+   const edgeSymbol = " "
+   const definition = this.getDefinition()
+   const requiredCellIds = definition.getRequiredCellTypeIds()
+   const catchAllIndex = requiredCellIds.length
+   const catchAllCellTypeId = definition.getCatchAllCellTypeId()
+   if (catchAllCellTypeId) requiredCellIds.push(catchAllCellTypeId)
+   const cellInputs = requiredCellIds.map((cellTypeId, index) => {
+    const isCatchAll = cellTypeId === catchAllCellTypeId && index === catchAllIndex
+    const value = isCatchAll ? this.getWordsFrom(index + 1).join(edgeSymbol) : this.getWord(index + 1)
+    return ` input
+    placeholder ${cellTypeId}
+    value ${value}
+    name ${index + 1}
+    stumpOnChangeCommand ${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}`
+   })
+   return `div ${definition.getDescription()}
+  div
+  ${cellInputs.join("\n")}`
+  }

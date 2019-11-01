@@ -1,0 +1,7 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test DidYouMean
+ createNewBlankProgramCommand
+  assertStringExcludes getStumpNodeStringWithoutCssAndSvg Did you mean
+  appendTileCommand show.summ
+   assertLengthIs getRenderedTilesDiagnostic 1
+   assertStringIncludes getStumpNodeStringWithoutCssAndSvg Did you mean

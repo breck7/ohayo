@@ -1,0 +1,10 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test simpleKpi
+ createNewBlankProgramCommand
+  assertStringExcludes getStumpNodeString showSumNode
+  pasteCommand
+   withParagraph
+    samples.waterBill
+     show.sum Amount
+   assertLengthIs getMountedTab.getTabProgram.getAllErrors 0
+   assertStringIncludes getStumpNodeString showSumNode

@@ -1,0 +1,10 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test reverseSort
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    samples.iris
+     rows.sortByReverse Petal.Width
+      rows.first 1
+       tables.basic
+   assertStringExcludes getStumpNodeString setosa

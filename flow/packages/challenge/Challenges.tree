@@ -1,0 +1,52 @@
+challenge
+ id 1
+ question How many U.S. Presidents were born in California?
+ answer 2
+ difficulty easy
+ solution
+  samples.presidents
+   filter.with California
+    tables.basic
+challenge
+ id 2
+ question What is the score of the highest rated movie on IMDB?
+ answer 9.2
+ difficulty easy
+ solution
+  vega.data movies.json
+   columns.keep Title IMDB_Rating
+    filter.where IMDB_Rating > 0
+     rows.sortBy IMDB_Rating
+      rows.reverse
+       tables.basic
+challenge
+ id 3
+ question How many movies are rated 8+ on IMDB?
+ answer 157
+ difficulty easy
+ solution
+  vega.data movies.json
+   filter.where IMDB_Rating > 8
+    columns.keep Title IMDB_Rating
+     tables.basic
+challenge
+ id 4
+ question In the sample dataset "waterBill", what is the median monthly water bill?
+ answer 65.03
+ difficulty easy
+ solution
+  samples.waterBill
+   columns.describe
+    columns.keep Column median
+     tables.basic
+challenge
+ id 5
+ question In the Declaration of Independence, how many times does the word "people" appear, including when capitalized?
+ answer 10
+ difficulty medium
+ solution
+  samples.declaration
+   text.toLowerCase text
+    text.wordCount
+     filter.where word = people
+      show.max count Count

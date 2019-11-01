@@ -1,0 +1,50 @@
+tooling onsave jtree build produceFlowGrammar
+supportedTreeLanguageCell
+ enum flow stump hakon fire
+lineOfContentNode
+ catchAllNodeType lineOfContentNode
+ catchAllCellType stringCell
+contentNode
+ catchAllNodeType lineOfContentNode
+ extends abstractTileSettingNonTerminalNode
+ crux content
+reduceNode
+ description Provide information to correctly parse a column.
+ example 4 years of seattle weather
+  vega.data seattle-weather.csv
+   date.addColumns
+    group.by year
+     reduce temp_max mean average_max
+     reduce temp_max max max_max
+     reduce temp_min min min_min
+     tables.basic
+ cells tileSettingKeywordCell columnNameCell reductionTypeCell newColumnNameCell
+ extends abstractTileSettingTerminalNode
+ crux reduce
+styleNode
+ extends abstractTileSettingTerminalNode
+ crux style
+columnLimitNode
+ description How many columns to show
+ cells tileSettingKeywordCell intCell
+ extends abstractTileSettingTerminalNode
+ crux columnLimit
+howManyNode
+ cells tileSettingKeywordCell quantityCell
+ extends abstractTileSettingTerminalNode
+ crux howMany
+sizeNode
+ cells tileSettingKeywordCell numberCell
+ description Size of mark.
+ extends abstractTileSettingTerminalNode
+ crux size
+rowDisplayLimitNode
+ cells tileSettingKeywordCell intCell
+ frequency .5
+ description Sets the maximum number of rows to show in a tile.
+ extends abstractTileSettingTerminalNode
+ crux rowDisplayLimit
+srcNode
+ cells tileSettingKeywordCell urlCell
+ extends abstractTileSettingTerminalNode
+ crux src

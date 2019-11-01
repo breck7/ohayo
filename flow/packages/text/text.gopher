@@ -1,0 +1,10 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+testProgram declaration.flow
+ samples.declaration
+  text.toLowerCase text
+   text.wordCount
+    text.length word
+     filter.where wordLength > 5
+      rows.sortByReverse count
+       tables.basic
+ layout tiled

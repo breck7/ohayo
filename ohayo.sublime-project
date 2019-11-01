@@ -1,0 +1,34 @@
+{
+  "folders":
+  [
+    {
+      "path": ".",
+      "folder_exclude_patterns": ["node_modules", "ignore", "coverage" , ".nyc_output"],
+      "file_exclude_patterns": ["ohayo.es6.browser.js", "*movies.json", "*.nodejs.js", "flow.grammar", "tiles.grammar", "oswarm.grammar"]
+    }
+  ],
+  "build_systems":
+    [
+      
+        {
+            "name": "coverFile",
+            "shell_cmd": "istanbul cover tape ${file}"
+        },
+        {
+            "name": "cellCheck",
+            "shell_cmd": "jtree check ${file}"
+        },
+        {
+            "name": "formatFile",
+            "shell_cmd": "jtree format ${file}"
+        },
+        {
+            "name": "executeFile",
+            "shell_cmd": "${file}"
+        },
+        {
+            "name": "makeExecutable",
+            "shell_cmd": "chmod +x ${file}"
+        }
+    ]
+}

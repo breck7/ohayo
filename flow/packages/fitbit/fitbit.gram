@@ -1,0 +1,6 @@
+tooling onsave jtree build produceFlowGrammar
+fitbitAllNode
+ description Instructions on how to get your Fitbit data.
+ string content Step 1. Go to <a target="_blank" href="https://www.fitbit.com/settings/data/export">https://www.fitbit.com/settings/data/export</a> to download your Fitbit data.<br> Step 2. Drop the CSV onto this page.
+ extends abstractInstructionsNode
+ crux fitbit.all

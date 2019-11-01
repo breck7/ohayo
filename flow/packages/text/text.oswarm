@@ -1,0 +1,12 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+todo check to assert tileSize came through correctly
+test tileHeight regression
+ createNewBlankProgramCommand
+  assertLengthIs getRenderedTilesDiagnostic 0
+  pasteCommand
+   withParagraph
+    samples.declaration
+     text.toLowerCase text
+    layout column
+   assertLengthIs getRenderedTilesDiagnostic 2
+   assertStringIncludes getStumpNodeString 1776

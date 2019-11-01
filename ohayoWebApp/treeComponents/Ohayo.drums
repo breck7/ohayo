@@ -1,0 +1,36 @@
+panel new createNewBlankProgramCommand ctrl+n New file
+mounted new cloneTabCommand ctrl+shift+n Clone file
+panel new createMiniMapCommand shift+m Browse files
+mounted new createNewSourceCodeVisualizationProgramCommand  Visualize Source Code
+mounted file saveTabAndNotifyCommand command+s Save file
+mounted file showTabMoveFilePromptCommand  Move file
+mounted file cellCheckProgramCommand shift+c Check file for Errors
+mounted file showDeleteFileConfirmDialogCommand shift+backspace Delete file
+panel file openDeleteAllTabsPromptCommand  Delete all open files
+mounted navigation closeMountedProgramCommand ctrl+w Close focused tab
+panel navigation closeAllTabsCommand ctrl+shift+w Close all tabs
+mounted navigation mountPreviousTabCommand shift+left Previous tab
+mounted navigation mountNextTabCommand shift+right Next tab
+panel navigation openFullDiskFilePathPromptCommand shift+o Open file from path
+panel navigation openFolderPromptCommand  Open folder
+panel navigation changeWorkingFolderPromptCommand  Change working folder
+mounted selection selectAllTilesCommand command+a Select all tiles
+mounted selection selectNextTileCommand shift+down Select next tile
+mounted selection selectPreviousTileCommand shift+up Select previous Tile
+mounted selection deleteSelectionCommand backspace Delete Selection
+mounted selection duplicateSelectionCommand command+d Duplicate Selection
+panel window toggleThemeCommand shift+t Toggle Theme
+panel window toggleGutterCommand shift+u Toggle Source Editor Gutter
+panel window toggleFullScreenCommand shift+f Toggle Full Screen
+panel window toggleFocusedModeCommand command+shift+f Toggle Focused Mode
+panel window closeModalCommand escape Close any open modal
+mounted window clearTabMessagesCommand command+\\ Clear tab messages
+panel window toggleAutoSaveCommand  Toggle autosave
+mounted window fetchAndReloadFocusedTabCommand shift+r Re-download and refresh tab
+mounted edit toggleLayoutCommand shift+l Toggle layout
+mounted edit undoFocusedProgramCommand command+z Undo
+mounted edit redoFocusedProgramCommand command+shift+z Redo
+mounted edit insertAdjacentTileCommand shift+i Insert Tile
+panel ohayo toggleHelpCommand ? Help
+panel ohayo confirmAndResetAppStateCommand  Reset Ohayo
+panel ohayo toggleTreeComponentFrameworkDebuggerCommand shift+d Toggle TCF Debugger

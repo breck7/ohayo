@@ -1,0 +1,64 @@
+tooling onsave jtree build produceTilesGrammar
+PickerTileNode
+ description Displays list of available tiles.
+ javascript
+  toHakonCode() {
+   const theme = this.getTheme()
+   return `.PickerTileNode
+   .TileBody
+    display flex
+    flex-flow row wrap
+    a
+     &:hover
+      background-color ${theme.borderColor}
+     padding 10px
+     margin 5px
+     height 30px
+     background-color ${theme.backgroundColor}
+     border 1px solid ${theme.borderColor}
+     overflow hidden
+     text-align center
+     text-overflow ellipsis
+     font-size 14px
+     width 120px
+     span
+      font-size 70%`
+  }
+  async fetchTableInputs() {
+   return { rows: this.getPredictionsForThisTile().map(obj => obj.toObject()) }
+  }
+  getPredictionsForThisTile() {
+   const allChoices = this.getRootNode().getGrammarProgram().getTopNodeTypeDefinitions()
+   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
+   return filteredChoices.length ? filteredChoices : allChoices
+  }
+  getTileBodyStumpCode() {
+   const choices = this.getPredictionsForThisTile()
+   let lastCat = ""
+   return choices
+    .map(nodeDefinition => {
+     const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition() // todo: cleanup. need to get first word.
+     const nodeName = nodeId.split(".")[1]
+     const name = nodeName
+     const category = lodash.upperFirst(nodeId.split(".")[0])
+     let breaker = ""
+     if (lastCat !== category)
+      breaker = `div ${category}
+   style width: 100%; margin-top: 20px; text-align: center;\n`
+     lastCat = category
+     return `${breaker}a ${name}
+   br
+    span ${nodeDefinition.getDescription()}
+   title ${nodeDefinition.getDescription()}
+   tabindex -1
+   value ${nodeId}
+   stumpOnClickCommand changeTileTypeCommand`
+    })
+    .join("\n")
+  }
+  getTileHeaderBern() {
+   return "Tile Gallery"
+  }
+ string tileSize 480 420
+ extends abstractTileTreeComponentNode
+ crux tiles.picker

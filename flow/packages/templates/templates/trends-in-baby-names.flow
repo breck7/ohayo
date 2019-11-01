@@ -1,0 +1,10 @@
+html.h1 Trends in Baby Names
+comment Uncomment the below line, and delete the following line, to use the full dataset
+comment  web.get https://raw.githubusercontent.com/hadley/data-baby-names/master/baby-names.csv
+samples.babyNames
+ filter.where name = Aria
+  filter.where sex = girl
+   vega.line
+    xColumn year
+    yColumn percent
+layout column

@@ -1,0 +1,27 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test dataRegression
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    data.inline
+     content
+      <b>foo</b>
+   assertStringIncludes getStumpNodeString &lt;b&gt;foo
+test moreData
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    data.inline
+     parser test
+     content
+      0
+       1
+        name joe
+   assertLengthIs getMountedTilesProgram.getTiles 1
+   pasteCommand
+    withParagraph
+     data.inline
+      parser json
+      content
+       [{"name": "joe", "age": 32}]
+    assertLengthIs getMountedTilesProgram.getTiles 2

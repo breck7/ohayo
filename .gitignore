@@ -1,2 +1,12 @@
-favicon-dev*
-/node_modules/
+ignore/
+node_modules/
+coverage/
+.nyc_output/
+*-v8.log
+*.sublime-workspace
+ohayo.project
+fab.html
+builder.js
+syntax.sh
+deploy.sh
+preview.sh

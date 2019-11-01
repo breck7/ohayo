@@ -1,0 +1,79 @@
+tooling onsave jtree build produceGopherGrammar
+gopherNode
+ description Gopher is a Tree language for testing complete tree programs in Ohayo for errors.
+ root
+ inScope hashBangNode testAllNodeTypesNode testProgramNode
+ catchAllNodeType errorNode
+ javascript
+  async execute(filename) {    
+    const oswarmNode = require("./oswarm.nodejs.js")
+    const program = new oswarmNode(this.compileToOSwarm())
+    await program.execute(filename)
+  }
+  compileToOSwarm() {
+    return this.getChildInstancesOfNodeTypeId("testProgramNode").map(child => child.compileToOSwarm()).join("\n")
+  }
+anyCell
+filepathCell
+filenameCell
+ highlightScope variable.parameter
+intCell
+ highlightScope constant.numeric.integer
+numberOfErrorsCell
+ extends intCell
+stringCell
+flowWordCell
+ highlightScope string
+ extends stringCell
+errorWordCell
+ highlightScope invalid
+topNodeWordCell
+ highlightScope storage.type.function
+hashBangWordCell
+ highlightScope comment.line
+errorNode
+ catchAllCellType errorWordCell
+ baseNodeType errorNode
+ cells errorWordCell
+hashBangNode
+ crux #!
+ cells hashBangWordCell filepathCell
+ catchAllCellType hashBangWordCell
+flowCodeNode
+ catchAllCellType flowWordCell
+ catchAllNodeType flowCodeNode
+ cells flowWordCell
+testProgramNode
+ cells topNodeWordCell filenameCell
+ catchAllCellType numberOfErrorsCell
+ catchAllNodeType flowCodeNode
+ javascript
+  getTestString() { return this.childrenToString() }
+  getExpectedErrorCount() { return this.getWord(2) || "0" }
+  compileToOSwarm() {
+    const testName = this.getWord(1)
+    const expectedErrorCount = this.getExpectedErrorCount()
+    const errorTest = expectedErrorCount
+      ? `assertLengthIs getMountedTilesProgram.getAllErrors ${expectedErrorCount}`
+      : `assertTypeIs getMountedTilesProgram.getAllErrors object`
+    return `test ${testName}
+   createNewBlankProgramCommand ${testName}
+    assertStringIs getMountedTab.getFileName ${testName}
+    pasteCommand
+     withParagraph
+  ${new jtree.TreeNode(this.getTestString()).toString(4)}
+     assertLengthIs getFocusedPanel.getTabs 1
+     assertLengthIs getOpenModals 0
+     ${errorTest}
+     saveCompiledCommand
+      deleteFileCommand localStorage/${testName}`
+    }
+ crux testProgram
+testAllNodeTypesNode
+ extends testProgramNode
+ description Todo: does this test cellTypes too?
+ cells topNodeWordCell filenameCell filepathCell
+ javascript
+  getTestString() { return require("fs").readFileSync(this.getWord(2), "utf8") }
+  getExpectedErrorCount() { return undefined}
+ crux testAllTypesNode

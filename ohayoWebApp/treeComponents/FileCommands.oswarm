@@ -1,0 +1,59 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test reloadCommand
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    data.inline
+     content
+      name,number
+      Obama,44
+     tables.basic
+   assertLengthIs getRenderedTilesDiagnostic 2
+   assertStringIncludes getStumpNodeString Obama
+   assertStringIncludes getStumpNodeString tables.basic
+   fetchAndReloadFocusedTabCommand
+    printProgramStatsCommand
+test createProgramFromFileCommand
+ createProgramFromFileCommand sample.turtle clear
+  assertLengthIs getDefaultDisk.readFilesSync 1
+test deleteFile
+ createNewBlankProgramCommand
+  showDeleteFileConfirmDialogCommand
+   assertTypeIs getMountedTab undefined
+   createNewBlankProgramCommand
+    insertPickerTileCommand
+     assertLengthIs getMountedTilesDiagnostic 1
+     createNewBlankProgramCommand
+      assertLengthIs getMountedTilesDiagnostic 0
+      showDeleteFileConfirmDialogCommand
+       assertStringIs getMountedTab.getFileName untitled.flow
+       assertLengthIs getMountedTilesDiagnostic 1
+test open
+ createNewBlankProgramCommand some.flow
+  closeMountedProgramCommand
+   assertTypeIs getMountedTab undefined
+   openFullDiskFilePathPromptCommand localStorage/some.flow
+    assertStringIs getMountedTab.getFileName some.flow
+test moveFilePrompt
+ createNewBlankProgramCommand
+  showTabMoveFilePromptCommand
+   assertStringIs getMountedTab.getFileName untitled.flow
+   showTabMoveFilePromptCommand renamed.flow
+    assertStringIs getMountedTab.getFileName renamed.flow
+test deleteFileCommand
+ createNewBlankProgramCommand
+  assertLengthIs getCommandsBuffer 0
+  assertLengthIs getDefaultDisk.readFilesSync 1
+  assertTypeIs getWillowProgram.getPageHtml string
+  assertStringIncludes getWillowProgram.getPageHtml untitled
+  deleteFileCommand localStorage/untitled.flow
+   assertLengthIs getDefaultDisk.readFilesSync 0
+test delete
+ createNewBlankProgramCommand
+  assertStringIs getMountedTab.getFileName untitled.flow
+  createNewBlankProgramCommand
+   assertStringIs getMountedTab.getFileName untitled-2.flow
+   deleteFocusedTabCommand
+    assertStringIs getMountedTab.getFileName untitled.flow
+    deleteFocusedTabCommand
+     assertTypeIs getMountedTab undefined

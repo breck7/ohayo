@@ -1,0 +1,17 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test stats
+ openUrlInNewTabCommand localStorage/staff/featured
+  createNewBlankProgramCommand
+   appendTileCommand samples.presidents
+    appendTileCommand columns.describe
+     appendTileCommand tables.basic
+      assertLengthIs getMountedTilesProgram.getTiles 3
+test keep
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    vega.data movies.json
+     columns.keep Title IMDB_Rating
+      rows.sortBy IMDB_Rating
+       tables.basic
+   assertStringExcludes getStumpNodeString DVD

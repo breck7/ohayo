@@ -1,0 +1,38 @@
+tooling onsave jtree build produceTilesGrammar
+DidYouMeanTileNode
+ tags noPicker
+ description Provides suggestions for misspelled tiles.
+ extends abstractTileTreeComponentNode
+ crux tiles.didyoumean
+ javascript
+  getTileBodyStumpCode() {
+   const input = this.getFirstWord()
+   const lineNo =
+    this.getParent()
+     .getTopDownArray()
+     .indexOf(this) + 1
+   const closestTile = jtree.Utils.didYouMean(
+    input,
+    this.getRootNode()
+     .getGrammarProgram()
+     .getTopNodeTypeDefinitions().map(def => def.get("crux"))
+   )
+   if (!closestTile) {
+    if (!input) return `div Your program has a blank line on line ${lineNo}.`
+    return `div No tile '${input}' found.`
+   }
+   return `div
+  span No tile '${input}' found. Line ${lineNo}. Did you mean
+  a ${closestTile}
+   stumpCollapse
+   tabindex -1
+   value ${closestTile}
+   stumpOnClickCommand changeTileTypeCommand
+  span ?`
+  }
+  getErrors() {
+    return [new jtree.UnknownNodeTypeError(this)]
+  }
+  getTileHeaderBern() {
+   return ""
+  }

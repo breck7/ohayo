@@ -1,0 +1,51 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test columnsKeepDropsColumns
+ createNewBlankProgramCommand
+  assertStringExcludes getStumpNodeString span petal_width
+  pasteCommand
+   withParagraph
+    samples.tinyIris
+     columns.keep species
+      filter.with vir
+       tables.basic
+   assertStringExcludes getStumpNodeString span petal_width
+test changeFilterViaTileUI
+ createNewBlankProgramCommand
+  assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 0
+  pasteCommand
+   withParagraph
+    samples.tinyIris
+     filter.with vir
+      tables.basic
+   assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 6
+   fillShadowInputOrTextAreaByClassNameCommand LargeTileInput set
+    executeStumpNodeCommandByStumpNodeClassCommand stumpOnChangeCommand LargeTileInput
+     assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 5
+     assertStringIncludes getStumpNodeStringWithoutCssAndSvg class tableRow
+     fillShadowInputOrTextAreaByClassNameCommand LargeTileInput nothingWillMatchThis
+      executeStumpNodeCommandByStumpNodeClassCommand stumpOnChangeCommand LargeTileInput
+       assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 4
+       assertStringExcludes getStumpNodeStringWithoutCssAndSvg class tableRow
+test clearingAFilterInUI
+ createNewBlankProgramCommand
+  assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 0
+  pasteCommand
+   withParagraph
+    layout column
+    samples.tinyIris
+     filter.with vir
+      tables.basic
+   assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 6
+   fillShadowInputOrTextAreaByClassNameCommand LargeTileInput 
+    executeStumpNodeCommandByStumpNodeClassCommand stumpOnChangeCommand LargeTileInput
+     assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 8
+test filteringDates
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    samples.waterBill
+     date.addColumns year
+      tables.basic
+      filter.where year < 2019
+       show.rowCount Row count
+   assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 29

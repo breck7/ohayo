@@ -1,0 +1,20 @@
+tooling onsave jtree build produceFlowGrammar
+mathLogNode
+ description Add a column that is the natural log (base e) of another column.
+ cells tileKeywordCell columnNameCell
+ extends abstractColumnAdderTileNode
+ crux math.log
+ javascript
+  getNewColumns() {
+   const inputColumnName = this.getWord(1)
+   if (!inputColumnName) return []
+   const inputCol = this.getParentOrDummyTable().getColumnByName(inputColumnName)
+   return [
+    {
+     source: inputColumnName,
+     name: inputColumnName + "Log",
+     type: inputCol.getPrimitiveTypeName(),
+     mathFn: Math.log
+    }
+   ]
+  }

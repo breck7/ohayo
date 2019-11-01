@@ -1,0 +1,22 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test iris
+ createNewBlankProgramCommand
+  toggleOfflineModeCommand
+   appendTileCommand
+    withParagraph
+     samples.tinyIris
+    assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 4
+    selectAllTilesCommand
+     appendTileCommand tables.basic
+      assertParagraphIs getMountedTilesProgram.childrenToString
+       samples.tinyIris
+        tables.basic
+      assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 4
+      toggleOfflineModeCommand
+test list
+ createNewBlankProgramCommand
+  assertStringExcludes getStumpNodeString telescope
+  appendTileCommand
+   withParagraph
+    samples.list
+   assertStringIncludes getStumpNodeString telescope

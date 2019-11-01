@@ -1,0 +1,12 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test h1
+ createNewBlankProgramCommand
+  appendTileCommand html.h1
+test img
+ createNewBlankProgramCommand
+  assertLengthIs getRenderedTilesDiagnostic 0
+  pasteCommand
+   withParagraph
+    html.img http://localhost:2222/ohayoWebApp/images/favicon.svg
+   assertStringIncludes getStumpNodeString img
+   assertLengthIs getRenderedTilesDiagnostic 1

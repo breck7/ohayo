@@ -1,0 +1,10 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test tileContextMenu
+ createNewBlankProgramCommand
+  appendTileCommand data.inline
+   executeStumpNodeCommandByStumpNodeStringCommand
+    withParagraph
+     stumpOnContextMenuCommand
+    withParagraph
+     dataInlineNode
+    assertStringIncludes getStumpNodeString Export data to csv file

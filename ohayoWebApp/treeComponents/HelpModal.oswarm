@@ -1,0 +1,15 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test help
+ toggleHelpCommand
+  executeStumpNodeCommandByStumpNodeIdCommand stumpOnClickCommand welcomePageButton
+   assertStringIs getMountedTab.getFileName ohayo.flow
+   assertLengthIs getFocusedPanel.getTabs 1
+   executeStumpNodeCommandByStumpNodeIdCommand stumpOnClickCommand welcomePageButton
+    assertLengthIs getFocusedPanel.getTabs 1
+test helpMore
+ createNewBlankProgramCommand
+  assertStringExcludes getWillowProgram.getPageHtml ctrl+n
+  toggleHelpCommand
+   assertStringIncludes getWillowProgram.getPageHtml ctrl+n
+   toggleShadowByIdCommand shortcutsHelp
+    executeStumpNodeCommandByStumpNodeIdCommand stumpOnClickCommand closeModalX

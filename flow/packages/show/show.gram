@@ -1,0 +1,75 @@
+tooling onsave jtree build produceFlowGrammar
+abstractShowTileNode
+ cells tileKeywordCell columnNameCell
+ catchAllCellType titleCell
+ frequency .02
+ example A dashboard for a Seattle family's water bill.
+  samples.waterBill
+   hidden
+   vega.scatter
+   tables.basic
+   show.mean Amount
+   show.median Amount
+   show.sum Amount
+   show.min Amount
+   show.max Amount
+  layout bin
+ string tileSize 140 120
+ string dummyDataSet stockPrice
+ extends abstractBodyOnlyTileNode
+ abstract
+ javascript
+  toHakonCode() {
+   return `.abstractShowTileNode
+   h3
+    text-align center
+   h6
+    text-align center
+    height 40px
+    overflow hidden`
+  }
+  getTileBodyStumpCode() {
+   const columnName = this.getWord(1)
+   if (!columnName) return `No data for ${this.getFirstWord()}`
+   const col = this.getParentOrDummyTable().getTableColumnByName(columnName)
+   if (!col) return ""
+   const reductionName = this.getWord(0).split(".")[1]
+   const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
+   return `h6 ${title}
+  h3 ${this.toDisplayString(col.getReductions()[reductionName], columnName)}`
+  }
+showRowCountNode
+ catchAllCellType titleCell
+ description Show the total number of rows
+ frequency .02
+ string tileSize 140 120
+ string dummyDataSet stockPrice
+ cells tileKeywordCell
+ extends abstractShowTileNode
+ crux show.rowCount
+ javascript
+  getTileBodyStumpCode() {
+   const title = this.getWordsFrom(1).join(" ") || "Total rows"
+   return `h6 ${title}
+  h3 ${this.getParentOrDummyTable().getRowCount()}`
+  }
+showMedianNode
+ description Show the median value of a column
+ extends abstractShowTileNode
+ crux show.median
+showSumNode
+ description Show the sum of a column
+ extends abstractShowTileNode
+ crux show.sum
+showMeanNode
+ description Show the mean of a column
+ extends abstractShowTileNode
+ crux show.mean
+showMinNode
+ description Show the min value of a column
+ extends abstractShowTileNode
+ crux show.min
+showMaxNode
+ description Show the max value of a column
+ extends abstractShowTileNode
+ crux show.max

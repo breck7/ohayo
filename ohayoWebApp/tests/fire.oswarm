@@ -1,0 +1,29 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test compile
+ createNewBlankProgramCommand hello-world.fire
+  assertStringIncludes getWillowProgram.getPageHtml hello-world
+  pasteCommand
+   withParagraph
+    set$ greeting Hello world
+    log$ greeting
+   assertLengthIs getMountedTilesProgram.getTiles 2
+   saveCompiledCommand
+test compile2
+ createNewBlankProgramCommand hello-world.fire
+  assertStringExcludes getWillowProgram.getPageHtml Ohayo!
+  pasteCommand
+   withParagraph
+    tiles.picker
+     pin 8 4
+   assertLengthIs getRenderedTilesDiagnostic 1
+   assertStringIncludes getWillowProgram.getPageHtml hello-world
+   assertStringExcludes getStumpNodeStringWithoutCssAndSvg errors
+   assertStringExcludes getWillowProgram.getPageHtml Ohayo!
+   cellCheckProgramCommand
+    assertStringIncludes getStumpNodeStringWithoutCssAndSvg errors
+test executeProgramCommand
+ createNewBlankProgramCommand hello-world.fire
+  clearTabMessagesCommand
+   executeProgramCommand
+    createNewSourceCodeVisualizationProgramCommand
+     assertStringIs getMountedTab.getFileName hello-world.fire-source-code-vis.flow

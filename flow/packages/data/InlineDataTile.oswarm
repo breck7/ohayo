@@ -1,0 +1,5 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test
+ createNewBlankProgramCommand
+  appendTileCommand data.inline
+   assertStringIncludes getStumpNodeStringWithoutCssAndSvg Enter data in any format here

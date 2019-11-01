@@ -1,0 +1,153 @@
+tooling onsave jtree build produceFlowGrammar
+tileKeywordCell
+ highlightScope keyword
+abstractFlowTileNode
+ abstract
+ extends abstractTileTreeComponentNode
+ inScope abstractFlowTileNode hiddenNode maximizedNode abstractPagePositionNode commentNode
+ cells tileKeywordCell
+ string settingKey setting
+ string rowDisplayLimitKey rowDisplayLimit
+ string contentKey content
+ string dummyDataSetKey dummyDataSet
+ string xColumnKey xColumn
+ string yColumnKey yColumn
+ string colorColumnKey colorColumn
+ string shapeColumnKey shapeColumn
+ string sizeColumnKey sizeColumn
+ string columnPredictionHintsKey columnPredictionHints
+ string flowFileExtensionKey .flow
+ string dayKey day
+ string monthKey month
+ string yearKey year
+ javascript
+  // todo: ADD TYPINGS
+  getPipishInput() {
+   // todo: add placeholder property?
+   return this.getSettingsStruct().content || this.getParentOrDummyTable().getFirstColumnAsString() || ""
+  }
+  getDependencies() {
+   return [{ getLineModifiedTime: () => this.getParentOrDummyTable().getTableCTime() }] // todo: we removed this: this.getOutputOrInputTable().getTableCTime()...i think we had it because we want to return true to update children.
+  }
+  getRunTimeEnumOptions(cell) {
+   // todo: only works if codemirror === tab
+   try {
+    if (cell.getCellTypeId() === "columnNameCell") {
+     return this
+      .getParentOrDummyTable()
+      .getColumnNames()
+    }
+   } catch (err) {
+    console.log(err)
+   }
+  }
+  mapSettingNamesToColumnNames(settingNames) {
+   const tileStruct = this.getSettingsStruct()
+   return settingNames.map(name => tileStruct[name])
+  }
+  getOutputOrInputTable() {
+   return this._outputTable || this.getParentOrDummyTable()
+  }
+  getOutputTable() {
+   return this._outputTable
+  }
+  getParentOrDummyTable() {
+   // Returns: non-empty input table || dummy table || empty input table.
+   const parentTable = this.getParent().getOutputOrInputTable()
+   if (!parentTable.isBlankTable()) return parentTable
+   return this._getDummyTable() || parentTable
+  }
+  _getDummyTable() {
+   const name = this.getDefinition().getConstantsObject()[this.dummyDataSetKey]
+   const dataSet = DummyDataSets[name]
+   if (!this._dummyTable && dataSet) this._dummyTable = new Table(jtree.Utils.javascriptTableWithHeaderRowToObjects(dataSet))
+   return this._dummyTable
+  }
+  getRequiredTableWithHeader(headerSettingNames) {
+   const columnNames = this.mapSettingNamesToColumnNames(headerSettingNames)
+   const table = this.getParentOrDummyTable()
+   const columns = columnNames.map(name => table.getTableColumnByName(name))
+   if (columns.some(col => !col)) return []
+   return this.getRowsAsDataTableArrayWithHeader(table.getRows(), columnNames)
+  }
+  setIsDataLoaded(value) {
+   this._isDataLoaded = value
+   this.makeDirty() // todo: remove
+   return this
+  }
+  isLoaded() {
+   return super.isLoaded() && this._isDataLoaded
+  }
+  getRowsAsDataTableArrayWithHeader(rows, header) {
+   const data = rows.map(row => row.getAsArray(header))
+   data.unshift(header)
+   return data
+  }
+  async _executeChildNodes() {
+   this.setIsDataLoaded(true)
+   return super._executeChildNodes()
+  }
+  getTileQualityCheck() {
+   const definition = this.getDefinition()
+   const name = this.getFirstWord()
+   let score = 0
+   return {
+    name: name,
+    namespace: name.split(".")[0],
+    description: definition.getDescription() ? 1 : 0,
+    dummyDataSet: definition.getConstantsObject()[this.dummyDataSetKey],
+    runTimeErrors: Object.values(this.getRunTimePhaseErrors()).length,
+    examples: definition.getExamples().length,
+    edgeTests: 0,
+    speedTests: 0,
+    roadMap: 0,
+    idealStyleUXDescription: 0,
+    secPriTests: 0,
+    userType: 0
+   }
+  }
+  _getCachedSettings() {
+   if (this._cache_settingsObject) return this._cache_settingsObject
+   this._cache_settingsObject = {}
+   this.filter(child => child.doesExtend("abstractTileSettingTerminalNode") || child.doesExtend("abstractTileSettingNonTerminalNode")).forEach(setting => {
+    this._cache_settingsObject[setting.getFirstWord()] = setting.getSettingValue()
+   })
+   return this._cache_settingsObject
+  }
+  // todo: ADD TYPINGS
+  getSettingsStruct() {
+   const settingsFromCache = this._getCachedSettings()
+   // todo: this wont work anymore
+   const hintsNode = this.getDefinition().getConstantsObject()[this.columnPredictionHintsKey]
+   if (hintsNode) Object.assign(settingsFromCache, this.getParentOrDummyTable().getPredictionsForAPropertyNameToColumnNameMapGivenHintsNode(new jtree.TreeNode(hintsNode), settingsFromCache))
+   return settingsFromCache
+  }
+  toInspection() {
+   const inputTable = this.getParentOrDummyTable()
+   const outputTable = this.getOutputOrInputTable()
+   const outputColumns = outputTable.getColumnsArrayOfObjects()
+   const inputCols = inputTable.getColumnsArrayOfObjects()
+   const inputCount = inputTable.getRowCount()
+   const outputCount = outputTable.getRowCount()
+   return `${super.toInspection()}
+    div TileStruct:
+     pre
+      bern${jtree.TreeNode.nest(JSON.stringify(this.getSettingsStruct(), null, 2), 2)}
+    div Input rows: ${inputCount} Output rows: ${outputCount}
+    div Load time: ${this.getTimeToLoad()} Render time: ${this.getNewestTimeToRender()}
+    div Input Columns:
+    pre
+     bern${jtree.TreeNode.nest(new jtree.TreeNode(inputCols).toTable(), 2)}
+    div Output Columns
+    pre
+     bern${jtree.TreeNode.nest(new jtree.TreeNode(outputColumns).toTable(), 2)}
+    div Output Numeric Values:
+    pre
+     bern${jtree.TreeNode.nest(new jtree.TreeNode(outputTable.getJavascriptNativeTypedValues()).toTable(), 2)}
+    div TypeScript Interface:
+    pre
+     bern${jtree.TreeNode.nest(outputTable.toTypeScriptInterface(), 2)}
+    div Input Numeric Values:
+    pre
+     bern${jtree.TreeNode.nest(new jtree.TreeNode(inputTable.getJavascriptNativeTypedValues()).toTable(), 2)}`
+  }

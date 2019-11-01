@@ -1,0 +1,7 @@
+tooling onsave jtree build produceFlowGrammar
+amazonHistoryNode
+ description Instructions on how to get your Amazon order history.
+ string content Step 1. Go to <a target="_blank" href="https://www.amazon.com/gp/b2b/reports">https://www.amazon.com/gp/b2b/reports</a> to download your Amazon order history.<br> Step 2. Add the data here.
+ string dummyDataSet amazonPurchases
+ extends abstractInstructionsNode
+ crux amazon.history
