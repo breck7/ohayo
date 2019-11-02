@@ -15,7 +15,8 @@ DidYouMeanTileNode
     input,
     this.getRootNode()
      .getGrammarProgram()
-     .getTopNodeTypeDefinitions().map(def => def.get("crux"))
+     .getTopNodeTypeDefinitions()
+     .map(def => def.get("crux"))
    )
    if (!closestTile) {
     if (!input) return `div Your program has a blank line on line ${lineNo}.`
@@ -31,7 +32,7 @@ DidYouMeanTileNode
   span ?`
   }
   getErrors() {
-    return [new jtree.UnknownNodeTypeError(this)]
+   return [new jtree.UnknownNodeTypeError(this)]
   }
   getTileHeaderBern() {
    return ""

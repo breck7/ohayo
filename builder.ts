@@ -8,7 +8,7 @@ const { jtree } = require("jtree")
 
 const rootDir = __dirname + "/"
 
-const { AbstractBuilder } = require("jtree/products/abstractBuilder.node.js")
+const { AbstractBuilder } = require("jtree/products/AbstractBuilder.node.js")
 const { TypeScriptRewriter } = require("jtree/products/TypeScriptRewriter.js")
 const project = require("jtree/langs/project/project.node.js")
 const { Disk } = require("jtree/products/Disk.node.js")

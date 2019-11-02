@@ -28,7 +28,9 @@ PickerTileNode
    return { rows: this.getPredictionsForThisTile().map(obj => obj.toObject()) }
   }
   getPredictionsForThisTile() {
-   const allChoices = this.getRootNode().getGrammarProgram().getTopNodeTypeDefinitions()
+   const allChoices = this.getRootNode()
+    .getGrammarProgram()
+    .getTopNodeTypeDefinitions()
    const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
    return filteredChoices.length ? filteredChoices : allChoices
   }

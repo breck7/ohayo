@@ -33,9 +33,10 @@ abstractTileTreeComponentNode
    if (el) el.scrollIntoView()
   }
   async loadRequirements() {
-   const loadingMap = this.getTab().getRootNode().getDefinitionLoadingPromiseMap()
-   if (!loadingMap.has(this.constructor))
-    loadingMap.set(this.constructor, this._makeLoadRequirementsPromise(loadingMap))
+   const loadingMap = this.getTab()
+    .getRootNode()
+    .getDefinitionLoadingPromiseMap()
+   if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeLoadRequirementsPromise(loadingMap))
    await loadingMap.get(this.constructor)
   }
   async _makeLoadRequirementsPromise(loadingMap) {
@@ -64,13 +65,15 @@ abstractTileTreeComponentNode
     )
   }
   _hasRequirements() {
-    const def = this.getDefinition()
-    const constants = def.getConstantsObject()
-    return constants[TilesConstants.tileScript]
+   const def = this.getDefinition()
+   const constants = def.getConstantsObject()
+   return constants[TilesConstants.tileScript]
   }
   _areRequirementsLoaded() {
-    const loadingMap = this.getTab().getRootNode().getDefinitionLoadingPromiseMap()
-    return !this._hasRequirements() || loadingMap.get(this.constructor) === true
+   const loadingMap = this.getTab()
+    .getRootNode()
+    .getDefinitionLoadingPromiseMap()
+   return !this._hasRequirements() || loadingMap.get(this.constructor) === true
   }
   isLoaded() {
    return this._areRequirementsLoaded()
@@ -80,8 +83,8 @@ abstractTileTreeComponentNode
    return errors.length ? ` <span style="color: ${this.getTheme().errorColor};">${errors.join(" ")}</span>` : "" //todo: cleanup
   }
   toStumpErrorStateCode(err) {
-    const errorMessage = `Error on tile '${this.getFirstWord()}'. ${err}`
-    return `div
+   const errorMessage = `Error on tile '${this.getFirstWord()}'. ${err}`
+   return `div
    class ${this.getCssClassNames().join(" ")}
    id ${this.getTreeComponentId()}
    stumpOnContextMenuCommand openTileContextMenuCommand
@@ -134,8 +137,7 @@ abstractTileTreeComponentNode
   }
   getCssClassNames() {
    const classNames = super.getCssClassNames()
-   if (this._isMaximized())
-    classNames.push("TileMaximized")
+   if (this._isMaximized()) classNames.push("TileMaximized")
    return classNames
   }
   toStumpCode() {

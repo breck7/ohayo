@@ -34,7 +34,8 @@
     "recursive-readdir-sync": "^1.0.6",
     "superagent": "^5.0.5",
     "tinycolor2": "^1.4.1",
-    "ts-node": "^8.4.1"
+    "ts-node": "^8.4.1",
+    "typescript": "^3.6.4"
   },
   "devDependencies": {
     "@types/superagent": "^3.8.7",
