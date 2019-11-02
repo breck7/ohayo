@@ -79,13 +79,12 @@ class OhayoServerApp {
 
   _initPackageFolder(folder) {
     this._verbose(`Loading folder ${folder}...`)
-    glob
-      .sync(folder + OhayoServerAppConstants.routeFileGlob) // todo: don't recurse.
-      .flat()
-      .forEach(filePath => {
-        this._verbose(`Loading package ${filePath}...`)
-        require(filePath)(this.app)
-      })
+    // todo: don't recurse.
+    jtree.Utils.flatten(glob.sync(folder + OhayoServerAppConstants.routeFileGlob))
+    .forEach(filePath => {
+      this._verbose(`Loading package ${filePath}...`)
+      require(filePath)(this.app)
+    })
   }
 
   _getUrlBase() {

@@ -121,8 +121,8 @@ ${flowPath}flow/flow.browser.js`.split("\n")
     return projectProgram.getScriptPathsInCorrectDependencyOrder()
   }
 
-  startFabServer() {
-    new (require("./OhayoServerApp.js")).FabServer(2222, rootDir + "ignore/programs/").listenForFileChanges().start()
+  startFabServer(programFolder = rootDir) {
+    new (require("./OhayoServerApp.js")).FabServer(2222, programFolder).listenForFileChanges().start()
   }
 
   profile() {
