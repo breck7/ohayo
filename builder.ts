@@ -70,7 +70,7 @@ ${currentReleaseNotes}`
   }
 
   _getTreeScripts() {
-    return `flow/packages/challenge/Challenges.tree
+    return `flow/packages/challenge/challenges.tree
 flow/packages/templates/Templates.stamp
 ohayoWebApp/treeComponents/Ohayo.drums`.split("\n")
   }
