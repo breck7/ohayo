@@ -132,11 +132,6 @@ ${flowPath}flow/flow.browser.js`.split("\n")
     // node --prof-process isolate-0x102801600-v8.log > processed-v8.log
   }
 
-  cover() {
-    // todo: does this still work?
-    exec("tap --cov --coverage-report=lcov ${rootDir}builder.js test")
-  }
-
   produceOSwarmGrammar() {
     return this._buildGrammar(
       [__dirname + "/node_modules/jtree/langs/swarm/swarm.grammar", __dirname + "/testing/oswarm.gram"],
