@@ -1,3 +1,8 @@
+14.0.2 2019-11-2
+----------------
+- Fix: deep link fixes and tests
+- Fix: hn fix
+
 14.0.1 2019-11-2
 ----------------
 - Fix: you can now use server side storage not on local host

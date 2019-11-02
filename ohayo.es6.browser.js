@@ -16333,7 +16333,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "44.0.1"
+TreeNode.getVersion = () => "44.0.3"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -23771,7 +23771,11 @@ class AbstractWillowProgram extends stumpNode {
     return this.location.port ? ":" + this.location.port : ""
   }
   queryObjectToQueryString(obj) {
-    return ""
+    const params = new URLSearchParams()
+    for (const [key, value] of Object.entries(obj)) {
+      params.set(key, String(value))
+    }
+    return params.toString()
   }
   toPrettyDeepLink(treeCode, queryObject) {
     // todo: move things to a constant.
@@ -24114,9 +24118,6 @@ class WillowBrowserProgram extends AbstractWillowProgram {
       stumpNodes.push(that.getStumpNodeFromElement(this))
     })
     return stumpNodes
-  }
-  queryObjectToQueryString(obj) {
-    return jQuery.param(obj)
   }
   addSuidsToHtmlHeadAndBodyShadows() {
     jQuery(WillowConstants.tags.html).attr(WillowConstants.uidAttribute, this.getHtmlStumpNode()._getUid())
@@ -24995,8 +24996,8 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "treenotation.3d": treenotation3dNode,
           "disk.browse": diskBrowseNode,
           "disk.read": diskReadNode,
-          "hackernews.submissions": hackernewsSubmissionsNode,
           "hackernews.top": hackernewsTopNode,
+          "hackernews.submissions": hackernewsSubmissionsNode,
           "web.get": webGetNode,
           "web.post": webPostNode,
           "acs.cases2019": acsCases2019Node,
@@ -25624,8 +25625,8 @@ span ?`
           "treenotation.3d": treenotation3dNode,
           "disk.browse": diskBrowseNode,
           "disk.read": diskReadNode,
-          "hackernews.submissions": hackernewsSubmissionsNode,
           "hackernews.top": hackernewsTopNode,
+          "hackernews.submissions": hackernewsSubmissionsNode,
           "web.get": webGetNode,
           "web.post": webPostNode,
           "acs.cases2019": acsCases2019Node,
@@ -26039,7 +26040,7 @@ ${options}`
       return `Try a challenge:`
     }
     getGalleryNodes() {
-      return typeof ChallengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(ChallengesTree)
+      return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
     }
     getSnippetTemplate(id) {
       return `challenge.play ${id}`
@@ -26147,7 +26148,7 @@ ${options}`
     }
     _getChallengeNode(challengeId) {
       const challenges =
-        typeof ChallengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(ChallengesTree)
+        typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
       return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
     }
     getTileBodyStumpCode() {
@@ -28020,27 +28021,6 @@ ${rows
 
   class abstractHackernewsNode extends abstractUrlNode {}
 
-  class hackernewsSubmissionsNode extends abstractHackernewsNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get quantityCell() {
-      return parseInt(this.getWord(1))
-    }
-    get hackerNewsUserNameCell() {
-      return this.getWordsFrom(2)
-    }
-    _getFirstUrls() {
-      return this.getWordsFrom(2).map(username => `https://hacker-news.firebaseio.com/v0/user/${username}.json?print=pretty`)
-    }
-    _getLimit() {
-      return parseInt(this.getWord(1) || 10)
-    }
-    _parseNextUrls(response) {
-      return response.asJson.submitted.map(id => `https://hacker-news.firebaseio.com/v0/item/${id}.json?print=pretty`)
-    }
-  }
-
   class hackernewsTopNode extends abstractHackernewsNode {
     get tileKeywordCell() {
       return this.getWord(0)
@@ -28073,6 +28053,27 @@ ${rows
     }
     _getFirstUrls() {
       return ["https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty"]
+    }
+  }
+
+  class hackernewsSubmissionsNode extends hackernewsTopNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get quantityCell() {
+      return parseInt(this.getWord(1))
+    }
+    get hackerNewsUserNameCell() {
+      return this.getWordsFrom(2)
+    }
+    _getFirstUrls() {
+      return this.getWordsFrom(2).map(username => `https://hacker-news.firebaseio.com/v0/user/${username}.json?print=pretty`)
+    }
+    _getLimit() {
+      return parseInt(this.getWord(1) || 10)
+    }
+    _parseNextUrls(response) {
+      return response.asJson.submitted.map(id => `https://hacker-news.firebaseio.com/v0/item/${id}.json?print=pretty`)
     }
   }
 
@@ -29365,8 +29366,8 @@ bern${jtree.TreeNode.nest(text, 2)}`
           "treenotation.3d": treenotation3dNode,
           "disk.browse": diskBrowseNode,
           "disk.read": diskReadNode,
-          "hackernews.submissions": hackernewsSubmissionsNode,
           "hackernews.top": hackernewsTopNode,
+          "hackernews.submissions": hackernewsSubmissionsNode,
           "web.get": webGetNode,
           "web.post": webPostNode,
           "acs.cases2019": acsCases2019Node,
@@ -29550,6 +29551,7 @@ comparisonCell
  enum < > <= >= = !=
  highlightScope constant
 hackerNewsUserNameCell
+ highlightScope string
 htmlTextTagCell
  enum div pre p h1 h2 h3 h4 h5 h6
 htmlCell
@@ -30348,7 +30350,7 @@ challengeListNode
  crux challenge.list
  javascript
   getGalleryNodes() {
-   return typeof ChallengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(ChallengesTree)
+   return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
   }
   getSnippetTemplate(id) {
    return \`challenge.play \${id}\`
@@ -30450,7 +30452,7 @@ challengePlayNode
    }
   }
   _getChallengeNode(challengeId) {
-   const challenges = typeof ChallengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(ChallengesTree)
+   const challenges = typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
    return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
   }
   getTileBodyStumpCode() {
@@ -32178,34 +32180,6 @@ abstractHackernewsNode
  tags internetConnectionRequired
  extends abstractUrlNode
  abstract
-hackernewsSubmissionsNode
- description Get a user's comments and submissions
- cells tileKeywordCell quantityCell
- catchAllCellType hackerNewsUserNameCell
- example View a users comment and story submissions
-  hackernews.submissions 100 breck
-   tables.basic
-    filter.where type = story
-     vega.scatter Stories
-      xColumn time
-      yColumn score
-    filter.where type = comment
-     vega.scatter Comments
-      xColumn time
-      yColumn score
-  layout tree
- javascript
-  _getFirstUrls() {
-   return this.getWordsFrom(2).map(username => \`https://hacker-news.firebaseio.com/v0/user/\${username}.json?print=pretty\`)
-  }
-  _getLimit() {
-   return parseInt(this.getWord(1) || 10)
-  }
-  _parseNextUrls(response) {
-   return response.asJson.submitted.map(id => \`https://hacker-news.firebaseio.com/v0/item/\${id}.json?print=pretty\`)
-  }
- extends abstractHackernewsNode
- crux hackernews.submissions
 hackernewsTopNode
  cells tileKeywordCell quantityCell
  description Get the top stories on hackernews
@@ -32246,6 +32220,34 @@ hackernewsTopNode
   }
  extends abstractHackernewsNode
  crux hackernews.top
+hackernewsSubmissionsNode
+ description Get a user's comments and submissions
+ cells tileKeywordCell quantityCell
+ catchAllCellType hackerNewsUserNameCell
+ example View a users comment and story submissions
+  hackernews.submissions 100 breck
+   tables.basic
+    filter.where type = story
+     vega.scatter Stories
+      xColumn time
+      yColumn score
+    filter.where type = comment
+     vega.scatter Comments
+      xColumn time
+      yColumn score
+  layout tree
+ javascript
+  _getFirstUrls() {
+   return this.getWordsFrom(2).map(username => \`https://hacker-news.firebaseio.com/v0/user/\${username}.json?print=pretty\`)
+  }
+  _getLimit() {
+   return parseInt(this.getWord(1) || 10)
+  }
+  _parseNextUrls(response) {
+   return response.asJson.submitted.map(id => \`https://hacker-news.firebaseio.com/v0/item/\${id}.json?print=pretty\`)
+  }
+ extends hackernewsTopNode
+ crux hackernews.submissions
 webGetNode
  description Get a URL and parse the fetched data.
  example Fetch a TSV from the web and show results
@@ -33800,8 +33802,8 @@ abstractRandomTileNode
         diskBrowseNode: diskBrowseNode,
         diskReadNode: diskReadNode,
         abstractHackernewsNode: abstractHackernewsNode,
-        hackernewsSubmissionsNode: hackernewsSubmissionsNode,
         hackernewsTopNode: hackernewsTopNode,
+        hackernewsSubmissionsNode: hackernewsSubmissionsNode,
         webGetNode: webGetNode,
         webPostNode: webPostNode,
         abstractFixedDatasetFromUrlNode: abstractFixedDatasetFromUrlNode,
@@ -34215,7 +34217,7 @@ abstractRandomTileNode
 }
 
 "use strict";
-window.ChallengesTree = `challenge
+window.challengesTree = `challenge
  id 1
  question How many U.S. Presidents were born in California?
  answer 2
@@ -38144,6 +38146,7 @@ OhayoConstants.DropDownMenuSubstring = "DropDownMenu"
 
 OhayoConstants.productName = "ohayo"
 OhayoConstants.githubLink = "https://github.com/treenotation/ohayo"
+OhayoConstants.subredditLink = "https://www.reddit.com/r/ohayocomputer"
 OhayoConstants.slogan = "a fast and free data science studio"
 
 OhayoConstants.fileExtensions = {}
@@ -38354,7 +38357,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
-    const uri = new URLSearchParams(deepLink)
+    const uri = new URLSearchParams(new URL(deepLink).search)
     const fileName = decodeURIComponent(uri.get(OhayoConstants.deepLinks.filename))
     let sourceCode = decodeURIComponent(uri.get(OhayoConstants.deepLinks.data))
     if (uri.get(OhayoConstants.deepLinks.edgeSymbol)) sourceCode = sourceCode.replace(new RegExp(uri.get(OhayoConstants.deepLinks.edgeSymbol), "g"), " ")
@@ -38366,7 +38369,7 @@ div - ${errors.join("\ndiv - ")}`
     await this.app._createAndOpen(sourceCode, fileName)
     // Now remove the current page from history.
     // todo: cleanup by moving to willow
-    window.history.replaceState({}, document.title, location.pathname)
+    if (typeof window !== "undefined") window.history.replaceState({}, document.title, location.pathname)
   }
 
   async openCreateNewProgramFromUrlDialogCommand() {
@@ -39244,6 +39247,9 @@ p
  span ${OhayoConstants.productName} is on
  a GitHub
   href ${OhayoConstants.githubLink}
+ span and
+ a Reddit
+  href ${OhayoConstants.subredditLink}
 p Current working folder: ${app.getDefaultDisk().getPathBase()}
 p Version ${app.getVersion()} ${app.constructor.name}
 p
@@ -40002,7 +40008,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "14.0.1"
+const Version = "14.0.2"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
