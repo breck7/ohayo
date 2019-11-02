@@ -28034,13 +28034,12 @@ ${rows
       const firstUrls = this._getFirstUrls()
       if (!firstUrls.length || this.isNodeJs()) return []
       let allResults = []
-      const app = this.getWebApp()
+      const fetchMethod = async url =>
+        this.getWebApp().isUrlGetProxyAvailable() ? willowProgram.httpGetUrlFromProxyCache(url) : willowProgram.httpGetUrlFromCache(url)
       for (let mainUrl of firstUrls) {
-        let response
-        if (app.isUrlGetProxyAvailable()) response = await willowProgram.httpGetUrlFromProxyCache(mainUrl)
-        else response = await willowProgram.httpGetUrlFromCache(mainUrl)
+        const response = await fetchMethod(mainUrl)
         const nextUrls = this._parseNextUrls(response)
-        const batchResults = await Promise.all(nextUrls.slice(0, this._getLimit()).map(url => willowProgram.httpGetUrlFromProxyCache(url)))
+        const batchResults = await Promise.all(nextUrls.slice(0, this._getLimit()).map(url => fetchMethod(url)))
         allResults = allResults.concat(batchResults)
       }
       return { rows: allResults.map(res => res.asJson) }
@@ -32198,13 +32197,11 @@ hackernewsTopNode
    const firstUrls = this._getFirstUrls()
    if (!firstUrls.length || this.isNodeJs()) return []
    let allResults = []
-   const app = this.getWebApp()
+   const fetchMethod = async url => (this.getWebApp().isUrlGetProxyAvailable() ? willowProgram.httpGetUrlFromProxyCache(url) : willowProgram.httpGetUrlFromCache(url))
    for (let mainUrl of firstUrls) {
-    let response
-    if (app.isUrlGetProxyAvailable()) response = await willowProgram.httpGetUrlFromProxyCache(mainUrl)
-    else response = await willowProgram.httpGetUrlFromCache(mainUrl)
+    const response = await fetchMethod(mainUrl)
     const nextUrls = this._parseNextUrls(response)
-    const batchResults = await Promise.all(nextUrls.slice(0, this._getLimit()).map(url => willowProgram.httpGetUrlFromProxyCache(url)))
+    const batchResults = await Promise.all(nextUrls.slice(0, this._getLimit()).map(url => fetchMethod(url)))
     allResults = allResults.concat(batchResults)
    }
    return { rows: allResults.map(res => res.asJson) }
