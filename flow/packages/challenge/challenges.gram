@@ -25,7 +25,7 @@ challengePlayNode
    }
   }
   _getChallengeNode(challengeId) {
-   const challenges = typeof ChallengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(ChallengesTree)
+   const challenges = typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
    return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
   }
   getTileBodyStumpCode() {
@@ -64,7 +64,7 @@ challengeListNode
  crux challenge.list
  javascript
   getGalleryNodes() {
-   return typeof ChallengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(ChallengesTree)
+   return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
   }
   getSnippetTemplate(id) {
    return `challenge.play ${id}`
