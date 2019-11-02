@@ -193,7 +193,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
-    const uri = new URLSearchParams(deepLink)
+    const uri = new URLSearchParams(new URL(deepLink).search)
     const fileName = decodeURIComponent(uri.get(OhayoConstants.deepLinks.filename))
     let sourceCode = decodeURIComponent(uri.get(OhayoConstants.deepLinks.data))
     if (uri.get(OhayoConstants.deepLinks.edgeSymbol)) sourceCode = sourceCode.replace(new RegExp(uri.get(OhayoConstants.deepLinks.edgeSymbol), "g"), " ")
@@ -205,7 +205,7 @@ div - ${errors.join("\ndiv - ")}`
     await this.app._createAndOpen(sourceCode, fileName)
     // Now remove the current page from history.
     // todo: cleanup by moving to willow
-    window.history.replaceState({}, document.title, location.pathname)
+    if (typeof window !== "undefined") window.history.replaceState({}, document.title, location.pathname)
   }
 
   async openCreateNewProgramFromUrlDialogCommand() {
