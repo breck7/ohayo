@@ -51,8 +51,13 @@ hackernewsTopNode
    const firstUrls = this._getFirstUrls()
    if (!firstUrls.length || this.isNodeJs()) return []
    let allResults = []
+   const app = this.getWebApp()
    for (let mainUrl of firstUrls) {
-    const response = await willowProgram.httpGetUrlFromProxyCache(mainUrl)
+    let response
+    if (app.isUrlGetProxyAvailable())
+      response = await willowProgram.httpGetUrlFromProxyCache(mainUrl)
+    else
+      response = await willowProgram.httpGetUrlFromCache(mainUrl)
     const nextUrls = this._parseNextUrls(response)
     const batchResults = await Promise.all(nextUrls.slice(0, this._getLimit()).map(url => willowProgram.httpGetUrlFromProxyCache(url)))
     allResults = allResults.concat(batchResults)

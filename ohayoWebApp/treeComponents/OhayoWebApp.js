@@ -322,6 +322,14 @@ ${OhayoConstants.panel} 400
  color ${theme.errorColor}`
   }
 
+  isConnectedToOhayoServerApp() {
+    return typeof isConnectedToOhayoServerApp !== "undefined"
+  }
+
+  isUrlGetProxyAvailable() {
+    return this.isConnectedToOhayoServerApp()
+  }
+
   goRed(err) {
     const tab = this.getMountedTab()
     const message = err ? err.reason || err : ""
@@ -695,7 +703,7 @@ ${OhayoConstants.panel} 400
     const localDisk = new LocalStorageDisk(this)
     this._defaultDisk = localDisk
     this._disks[localDisk.getDisplayName()] = localDisk
-    const addServerDisk = this.isNodeJs() ? false : this.getWillowProgram().isDesktopVersion() && typeof isOhayoDesktop !== "undefined"
+    const addServerDisk = this.isNodeJs() ? false : this.isConnectedToOhayoServerApp()
     let serverDisk
     if (addServerDisk) {
       serverDisk = new ServerStorageDisk(this)

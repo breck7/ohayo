@@ -1,3 +1,8 @@
+14.0.1 2019-11-2
+----------------
+- Fix: you can now use server side storage not on local host
+- Infra: updated jtree
+
 14.0.0 2019-11-01
 -----------------
 - New: Flow now works on the command line too

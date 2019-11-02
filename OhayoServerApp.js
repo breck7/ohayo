@@ -32,7 +32,7 @@ class OhayoServerApp {
   _addCurrentWorkingDirectory(content, cwd) {
     return content.replace(
       `const DefaultServerCurrentWorkingDirectory = "/"`,
-      `const isOhayoDesktop = true;\nconst DefaultServerCurrentWorkingDirectory = "${cwd}"`
+      `const isConnectedToOhayoServerApp = true;\nconst DefaultServerCurrentWorkingDirectory = "${cwd}"`
     )
   }
 
@@ -80,8 +80,7 @@ class OhayoServerApp {
   _initPackageFolder(folder) {
     this._verbose(`Loading folder ${folder}...`)
     // todo: don't recurse.
-    jtree.Utils.flatten(glob.sync(folder + OhayoServerAppConstants.routeFileGlob))
-    .forEach(filePath => {
+    jtree.Utils.flatten(glob.sync(folder + OhayoServerAppConstants.routeFileGlob)).forEach(filePath => {
       this._verbose(`Loading package ${filePath}...`)
       require(filePath)(this.app)
     })

@@ -16333,7 +16333,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "44.0.0"
+TreeNode.getVersion = () => "44.0.1"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -23874,7 +23874,6 @@ class AbstractWillowProgram extends stumpNode {
     return cacheHit
   }
   async httpGetUrlFromProxyCache(url) {
-    if (!this.isDesktopVersion()) return this.httpGetUrlFromCache(url)
     const queryStringMap = {}
     queryStringMap.url = url
     queryStringMap.cacheOnServer = "true"
@@ -23937,10 +23936,6 @@ class AbstractWillowProgram extends stumpNode {
   }
   async promptThen(message, value) {
     return value
-  }
-  // todo: refactor. should be able to override this.
-  isDesktopVersion() {
-    return this._getHostname() === "localhost"
   }
   setLoadedDroppedFileHandler(callback, helpText = "") {}
   getWindowSize() {
@@ -28059,8 +28054,11 @@ ${rows
       const firstUrls = this._getFirstUrls()
       if (!firstUrls.length || this.isNodeJs()) return []
       let allResults = []
+      const app = this.getWebApp()
       for (let mainUrl of firstUrls) {
-        const response = await willowProgram.httpGetUrlFromProxyCache(mainUrl)
+        let response
+        if (app.isUrlGetProxyAvailable()) response = await willowProgram.httpGetUrlFromProxyCache(mainUrl)
+        else response = await willowProgram.httpGetUrlFromCache(mainUrl)
         const nextUrls = this._parseNextUrls(response)
         const batchResults = await Promise.all(nextUrls.slice(0, this._getLimit()).map(url => willowProgram.httpGetUrlFromProxyCache(url)))
         allResults = allResults.concat(batchResults)
@@ -32226,8 +32224,11 @@ hackernewsTopNode
    const firstUrls = this._getFirstUrls()
    if (!firstUrls.length || this.isNodeJs()) return []
    let allResults = []
+   const app = this.getWebApp()
    for (let mainUrl of firstUrls) {
-    const response = await willowProgram.httpGetUrlFromProxyCache(mainUrl)
+    let response
+    if (app.isUrlGetProxyAvailable()) response = await willowProgram.httpGetUrlFromProxyCache(mainUrl)
+    else response = await willowProgram.httpGetUrlFromCache(mainUrl)
     const nextUrls = this._parseNextUrls(response)
     const batchResults = await Promise.all(nextUrls.slice(0, this._getLimit()).map(url => willowProgram.httpGetUrlFromProxyCache(url)))
     allResults = allResults.concat(batchResults)
@@ -40001,7 +40002,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "14.0.0"
+const Version = "14.0.1"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
@@ -40922,6 +40923,14 @@ ${OhayoConstants.panel} 400
  color ${theme.errorColor}`
   }
 
+  isConnectedToOhayoServerApp() {
+    return typeof isConnectedToOhayoServerApp !== "undefined"
+  }
+
+  isUrlGetProxyAvailable() {
+    return this.isConnectedToOhayoServerApp()
+  }
+
   goRed(err) {
     const tab = this.getMountedTab()
     const message = err ? err.reason || err : ""
@@ -41295,7 +41304,7 @@ ${OhayoConstants.panel} 400
     const localDisk = new LocalStorageDisk(this)
     this._defaultDisk = localDisk
     this._disks[localDisk.getDisplayName()] = localDisk
-    const addServerDisk = this.isNodeJs() ? false : this.getWillowProgram().isDesktopVersion() && typeof isOhayoDesktop !== "undefined"
+    const addServerDisk = this.isNodeJs() ? false : this.isConnectedToOhayoServerApp()
     let serverDisk
     if (addServerDisk) {
       serverDisk = new ServerStorageDisk(this)
