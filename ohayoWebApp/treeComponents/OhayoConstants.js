@@ -18,6 +18,7 @@ OhayoConstants.DropDownMenuSubstring = "DropDownMenu"
 
 OhayoConstants.productName = "ohayo"
 OhayoConstants.githubLink = "https://github.com/treenotation/ohayo"
+OhayoConstants.subredditLink = "https://www.reddit.com/r/ohayocomputer"
 OhayoConstants.slogan = "a fast and free data science studio"
 
 OhayoConstants.fileExtensions = {}

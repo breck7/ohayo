@@ -12,7 +12,7 @@ This project includes a data science web application AND a new dataflow programm
 
 ## BETA!
 
-Ohayo is still beta, and we are still iterating quickly. We encourage you to use it and send feedback, but it may not be stable until 2020.
+Ohayo is still beta, and we are still iterating quickly. We encourage you to post feedback here or on the [Ohayo subreddit](https://www.reddit.com/r/ohayocomputer), but it may not be stable until 2020.
 
 ## Unbeatable Features
 
@@ -67,7 +67,7 @@ Ohayo is still beta, and we are still iterating quickly. We encourage you to use
 
 ## How to Give Feedback
 
-Open an issue, post to the [Tree Notation subreddit](https://www.reddit.com/r/treenotation/) or email ohayo@treenotation.org.
+Open an issue here, post to the [Ohayo subreddit](https://www.reddit.com/r/ohayocomputer), the [Tree Notation subreddit](https://www.reddit.com/r/treenotation/) or email ohayo@treenotation.org.
 
 ## Copyright & License
 

@@ -89,6 +89,9 @@ p
  span ${OhayoConstants.productName} is on
  a GitHub
   href ${OhayoConstants.githubLink}
+ span and
+ a Reddit
+  href ${OhayoConstants.subredditLink}
 p Current working folder: ${app.getDefaultDisk().getPathBase()}
 p Version ${app.getVersion()} ${app.constructor.name}
 p
