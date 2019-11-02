@@ -1,5 +1,7 @@
 # Ohayo
 
+[![Build Status](https://travis-ci.org/treenotation/ohayo.svg?branch=master)](https://travis-ci.org/treenotation/ohayo)
+
 Ohayo is a fast and free data science studio. My goal is to enable people to do data science at the speed of thought.
 
 You can try ohayo at [https://ohayo.computer](https://ohayo.computer), [download Ohayo on GitHub](https://github.com/treenotation/ohayo), try Ohayo [hosted on GitHub](https://treenotation.github.io/ohayo/), or install it using `npm install ohayo`.
