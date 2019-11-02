@@ -2,6 +2,8 @@ language: node_js
 node_js:
   - "11.15"
   - "12.3"
+before_script:
+  - ./builder.ts produceAll
 matrix:
   include:
     - node_js: "13"
