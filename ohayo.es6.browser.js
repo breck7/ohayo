@@ -25000,7 +25000,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "hackernews.submissions": hackernewsSubmissionsNode,
           "web.get": webGetNode,
           "web.post": webPostNode,
-          "acs.cases2019": acsCases2019Node,
+          "cancer.cases": cancerCasesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "samples.telescopes": samplesTelescopesNode,
           "samples.mtcars": samplesMtcarsNode,
@@ -25560,7 +25560,7 @@ span ?`
     }
   }
 
-  class abstractFlowTileNode extends abstractTileTreeComponentNode {
+  class abstractMaiaTileNode extends abstractTileTreeComponentNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -25629,7 +25629,7 @@ span ?`
           "hackernews.submissions": hackernewsSubmissionsNode,
           "web.get": webGetNode,
           "web.post": webPostNode,
-          "acs.cases2019": acsCases2019Node,
+          "cancer.cases": cancerCasesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "samples.telescopes": samplesTelescopesNode,
           "samples.mtcars": samplesMtcarsNode,
@@ -25716,8 +25716,8 @@ span ?`
     get dayKey() {
       return `day`
     }
-    get flowFileExtensionKey() {
-      return `.flow`
+    get maiaFileExtensionKey() {
+      return `.maia`
     }
     get columnPredictionHintsKey() {
       return `columnPredictionHints`
@@ -25883,7 +25883,7 @@ span ?`
     }
   }
 
-  class abstractChartNode extends abstractFlowTileNode {
+  class abstractChartNode extends abstractMaiaTileNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -26005,7 +26005,7 @@ ${options}`
           const id = node
             .getWord(1)
             .replace("templates/", "")
-            .replace(this.flowFileExtensionKey, "")
+            .replace(this.maiaFileExtensionKey, "")
           return {
             id: id,
             description: node
@@ -26020,14 +26020,14 @@ ${options}`
     _getTheTemplates() {
       // todo: trim?
       return typeof TemplatesStamp === "undefined"
-        ? jtree.TreeNode.fromDisk("flow/packages/templates/Templates.stamp").trim()
+        ? jtree.TreeNode.fromDisk("maia/packages/templates/Templates.stamp").trim()
         : new jtree.TreeNode(TemplatesStamp).trim()
     }
     getProgramTemplate(id) {
-      const node = this._getTheTemplates().filter(node => node.getContent() === `templates/${id}${this.flowFileExtensionKey}`)[0]
+      const node = this._getTheTemplates().filter(node => node.getContent() === `templates/${id}${this.maiaFileExtensionKey}`)[0]
       return {
         template: node.getNode("data").childrenToString(),
-        name: id + this.flowFileExtensionKey
+        name: id + this.maiaFileExtensionKey
       }
     }
   }
@@ -26040,7 +26040,7 @@ ${options}`
       return `Try a challenge:`
     }
     getGalleryNodes() {
-      return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
+      return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
     }
     getSnippetTemplate(id) {
       return `challenge.play ${id}`
@@ -26056,8 +26056,8 @@ ${options}`
     }
     getGalleryNodes() {
       // todo: cleanup.
-      const flow = this.getWebApp().getFlowGrammarAsTree()
-      const hits = flow.getNodesByRegex(/^samples/).map(node => {
+      const maia = this.getWebApp().getMaiaGrammarAsTree()
+      const hits = maia.getNodesByRegex(/^samples/).map(node => {
         return {
           id: node.get("crux"),
           description: node.get("description")
@@ -26080,7 +26080,7 @@ ${options}`
     getGalleryNodes() {
       // todo: cleanup this line.
       const node = this.getWebApp()
-        .getFlowGrammarAsTree()
+        .getMaiaGrammarAsTree()
         .getNodesByRegex(/^vegaDataSetCell/)[0]
       return new jtree.TreeNode(
         node
@@ -26108,7 +26108,7 @@ ${options}`
     getGalleryNodes() {
       // todo: cleanup this line.
       const node = this.getWebApp()
-        .getFlowGrammarAsTree()
+        .getMaiaGrammarAsTree()
         .getNodesByRegex(/^vegaExampleNameCell/)[0]
       return new jtree.TreeNode(
         node
@@ -26143,12 +26143,12 @@ ${options}`
       const challengeNode = this._getChallengeNode(parseInt(id))
       return {
         template: challengeNode.getNode("solution").childrenToString(),
-        name: "challenge-" + id + "-solution.flow"
+        name: "challenge-" + id + "-solution.maia"
       }
     }
     _getChallengeNode(challengeId) {
       const challenges =
-        typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
+        typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
       return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
     }
     getTileBodyStumpCode() {
@@ -26183,10 +26183,10 @@ div
 
   class dtjsBasicNode extends abstractBodyOnlyTileNode {
     get tileScript() {
-      return `flow/packages/dtjs/datatables.min.js`
+      return `maia/packages/dtjs/datatables.min.js`
     }
     get tileCssScript() {
-      return `flow/packages/dtjs/datatables.min.css`
+      return `maia/packages/dtjs/datatables.min.css`
     }
     get tileSize() {
       return `1200 500`
@@ -26470,7 +26470,7 @@ h3 ${this.getParentOrDummyTable().getRowCount()}`
       return `stockPrice`
     }
     get tileScript() {
-      return `flow/packages/vega/vega.combined.min.js`
+      return `maia/packages/vega/vega.combined.min.js`
     }
     get tileSize() {
       return `800 300`
@@ -26729,7 +26729,7 @@ yColumn isString=false`
       // todo: localtesting.
       if (this.isNodeJs()) return undefined
       const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
-      const url = `flow/packages/vega/ignore/vega-lite/examples/compiled/${exampleName}.vg.json`
+      const url = `maia/packages/vega/ignore/vega-lite/examples/compiled/${exampleName}.vg.json`
       const res = await this.getWebApp()
         .getWillowProgram()
         .httpGetUrl(url)
@@ -27219,7 +27219,7 @@ a Run Tile Quality Check
       return this.getWord(1)
     }
     async fetchTableInputs() {
-      const fileExtension = this.getWord(1) || "flow"
+      const fileExtension = this.getWord(1) || "maia"
       const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
       const tree = new programClass("").getGrammarProgram().getNodeTypeFamilyTree()
       return { rows: [{ text: tree.toString() }] }
@@ -27279,7 +27279,7 @@ a Run Tile Quality Check
 
   class editorGalleryNode extends abstractChartNode {
     get dummyDataSet() {
-      return `flowPrograms`
+      return `maiaPrograms`
     }
     get tileSize() {
       return `1080 600`
@@ -27320,9 +27320,9 @@ a Run Tile Quality Check
     background ${theme.linkColor}`
     }
     _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
-      const flowProgram = new flowNode(sourceCode)
-      const dimensions = flowProgram.getTileDimensionMap(width, height)
-      const theTiles = flowProgram
+      const maiaProgram = new maiaNode(sourceCode)
+      const dimensions = maiaProgram.getTileDimensionMap(width, height)
+      const theTiles = maiaProgram
         .getTiles()
         .filter(tile => tile.isVisible())
         .map(
@@ -27352,10 +27352,10 @@ class MiniMapTile${jtree.TreeNode.nest(minis, 1)}`
 
   class handsontableBasicNode extends abstractChartNode {
     get tileScript() {
-      return `flow/packages/handsontable/handsontable.full.min.js`
+      return `maia/packages/handsontable/handsontable.full.min.js`
     }
     get tileCssScript() {
-      return `flow/packages/handsontable/handsontable.min.css`
+      return `maia/packages/handsontable/handsontable.min.css`
     }
     get tileSize() {
       return `1200 500`
@@ -27627,7 +27627,7 @@ count isString=false`
       return `wordCounts`
     }
     get tileScript() {
-      return `flow/packages/text/wordcloud2.min.js`
+      return `maia/packages/text/wordcloud2.min.js`
     }
     getTileBodyStumpCode() {
       return `div
@@ -27682,7 +27682,7 @@ style width: 100%; height: 100%;`
       return `treeProgram`
     }
     get tileScript() {
-      return `flow/packages/treenotation/vis.min.js`
+      return `maia/packages/treenotation/vis.min.js`
     }
     get tileSize() {
       return `800 500`
@@ -27811,7 +27811,7 @@ class visjs`
     }
   }
 
-  class abstractProviderNode extends abstractFlowTileNode {
+  class abstractProviderNode extends abstractMaiaTileNode {
     get tileSize() {
       return `140 60`
     }
@@ -28128,7 +28128,7 @@ textarea
 
   class abstractFixedDatasetFromUrlNode extends abstractUrlNoCellsNode {}
 
-  class abstractFixedDatasetFromFlowCollectionNode extends abstractFixedDatasetFromUrlNode {
+  class abstractFixedDatasetFromMaiaCollectionNode extends abstractFixedDatasetFromUrlNode {
     get tileSize() {
       return `300 150`
     }
@@ -28140,88 +28140,88 @@ textarea
     }
   }
 
-  class acsCases2019Node extends abstractFixedDatasetFromFlowCollectionNode {
+  class cancerCasesNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/acs/cases2019.csv`
+      return `maia/packages/cancer/cases.csv`
     }
   }
 
-  class kaggleDatasetsHeartNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class kaggleDatasetsHeartNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/kaggle/heart.csv`
+      return `maia/packages/kaggle/heart.csv`
     }
   }
 
-  class samplesTelescopesNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class samplesTelescopesNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/samples/telescopes.tsv`
+      return `maia/packages/samples/telescopes.tsv`
     }
   }
 
-  class samplesMtcarsNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class samplesMtcarsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/samples/mtcars.tsv`
+      return `maia/packages/samples/mtcars.tsv`
     }
   }
 
-  class samplesIrisNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class samplesIrisNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/samples/iris.tsv`
+      return `maia/packages/samples/iris.tsv`
     }
   }
 
-  class samplesFlights14Node extends abstractFixedDatasetFromFlowCollectionNode {
+  class samplesFlights14Node extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/samples/flights14-sample.csv`
+      return `maia/packages/samples/flights14-sample.csv`
     }
   }
 
-  class samplesSiNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class samplesSiNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get parser() {
       return `text`
     }
     get url() {
-      return `flow/packages/samples/si.tree`
+      return `maia/packages/samples/si.tree`
     }
   }
 
-  class samplesStarWarsNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class samplesStarWarsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/samples/starwars.json`
+      return `maia/packages/samples/starwars.json`
     }
   }
 
-  class samplesPopulationsNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class samplesPopulationsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/samples/populations.tsv`
+      return `maia/packages/samples/populations.tsv`
     }
   }
 
-  class samplesBabyNamesNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class samplesBabyNamesNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/samples/baby-names-sample.csv`
+      return `maia/packages/samples/baby-names-sample.csv`
     }
   }
 
-  class samplesDeclarationNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class samplesDeclarationNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/samples/declaration-of-independence.text`
+      return `maia/packages/samples/declaration-of-independence.text`
     }
   }
 
-  class samplesPresidentsNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class samplesPresidentsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/samples/presidents.csv`
+      return `maia/packages/samples/presidents.csv`
     }
   }
 
-  class ucimlrDatasetsNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class ucimlrDatasetsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
-      return `flow/packages/ucimlr/datasets.tsv`
+      return `maia/packages/ucimlr/datasets.tsv`
     }
   }
 
-  class vegaDataNode extends abstractFixedDatasetFromFlowCollectionNode {
+  class vegaDataNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
@@ -28229,13 +28229,13 @@ textarea
       return this.getWord(1)
     }
     get urlPrefix() {
-      return `flow/packages/vega/datasets/`
+      return `maia/packages/vega/datasets/`
     }
   }
 
   class redditAllNode extends abstractUrlNoCellsNode {
     get offlineDataSet() {
-      return `flow/packages/reddit/all.json`
+      return `maia/packages/reddit/all.json`
     }
     get url() {
       return `https://www.reddit.com/r/all/top/.json?sort=top`
@@ -28629,7 +28629,7 @@ input
       return this.getWord(2)
     }
     get tileScript() {
-      return `flow/packages/match/fuse.min.js`
+      return `maia/packages/match/fuse.min.js`
     }
     makeNewRows() {
       // Todo: move some of this logic to table project?
@@ -29181,7 +29181,7 @@ bern${jtree.TreeNode.nest(text, 2)}`
     }
   }
 
-  class toCsvNode extends abstractFlowTileNode {
+  class toCsvNode extends abstractMaiaTileNode {
     execute() {
       console.log(this.getParentOrDummyTable().toDelimited(","))
     }
@@ -29299,7 +29299,7 @@ bern${jtree.TreeNode.nest(text, 2)}`
     }
   }
 
-  class flowNode extends tilesNode {
+  class maiaNode extends tilesNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         DidYouMeanTileNode,
@@ -29369,7 +29369,7 @@ bern${jtree.TreeNode.nest(text, 2)}`
           "hackernews.submissions": hackernewsSubmissionsNode,
           "web.get": webGetNode,
           "web.post": webPostNode,
-          "acs.cases2019": acsCases2019Node,
+          "cancer.cases": cancerCasesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "samples.telescopes": samplesTelescopesNode,
           "samples.mtcars": samplesMtcarsNode,
@@ -29531,7 +29531,7 @@ reductionTypeCell
  enum count sum mean min max median
  highlightScope constant
 supportedTreeLanguageCell
- enum flow stump hakon fire
+ enum maia stump hakon fire
 challengeIdCell
  extends intCell
 challengeAnswerCell
@@ -29541,7 +29541,7 @@ dateColumnTypeCell
  enum day month year monthDay
  highlightScope constant
 dummyDataSetIdCell
- enum flowPrograms waterBill gapMinder markdown webPages outerSpace wordCounts treeProgram poem playerGoals patients regionalMarkets stockPrice
+ enum maiaPrograms waterBill gapMinder markdown webPages outerSpace wordCounts treeProgram poem playerGoals patients regionalMarkets stockPrice
 tileEventNameCell
  enum fetchTableInputs getTileBodyStumpCode treeComponentDidMount treeComponentDidUpdate
 scalarValueCell
@@ -30057,10 +30057,10 @@ PickerTileNode
  string tileSize 480 420
  extends abstractTileTreeComponentNode
  crux tiles.picker
-abstractFlowTileNode
+abstractMaiaTileNode
  abstract
  extends abstractTileTreeComponentNode
- inScope abstractFlowTileNode hiddenNode maximizedNode abstractPagePositionNode commentNode
+ inScope abstractMaiaTileNode hiddenNode maximizedNode abstractPagePositionNode commentNode
  cells tileKeywordCell
  string settingKey setting
  string rowDisplayLimitKey rowDisplayLimit
@@ -30072,7 +30072,7 @@ abstractFlowTileNode
  string shapeColumnKey shapeColumn
  string sizeColumnKey sizeColumn
  string columnPredictionHintsKey columnPredictionHints
- string flowFileExtensionKey .flow
+ string maiaFileExtensionKey .maia
  string dayKey day
  string monthKey month
  string yearKey year
@@ -30208,7 +30208,7 @@ abstractFlowTileNode
 abstractChartNode
  inScope rowDisplayLimitNode
  int rowDisplayLimit 10000
- extends abstractFlowTileNode
+ extends abstractMaiaTileNode
  abstract
  javascript
   getTileFooterStumpCode() {
@@ -30318,7 +30318,7 @@ templatesListNode
      const id = node
       .getWord(1)
       .replace("templates/", "")
-      .replace(this.flowFileExtensionKey, "")
+      .replace(this.maiaFileExtensionKey, "")
      return {
       id: id,
       description: node
@@ -30332,13 +30332,13 @@ templatesListNode
   }
   _getTheTemplates() {
    // todo: trim?
-   return typeof TemplatesStamp === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/templates/Templates.stamp").trim() : new jtree.TreeNode(TemplatesStamp).trim()
+   return typeof TemplatesStamp === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/templates/Templates.stamp").trim() : new jtree.TreeNode(TemplatesStamp).trim()
   }
   getProgramTemplate(id) {
-   const node = this._getTheTemplates().filter(node => node.getContent() === \`templates/\${id}\${this.flowFileExtensionKey}\`)[0]
+   const node = this._getTheTemplates().filter(node => node.getContent() === \`templates/\${id}\${this.maiaFileExtensionKey}\`)[0]
    return {
     template: node.getNode("data").childrenToString(),
-    name: id + this.flowFileExtensionKey
+    name: id + this.maiaFileExtensionKey
    }
   }
 challengeListNode
@@ -30349,7 +30349,7 @@ challengeListNode
  crux challenge.list
  javascript
   getGalleryNodes() {
-   return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
+   return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
   }
   getSnippetTemplate(id) {
    return \`challenge.play \${id}\`
@@ -30363,8 +30363,8 @@ samplesListNode
  javascript
   getGalleryNodes() {
    // todo: cleanup.
-   const flow = this.getWebApp().getFlowGrammarAsTree()
-   const hits = flow.getNodesByRegex(/^samples/).map(node => {
+   const maia = this.getWebApp().getMaiaGrammarAsTree()
+   const hits = maia.getNodesByRegex(/^samples/).map(node => {
     return {
      id: node.get("crux"),
      description: node.get("description")
@@ -30386,7 +30386,7 @@ vegaDataListNode
   getGalleryNodes() {
    // todo: cleanup this line.
    const node = this.getWebApp()
-    .getFlowGrammarAsTree()
+    .getMaiaGrammarAsTree()
     .getNodesByRegex(/^vegaDataSetCell/)[0]
    return new jtree.TreeNode(
     node
@@ -30413,7 +30413,7 @@ vegaExampleListNode
   getGalleryNodes() {
    // todo: cleanup this line.
    const node = this.getWebApp()
-    .getFlowGrammarAsTree()
+    .getMaiaGrammarAsTree()
     .getNodesByRegex(/^vegaExampleNameCell/)[0]
    return new jtree.TreeNode(
     node
@@ -30447,11 +30447,11 @@ challengePlayNode
    const challengeNode = this._getChallengeNode(parseInt(id))
    return {
     template: challengeNode.getNode("solution").childrenToString(),
-    name: "challenge-" + id + "-solution.flow"
+    name: "challenge-" + id + "-solution.maia"
    }
   }
   _getChallengeNode(challengeId) {
-   const challenges = typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("flow/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
+   const challenges = typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
    return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
   }
   getTileBodyStumpCode() {
@@ -30485,8 +30485,8 @@ challengePlayNode
 dtjsBasicNode
  description A spreadsheet-like table.
  string tileSize 1200 500
- string tileCssScript flow/packages/dtjs/datatables.min.css
- string tileScript flow/packages/dtjs/datatables.min.js
+ string tileCssScript maia/packages/dtjs/datatables.min.css
+ string tileScript maia/packages/dtjs/datatables.min.js
  extends abstractBodyOnlyTileNode
  crux dtjs.basic
  javascript
@@ -30740,7 +30740,7 @@ abstractVegaNode
  frequency .1
  catchAllCellType titleCell
  string tileSize 800 300
- string tileScript flow/packages/vega/vega.combined.min.js
+ string tileScript maia/packages/vega/vega.combined.min.js
  string dummyDataSet stockPrice
  string mark bar
  extends abstractBodyOnlyTileNode
@@ -30966,7 +30966,7 @@ vegaExampleNode
    // todo: localtesting.
    if (this.isNodeJs()) return undefined
    const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
-   const url = \`flow/packages/vega/ignore/vega-lite/examples/compiled/\${exampleName}.vg.json\`
+   const url = \`maia/packages/vega/ignore/vega-lite/examples/compiled/\${exampleName}.vg.json\`
    const res = await this.getWebApp()
     .getWillowProgram()
     .httpGetUrl(url)
@@ -31425,13 +31425,13 @@ debugGrammarTreeNode
  description Show the family tree for a grammar.
  cells tileKeywordCell supportedTreeLanguageCell
  example Show the family tree for a grammar
-  debug.grammarTree flow
+  debug.grammarTree maia
    treenotation.outline
  extends abstractChartNode
  crux debug.grammarTree
  javascript
   async fetchTableInputs() {
-   const fileExtension = this.getWord(1) || "flow"
+   const fileExtension = this.getWord(1) || "maia"
    const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
    const tree = new programClass("").getGrammarProgram().getNodeTypeFamilyTree()
    return { rows: [{ text: tree.toString() }] }
@@ -31488,7 +31488,7 @@ editorGalleryNode
   editor.files
    editor.gallery
  string tileSize 1080 600
- string dummyDataSet flowPrograms
+ string dummyDataSet maiaPrograms
  extends abstractChartNode
  crux editor.gallery
  javascript
@@ -31528,9 +31528,9 @@ editorGalleryNode
       background \${theme.linkColor}\`
   }
   _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
-   const flowProgram = new flowNode(sourceCode)
-   const dimensions = flowProgram.getTileDimensionMap(width, height)
-   const theTiles = flowProgram
+   const maiaProgram = new maiaNode(sourceCode)
+   const dimensions = maiaProgram.getTileDimensionMap(width, height)
+   const theTiles = maiaProgram
     .getTiles()
     .filter(tile => tile.isVisible())
     .map(
@@ -31559,8 +31559,8 @@ editorGalleryNode
 handsontableBasicNode
  description A spreadsheet-like table.
  string tileSize 1200 500
- string tileCssScript flow/packages/handsontable/handsontable.min.css
- string tileScript flow/packages/handsontable/handsontable.full.min.js
+ string tileCssScript maia/packages/handsontable/handsontable.min.css
+ string tileScript maia/packages/handsontable/handsontable.full.min.js
  javascript
   getTileBodyStumpCode() {
    return \`div
@@ -31841,7 +31841,7 @@ textWordcloudNode
     .getShadowElement()
    WordCloud(element, options)
   }
- string tileScript flow/packages/text/wordcloud2.min.js
+ string tileScript maia/packages/text/wordcloud2.min.js
  string dummyDataSet wordCounts
  string columnPredictionHints
   name isString=true
@@ -31855,7 +31855,7 @@ treenotation3dNode
    treenotation.3d
  inScope contentNode sizeNode cameraPositionNode
  string tileSize 800 500
- string tileScript flow/packages/treenotation/vis.min.js
+ string tileScript maia/packages/treenotation/vis.min.js
  string dummyDataSet treeProgram
  extends abstractChartNode
  crux treenotation.3d
@@ -31984,7 +31984,7 @@ treenotation3dNode
   }
 abstractProviderNode
  string tileSize 140 60
- extends abstractFlowTileNode
+ extends abstractMaiaTileNode
  abstract
  javascript
   getTileFooterStumpCode() {
@@ -32248,7 +32248,7 @@ hackernewsSubmissionsNode
 webGetNode
  description Get a URL and parse the fetched data.
  example Fetch a TSV from the web and show results
-  web.get https://raw.githubusercontent.com/treenotation/ohayo/master/flow/packages/samples/iris.tsv
+  web.get https://raw.githubusercontent.com/treenotation/ohayo/master/maia/packages/samples/iris.tsv
    tables.basic
  frequency .1
  javascript
@@ -32302,7 +32302,7 @@ abstractFixedDatasetFromUrlNode
  description A dataset that generally is fixed and will never change.
  extends abstractUrlNoCellsNode
  abstract
-abstractFixedDatasetFromFlowCollectionNode
+abstractFixedDatasetFromMaiaCollectionNode
  description A dataset that ships with Ohayo.
  string tileSize 300 150
  javascript
@@ -32314,16 +32314,16 @@ abstractFixedDatasetFromFlowCollectionNode
   }
  extends abstractFixedDatasetFromUrlNode
  abstract
-acsCases2019Node
+cancerCasesNode
  description Estimated new cancer cases in the U.S. in 2019 from https://cancerstatisticscenter.cancer.org/
- string url flow/packages/acs/cases2019.csv
- extends abstractFixedDatasetFromFlowCollectionNode
- crux acs.cases2019
+ string url maia/packages/cancer/cases.csv
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ crux cancer.cases
 kaggleDatasetsHeartNode
  tags internetConnectionRequired
  description Heart Disease dataset from https://www.kaggle.com/ronitf/heart-disease-uci
- string url flow/packages/kaggle/heart.csv
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/kaggle/heart.csv
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux kaggle.datasets.heart
 samplesTelescopesNode
  description A partial list of humankind's largest telescopes.
@@ -32331,25 +32331,25 @@ samplesTelescopesNode
  example Display list of links to telescope websites.
   samples.telescopes
    list.links Name Url
- string url flow/packages/samples/telescopes.tsv
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/samples/telescopes.tsv
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.telescopes
 samplesMtcarsNode
  description Dataset from 1974 Motor Trend US magazine.
  frequency .03
- string url flow/packages/samples/mtcars.tsv
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/samples/mtcars.tsv
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.mtcars
 samplesIrisNode
  description The famous Iris flower data set.
  frequency .15
- string url flow/packages/samples/iris.tsv
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/samples/iris.tsv
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.iris
 samplesFlights14Node
  description On-Time flights data from the Bureau of Transporation Statistics for all the flights that departed from New York City airports in 2014. The data is available only for Jan-Oct'14.
- string url flow/packages/samples/flights14-sample.csv
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/samples/flights14-sample.csv
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.flights14
 samplesSiNode
  description A description of The International System of Units (SI) aka the metric system.
@@ -32357,39 +32357,39 @@ samplesSiNode
   samples.si
    treenotation.outline
  frequency .03
- string url flow/packages/samples/si.tree
+ string url maia/packages/samples/si.tree
  string parser text
- extends abstractFixedDatasetFromFlowCollectionNode
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.si
 samplesStarWarsNode
  description All Star Wars characters. Data comes from https://swapi.co/
  frequency .03
- string url flow/packages/samples/starwars.json
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/samples/starwars.json
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.starWars
 samplesPopulationsNode
  description Countries of the world and their populations.
  frequency .15
- string url flow/packages/samples/populations.tsv
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/samples/populations.tsv
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.populations
 samplesBabyNamesNode
  description 30 rows of a much larger dataset of baby name popularity over time in the U.S.
  frequency .03
- string url flow/packages/samples/baby-names-sample.csv
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/samples/baby-names-sample.csv
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.babyNames
 samplesDeclarationNode
  description The 1776 Declaration of Independence
  frequency .02
- string url flow/packages/samples/declaration-of-independence.text
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/samples/declaration-of-independence.text
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.declaration
 samplesPresidentsNode
  description CSV of president's of United States.
  frequency .03
- string url flow/packages/samples/presidents.csv
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/samples/presidents.csv
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.presidents
 ucimlrDatasetsNode
  description A list of datasets from the UC Irvine Machine Learning Repository at http://archive.ics.uci.edu/ml/index.php.
@@ -32397,15 +32397,15 @@ ucimlrDatasetsNode
  example Display list of datasets from UCIMLR
   ucimlr.datasets
    tables.basic
- string url flow/packages/ucimlr/datasets.tsv
- extends abstractFixedDatasetFromFlowCollectionNode
+ string url maia/packages/ucimlr/datasets.tsv
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux ucimlr.datasets
 vegaDataNode
  cells tileKeywordCell vegaDataSetCell
  frequency .001
  description Fetchs a Vega sample dataset
- string urlPrefix flow/packages/vega/datasets/
- extends abstractFixedDatasetFromFlowCollectionNode
+ string urlPrefix maia/packages/vega/datasets/
+ extends abstractFixedDatasetFromMaiaCollectionNode
  crux vega.data
 redditAllNode
  tags internetConnectionRequired
@@ -32435,7 +32435,7 @@ redditAllNode
    return "json"
   }
  string url https://www.reddit.com/r/all/top/.json?sort=top
- string offlineDataSet flow/packages/reddit/all.json
+ string offlineDataSet maia/packages/reddit/all.json
  extends abstractUrlNoCellsNode
  crux reddit.all
 redditSubsNode
@@ -32797,7 +32797,7 @@ matchColumnsFuzzyNode
      rows.sortBy confidence
       rows.reverse
        tables.basic
- string tileScript flow/packages/match/fuse.min.js
+ string tileScript maia/packages/match/fuse.min.js
  extends abstractNewRowsTransformerTileNode
  crux match.columnsFuzzy
  javascript
@@ -33358,7 +33358,7 @@ samplesTinyIrisNode
   }
 toCsvNode
  description Print input table to console as csv.
- extends abstractFlowTileNode
+ extends abstractMaiaTileNode
  crux shell.csv
  javascript
   execute() {
@@ -33462,7 +33462,7 @@ tilesNode
     .reverse()[0]
    return stats
   }
-flowNode
+maiaNode
  compilesTo html
  root
  _rootNodeJsHeader
@@ -33479,8 +33479,8 @@ flowNode
  extends tilesNode
  catchAllNodeType DidYouMeanTileNode
  string wallType flex
- description Flow is a programming language for doing data science.
- inScope abstractFlowTileNode hashBangNode abstractDocumentSettingNode commentNode PickerTileNode
+ description Maia is a programming language for doing data science.
+ inScope abstractMaiaTileNode hashBangNode abstractDocumentSettingNode commentNode PickerTileNode
  javascript
   _getProgramRowCount() {
    return this.getAllRowsFromAllOutputTables().reduce((acc, curr) => acc + curr.length, 0)
@@ -33720,7 +33720,7 @@ abstractRandomTileNode
         BlankLineNode: BlankLineNode,
         DidYouMeanTileNode: DidYouMeanTileNode,
         PickerTileNode: PickerTileNode,
-        abstractFlowTileNode: abstractFlowTileNode,
+        abstractMaiaTileNode: abstractMaiaTileNode,
         abstractChartNode: abstractChartNode,
         abstractBodyOnlyTileNode: abstractBodyOnlyTileNode,
         abstractSnippetGalleryNode: abstractSnippetGalleryNode,
@@ -33804,8 +33804,8 @@ abstractRandomTileNode
         webGetNode: webGetNode,
         webPostNode: webPostNode,
         abstractFixedDatasetFromUrlNode: abstractFixedDatasetFromUrlNode,
-        abstractFixedDatasetFromFlowCollectionNode: abstractFixedDatasetFromFlowCollectionNode,
-        acsCases2019Node: acsCases2019Node,
+        abstractFixedDatasetFromMaiaCollectionNode: abstractFixedDatasetFromMaiaCollectionNode,
+        cancerCasesNode: cancerCasesNode,
         kaggleDatasetsHeartNode: kaggleDatasetsHeartNode,
         samplesTelescopesNode: samplesTelescopesNode,
         samplesMtcarsNode: samplesMtcarsNode,
@@ -33881,7 +33881,7 @@ abstractRandomTileNode
         catchAllErrorNode: catchAllErrorNode,
         hashBangNode: hashBangNode,
         tilesNode: tilesNode,
-        flowNode: flowNode,
+        maiaNode: maiaNode,
         abstractTileSettingNode: abstractTileSettingNode,
         abstractTileSettingTerminalNode: abstractTileSettingTerminalNode,
         hiddenNode: hiddenNode,
@@ -34210,7 +34210,7 @@ abstractRandomTileNode
     }
   }
 
-  window.flowNode = flowNode
+  window.maiaNode = maiaNode
 }
 
 "use strict";
@@ -34267,7 +34267,7 @@ challenge
      filter.where word = people
       show.max count Count`
 "use strict";
-window.TemplatesStamp = `file templates/amazon-purchase-history.flow
+window.TemplatesStamp = `file templates/amazon-purchase-history.maia
  data
   html.h1 Amazon Purchase History
   comment Delete the below line and replace with your data
@@ -34289,10 +34289,10 @@ window.TemplatesStamp = `file templates/amazon-purchase-history.flow
        yColumn count
        xColumn year
   layout column
-file templates/cancer-in-the-us.flow
+file templates/cancer-in-the-us.maia
  data
   html.h1 Cancer in the U.S.
-  acs.cases2019
+  cancer.cases
    tables.basic
    show.sum Female Total female cases
    vega.bar
@@ -34304,7 +34304,7 @@ file templates/cancer-in-the-us.flow
      xColumn CancerType
      yColumn Male
   layout column
-file templates/git-repo-dashboard.flow
+file templates/git-repo-dashboard.maia
  data
   html.h1 Desktop Only: Statistics for Local Git Repo
   web.get http://localhost:2222/shell?command=gitlog
@@ -34325,7 +34325,7 @@ file templates/git-repo-dashboard.flow
    show.max time Most Recent Commit
    show.min time First Commit
   layout column
-file templates/loc-with-bars.flow
+file templates/loc-with-bars.maia
  data
   html.h1 Desktop Only: Analyze lines of code in a folder
   web.get /disk?path=/ohayo/ohayoWebApp&lineStats=true&recursive=true
@@ -34344,7 +34344,7 @@ file templates/loc-with-bars.flow
       yColumn words
      tables.basic Top Extensions
   layout column
-file templates/reddit.flow
+file templates/reddit.maia
  data
   html.h1 Top Stories on Reddit
   reddit.all
@@ -34359,7 +34359,7 @@ file templates/reddit.flow
     vega.bar Top Stories on Reddit Right Now
      yColumn score
   layout column
-file templates/trends-in-baby-names.flow
+file templates/trends-in-baby-names.maia
  data
   html.h1 Trends in Baby Names
   comment Uncomment the below line, and delete the following line, to use the full dataset
@@ -34371,7 +34371,7 @@ file templates/trends-in-baby-names.flow
       xColumn year
       yColumn percent
   layout column
-file templates/ucimlr-overview.flow
+file templates/ucimlr-overview.maia
  data
   html.h1 UCIMLR Dataset Overview
   layout column
@@ -34386,7 +34386,7 @@ file templates/ucimlr-overview.flow
       vega.bar
        xColumn Year
        yColumn count
-file templates/word-cloud.flow
+file templates/word-cloud.maia
  data
   html.h1 Word Cloud
   layout column
@@ -34720,8 +34720,8 @@ window.AbstractDisk
 // File. then we can have diskFile, remoteFile, folderFile, templateFile, localstorageFile, et cetera.,
 // each with it's own storage strategy. they can extend tree notation. they can implment fetch. they can
 // handle readonly, et cetera. google docs file. dropbox file. derivative file (for example, from a png).
-// then the bytes of the file get turned into a program. there are Tree Languages flow/fire caddoes and then there
-// are non-treeLanguage files like pngs and JS, et cetera, that we can build flow in-memory templates for.
+// then the bytes of the file get turned into a program. there are Tree Languages maia/fire caddoes and then there
+// are non-treeLanguage files like pngs and JS, et cetera, that we can build maia in-memory templates for.
 
 // folders and files =>
 
@@ -34887,13 +34887,13 @@ window.LocalStorageDisk
  = LocalStorageDisk
 ;
 
-const DemoTemplates = `faq.flow
- web.get flow/packages/samples/faq.md
+const DemoTemplates = `faq.maia
+ web.get maia/packages/samples/faq.md
   parser text
   hidden
   markdown.toHtml
-ohayo.flow
- web.get flow/packages/samples/welcome.md?22
+ohayo.maia
+ web.get maia/packages/samples/welcome.md?22
   parser text
   hidden
   markdown.toHtml
@@ -34907,7 +34907,7 @@ window.DemoTemplates
 
 
 
-const FlowCodeEditorTemplate = (source, fileName, treeLanguage) => `html.h1 Source code visualization of ${fileName}
+const MaiaCodeEditorTemplate = (source, fileName, treeLanguage) => `html.h1 Source code visualization of ${fileName}
 data.inline
  parser text
  treeLanguage ${treeLanguage}
@@ -34925,34 +34925,34 @@ data.inline
  content${jtree.TreeNode.nest(source, 2)}
 layout column`
 
-window.FlowCodeEditorTemplate
- = FlowCodeEditorTemplate
+window.MaiaCodeEditorTemplate
+ = MaiaCodeEditorTemplate
 ;
 
-const FlowTemplates = {}
+const MaiaTemplates = {}
 
-FlowTemplates._fromDelimited = (filename, data, app) => {
+MaiaTemplates._fromDelimited = (filename, data, app) => {
   const key = app.initLocalDataStorage(filename, data)
   return `data.localStorage ${key}
  tables.basic`
 }
 
-FlowTemplates.tsv = FlowTemplates._fromDelimited
+MaiaTemplates.tsv = MaiaTemplates._fromDelimited
 
-FlowTemplates.json = (filename, data, app) => {
+MaiaTemplates.json = (filename, data, app) => {
   const key = app.initLocalDataStorage(filename, data)
   return `data.localStorage ${key}`
 }
 
-FlowTemplates.csv = (filename, data, app) => {
+MaiaTemplates.csv = (filename, data, app) => {
   // todo: remove \r?
   // check csv subtypes
   const isMultiCsv = data.split("\n\n").length > 3
-  if (isMultiCsv) return FlowTemplates._multiCsv(filename, data, app)
-  return FlowTemplates._fromDelimited(filename, data, app)
+  if (isMultiCsv) return MaiaTemplates._multiCsv(filename, data, app)
+  return MaiaTemplates._fromDelimited(filename, data, app)
 }
 
-FlowTemplates._multiCsv = (filename, data, app) => {
+MaiaTemplates._multiCsv = (filename, data, app) => {
   return data
     .split("\n\n")
     .map(t => t.trim())
@@ -34967,8 +34967,8 @@ FlowTemplates._multiCsv = (filename, data, app) => {
     .join("\n")
 }
 
-window.FlowTemplates
- = FlowTemplates
+window.MaiaTemplates
+ = MaiaTemplates
 ;
 
 // todo: title should be folder name?
@@ -36196,6 +36196,38 @@ class WallFlexCommander extends WallCommander {
 
 window.WallFlexCommander
  = WallFlexCommander
+;
+
+{
+  class defaultRootNode extends jtree.GrammarBackedNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(BlobNode, undefined, undefined)
+    }
+    getGrammarProgram() {
+      if (!this._cachedGrammarProgramRoot)
+        this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`defaultRootNode
+ root
+ catchAllNodeType BlobNode
+BlobNode
+ baseNodeType blobNode`)
+      return this._cachedGrammarProgramRoot
+    }
+    static getNodeTypeMap() {
+      return { defaultRootNode: defaultRootNode, BlobNode: BlobNode }
+    }
+  }
+
+  class BlobNode extends jtree.GrammarBackedNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(this._getBlobNodeCatchAllNodeType())
+    }
+    getErrors() {
+      return []
+    }
+  }
+
+  window.defaultRootNode = defaultRootNode
+}
 ;
 
 {
@@ -38101,7 +38133,7 @@ class NewDropDownMenuTreeComponent extends AbstractDropDownMenuTreeComponent {
   getDropDownStumpCode() {
     const newProgram = `a New File
  stumpOnClickCommand createNewBlankProgramCommand
- value untitled.flow
+ value untitled.maia
 a New From Url
  stumpOnClickCommand openCreateNewProgramFromUrlDialogCommand`
     const program = this.getRootNode().getMountedTab()
@@ -38147,7 +38179,7 @@ OhayoConstants.subredditLink = "https://www.reddit.com/r/ohayocomputer"
 OhayoConstants.slogan = "a fast and free data science studio"
 
 OhayoConstants.fileExtensions = {}
-OhayoConstants.fileExtensions.flow = ".flow"
+OhayoConstants.fileExtensions.maia = ".maia"
 
 OhayoConstants.deepLinks = {}
 OhayoConstants.deepLinks.filename = "filename"
@@ -38176,9 +38208,9 @@ window.OhayoConstants
 
 class AppCommander extends AbstractCommander {
   async playFirstVisitCommand() {
-    // await this.openOhayoProgramCommand("faq.flow")
+    // await this.openOhayoProgramCommand("faq.maia")
     // todo: make this create in memory?
-    await this.openOhayoProgramCommand(OhayoConstants.productName + OhayoConstants.fileExtensions.flow)
+    await this.openOhayoProgramCommand(OhayoConstants.productName + OhayoConstants.fileExtensions.maia)
   }
 
   get _targetCommander() {
@@ -38251,9 +38283,9 @@ div - ${errors.join("\ndiv - ")}`
     const extension = jtree.Utils.getFileExtension(filename)
     if (this.app.getGrammars()[extension]) return this.app._createAndOpen(data, filename)
 
-    const templateFn = FlowTemplates[extension]
+    const templateFn = MaiaTemplates[extension]
     const program = templateFn ? templateFn(filename, data, this.app) : `html.h1 No visualization templates for ${filename}`
-    return this.app._createAndOpen(program, filename + OhayoConstants.fileExtensions.flow)
+    return this.app._createAndOpen(program, filename + OhayoConstants.fileExtensions.maia)
   }
 
   async toggleShadowByIdCommand(id) {
@@ -38344,7 +38376,7 @@ div - ${errors.join("\ndiv - ")}`
     return this.app.moveFile(existingFullDiskFilePath, newFullDiskFilePath)
   }
 
-  async createNewBlankProgramCommand(filename = "untitled" + OhayoConstants.fileExtensions.flow) {
+  async createNewBlankProgramCommand(filename = "untitled" + OhayoConstants.fileExtensions.maia) {
     const tab = await this.app._createAndOpen("", filename)
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
@@ -38376,7 +38408,7 @@ div - ${errors.join("\ndiv - ")}`
 
     const res = await this.willowProgram.httpGetUrl(url)
 
-    const tab = await this.app._createAndOpen(res.text, "untitled" + OhayoConstants.fileExtensions.flow)
+    const tab = await this.app._createAndOpen(res.text, "untitled" + OhayoConstants.fileExtensions.maia)
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
@@ -38650,15 +38682,15 @@ div - ${errors.join("\ndiv - ")}`
   async createNewSourceCodeVisualizationProgramCommand() {
     // todo: make this create in memory? but then a refresh will end it.
     const sourceCode = this.mountedProgram.childrenToString()
-    const template = FlowCodeEditorTemplate(sourceCode, this.mountedTab.getFileName(), OhayoConstants.fileExtensions.flow.substr(1))
-    const tab = await this.app._createAndOpen(template, this.mountedTab.getFileName() + "-source-code-vis.flow")
+    const template = MaiaCodeEditorTemplate(sourceCode, this.mountedTab.getFileName(), OhayoConstants.fileExtensions.maia.substr(1))
+    const tab = await this.app._createAndOpen(template, this.mountedTab.getFileName() + "-source-code-vis.maia")
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
   async createMiniMapCommand() {
     // todo: make this create in memory? but then a refresh will end it.
-    const tab = await this.app._createAndOpen(MiniTemplate, "myPrograms" + OhayoConstants.fileExtensions.flow)
+    const tab = await this.app._createAndOpen(MiniTemplate, "myPrograms" + OhayoConstants.fileExtensions.maia)
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
@@ -38770,18 +38802,18 @@ div - ${errors.join("\ndiv - ")}`
     const topNodeTypes = grammarProgram.getTopNodeTypeDefinitions().map(def => def.get("crux"))
 
     const sourceCode = topNodeTypes.join("\n") + `\n${TilesConstants.layout} ${TilesConstants.layouts.column}`
-    const tab = await this.app._createAndOpen(sourceCode, "all-tiles" + OhayoConstants.fileExtensions.flow)
+    const tab = await this.app._createAndOpen(sourceCode, "all-tiles" + OhayoConstants.fileExtensions.maia)
     const data = tab
       .getTabProgram()
       .getTiles()
-      .filter(tile => tile.getTileQualityCheck) // only check Flow tiles
+      .filter(tile => tile.getTileQualityCheck) // only check Maia tiles
       .map(tile => tile.getTileQualityCheck())
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
     const sourceCode2 = new jtree.TreeNode(`data.inline
  tables.basic Quality Check Results`)
     sourceCode2.getNode("data.inline").appendLineAndChildren("content", new jtree.TreeNode(data).toCsv())
-    const tab2 = await this.app._createAndOpen(sourceCode2.toString(), "tiles-quality-check-results" + OhayoConstants.fileExtensions.flow)
+    const tab2 = await this.app._createAndOpen(sourceCode2.toString(), "tiles-quality-check-results" + OhayoConstants.fileExtensions.maia)
 
     tab2.addStumpCodeMessageToLog(`div Created '${tab2.getFullTabFilePath()}'`)
   }
@@ -38808,7 +38840,7 @@ div - ${errors.join("\ndiv - ")}`
     const rowsAsCsv = new jtree.TreeNode(times)
     const runTime = Date.now() - startTime
     const title = `Program Load Times ${moment().format("MM/DD/YYYY")} version ${app.getVersion()}. Run time: ${runTime}`
-    return app._createAndOpen(SpeedTestTemplate(title, rowsAsCsv.toCsv()), "program-load-times" + OhayoConstants.fileExtensions.flow)
+    return app._createAndOpen(SpeedTestTemplate(title, rowsAsCsv.toCsv()), "program-load-times" + OhayoConstants.fileExtensions.maia)
   }
 }
 
@@ -38973,7 +39005,7 @@ class TileCommander extends AbstractCommander {
     const tile = this.getTarget()
     const template = tile.getExampleTemplate(index)
     if (!template) return undefined
-    const fileExtension = "flow" // todo: generalize
+    const fileExtension = "maia" // todo: generalize
     const tab = await tile
       .getTab()
       .getRootNode()
@@ -39253,7 +39285,7 @@ p
  a Welcome Page
   id welcomePageButton
   stumpOnClickCommand openOhayoProgramCommand
-  value ohayo.flow
+  value ohayo.maia
 a Keyboard Shortcuts
  class helpToggle
  stumpOnClickCommand toggleShadowByIdCommand
@@ -40005,7 +40037,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "14.0.2"
+const Version = "14.0.3"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
@@ -40826,18 +40858,18 @@ ${OhayoConstants.panel} 400
 
   getProgramConstructorFromFileExtension(treeLanguageName) {
     const grammars = this.getGrammars()
-    return grammars[treeLanguageName] || grammars.flow
+    return grammars[treeLanguageName] || grammars.maia
   }
 
-  getFlowGrammarAsTree() {
-    if (!this._flowGrammarTree) this._flowGrammarTree = new flowNode().getGrammarProgram()
-    return this._flowGrammarTree
+  getMaiaGrammarAsTree() {
+    if (!this._maiaGrammarTree) this._maiaGrammarTree = new maiaNode().getGrammarProgram()
+    return this._maiaGrammarTree
   }
 
   getGrammars() {
     if (!this._grammars) {
       this._grammars = {}
-      this._grammars["flow"] = flowNode // todo: do the same as the others?
+      this._grammars["maia"] = maiaNode // todo: do the same as the others?
       this._grammars["tiles"] = tilesNode
       // todo: do the below on demand? is this slow?
       this._combineWithTilesAndRegisterGrammar("fire", new fireNode().getGrammarProgram().toTreeNode())
@@ -41264,11 +41296,11 @@ ${OhayoConstants.panel} 400
   }
 
   async _createProgramFromPaste(pastedText) {
-    await this._createAndOpen(pastedText, `untitled${OhayoConstants.fileExtensions.flow}`) // todo: guess language!
+    await this._createAndOpen(pastedText, `untitled${OhayoConstants.fileExtensions.maia}`) // todo: guess language!
   }
 
   // for tests and debugging
-  // todo: only relevant for FlowTiles with tables
+  // todo: only relevant for MaiaTiles with tables
   dumpTablesDiagnostic() {
     return this.getRenderedTilesDiagnostic().forEach(tile => {
       console.log(tile.getLine())
