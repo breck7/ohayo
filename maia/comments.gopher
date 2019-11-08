@@ -1,0 +1,8 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+testProgram programwithcomments.maia 0
+ comment get iris data
+ samples.tinyIris
+  comment filter is
+  filter.where species = virginica
+   comment display results
+   tables.basic

@@ -9,7 +9,7 @@ const { jtree } = require("jtree")
 
 const OhayoServerAppConstants = {}
 OhayoServerAppConstants.routeFileGlob = "/*/*.routes.js"
-OhayoServerAppConstants.flowPackagesFolder = "/flow/packages/"
+OhayoServerAppConstants.maiaPackagesFolder = "/maia/packages/"
 
 class OhayoServerApp {
   constructor(port = 1111, cwd = process.cwd(), hostname = "localhost", protocol = "http") {
@@ -37,7 +37,7 @@ class OhayoServerApp {
   }
 
   _getPackageDirectories() {
-    return [__dirname + OhayoServerAppConstants.flowPackagesFolder]
+    return [__dirname + OhayoServerAppConstants.maiaPackagesFolder]
   }
 
   _getStaticRoutes() {
@@ -121,7 +121,7 @@ class FabServer extends OhayoServerApp {
 
   listenForFileChanges() {
     fs.watch("ohayoWebApp/", { recursive: true }, (event, filename) => this._onFileChange(event, filename))
-    fs.watch("flow/", { recursive: true }, (event, filename) => this._onFileChange(event, filename))
+    fs.watch("maia/", { recursive: true }, (event, filename) => this._onFileChange(event, filename))
     return this
   }
 
@@ -164,7 +164,7 @@ class FabServer extends OhayoServerApp {
       })
     }
 
-    this.app.get(/.*(ohayoWebApp|flow)\/.*\.(js|grammar|drums|tree|stamp)/, serveDevFile)
+    this.app.get(/.*(ohayoWebApp|maia)\/.*\.(js|grammar|drums|tree|stamp)/, serveDevFile)
     return this
   }
 }

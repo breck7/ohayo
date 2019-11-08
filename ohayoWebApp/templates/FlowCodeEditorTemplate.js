@@ -1,6 +1,6 @@
 const { jtree } = require("jtree")
 
-const FlowCodeEditorTemplate = (source, fileName, treeLanguage) => `html.h1 Source code visualization of ${fileName}
+const MaiaCodeEditorTemplate = (source, fileName, treeLanguage) => `html.h1 Source code visualization of ${fileName}
 data.inline
  parser text
  treeLanguage ${treeLanguage}
@@ -18,4 +18,4 @@ data.inline
  content${jtree.TreeNode.nest(source, 2)}
 layout column`
 
-module.exports = FlowCodeEditorTemplate
+module.exports = MaiaCodeEditorTemplate

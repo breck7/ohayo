@@ -1,27 +1,27 @@
-const FlowTemplates = {}
+const MaiaTemplates = {}
 
-FlowTemplates._fromDelimited = (filename, data, app) => {
+MaiaTemplates._fromDelimited = (filename, data, app) => {
   const key = app.initLocalDataStorage(filename, data)
   return `data.localStorage ${key}
  tables.basic`
 }
 
-FlowTemplates.tsv = FlowTemplates._fromDelimited
+MaiaTemplates.tsv = MaiaTemplates._fromDelimited
 
-FlowTemplates.json = (filename, data, app) => {
+MaiaTemplates.json = (filename, data, app) => {
   const key = app.initLocalDataStorage(filename, data)
   return `data.localStorage ${key}`
 }
 
-FlowTemplates.csv = (filename, data, app) => {
+MaiaTemplates.csv = (filename, data, app) => {
   // todo: remove \r?
   // check csv subtypes
   const isMultiCsv = data.split("\n\n").length > 3
-  if (isMultiCsv) return FlowTemplates._multiCsv(filename, data, app)
-  return FlowTemplates._fromDelimited(filename, data, app)
+  if (isMultiCsv) return MaiaTemplates._multiCsv(filename, data, app)
+  return MaiaTemplates._fromDelimited(filename, data, app)
 }
 
-FlowTemplates._multiCsv = (filename, data, app) => {
+MaiaTemplates._multiCsv = (filename, data, app) => {
   return data
     .split("\n\n")
     .map(t => t.trim())
@@ -36,4 +36,4 @@ FlowTemplates._multiCsv = (filename, data, app) => {
     .join("\n")
 }
 
-module.exports = FlowTemplates
+module.exports = MaiaTemplates

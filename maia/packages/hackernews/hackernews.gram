@@ -1,0 +1,74 @@
+tooling onsave jtree build produceMaiaGrammar
+hackerNewsUserNameCell
+ highlightScope string
+abstractHackernewsNode
+ frequency .01
+ tags internetConnectionRequired
+ extends abstractUrlNode
+ abstract
+hackernewsTopNode
+ cells tileKeywordCell quantityCell
+ description Get the top stories on hackernews
+ example A dashboard of the Hacker News homepage.
+  hackernews.top 10
+   rows.sortBy by
+    tables.basic
+     vega.scatter
+      xColumn time
+      yColumn score
+  layout tree
+ javascript
+  async fetchTableInputs() {
+   // todo: allow cache breaking.
+   const willowProgram = this.getWebApp().getWillowProgram()
+   const firstUrls = this._getFirstUrls()
+   if (!firstUrls.length || this.isNodeJs()) return []
+   let allResults = []
+   const fetchMethod = async url => this.getWebApp().isUrlGetProxyAvailable() ? willowProgram.httpGetUrlFromProxyCache(url) : willowProgram.httpGetUrlFromCache(url)
+   for (let mainUrl of firstUrls) {
+    const response = await fetchMethod(mainUrl)
+    const nextUrls = this._parseNextUrls(response)
+    const batchResults = await Promise.all(nextUrls.slice(0, this._getLimit()).map(url => fetchMethod(url)))
+    allResults = allResults.concat(batchResults)
+   }
+   return { rows: allResults.map(res => res.asJson) }
+  }
+  _getLimit() {
+   return parseInt(this.getContent() || 10)
+  }
+  _parseNextUrls(response) {
+   return response.asJson.map(id => `https://hacker-news.firebaseio.com/v0/item/${id}.json?print=pretty`)
+  }
+  _getFirstUrls() {
+   return ["https://hacker-news.firebaseio.com/v0/topstories.json?print=pretty"]
+  }
+ extends abstractHackernewsNode
+ crux hackernews.top
+hackernewsSubmissionsNode
+ description Get a user's comments and submissions
+ cells tileKeywordCell quantityCell
+ catchAllCellType hackerNewsUserNameCell
+ example View a users comment and story submissions
+  hackernews.submissions 100 breck
+   tables.basic
+    filter.where type = story
+     vega.scatter Stories
+      xColumn time
+      yColumn score
+    filter.where type = comment
+     vega.scatter Comments
+      xColumn time
+      yColumn score
+  layout tree
+ javascript
+  _getFirstUrls() {
+   return this.getWordsFrom(2).map(username => `https://hacker-news.firebaseio.com/v0/user/${username}.json?print=pretty`)
+  }
+  _getLimit() {
+   return parseInt(this.getWord(1) || 10)
+  }
+  _parseNextUrls(response) {
+   return response.asJson.submitted.map(id => `https://hacker-news.firebaseio.com/v0/item/${id}.json?print=pretty`)
+  }
+ extends hackernewsTopNode
+ crux hackernews.submissions

@@ -6,30 +6,30 @@ test deleteAllTabs
    assertLengthIs getDefaultDisk.readFilesSync 0
 test twoPrograms
  createNewBlankProgramCommand
-  assertStringIs getMountedTab.getFileName untitled.flow
+  assertStringIs getMountedTab.getFileName untitled.maia
   assertLengthIs getFocusedPanel.getTabs 1
   createNewBlankProgramCommand
    assertLengthIs getFocusedPanel.getTabs 2
-   openFullPathInNewTabAndFocusCommand localStorage/untitled.flow
+   openFullPathInNewTabAndFocusCommand localStorage/untitled.maia
     assertLengthIs getFocusedPanel.getTabs 2
 test cloneTabCommand
  createNewBlankProgramCommand
   appendTileCommand samples.presidents
    cloneTabCommand
-    assertStringIs getMountedTab.getFileName untitled-2.flow
+    assertStringIs getMountedTab.getFileName untitled-2.maia
     assertLengthIs getMountedTilesProgram.getTiles 1
     fetchAndReloadFocusedTabCommand
-     assertStringIs getMountedTab.getFileName untitled-2.flow
+     assertStringIs getMountedTab.getFileName untitled-2.maia
 test saveTab
  createNewBlankProgramCommand
   saveTabAndNotifyCommand
 test mountTab
  createNewBlankProgramCommand
-  assertStringIs getMountedTab.getFileName untitled.flow
+  assertStringIs getMountedTab.getFileName untitled.maia
   createNewBlankProgramCommand
-   assertStringIs getMountedTab.getFileName untitled-2.flow
+   assertStringIs getMountedTab.getFileName untitled-2.maia
    mountTabByIndexCommand 0
-   assertStringIs getMountedTab.getFileName untitled.flow
+   assertStringIs getMountedTab.getFileName untitled.maia
 test nav
  openUrlInNewTabCommand localStorage/new
   openUrlInNewTabCommand localStorage/test1391
@@ -39,26 +39,26 @@ test nav
       openUrlInNewTabCommand localStorage/s/brady
 test navigation
  createNewBlankProgramCommand
-  assertStringIs getMountedTab.getFileName untitled.flow
+  assertStringIs getMountedTab.getFileName untitled.maia
   createNewBlankProgramCommand
    mountPreviousTabCommand
-    assertStringIs getMountedTab.getFileName untitled.flow
+    assertStringIs getMountedTab.getFileName untitled.maia
     mountNextTabCommand
-     assertStringIs getMountedTab.getFileName untitled-2.flow
+     assertStringIs getMountedTab.getFileName untitled-2.maia
      mountNextTabCommand
-      assertStringIs getMountedTab.getFileName untitled.flow
+      assertStringIs getMountedTab.getFileName untitled.maia
       mountPreviousTabCommand
-       assertStringIs getMountedTab.getFileName untitled-2.flow
+       assertStringIs getMountedTab.getFileName untitled-2.maia
        closeMountedProgramCommand
-        assertStringIs getMountedTab.getFileName untitled.flow
+        assertStringIs getMountedTab.getFileName untitled.maia
         mountNextTabCommand
-         assertStringIs getMountedTab.getFileName untitled.flow
+         assertStringIs getMountedTab.getFileName untitled.maia
          mountPreviousTabCommand
-          assertStringIs getMountedTab.getFileName untitled.flow
+          assertStringIs getMountedTab.getFileName untitled.maia
           closeMountedProgramCommand
            assertTypeIs getMountedTab undefined
            createNewBlankProgramCommand
-            assertStringIs getMountedTab.getFileName untitled-3.flow
+            assertStringIs getMountedTab.getFileName untitled-3.maia
             toggleGutterCommand
              closeTabByIndexCommand 0
               assertTypeIs getMountedTab undefined

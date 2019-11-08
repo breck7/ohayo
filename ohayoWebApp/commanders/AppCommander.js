@@ -8,16 +8,16 @@ const StorageKeys = require("../storage/StorageKeys.js")
 const TilesConstants = require("../tiles/TilesConstants.js")
 const OhayoConstants = require("../treeComponents/OhayoConstants.js")
 
-const FlowCodeEditorTemplate = require("../templates/FlowCodeEditorTemplate.js")
+const MaiaCodeEditorTemplate = require("../templates/MaiaCodeEditorTemplate.js")
 const MiniTemplate = require("../templates/MiniTemplate.js")
 const SpeedTestTemplate = require("../templates/SpeedTestTemplate.js")
-const FlowTemplates = require("../templates/FlowTemplates.js")
+const MaiaTemplates = require("../templates/MaiaTemplates.js")
 
 class AppCommander extends AbstractCommander {
   async playFirstVisitCommand() {
-    // await this.openOhayoProgramCommand("faq.flow")
+    // await this.openOhayoProgramCommand("faq.maia")
     // todo: make this create in memory?
-    await this.openOhayoProgramCommand(OhayoConstants.productName + OhayoConstants.fileExtensions.flow)
+    await this.openOhayoProgramCommand(OhayoConstants.productName + OhayoConstants.fileExtensions.maia)
   }
 
   get _targetCommander() {
@@ -90,9 +90,9 @@ div - ${errors.join("\ndiv - ")}`
     const extension = jtree.Utils.getFileExtension(filename)
     if (this.app.getGrammars()[extension]) return this.app._createAndOpen(data, filename)
 
-    const templateFn = FlowTemplates[extension]
+    const templateFn = MaiaTemplates[extension]
     const program = templateFn ? templateFn(filename, data, this.app) : `html.h1 No visualization templates for ${filename}`
-    return this.app._createAndOpen(program, filename + OhayoConstants.fileExtensions.flow)
+    return this.app._createAndOpen(program, filename + OhayoConstants.fileExtensions.maia)
   }
 
   async toggleShadowByIdCommand(id) {
@@ -183,7 +183,7 @@ div - ${errors.join("\ndiv - ")}`
     return this.app.moveFile(existingFullDiskFilePath, newFullDiskFilePath)
   }
 
-  async createNewBlankProgramCommand(filename = "untitled" + OhayoConstants.fileExtensions.flow) {
+  async createNewBlankProgramCommand(filename = "untitled" + OhayoConstants.fileExtensions.maia) {
     const tab = await this.app._createAndOpen("", filename)
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
@@ -215,7 +215,7 @@ div - ${errors.join("\ndiv - ")}`
 
     const res = await this.willowProgram.httpGetUrl(url)
 
-    const tab = await this.app._createAndOpen(res.text, "untitled" + OhayoConstants.fileExtensions.flow)
+    const tab = await this.app._createAndOpen(res.text, "untitled" + OhayoConstants.fileExtensions.maia)
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
@@ -489,15 +489,15 @@ div - ${errors.join("\ndiv - ")}`
   async createNewSourceCodeVisualizationProgramCommand() {
     // todo: make this create in memory? but then a refresh will end it.
     const sourceCode = this.mountedProgram.childrenToString()
-    const template = FlowCodeEditorTemplate(sourceCode, this.mountedTab.getFileName(), OhayoConstants.fileExtensions.flow.substr(1))
-    const tab = await this.app._createAndOpen(template, this.mountedTab.getFileName() + "-source-code-vis.flow")
+    const template = MaiaCodeEditorTemplate(sourceCode, this.mountedTab.getFileName(), OhayoConstants.fileExtensions.maia.substr(1))
+    const tab = await this.app._createAndOpen(template, this.mountedTab.getFileName() + "-source-code-vis.maia")
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
   async createMiniMapCommand() {
     // todo: make this create in memory? but then a refresh will end it.
-    const tab = await this.app._createAndOpen(MiniTemplate, "myPrograms" + OhayoConstants.fileExtensions.flow)
+    const tab = await this.app._createAndOpen(MiniTemplate, "myPrograms" + OhayoConstants.fileExtensions.maia)
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
@@ -609,18 +609,18 @@ div - ${errors.join("\ndiv - ")}`
     const topNodeTypes = grammarProgram.getTopNodeTypeDefinitions().map(def => def.get("crux"))
 
     const sourceCode = topNodeTypes.join("\n") + `\n${TilesConstants.layout} ${TilesConstants.layouts.column}`
-    const tab = await this.app._createAndOpen(sourceCode, "all-tiles" + OhayoConstants.fileExtensions.flow)
+    const tab = await this.app._createAndOpen(sourceCode, "all-tiles" + OhayoConstants.fileExtensions.maia)
     const data = tab
       .getTabProgram()
       .getTiles()
-      .filter(tile => tile.getTileQualityCheck) // only check Flow tiles
+      .filter(tile => tile.getTileQualityCheck) // only check Maia tiles
       .map(tile => tile.getTileQualityCheck())
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
     const sourceCode2 = new jtree.TreeNode(`data.inline
  tables.basic Quality Check Results`)
     sourceCode2.getNode("data.inline").appendLineAndChildren("content", new jtree.TreeNode(data).toCsv())
-    const tab2 = await this.app._createAndOpen(sourceCode2.toString(), "tiles-quality-check-results" + OhayoConstants.fileExtensions.flow)
+    const tab2 = await this.app._createAndOpen(sourceCode2.toString(), "tiles-quality-check-results" + OhayoConstants.fileExtensions.maia)
 
     tab2.addStumpCodeMessageToLog(`div Created '${tab2.getFullTabFilePath()}'`)
   }
@@ -647,7 +647,7 @@ div - ${errors.join("\ndiv - ")}`
     const rowsAsCsv = new jtree.TreeNode(times)
     const runTime = Date.now() - startTime
     const title = `Program Load Times ${moment().format("MM/DD/YYYY")} version ${app.getVersion()}. Run time: ${runTime}`
-    return app._createAndOpen(SpeedTestTemplate(title, rowsAsCsv.toCsv()), "program-load-times" + OhayoConstants.fileExtensions.flow)
+    return app._createAndOpen(SpeedTestTemplate(title, rowsAsCsv.toCsv()), "program-load-times" + OhayoConstants.fileExtensions.maia)
   }
 }
 

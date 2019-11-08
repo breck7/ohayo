@@ -1,0 +1,10 @@
+tooling onsave jtree build produceMaiaGrammar
+ucimlrDatasetsNode
+ description A list of datasets from the UC Irvine Machine Learning Repository at http://archive.ics.uci.edu/ml/index.php.
+ frequency .001
+ example Display list of datasets from UCIMLR
+  ucimlr.datasets
+   tables.basic
+ string url maia/packages/ucimlr/datasets.tsv
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ crux ucimlr.datasets

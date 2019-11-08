@@ -26,34 +26,34 @@ test deleteFile
      createNewBlankProgramCommand
       assertLengthIs getMountedTilesDiagnostic 0
       showDeleteFileConfirmDialogCommand
-       assertStringIs getMountedTab.getFileName untitled.flow
+       assertStringIs getMountedTab.getFileName untitled.maia
        assertLengthIs getMountedTilesDiagnostic 1
 test open
- createNewBlankProgramCommand some.flow
+ createNewBlankProgramCommand some.maia
   closeMountedProgramCommand
    assertTypeIs getMountedTab undefined
-   openFullDiskFilePathPromptCommand localStorage/some.flow
-    assertStringIs getMountedTab.getFileName some.flow
+   openFullDiskFilePathPromptCommand localStorage/some.maia
+    assertStringIs getMountedTab.getFileName some.maia
 test moveFilePrompt
  createNewBlankProgramCommand
   showTabMoveFilePromptCommand
-   assertStringIs getMountedTab.getFileName untitled.flow
-   showTabMoveFilePromptCommand renamed.flow
-    assertStringIs getMountedTab.getFileName renamed.flow
+   assertStringIs getMountedTab.getFileName untitled.maia
+   showTabMoveFilePromptCommand renamed.maia
+    assertStringIs getMountedTab.getFileName renamed.maia
 test deleteFileCommand
  createNewBlankProgramCommand
   assertLengthIs getCommandsBuffer 0
   assertLengthIs getDefaultDisk.readFilesSync 1
   assertTypeIs getWillowProgram.getPageHtml string
   assertStringIncludes getWillowProgram.getPageHtml untitled
-  deleteFileCommand localStorage/untitled.flow
+  deleteFileCommand localStorage/untitled.maia
    assertLengthIs getDefaultDisk.readFilesSync 0
 test delete
  createNewBlankProgramCommand
-  assertStringIs getMountedTab.getFileName untitled.flow
+  assertStringIs getMountedTab.getFileName untitled.maia
   createNewBlankProgramCommand
-   assertStringIs getMountedTab.getFileName untitled-2.flow
+   assertStringIs getMountedTab.getFileName untitled-2.maia
    deleteFocusedTabCommand
-    assertStringIs getMountedTab.getFileName untitled.flow
+    assertStringIs getMountedTab.getFileName untitled.maia
     deleteFocusedTabCommand
      assertTypeIs getMountedTab undefined

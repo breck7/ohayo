@@ -23,13 +23,13 @@ test moreBasics
  createNewBlankProgramCommand
   assertLengthIs getCommandsBuffer 0
   assertLengthIs getDefaultDisk.readFilesSync 1
-  assertStringIs getMountedTab.getFileName untitled.flow
+  assertStringIs getMountedTab.getFileName untitled.maia
   createNewBlankProgramCommand
-   assertStringIs getMountedTab.getFileName untitled-2.flow
+   assertStringIs getMountedTab.getFileName untitled-2.maia
    assertLengthIs getDefaultDisk.readFilesSync 2
    createNewBlankProgramCommand
     assertLengthIs getDefaultDisk.readFilesSync 3
-    moveFileCommand localStorage/untitled-3.flow localStorage/renamed
+    moveFileCommand localStorage/untitled-3.maia localStorage/renamed
      closeMountedProgramCommand
       closeAllTabsCommand
        assertTypeIs getMountedTab undefined

@@ -4,7 +4,7 @@ class NewDropDownMenuTreeComponent extends AbstractDropDownMenuTreeComponent {
   getDropDownStumpCode() {
     const newProgram = `a New File
  stumpOnClickCommand createNewBlankProgramCommand
- value untitled.flow
+ value untitled.maia
 a New From Url
  stumpOnClickCommand openCreateNewProgramFromUrlDialogCommand`
     const program = this.getRootNode().getMountedTab()

@@ -98,7 +98,7 @@ p
  a Welcome Page
   id welcomePageButton
   stumpOnClickCommand openOhayoProgramCommand
-  value ohayo.flow
+  value ohayo.maia
 a Keyboard Shortcuts
  class helpToggle
  stumpOnClickCommand toggleShadowByIdCommand

@@ -12,7 +12,7 @@ const ThemeConstants = require("../themes/ThemeConstants.js")
 const Version = require("./Version.js")
 
 /*NODE_JS_ONLY*/ const tilesNode = require("../tiles/tiles.nodejs.js")
-/*NODE_JS_ONLY*/ const flowNode = require("../../flow/flow.nodejs.js")
+/*NODE_JS_ONLY*/ const maiaNode = require("../../maia/maia.nodejs.js")
 /*NODE_JS_ONLY*/ const hakonNode = require("jtree/products/hakon.nodejs.js")
 /*NODE_JS_ONLY*/ const fireNode = require("jtree/products/fire.nodejs.js")
 /*NODE_JS_ONLY*/ const stumpNode = require("jtree/products/stump.nodejs.js")
@@ -222,18 +222,18 @@ ${OhayoConstants.panel} 400
 
   getProgramConstructorFromFileExtension(treeLanguageName) {
     const grammars = this.getGrammars()
-    return grammars[treeLanguageName] || grammars.flow
+    return grammars[treeLanguageName] || grammars.maia
   }
 
-  getFlowGrammarAsTree() {
-    if (!this._flowGrammarTree) this._flowGrammarTree = new flowNode().getGrammarProgram()
-    return this._flowGrammarTree
+  getMaiaGrammarAsTree() {
+    if (!this._maiaGrammarTree) this._maiaGrammarTree = new maiaNode().getGrammarProgram()
+    return this._maiaGrammarTree
   }
 
   getGrammars() {
     if (!this._grammars) {
       this._grammars = {}
-      this._grammars["flow"] = flowNode // todo: do the same as the others?
+      this._grammars["maia"] = maiaNode // todo: do the same as the others?
       this._grammars["tiles"] = tilesNode
       // todo: do the below on demand? is this slow?
       this._combineWithTilesAndRegisterGrammar("fire", new fireNode().getGrammarProgram().toTreeNode())
@@ -660,11 +660,11 @@ ${OhayoConstants.panel} 400
   }
 
   async _createProgramFromPaste(pastedText) {
-    await this._createAndOpen(pastedText, `untitled${OhayoConstants.fileExtensions.flow}`) // todo: guess language!
+    await this._createAndOpen(pastedText, `untitled${OhayoConstants.fileExtensions.maia}`) // todo: guess language!
   }
 
   // for tests and debugging
-  // todo: only relevant for FlowTiles with tables
+  // todo: only relevant for MaiaTiles with tables
   dumpTablesDiagnostic() {
     return this.getRenderedTilesDiagnostic().forEach(tile => {
       console.log(tile.getLine())

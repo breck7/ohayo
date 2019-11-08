@@ -1,10 +1,10 @@
-const DemoTemplates = `faq.flow
- web.get flow/packages/samples/faq.md
+const DemoTemplates = `faq.maia
+ web.get maia/packages/samples/faq.md
   parser text
   hidden
   markdown.toHtml
-ohayo.flow
- web.get flow/packages/samples/welcome.md?22
+ohayo.maia
+ web.get maia/packages/samples/welcome.md?22
   parser text
   hidden
   markdown.toHtml
