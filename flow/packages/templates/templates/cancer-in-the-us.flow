@@ -1,5 +1,5 @@
 html.h1 Cancer in the U.S.
-acs.cases2019
+cancer.cases
  tables.basic
  show.sum Female Total female cases
  vega.bar

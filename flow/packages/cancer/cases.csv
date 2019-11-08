@@ -1,0 +1,57 @@
+Countr,Year,CancerType,Female,Male
+USA,2019,Acute lymphocytic leukemia,2650,3280
+USA,2019,Acute myeloid leukemia,9800,11650
+USA,2019,Anus and anal canal and anorectum,5530,2770
+USA,2019,Bones and joints,1470,2030
+USA,2019,Brain and other nervous system,10410,13410
+USA,2019,Breast,268600,2670
+USA,2019,Cervix,13170,NaN
+USA,2019,Chronic lymphocytic leukemia,7840,12880
+USA,2019,Chronic myeloid leukemia,3740,5250
+USA,2019,Colon (excluding rectum),49730,51690
+USA,2019,Colorectum,67100,78500
+USA,2019,Digestive system,141950,186080
+USA,2019,Endocrine system,39090,15650
+USA,2019,Esophagus,3900,13750
+USA,2019,Eye and orbit,1500,1860
+USA,2019,Gallbladder and other biliary,6550,5810
+USA,2019,Genital system,109000,186290
+USA,2019,Hodgkin lymphoma,3540,4570
+USA,2019,Kidney and renal pelvis,29700,44120
+USA,2019,Larynx,2550,9860
+USA,2019,Leukemia,25860,35920
+USA,2019,Liver and intrahepatic bile duct,12550,29480
+USA,2019,Lung and bronchus,111710,116440
+USA,2019,Lymphoma,36650,45660
+USA,2019,Melanoma of the skin,39260,57220
+USA,2019,Mouth,5880,8430
+USA,2019,Myeloma,13980,18130
+USA,2019,Non-Hodgkin lymphoma,33110,41090
+USA,2019,Oral cavity and pharynx,14860,38140
+USA,2019,Other and unspecified primary sites,14730,16750
+USA,2019,Other digestive organs,4230,2990
+USA,2019,Other endocrine,1280,1390
+USA,2019,Other leukemia,1830,2860
+USA,2019,Other nonepithelial skin,2770,5100
+USA,2019,Other oral cavity,1050,2710
+USA,2019,Other respiratory organs,1810,4070
+USA,2019,Ovary,22530,NaN
+USA,2019,Pancreas,26830,29940
+USA,2019,Penis and other male genital,NaN,2080
+USA,2019,Pharynx,3420,14450
+USA,2019,Prostate,NaN,174650
+USA,2019,Rectum,17370,26810
+USA,2019,Respiratory system,116070,130370
+USA,2019,Skin (excluding basal and squamous),42030,62320
+USA,2019,Small intestine,4980,5610
+USA,2019,Soft tissue (including heart),5510,7240
+USA,2019,Stomach,10280,17230
+USA,2019,Testis,NaN,9560
+USA,2019,Thyroid,37810,14260
+USA,2019,Tongue,4510,12550
+USA,2019,Ureter and other urinary organs,1300,2630
+USA,2019,Urinary bladder,18770,61700
+USA,2019,Urinary system,49770,108450
+USA,2019,Uterine corpus,61880,NaN
+USA,2019,Vagina and other female genital,5350,NaN
+USA,2019,Vulva,6070,NaN

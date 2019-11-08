@@ -1,6 +1,6 @@
 tooling onsave jtree build produceFlowGrammar
-acsCases2019Node
+cancerCasesNode
  description Estimated new cancer cases in the U.S. in 2019 from https://cancerstatisticscenter.cancer.org/
- string url flow/packages/acs/cases2019.csv
+ string url flow/packages/cancer/cases.csv
  extends abstractFixedDatasetFromFlowCollectionNode
- crux acs.cases2019
+ crux cancer.cases
