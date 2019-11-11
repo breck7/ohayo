@@ -1,7 +1,0 @@
-tooling onsave jtree build produceFlowGrammar
-kaggleDatasetsHeartNode
- tags internetConnectionRequired
- description Heart Disease dataset from https://www.kaggle.com/ronitf/heart-disease-uci
- string url flow/packages/kaggle/heart.csv
- extends abstractFixedDatasetFromFlowCollectionNode
- crux kaggle.datasets.heart

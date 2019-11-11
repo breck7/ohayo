@@ -26,4 +26,4 @@ test executeProgramCommand
   clearTabMessagesCommand
    executeProgramCommand
     createNewSourceCodeVisualizationProgramCommand
-     assertStringIs getMountedTab.getFileName hello-world.fire-source-code-vis.flow
+     assertStringIs getMountedTab.getFileName hello-world.fire-source-code-vis.maia

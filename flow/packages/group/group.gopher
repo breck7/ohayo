@@ -1,9 +1,0 @@
-#! /usr/bin/env node /usr/local/bin/jtree
-testProgram group.flow 0
- samples.waterBill
-  date.addColumns year
-   group.by year
-    reduce Amount sum sum
-    tables.basic
-    group.by count
-     tables.basic

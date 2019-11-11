@@ -155,7 +155,7 @@ class TileCommander extends AbstractCommander {
     const tile = this.getTarget()
     const template = tile.getExampleTemplate(index)
     if (!template) return undefined
-    const fileExtension = "flow" // todo: generalize
+    const fileExtension = "maia" // todo: generalize
     const tab = await tile
       .getTab()
       .getRootNode()

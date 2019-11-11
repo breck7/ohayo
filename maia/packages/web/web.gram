@@ -1,0 +1,71 @@
+tooling onsave jtree build produceMaiaGrammar
+webGetNode
+ description Get a URL and parse the fetched data.
+ example Fetch a TSV from the web and show results
+  web.get https://raw.githubusercontent.com/treenotation/ohayo/master/maia/packages/samples/iris.tsv
+   tables.basic
+ frequency .1
+ javascript
+  _getPlaceHolderMessage() {
+   return "Enter a url."
+  }
+  getTileBodyStumpCode() {
+   return `span ${this.getFirstWord()}
+   class LargeLabel
+  input
+   value ${this.getContent() || ""}
+   placeholder ${this._getPlaceHolderMessage()}
+   stumpOnChangeCommand changeTileContentAndRenderCommand
+   class LargeTileInput`
+  }
+ string tileSize 400 100
+ extends abstractUrlNode
+ crux web.get
+catchAllNodesPostContentNode
+ catchAllCellType anyCell
+ extends abstractTileSettingNonTerminalNode
+ crux catchAllNodesPostContent
+postNode
+ catchAllNodeType catchAllNodesPostContentNode
+ extends abstractTileSettingNonTerminalNode
+ crux post
+webPostNode
+ frequency .02
+ description Post data to a URL and parse the returned data.
+ inScope postNode
+ javascript
+  getTileBodyStumpCode() {
+   return `${super.getTileBodyStumpCode()}
+  textarea
+   bern${jtree.TreeNode.nest(jtree.Utils.stripHtml(this.getSettingsStruct().post || ""), 2)}
+   placeholder This data will be sent as the value of the 'q' param
+   name post
+   stumpOnChangeCommand changeTileSettingMultilineCommand
+   class TileTextArea`
+  }
+  async _getData(url) {
+   const settings = this.getSettingsStruct()
+   // todo, but make a separate tile
+   // if (settings.pushButton) {
+   //   if (!settings.pushed) return ""
+   //   settings.pushed = false
+   // }
+   const postData = settings.post || ""
+   const res = await this.getWebApp()
+    .getWillowProgram()
+    .httpPostUrl(url, { q: postData.trim() })
+   this._setWillowHttpResponse(res)
+   return res.getParsedDataOrText()
+  }
+ string tileSize 400 130
+ extends abstractUrlNode
+ crux web.post
+webDumpNode
+ frequency .02
+ description Dump the raw text from the web request.
+ extends debugDumpNode
+ javascript
+  _getTextToDump() {
+   return this.getParent().getWillowHttpResponse ? this.getParent().getWillowHttpResponse().text : `${this.constructor.name} requires a parent web tile.`
+  }
+ crux web.dump

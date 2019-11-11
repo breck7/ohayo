@@ -1,3 +1,8 @@
+15.0.0 2019-11-10
+-----------------
+- Breaking: Flow is now named Maia
+- Breaking: in Flow acs.cases2019 is now cancer.cases
+
 14.0.3 2019-11-2
 ----------------
 - Fix: hn fix

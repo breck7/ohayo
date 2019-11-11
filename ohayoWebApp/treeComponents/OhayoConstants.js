@@ -22,7 +22,7 @@ OhayoConstants.subredditLink = "https://www.reddit.com/r/ohayocomputer"
 OhayoConstants.slogan = "a fast and free data science studio"
 
 OhayoConstants.fileExtensions = {}
-OhayoConstants.fileExtensions.flow = ".flow"
+OhayoConstants.fileExtensions.maia = ".maia"
 
 OhayoConstants.deepLinks = {}
 OhayoConstants.deepLinks.filename = "filename"

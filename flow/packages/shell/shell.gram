@@ -1,9 +1,0 @@
-tooling onsave jtree build produceFlowGrammar
-toCsvNode
- description Print input table to console as csv.
- extends abstractFlowTileNode
- crux shell.csv
- javascript
-  execute() {
-   console.log(this.getParentOrDummyTable().toDelimited(","))
-  }

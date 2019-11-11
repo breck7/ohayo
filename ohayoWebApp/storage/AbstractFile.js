@@ -5,8 +5,8 @@ const { FullDiskPath } = require("./FilePaths.js")
 // File. then we can have diskFile, remoteFile, folderFile, templateFile, localstorageFile, et cetera.,
 // each with it's own storage strategy. they can extend tree notation. they can implment fetch. they can
 // handle readonly, et cetera. google docs file. dropbox file. derivative file (for example, from a png).
-// then the bytes of the file get turned into a program. there are Tree Languages flow/fire caddoes and then there
-// are non-treeLanguage files like pngs and JS, et cetera, that we can build flow in-memory templates for.
+// then the bytes of the file get turned into a program. there are Tree Languages maia/fire caddoes and then there
+// are non-treeLanguage files like pngs and JS, et cetera, that we can build maia in-memory templates for.
 
 // folders and files =>
 

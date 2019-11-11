@@ -1,0 +1,7 @@
+tooling onsave jtree build produceMaiaGrammar
+kaggleDatasetsHeartNode
+ tags internetConnectionRequired
+ description Heart Disease dataset from https://www.kaggle.com/ronitf/heart-disease-uci
+ string url maia/packages/kaggle/heart.csv
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ crux kaggle.datasets.heart

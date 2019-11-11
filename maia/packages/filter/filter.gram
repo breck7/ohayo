@@ -1,0 +1,59 @@
+tooling onsave jtree build produceMaiaGrammar
+scalarValueCell
+ highlightScope constant.numeric
+comparisonCell
+ enum < > <= >= = !=
+ highlightScope constant
+filterWhereNode
+ description Each row must meet a certain condition
+ cells tileKeywordCell columnNameCell comparisonCell scalarValueCell
+ example Select rows by a certain text column
+  samples.iris
+   show.rowCount
+   filter.where Species = setosa
+    show.rowCount
+ frequency .01
+ string tileSize 250 100
+ extends abstractRowFilterTileNode
+ crux filter.where
+ javascript
+  _createOutputTable() {
+   // todo: use cells here.
+   const columnName = this.getWord(1)
+   const comparison = this.getWord(2)
+   let untypedScalarValue = this.getWord(3)
+   const table = this.getParentOrDummyTable()
+   if (!columnName || !comparison || untypedScalarValue === undefined) return table.clone()
+   const column = table.getColumnByName(columnName)
+   if (!column) return table
+   return table.filterClonedRowsByScalar(columnName, comparison, untypedScalarValue)
+  }
+filterWithNode
+ description Each row must contain all of these words
+ frequency .01
+ catchAllCellType stringCell
+ string tileSize 250 100
+ extends abstractRowFilterTileNode
+ crux filter.with
+ boolean expectedBooleanValue true
+ javascript
+  getRowFilterFn() {
+   const words = this.getWordsFrom(1)
+   // todo: problem here is, getRows has too many columns if after a transformed column.
+   const rows = this.getParentOrDummyTable().getRows()
+   if (!words.length) return undefined
+   const len = words.length
+   const expectedValue = this.expectedBooleanValue
+   return row => {
+    const str = JSON.stringify(row)
+    for (let index = 0; index < len; index++) {
+     if (str.includes(words[index]) !== expectedValue) return false
+    }
+    return true
+   }
+  }
+filterWithoutNode
+ description Each row CANNOT contain any of these words
+ extends filterWithNode
+ crux filter.without
+ boolean expectedBooleanValue false

@@ -2,7 +2,7 @@
 test help
  toggleHelpCommand
   executeStumpNodeCommandByStumpNodeIdCommand stumpOnClickCommand welcomePageButton
-   assertStringIs getMountedTab.getFileName ohayo.flow
+   assertStringIs getMountedTab.getFileName ohayo.maia
    assertLengthIs getFocusedPanel.getTabs 1
    executeStumpNodeCommandByStumpNodeIdCommand stumpOnClickCommand welcomePageButton
     assertLengthIs getFocusedPanel.getTabs 1

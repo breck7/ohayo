@@ -1,4 +1,0 @@
-#! /usr/bin/env node /usr/local/bin/jtree
-samples.presidents
- filter.with Obama
-  shell.csv

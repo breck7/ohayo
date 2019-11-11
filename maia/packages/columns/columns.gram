@@ -1,0 +1,96 @@
+tooling onsave jtree build produceMaiaGrammar
+columnsFirstNode
+ cells tileKeywordCell intCell
+ description Keeps only the first N columns.
+ example Drop all but first column
+  samples.iris
+   columns.first 1
+    tables.basic
+ extends abstractColumnFilterTileNode
+ crux columns.first
+ javascript
+  getColumnNamesToKeep() {
+   return this.getParentOrDummyTable()
+    .getColumnsArrayOfObjects()
+    .slice(0, parseInt(this.getContent()))
+    .map(col => col.name)
+  }
+  _getPlaceHolderMessage() {
+   return "Enter the number of columns you want to keep"
+  }
+columnsLastNode
+ cells tileKeywordCell intCell
+ description Keeps only the last N columns.
+ example Drop all but 1 column
+  samples.iris
+   columns.last 1
+    tables.basic
+ extends abstractColumnFilterTileNode
+ crux columns.last
+ javascript
+  getColumnNamesToKeep() {
+   const cols = this.getParentOrDummyTable().getColumnsArrayOfObjects()
+   return cols.slice(cols.length - parseInt(this.getContent())).map(col => col.name)
+  }
+  _getPlaceHolderMessage() {
+   return "Enter the number of columns you want to keep"
+  }
+columnsSetTypeNode
+ cells tileKeywordCell columnNameCell primitiveTypeCell
+ description Ohayo attempts to choose the correct primitive type, but you can override the default with this tile.
+ example List column information
+  samples.waterBill
+   columns.keep Amount Gallons
+    columns.setType Gallons year
+     columns.describe
+      tables.basic
+ extends abstractTransformerNode
+ crux columns.setType
+ javascript
+  _createOutputTable() {
+   const colToChange = this.getWord(1)
+   const newType = this.getWord(2)
+   return this.getParentOrDummyTable().changeColumnType(colToChange, newType)
+  }
+columnsDescribeNode
+ description Computes statistics for each input column.
+ example List column information
+  samples.iris
+   columns.describe
+ extends abstractNewRowsTransformerTileNode
+ crux columns.describe
+ javascript
+  makeNewRows() {
+   return this.getParentOrDummyTable().getColumnNamesAndTypesAndReductions()
+  }
+columnsListNode
+ description Provides a list of table columns and their types.
+ example List columns
+  samples.iris
+   columns.list
+ extends columnsDescribeNode
+ crux columns.list
+ javascript
+  makeNewRows() {
+   return this.getParentOrDummyTable().getColumnNamesAndTypes()
+  }
+columnsKeepNode
+ catchAllCellType columnNameCell
+ description Keep only the named columns
+ example Show 2 columns
+  samples.iris
+   columns.keep Species Petal.Length
+    tables.basic
+ extends abstractColumnFilterTileNode
+ crux columns.keep
+ javascript
+  getColumnNamesToKeep() {
+   const colsToKeep = this.getWordsFrom(1)
+   return this.getParentOrDummyTable()
+    .getColumnsArrayOfObjects()
+    .filter(col => colsToKeep.includes(col.name))
+    .map(col => col.name)
+  }
+  _getPlaceHolderMessage() {
+   return "Enter the columns to keep."
+  }

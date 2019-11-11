@@ -1,0 +1,122 @@
+tooling onsave jtree build produceMaiaGrammar
+editorFilesNode
+ description Fetch your files in the current working folder.
+ example
+  editor.files
+   editor.gallery
+ string tileSize 140 120
+ javascript
+  getRowClass() {
+   class FileRow extends Row {
+    destroyRow(app) {
+     return app.deleteFileCommand(this.getRowOriginalValue("link"))
+    }
+   }
+   return FileRow
+  }
+  getTileHeaderBern() {
+   return this.getWebApp()
+    .getDefaultDisk()
+    .getPathBase()
+  }
+  async fetchTableInputs() {
+   const files = await this.getWebApp()
+    .getDefaultDisk()
+    .readFiles()
+   return { rows: files.map(file => file.toFileObject()) }
+  }
+ extends abstractProviderNode
+ crux editor.files
+editorCommandHistoryNode
+ description Outputs row for each command executed in this Ohayo session.
+ example Show what you've done in this tab session.
+  editor.commandHistory
+   tables.basic
+ javascript
+  async fetchTableInputs() {
+   return { rows: this.getWebApp()[this.getDefinition().getConstantsObject().method]() }
+  }
+ string method getCommandsBuffer
+ extends abstractProviderNode
+ crux editor.commandHistory
+editorGalleryNode
+ description Show a thumbnail of all the Ohayo documents in the input table.
+ example
+  editor.files
+   editor.gallery
+ string tileSize 1080 600
+ string dummyDataSet maiaPrograms
+ extends abstractChartNode
+ crux editor.gallery
+ javascript
+  toHakonCode() {
+   const theme = this.getTheme()
+   return `.MiniMapTile
+   .miniMap
+    background ${theme.backgroundColor}
+    width 120px
+    height 90px
+    margin 6px
+    position relative
+    overflow hidden
+    box-sizing border-box
+    display inline-block
+    &:hover
+     border 1px solid ${theme.boxShadow}
+    &:active
+     border 2px solid ${theme.boxShadow}
+    .miniFooter
+     font-size 12px
+     position absolute
+     bottom 0
+     width 100%
+     height 15px
+     line-height 15px
+     white-space nowrap
+     text-align center
+    .miniPreview
+     position absolute
+     width 100%
+     height calc(100% - 15px)
+     top 0
+     overflow hidden
+     div
+      position absolute
+      background ${theme.linkColor}`
+  }
+  _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
+   const maiaProgram = new maiaNode(sourceCode)
+   const dimensions = maiaProgram.getTileDimensionMap(width, height)
+   const theTiles = maiaProgram
+    .getTiles()
+    .filter(tile => tile.isVisible())
+    .map(
+     tile => `div
+  style ${dimensions.get(tile).getScaledCss(0.1)}`
+    )
+    .join("\n")
+   return `a
+  class miniMap
+  ${permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"}
+  ${permalink ? `value ${permalink}` : "stumpNoOp"}
+  ${permalink ? `href ${permalink}` : "stumpNoOp"}
+  div
+   class miniPreview${jtree.TreeNode.nest(theTiles, 2)}
+  div ${filename}
+   class miniFooter`
+  }
+  getTileBodyStumpCode() {
+   // todo: cache.
+   const minis = this.getRowsWithRowDisplayLimit()
+    .map(row => this._getMiniStumpCode(row.getRowOriginalValue("bytes"), row.getRowOriginalValue("filename"), row.getRowOriginalValue("link")))
+    .join("\n")
+   return `div
+  class MiniMapTile${jtree.TreeNode.nest(minis, 1)}`
+  }
+editorHelloWorldNode
+ description Prints hello world
+ example Say hello.
+  editor.helloWorld
+ string content Ohayo world!
+ extends abstractTextNode
+ crux editor.helloWorld

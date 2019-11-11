@@ -70,12 +70,12 @@ ${currentReleaseNotes}`
   }
 
   _getTreeScripts() {
-    return `flow/packages/challenge/challenges.tree
-flow/packages/templates/Templates.stamp
+    return `maia/packages/challenge/challenges.tree
+maia/packages/templates/Templates.stamp
 ohayoWebApp/treeComponents/Ohayo.drums`.split("\n")
   }
 
-  _getLibScripts(jtreeProductsPath = `node_modules/jtree/products/`, flowPath = "") {
+  _getLibScripts(jtreeProductsPath = `node_modules/jtree/products/`, maiaPath = "") {
     return `node_modules/moment/min/moment.min.js
 node_modules/moment-parseformat/dist/moment-parseformat.js
 node_modules/marked/marked.min.js
@@ -96,7 +96,7 @@ ${jtreeProductsPath}stump.browser.js
 ${jtreeProductsPath}fire.browser.js
 ${jtreeProductsPath}hakon.browser.js
 ${jtreeProductsPath}TreeComponentFramework.browser.js
-${flowPath}flow/flow.browser.js`.split("\n")
+${maiaPath}maia/maia.browser.js`.split("\n")
   }
 
   makeScriptTags(scripts: string[]) {
@@ -146,7 +146,7 @@ ${flowPath}flow/flow.browser.js`.split("\n")
 
   produceTemplatesFile() {
     // # todo: pipe without echoing a newline?
-    exec(`${rootDir}node_modules/jtree/langs/stamp/stamp.cli.js ${rootDir}flow/packages/templates/templates content > flow/packages/templates/Templates.stamp`)
+    exec(`${rootDir}node_modules/jtree/langs/stamp/stamp.cli.js ${rootDir}maia/packages/templates/templates content > maia/packages/templates/Templates.stamp`)
   }
 
   _makeOhayoHtmlPage(header: string, footer: string, faviconPath: string) {
@@ -224,7 +224,7 @@ ${header}
 
   _getAllSourceFiles(): string[] {
     const getFiles = (dir: string) => recursiveReadSync(dir).filter((file: string) => !file.includes("node_modules") && !file.includes("ignore/"))
-    return jtree.Utils.flatten([__dirname + "/flow/", __dirname + "/ohayoWebApp/"].map(getFiles))
+    return jtree.Utils.flatten([__dirname + "/maia/", __dirname + "/ohayoWebApp/"].map(getFiles))
   }
 
   async test() {
@@ -262,8 +262,8 @@ ${common}`
         [
           __dirname + "/ohayoWebApp/**/*.grammar",
           __dirname + "/ohayoWebApp/**/*.gram",
-          __dirname + "/flow/**/*.grammar",
-          __dirname + "/flow/**/*.gram",
+          __dirname + "/maia/**/*.grammar",
+          __dirname + "/maia/**/*.gram",
           __dirname + "/testing/*.grammar"
         ],
         "5.0.0",
@@ -316,9 +316,9 @@ ${common}`
     return this._buildGrammar(["ohayoWebApp/tiles/grams/*.gram"], "ohayoWebApp/tiles/tiles.grammar", "ohayoWebApp/tiles/")
   }
 
-  produceFlowGrammar() {
+  produceMaiaGrammar() {
     this.produceTilesGrammar()
-    return this._buildGrammar(["ohayoWebApp/tiles/tiles.grammar", "flow/grams/*.gram", "flow/packages/*/*.gram"], "flow/flow.grammar", __dirname + "/flow/")
+    return this._buildGrammar(["ohayoWebApp/tiles/tiles.grammar", "maia/grams/*.gram", "maia/packages/*/*.gram"], "maia/maia.grammar", __dirname + "/maia/")
   }
 
   produceSVGFile() {
@@ -353,7 +353,7 @@ module.exports = SVGS
 
   produceAll() {
     const methods = `produceFabHtml
-produceFlowGrammar
+produceMaiaGrammar
 produceGopherGrammar
 produceProdHtml
 produceProdJs

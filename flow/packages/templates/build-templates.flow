@@ -1,3 +1,0 @@
-disk.browse flow/packages/templates/templates
- columns.keep name
-  debug.dump

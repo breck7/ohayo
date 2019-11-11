@@ -8,7 +8,7 @@ intCell
 numberOfErrorsCell
  extends intCell
 stringCell
-flowWordCell
+maiaWordCell
  highlightScope string
  extends stringCell
 errorWordCell
@@ -41,14 +41,14 @@ hashBangNode
  crux #!
  cells hashBangWordCell filepathCell
  catchAllCellType hashBangWordCell
-flowCodeNode
- catchAllCellType flowWordCell
- catchAllNodeType flowCodeNode
- cells flowWordCell
+maiaCodeNode
+ catchAllCellType maiaWordCell
+ catchAllNodeType maiaCodeNode
+ cells maiaWordCell
 testProgramNode
  cells topNodeWordCell filenameCell
  catchAllCellType numberOfErrorsCell
- catchAllNodeType flowCodeNode
+ catchAllNodeType maiaCodeNode
  javascript
   getTestString() {
    return this.childrenToString()

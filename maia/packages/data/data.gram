@@ -1,0 +1,95 @@
+tooling onsave jtree build produceMaiaGrammar
+localStorageKeyCell
+dataInlineNode
+ inScope contentNode parserNode treeLanguageNode
+ frequency .2
+ description Store data in your doc, in CSV, TSV, JSON, and other formats.
+ example
+  data.inline
+   parser csv
+   content
+    petal_length,petal_width,species
+    4.9,1.8,virginica
+    4.9,2,virginica
+    1.5,0.2,setosa
+ javascript
+  getDataContent() {
+   const node = this.getNode("content")
+   return node ? node.childrenToString() : ""
+  }
+  getTileBodyStumpCode() {
+   const text = lodash.escape(this.getDataContent())
+   return `textarea
+   name content
+   stumpOnChangeCommand changeTileSettingMultilineCommand
+   placeholder Enter data in any format here. It will be saved directly in your document.
+   class TileTextArea savable
+   bern${jtree.TreeNode.nest(text, 2)}`
+  }
+  getRowClass() {
+   class InlineDataTileRow extends Row {}
+   return InlineDataTileRow
+  }
+  getParserId() {
+   return super.getParserId() || new TableParser().guessTableParserId(this.getDataContent())
+  }
+  async fetchTableInputs() {
+   return new TableParser().parseTableInputsFromString(this.getDataContent(), this.getParserId())
+  }
+ string tileSize 280 220
+ extends abstractProviderNode
+ crux data.inline
+dataLocalStorageNode
+ cells tileKeywordCell localStorageKeyCell
+ description Use your browser's localStorage for storing data.
+ example
+  data.localStorage a-dropped-file.csv
+ javascript
+  // Note: for now, only way to clear a key is to do it manually through UI (select all delete) or console. That might be good enough.
+  _getStoreKey() {
+   return this.getContent()
+  }
+  getDataContent() {
+   const key = this._getStoreKey()
+   return key ? this.getWebApp().getFromStore(key) || "" : ""
+  }
+  storeValueCommand(value) {
+   let key = this._getStoreKey()
+   if (key) this.getWebApp().storeValue(key, value)
+   else this.setContent(this.getWebApp().initLocalDataStorage(this.constructor.name + ".data", value))
+  }
+  getTileBodyStumpCode() {
+   const text = encodeURIComponent(this.getDataContent())
+   return `textarea
+   stumpOnChangeCommand triggerTileMethodCommand
+   placeholder Enter data in any format here. It will be saved in your browser's localStorage.
+   name storeValueCommand
+   class TileTextArea savable
+   bern${jtree.TreeNode.nest(text, 2)}`
+  }
+ extends dataInlineNode
+ crux data.localStorage
+dataEvalNode
+ description Passes input rows, if any, to a Javascript function and returns transformed or new rows.
+ example Generate some data.
+  data.eval
+   content
+    inputRows => [{name: "Swift", year: 2015}, {name: "Kotlin", year: 2011}]
+   tables.basic
+ inScope contentNode
+ extends abstractNewRowsTransformerTileNode
+ crux data.eval
+ javascript
+  makeNewRows() {
+   const node = this.getNode(this.contentKey)
+   const code = node && node.childrenToString() // "rows => { return []}"
+   let fn
+   try {
+    fn = code && eval(code)
+   } catch (err) {
+    // todo: warn user
+    console.error(err)
+   }
+   const inputRows = this.getParentOrDummyTable().cloneNativeJavascriptTypedRows()
+   return fn ? fn(inputRows) : inputRows
+  }
