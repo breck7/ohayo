@@ -1,3 +1,8 @@
+15.1.0 2019-11-19
+-----------------
+- New: easier to create distributable copies via `jtree build buildDist destFolder`
+- New: experimenting with using background textures from transparenttextures.com
+
 15.0.0 2019-11-10
 -----------------
 - Breaking: Flow is now named Maia

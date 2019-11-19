@@ -8,7 +8,7 @@ tilesNode
   const TilesConstants = require(projectRootDir + "ohayoWebApp/tiles/TilesConstants.js")
   const OhayoConstants = require(projectRootDir + "ohayoWebApp/treeComponents/OhayoConstants.js")
   const Layout = require(projectRootDir + "ohayoWebApp/tiles/Layout.js")
-  const Icons = require(projectRootDir + "ohayoWebApp/images/Icons.js")
+  const Icons = require(projectRootDir + "ohayoWebApp/themes/Icons.js")
   const lodash = require(projectRootDir + "node_modules/lodash")
  _extendsJsClass AbstractTreeComponent
  catchAllNodeType DidYouMeanTileNode

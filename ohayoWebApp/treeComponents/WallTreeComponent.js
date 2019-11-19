@@ -10,7 +10,8 @@ class WallTreeComponent extends AbstractTreeComponent {
   toHakonCode() {
     const theme = this.getTheme()
     return `.WallTreeComponent
- background ${theme.wallBackground}
+ background-color ${theme.wallBackground}
+ background-image ${theme.wallBackgroundImage || "none"}
  display block
  position relative
  height 100%

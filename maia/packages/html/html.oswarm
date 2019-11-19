@@ -7,6 +7,6 @@ test img
   assertLengthIs getRenderedTilesDiagnostic 0
   pasteCommand
    withParagraph
-    html.img http://localhost:2222/ohayoWebApp/images/favicon.svg
+    html.img http://localhost:2222/images/favicon.svg
    assertStringIncludes getStumpNodeString img
    assertLengthIs getRenderedTilesDiagnostic 1

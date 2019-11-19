@@ -1,13 +1,10 @@
 {
   "name": "ohayo",
-  "version": "15.0.0",
+  "version": "15.1.0",
   "description": "ohayo desktop version",
   "main": "OhayoServerApp.js",
   "directories": {
     "lib": "lib"
-  },
-  "bin": {
-    "ohayo": "./commandLineApp.js"
   },
   "prettier": {
     "useTabs": false,

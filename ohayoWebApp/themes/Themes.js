@@ -118,7 +118,8 @@ Themes[ThemeConstants.dark] = new Theme({
 
 Themes[ThemeConstants.workshop] = new Theme({
   hasSolidBackground: true,
-  wallBackground: "url('ohayoWebApp/images/cork.jpg')",
+  wallBackgroundImage: "url('images/transparenttextures.com/wine-cork.png')",
+  wallBackground: "rgba(244,216,105,.4)",
   menuBackground: "#3B539A",
   tileOpacity: 0.95,
   tileShadow: "0 3px 5px rgba(33,33,33,.3)",

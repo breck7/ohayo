@@ -3,7 +3,7 @@ const { jtree } = require("jtree")
 const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework.node.js")
 const TileToolbarCommander = require("../commanders/TileToolbarCommander.js")
 
-const Icons = require("../images/Icons.js")
+const Icons = require("../themes/Icons.js")
 
 class TileToolbarTreeComponent extends AbstractTreeComponent {
   toHakonCode() {

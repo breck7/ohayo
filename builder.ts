@@ -159,7 +159,7 @@ ${maiaPath}maia/maia.browser.js`.split("\n")
   <title>${slogan}</title>
   <meta name="description" content="${slogan}">
   <meta name="keywords" content="${keywords}">
-  <link rel="shortcut icon" type="image/x-icon" href="ohayoWebApp/images/${faviconPath}">
+  <link rel="shortcut icon" type="image/x-icon" href="images/${faviconPath}">
   <script>const DefaultServerCurrentWorkingDirectory = "/";</script>
 ${header}
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -180,6 +180,17 @@ ${header}
       .forEach(file => {
         jtree.formatFile(file, __dirname + "/node_modules/jtree/langs/grammar/grammar.grammar")
       })
+  }
+
+  buildDist(distFolder = `${__dirname}/dist`) {
+    exec(
+      `echo "Remove dist folder first";
+mkdir ${distFolder};
+cp ${__dirname}/index.html ${distFolder}/;
+cp ${__dirname}/ohayo.es6.browser.js ${distFolder}/;
+cp -r ${__dirname}/maia ${distFolder}/;
+cp -r ${__dirname}/images ${distFolder}/;`
+    )
   }
 
   buildBuilder() {
@@ -327,7 +338,7 @@ ${common}`
       return str.substr(index)
     }
 
-    const path = `${rootDir}/ohayoWebApp/images/svg/`
+    const path = `${rootDir}/ohayoWebApp/themes/svg/`
     const files = fs
       .readdirSync(path)
       .filter((filename: string) => filename.includes(".svg"))
@@ -348,7 +359,7 @@ ${files.map(template).join("\n")}
 module.exports = SVGS
 `
 
-    fs.writeFileSync("ohayoWebApp/images/SVGS.js", newFile, "utf8")
+    fs.writeFileSync("ohayoWebApp/themes/SVGS.js", newFile, "utf8")
   }
 
   produceAll() {
