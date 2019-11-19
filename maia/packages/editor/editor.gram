@@ -48,12 +48,10 @@ editorGalleryNode
  string dummyDataSet maiaPrograms
  extends abstractChartNode
  crux editor.gallery
- javascript
-  toHakonCode() {
-   const theme = this.getTheme()
-   return `.MiniMapTile
+ string hakonTemplate
+  .MiniMapTile
    .miniMap
-    background ${theme.backgroundColor}
+    background {backgroundColor}
     width 120px
     height 90px
     margin 6px
@@ -62,9 +60,9 @@ editorGalleryNode
     box-sizing border-box
     display inline-block
     &:hover
-     border 1px solid ${theme.boxShadow}
+     border 1px solid {boxShadow}
     &:active
-     border 2px solid ${theme.boxShadow}
+     border 2px solid {boxShadow}
     .miniFooter
      font-size 12px
      position absolute
@@ -82,8 +80,8 @@ editorGalleryNode
      overflow hidden
      div
       position absolute
-      background ${theme.linkColor}`
-  }
+      background {linkColor}
+ javascript
   _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
    const maiaProgram = new maiaNode(sourceCode)
    const dimensions = maiaProgram.getTileDimensionMap(width, height)

@@ -37,7 +37,7 @@ class AbstractModalTreeComponent extends AbstractTreeComponent {
   margin-bottom 10px
   white-space pre
  pre
-${theme.enableTextSelect(2)}
+${theme.enableTextSelect2}
 
 .modalClose
  position absolute

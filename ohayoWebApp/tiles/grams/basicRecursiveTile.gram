@@ -1,17 +1,15 @@
 tooling onsave jtree build produceTilesGrammar
 basicRecursiveTileNode
  extends abstractTileTreeComponentNode
- javascript
-  toHakonCode() {
-   const theme = this.getTheme()
-   return `.BasicRecursiveTile
+ string hakonTemplate
+  .BasicRecursiveTile
    input
    textarea
     border 0
     font-size 14px
     height 100%
-    width 100%`
-  }
+    width 100%
+ javascript
   getTileBodyStumpCode() {
    const edgeSymbol = " "
    const definition = this.getDefinition()

@@ -3,7 +3,7 @@
   [
     {
       "path": ".",
-      "folder_exclude_patterns": ["node_modules", "ignore", "coverage" , ".nyc_output"],
+      "folder_exclude_patterns": ["node_modules", "dist", "ignore", "coverage" , ".nyc_output"],
       "file_exclude_patterns": ["ohayo.es6.browser.js", "*.min.css", "*.tsv", "*.csv", "*.min.js", "handsontable.full.min.js", "sanitize-html.min.js", "vis.min.js", "datatables.min.js", "maia/maia.browser.js", "*movies.json", "*.nodejs.js", "maia.grammar", "tiles.grammar", "oswarm.grammar"]
     }
   ],

@@ -4,17 +4,16 @@ diskBrowseNode
  tags localVersion
  catchAllCellType pathCell
  description An interactive list of files and folders.
- javascript
-  toHakonCode() {
-   return `.DiskTile
+ string hakonTemplate
+  .DiskTile
    table
     width 100%
     td,th
      overflow hidden
      text-overflow ellipsis
     tr
-     white-space nowrap`
-  }
+     white-space nowrap
+ javascript
   getUrl() {
    return this.getContent() ? "/disk?path=" + this.getContent() : "/disk"
   }

@@ -37,6 +37,14 @@ dateHeatcalNode
  string dummyDataSet waterBill
  extends abstractHeaderlessChartTileNode
  crux date.heatcal
+ string hakonTemplate
+  .heatCal
+   rect
+    fill {darkerBackground}
+    shape-rendering crispedges
+   text
+    font-size 10px
+    fill #ddd
  javascript
   _getLegend(quins, squareSideWithPadding, position) {
    const theme = this.getTheme()
@@ -52,16 +60,6 @@ dateHeatcalNode
   ${quinSvgs}
   <text x="${position.left + 70}" y="${position.top + 10}">More</text>
   </g>`
-  }
-  toHakonCode() {
-   const theme = this.getTheme()
-   return `.heatCal
-   rect
-    fill ${theme.darkerBackground}
-    shape-rendering crispedges
-   text
-    font-size 10px
-    fill #ddd`
   }
   getTileBodyStumpCode() {
    return `div

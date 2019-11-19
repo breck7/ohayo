@@ -182,8 +182,9 @@ abstractTileTreeComponentNode
    const visibleCss = this.isVisible() ? "" : "display: none"
    const dimensions = this.getTileDimensionIfAny()
    const dimensionCss = dimensions ? dimensions.toCss() : ""
+   const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
    return `${selector} { ${visibleCss} ${dimensionCss} }
-        ${theme.hakonToCss(this.toHakonCode())}`
+        ${theme.hakonToCss(hakonCode)}`
   }
   getContextMenuStumpCode() {
    return ""

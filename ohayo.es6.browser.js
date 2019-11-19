@@ -25262,8 +25262,9 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
       const visibleCss = this.isVisible() ? "" : "display: none"
       const dimensions = this.getTileDimensionIfAny()
       const dimensionCss = dimensions ? dimensions.toCss() : ""
+      const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
       return `${selector} { ${visibleCss} ${dimensionCss} }
-      ${theme.hakonToCss(this.toHakonCode())}`
+      ${theme.hakonToCss(hakonCode)}`
     }
     getContextMenuStumpCode() {
       return ""
@@ -25422,8 +25423,7 @@ pre
   }
 
   class basicRecursiveTileNode extends abstractTileTreeComponentNode {
-    toHakonCode() {
-      const theme = this.getTheme()
+    get hakonTemplate() {
       return `.BasicRecursiveTile
  input
  textarea
@@ -25499,20 +25499,19 @@ span ?`
     get tileSize() {
       return `480 420`
     }
-    toHakonCode() {
-      const theme = this.getTheme()
+    get hakonTemplate() {
       return `.PickerTileNode
  .TileBody
   display flex
   flex-flow row wrap
   a
    &:hover
-    background-color ${theme.borderColor}
+    background-color {borderColor}
    padding 10px
    margin 5px
    height 30px
-   background-color ${theme.backgroundColor}
-   border 1px solid ${theme.borderColor}
+   background-color {backgroundColor}
+   border 1px solid {borderColor}
    overflow hidden
    text-align center
    text-overflow ellipsis
@@ -26402,13 +26401,7 @@ bern${jtree.TreeNode.nest(content, 2)}`
     get titleCell() {
       return this.getWordsFrom(2)
     }
-    get dummyDataSet() {
-      return `stockPrice`
-    }
-    get tileSize() {
-      return `140 120`
-    }
-    toHakonCode() {
+    get hakonTemplate() {
       return `.abstractShowTileNode
  h3
   text-align center
@@ -26416,6 +26409,12 @@ bern${jtree.TreeNode.nest(content, 2)}`
   text-align center
   height 40px
   overflow hidden`
+    }
+    get dummyDataSet() {
+      return `stockPrice`
+    }
+    get tileSize() {
+      return `140 120`
     }
     getTileBodyStumpCode() {
       const columnName = this.getWord(1)
@@ -26791,6 +26790,15 @@ yColumn isString=false`
         undefined
       )
     }
+    get hakonTemplate() {
+      return `.heatCal
+ rect
+  fill {darkerBackground}
+  shape-rendering crispedges
+ text
+  font-size 10px
+  fill #ddd`
+    }
     get dummyDataSet() {
       return `waterBill`
     }
@@ -26815,16 +26823,6 @@ dayColumn getPrimitiveTypeName=day`
 ${quinSvgs}
 <text x="${position.left + 70}" y="${position.top + 10}">More</text>
 </g>`
-    }
-    toHakonCode() {
-      const theme = this.getTheme()
-      return `.heatCal
- rect
-  fill ${theme.darkerBackground}
-  shape-rendering crispedges
- text
-  font-size 10px
-  fill #ddd`
     }
     getTileBodyStumpCode() {
       return `div
@@ -27278,17 +27276,10 @@ a Run Tile Quality Check
   }
 
   class editorGalleryNode extends abstractChartNode {
-    get dummyDataSet() {
-      return `maiaPrograms`
-    }
-    get tileSize() {
-      return `1080 600`
-    }
-    toHakonCode() {
-      const theme = this.getTheme()
+    get hakonTemplate() {
       return `.MiniMapTile
  .miniMap
-  background ${theme.backgroundColor}
+  background {backgroundColor}
   width 120px
   height 90px
   margin 6px
@@ -27297,9 +27288,9 @@ a Run Tile Quality Check
   box-sizing border-box
   display inline-block
   &:hover
-   border 1px solid ${theme.boxShadow}
+   border 1px solid {boxShadow}
   &:active
-   border 2px solid ${theme.boxShadow}
+   border 2px solid {boxShadow}
   .miniFooter
    font-size 12px
    position absolute
@@ -27317,7 +27308,13 @@ a Run Tile Quality Check
    overflow hidden
    div
     position absolute
-    background ${theme.linkColor}`
+    background {linkColor}`
+    }
+    get dummyDataSet() {
+      return `maiaPrograms`
+    }
+    get tileSize() {
+      return `1080 600`
     }
     _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
       const maiaProgram = new maiaNode(sourceCode)
@@ -27351,6 +27348,10 @@ class MiniMapTile${jtree.TreeNode.nest(minis, 1)}`
   }
 
   class handsontableBasicNode extends abstractChartNode {
+    get hakonTemplate() {
+      return `.hot
+ color black`
+    }
     get tileScript() {
       return `maia/packages/handsontable/handsontable.full.min.js`
     }
@@ -27363,10 +27364,6 @@ class MiniMapTile${jtree.TreeNode.nest(minis, 1)}`
     getTileBodyStumpCode() {
       return `div
 class hot`
-    }
-    toHakonCode() {
-      return `.hot
-color black`
     }
     // todo: allow editing
     treeComponentWillUnmount() {
@@ -27480,6 +27477,47 @@ a ${label}
     get titleCell() {
       return this.getWordsFrom(0)
     }
+    get hakonTemplate() {
+      return `.tablesBasicNode
+ font-size 14px
+ box-sizing border-box
+ width 100%
+ height 100%
+ {enableTextSelect1}
+ top 34px
+ table
+  width 100%
+ tr
+  white-space nowrap
+  padding 0
+ td
+  border 1px solid {lineColor}
+ tr:nth-child(even)
+  background-color {veryLightGrey}
+ td,th
+  padding 2px 3px
+  text-align left
+  overflow hidden
+  text-overflow ellipsis
+  max-width 250px
+ td:hover,th:hover
+  overflow visible
+ td:first-child,th:first-child
+  padding-left 5px
+  color {greyish}
+  width 60px
+ th
+  cursor pointer
+  background-color {lightGrey}
+  border 1px solid {lineColor}
+  border-bottom-color {greyish}
+ input,textarea
+  border 0
+  font-size 14px
+  box-sizing border-box
+  padding 0
+  font-family {fonts}`
+    }
     get customBodyStyle() {
       return `padding:0px;`
     }
@@ -27494,48 +27532,6 @@ a ${label}
     }
     getTileHeaderBern() {
       return this.getContent() || super.getTileHeaderBern()
-    }
-    toHakonCode() {
-      const theme = this.getTheme()
-      return `.tablesBasicNode
- font-size 14px
- box-sizing border-box
- width 100%
- height 100%
-${theme.enableTextSelect(1)}
- top 34px
- table
-  width 100%
- tr
-  white-space nowrap
-  padding 0
- td
-  border 1px solid ${theme.lineColor}
- tr:nth-child(even)
-  background-color ${theme.veryLightGrey}
- td,th
-  padding 2px 3px
-  text-align left
-  overflow hidden
-  text-overflow ellipsis
-  max-width 250px
- td:hover,th:hover
-  overflow visible
- td:first-child,th:first-child
-  padding-left 5px
-  color ${theme.greyish}
-  width 60px
- th
-  cursor pointer
-  background-color ${theme.lightGrey}
-  border 1px solid ${theme.lineColor}
-  border-bottom-color ${theme.greyish}
- input,textarea
-  border 0
-  font-size 14px
-  box-sizing border-box
-  padding 0
-  font-family ${theme.fonts}`
     }
     _getTableRowsStumpCode(columns) {
       return this.getRowsWithRowDisplayLimit()
@@ -27959,7 +27955,7 @@ bern
     get tileSize() {
       return `500 500`
     }
-    toHakonCode() {
+    get hakonTemplate() {
       return `.DiskTile
  table
   width 100%
@@ -29758,8 +29754,9 @@ abstractTileTreeComponentNode
    const visibleCss = this.isVisible() ? "" : "display: none"
    const dimensions = this.getTileDimensionIfAny()
    const dimensionCss = dimensions ? dimensions.toCss() : ""
+   const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
    return \`\${selector} { \${visibleCss} \${dimensionCss} }
-        \${theme.hakonToCss(this.toHakonCode())}\`
+        \${theme.hakonToCss(hakonCode)}\`
   }
   getContextMenuStumpCode() {
    return ""
@@ -29917,17 +29914,15 @@ abstractTileTreeComponentNode
   }
 basicRecursiveTileNode
  extends abstractTileTreeComponentNode
- javascript
-  toHakonCode() {
-   const theme = this.getTheme()
-   return \`.BasicRecursiveTile
+ string hakonTemplate
+  .BasicRecursiveTile
    input
    textarea
     border 0
     font-size 14px
     height 100%
-    width 100%\`
-  }
+    width 100%
+ javascript
   getTileBodyStumpCode() {
    const edgeSymbol = " "
    const definition = this.getDefinition()
@@ -29994,29 +29989,27 @@ DidYouMeanTileNode
   }
 PickerTileNode
  description Displays list of available tiles.
- javascript
-  toHakonCode() {
-   const theme = this.getTheme()
-   return \`.PickerTileNode
+ string hakonTemplate
+  .PickerTileNode
    .TileBody
     display flex
     flex-flow row wrap
     a
      &:hover
-      background-color \${theme.borderColor}
+      background-color {borderColor}
      padding 10px
      margin 5px
      height 30px
-     background-color \${theme.backgroundColor}
-     border 1px solid \${theme.borderColor}
+     background-color {backgroundColor}
+     border 1px solid {borderColor}
      overflow hidden
      text-align center
      text-overflow ellipsis
      font-size 14px
      width 120px
      span
-      font-size 70%\`
-  }
+      font-size 70%
+ javascript
   async fetchTableInputs() {
    return { rows: this.getPredictionsForThisTile().map(obj => obj.toObject()) }
   }
@@ -30681,16 +30674,15 @@ abstractShowTileNode
  string dummyDataSet stockPrice
  extends abstractBodyOnlyTileNode
  abstract
- javascript
-  toHakonCode() {
-   return \`.abstractShowTileNode
+ string hakonTemplate
+  .abstractShowTileNode
    h3
     text-align center
    h6
     text-align center
     height 40px
-    overflow hidden\`
-  }
+    overflow hidden
+ javascript
   getTileBodyStumpCode() {
    const columnName = this.getWord(1)
    if (!columnName) return \`No data for \${this.getFirstWord()}\`
@@ -31027,6 +31019,14 @@ dateHeatcalNode
  string dummyDataSet waterBill
  extends abstractHeaderlessChartTileNode
  crux date.heatcal
+ string hakonTemplate
+  .heatCal
+   rect
+    fill {darkerBackground}
+    shape-rendering crispedges
+   text
+    font-size 10px
+    fill #ddd
  javascript
   _getLegend(quins, squareSideWithPadding, position) {
    const theme = this.getTheme()
@@ -31042,16 +31042,6 @@ dateHeatcalNode
   \${quinSvgs}
   <text x="\${position.left + 70}" y="\${position.top + 10}">More</text>
   </g>\`
-  }
-  toHakonCode() {
-   const theme = this.getTheme()
-   return \`.heatCal
-   rect
-    fill \${theme.darkerBackground}
-    shape-rendering crispedges
-   text
-    font-size 10px
-    fill #ddd\`
   }
   getTileBodyStumpCode() {
    return \`div
@@ -31491,12 +31481,10 @@ editorGalleryNode
  string dummyDataSet maiaPrograms
  extends abstractChartNode
  crux editor.gallery
- javascript
-  toHakonCode() {
-   const theme = this.getTheme()
-   return \`.MiniMapTile
+ string hakonTemplate
+  .MiniMapTile
    .miniMap
-    background \${theme.backgroundColor}
+    background {backgroundColor}
     width 120px
     height 90px
     margin 6px
@@ -31505,9 +31493,9 @@ editorGalleryNode
     box-sizing border-box
     display inline-block
     &:hover
-     border 1px solid \${theme.boxShadow}
+     border 1px solid {boxShadow}
     &:active
-     border 2px solid \${theme.boxShadow}
+     border 2px solid {boxShadow}
     .miniFooter
      font-size 12px
      position absolute
@@ -31525,8 +31513,8 @@ editorGalleryNode
      overflow hidden
      div
       position absolute
-      background \${theme.linkColor}\`
-  }
+      background {linkColor}
+ javascript
   _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
    const maiaProgram = new maiaNode(sourceCode)
    const dimensions = maiaProgram.getTileDimensionMap(width, height)
@@ -31561,14 +31549,13 @@ handsontableBasicNode
  string tileSize 1200 500
  string tileCssScript maia/packages/handsontable/handsontable.min.css
  string tileScript maia/packages/handsontable/handsontable.full.min.js
+ string hakonTemplate
+  .hot
+   color black
  javascript
   getTileBodyStumpCode() {
    return \`div
   class hot\`
-  }
-  toHakonCode() {
-   return \`.hot
-  color black\`
   }
   // todo: allow editing
   treeComponentWillUnmount() {
@@ -31674,18 +31661,13 @@ tablesBasicNode
  string tileSize 750 300
  todo added the below to allow custom body styling in tables
  string customBodyStyle padding:0px;
- javascript
-  getTileHeaderBern() {
-   return this.getContent() || super.getTileHeaderBern()
-  }
-  toHakonCode() {
-   const theme = this.getTheme()
-   return \`.tablesBasicNode
+ string hakonTemplate
+  .tablesBasicNode
    font-size 14px
    box-sizing border-box
    width 100%
    height 100%
-  \${theme.enableTextSelect(1)}
+   {enableTextSelect1}
    top 34px
    table
     width 100%
@@ -31693,9 +31675,9 @@ tablesBasicNode
     white-space nowrap
     padding 0
    td
-    border 1px solid \${theme.lineColor}
+    border 1px solid {lineColor}
    tr:nth-child(even)
-    background-color \${theme.veryLightGrey}
+    background-color {veryLightGrey}
    td,th
     padding 2px 3px
     text-align left
@@ -31706,19 +31688,22 @@ tablesBasicNode
     overflow visible
    td:first-child,th:first-child
     padding-left 5px
-    color \${theme.greyish}
+    color {greyish}
     width 60px
    th
     cursor pointer
-    background-color \${theme.lightGrey}
-    border 1px solid \${theme.lineColor}
-    border-bottom-color \${theme.greyish}
+    background-color {lightGrey}
+    border 1px solid {lineColor}
+    border-bottom-color {greyish}
    input,textarea
     border 0
     font-size 14px
     box-sizing border-box
     padding 0
-    font-family \${theme.fonts}\`
+    font-family {fonts}
+ javascript
+  getTileHeaderBern() {
+   return this.getContent() || super.getTileHeaderBern()
   }
   _getTableRowsStumpCode(columns) {
    return this.getRowsWithRowDisplayLimit()
@@ -32111,17 +32096,16 @@ diskBrowseNode
  tags localVersion
  catchAllCellType pathCell
  description An interactive list of files and folders.
- javascript
-  toHakonCode() {
-   return \`.DiskTile
+ string hakonTemplate
+  .DiskTile
    table
     width 100%
     td,th
      overflow hidden
      text-overflow ellipsis
     tr
-     white-space nowrap\`
-  }
+     white-space nowrap
+ javascript
   getUrl() {
    return this.getContent() ? "/disk?path=" + this.getContent() : "/disk"
   }
@@ -35651,9 +35635,13 @@ class Theme {
 
     // Pass values overwrite all
     Object.assign(this, options)
+
+    // todo: cleanup
+    this.enableTextSelect1 = this._enableTextSelect(1)
+    this.enableTextSelect2 = this._enableTextSelect(2)
   }
 
-  enableTextSelect(indent) {
+  _enableTextSelect(indent) {
     return new jtree.TreeNode(`-moz-user-select text
 -webkit-user-select text
 -ms-user-select text
@@ -36436,8 +36424,9 @@ BlobNode
       const visibleCss = this.isVisible() ? "" : "display: none"
       const dimensions = this.getTileDimensionIfAny()
       const dimensionCss = dimensions ? dimensions.toCss() : ""
+      const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
       return `${selector} { ${visibleCss} ${dimensionCss} }
-      ${theme.hakonToCss(this.toHakonCode())}`
+      ${theme.hakonToCss(hakonCode)}`
     }
     getContextMenuStumpCode() {
       return ""
@@ -36596,8 +36585,7 @@ pre
   }
 
   class basicRecursiveTileNode extends abstractTileTreeComponentNode {
-    toHakonCode() {
-      const theme = this.getTheme()
+    get hakonTemplate() {
       return `.BasicRecursiveTile
  input
  textarea
@@ -36673,20 +36661,19 @@ span ?`
     get tileSize() {
       return `480 420`
     }
-    toHakonCode() {
-      const theme = this.getTheme()
+    get hakonTemplate() {
       return `.PickerTileNode
  .TileBody
   display flex
   flex-flow row wrap
   a
    &:hover
-    background-color ${theme.borderColor}
+    background-color {borderColor}
    padding 10px
    margin 5px
    height 30px
-   background-color ${theme.backgroundColor}
-   border 1px solid ${theme.borderColor}
+   background-color {backgroundColor}
+   border 1px solid {borderColor}
    overflow hidden
    text-align center
    text-overflow ellipsis
@@ -37041,8 +37028,9 @@ abstractTileTreeComponentNode
    const visibleCss = this.isVisible() ? "" : "display: none"
    const dimensions = this.getTileDimensionIfAny()
    const dimensionCss = dimensions ? dimensions.toCss() : ""
+   const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
    return \`\${selector} { \${visibleCss} \${dimensionCss} }
-        \${theme.hakonToCss(this.toHakonCode())}\`
+        \${theme.hakonToCss(hakonCode)}\`
   }
   getContextMenuStumpCode() {
    return ""
@@ -37200,17 +37188,15 @@ abstractTileTreeComponentNode
   }
 basicRecursiveTileNode
  extends abstractTileTreeComponentNode
- javascript
-  toHakonCode() {
-   const theme = this.getTheme()
-   return \`.BasicRecursiveTile
+ string hakonTemplate
+  .BasicRecursiveTile
    input
    textarea
     border 0
     font-size 14px
     height 100%
-    width 100%\`
-  }
+    width 100%
+ javascript
   getTileBodyStumpCode() {
    const edgeSymbol = " "
    const definition = this.getDefinition()
@@ -37277,29 +37263,27 @@ DidYouMeanTileNode
   }
 PickerTileNode
  description Displays list of available tiles.
- javascript
-  toHakonCode() {
-   const theme = this.getTheme()
-   return \`.PickerTileNode
+ string hakonTemplate
+  .PickerTileNode
    .TileBody
     display flex
     flex-flow row wrap
     a
      &:hover
-      background-color \${theme.borderColor}
+      background-color {borderColor}
      padding 10px
      margin 5px
      height 30px
-     background-color \${theme.backgroundColor}
-     border 1px solid \${theme.borderColor}
+     background-color {backgroundColor}
+     border 1px solid {borderColor}
      overflow hidden
      text-align center
      text-overflow ellipsis
      font-size 14px
      width 120px
      span
-      font-size 70%\`
-  }
+      font-size 70%
+ javascript
   async fetchTableInputs() {
    return { rows: this.getPredictionsForThisTile().map(obj => obj.toObject()) }
   }
@@ -37740,7 +37724,7 @@ class AbstractModalTreeComponent extends AbstractTreeComponent {
   margin-bottom 10px
   white-space pre
  pre
-${theme.enableTextSelect(2)}
+${theme.enableTextSelect2}
 
 .modalClose
  position absolute
@@ -39780,7 +39764,7 @@ input,textarea
   line-height 30px
   padding-left 5px
  .TileSelectable
-${theme.enableTextSelect(2)}
+${theme.enableTextSelect2}
  .TileBody
   padding 5px
   width 100%

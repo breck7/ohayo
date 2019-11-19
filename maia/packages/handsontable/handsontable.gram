@@ -4,14 +4,13 @@ handsontableBasicNode
  string tileSize 1200 500
  string tileCssScript maia/packages/handsontable/handsontable.min.css
  string tileScript maia/packages/handsontable/handsontable.full.min.js
+ string hakonTemplate
+  .hot
+   color black
  javascript
   getTileBodyStumpCode() {
    return `div
   class hot`
-  }
-  toHakonCode() {
-   return `.hot
-  color black`
   }
   // todo: allow editing
   treeComponentWillUnmount() {

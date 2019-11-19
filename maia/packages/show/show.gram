@@ -18,16 +18,15 @@ abstractShowTileNode
  string dummyDataSet stockPrice
  extends abstractBodyOnlyTileNode
  abstract
- javascript
-  toHakonCode() {
-   return `.abstractShowTileNode
+ string hakonTemplate
+  .abstractShowTileNode
    h3
     text-align center
    h6
     text-align center
     height 40px
-    overflow hidden`
-  }
+    overflow hidden
+ javascript
   getTileBodyStumpCode() {
    const columnName = this.getWord(1)
    if (!columnName) return `No data for ${this.getFirstWord()}`

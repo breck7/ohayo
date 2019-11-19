@@ -232,7 +232,7 @@ input,textarea
   line-height 30px
   padding-left 5px
  .TileSelectable
-${theme.enableTextSelect(2)}
+${theme.enableTextSelect2}
  .TileBody
   padding 5px
   width 100%

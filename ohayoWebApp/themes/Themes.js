@@ -76,9 +76,13 @@ class Theme {
 
     // Pass values overwrite all
     Object.assign(this, options)
+
+    // todo: cleanup
+    this.enableTextSelect1 = this._enableTextSelect(1)
+    this.enableTextSelect2 = this._enableTextSelect(2)
   }
 
-  enableTextSelect(indent) {
+  _enableTextSelect(indent) {
     return new jtree.TreeNode(`-moz-user-select text
 -webkit-user-select text
 -ms-user-select text

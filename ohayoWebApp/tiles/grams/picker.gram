@@ -1,29 +1,27 @@
 tooling onsave jtree build produceTilesGrammar
 PickerTileNode
  description Displays list of available tiles.
- javascript
-  toHakonCode() {
-   const theme = this.getTheme()
-   return `.PickerTileNode
+ string hakonTemplate
+  .PickerTileNode
    .TileBody
     display flex
     flex-flow row wrap
     a
      &:hover
-      background-color ${theme.borderColor}
+      background-color {borderColor}
      padding 10px
      margin 5px
      height 30px
-     background-color ${theme.backgroundColor}
-     border 1px solid ${theme.borderColor}
+     background-color {backgroundColor}
+     border 1px solid {borderColor}
      overflow hidden
      text-align center
      text-overflow ellipsis
      font-size 14px
      width 120px
      span
-      font-size 70%`
-  }
+      font-size 70%
+ javascript
   async fetchTableInputs() {
    return { rows: this.getPredictionsForThisTile().map(obj => obj.toObject()) }
   }
