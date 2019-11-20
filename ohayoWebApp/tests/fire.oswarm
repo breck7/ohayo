@@ -1,7 +1,7 @@
 #! /usr/bin/env node /usr/local/bin/jtree
 test compile
  createNewBlankProgramCommand hello-world.fire
-  assertStringIncludes getWillowProgram.getPageHtml hello-world
+  assertStringIncludes getTextContent hello-world
   pasteCommand
    withParagraph
     set$ greeting Hello world
@@ -10,17 +10,17 @@ test compile
    saveCompiledCommand
 test compile2
  createNewBlankProgramCommand hello-world.fire
-  assertStringExcludes getWillowProgram.getPageHtml Ohayo!
+  assertStringExcludes getTextContent Ohayo!
   pasteCommand
    withParagraph
     tiles.picker
      pin 8 4
    assertLengthIs getRenderedTilesDiagnostic 1
-   assertStringIncludes getWillowProgram.getPageHtml hello-world
-   assertStringExcludes getStumpNodeStringWithoutCssAndSvg errors
-   assertStringExcludes getWillowProgram.getPageHtml Ohayo!
+   assertStringIncludes getTextContent hello-world
+   assertStringExcludes getTextContent errors
+   assertStringExcludes getTextContent Ohayo!
    cellCheckProgramCommand
-    assertStringIncludes getStumpNodeStringWithoutCssAndSvg errors
+    assertStringIncludes getTextContent errors
 test executeProgramCommand
  createNewBlankProgramCommand hello-world.fire
   clearTabMessagesCommand

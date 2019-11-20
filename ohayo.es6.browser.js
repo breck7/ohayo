@@ -27954,7 +27954,7 @@ class visjs`
       const theme = this.getWebApp().getTheme()
       // todo: use node type for color.
       const tagMap = {}
-      const tagTree = new jtree.TreeNode(program.getInPlaceCellTypeTree())
+      const tagTree = new jtree.TreeNode(program.toCellTypeTree())
       // const outlineFn = node => node.getIndex()
       // use language to get dict, use dict to get type overlay to get tag types.
       const randomFn = jtree.Utils.makeSemiRandomFn()
@@ -28907,7 +28907,7 @@ input
       const app = this.getWebApp()
       const language = app.getLanguageBestGuess(sourceCode) // todo: use treeLanguage setting
       const program = app.generateProgram(sourceCode, language)
-      return [{ text: program.getInPlaceCellTypeTree() }]
+      return [{ text: program.toCellTypeTree() }]
     }
   }
 
@@ -32133,7 +32133,7 @@ treenotation3dNode
    const theme = this.getWebApp().getTheme()
    // todo: use node type for color.
    const tagMap = {}
-   const tagTree = new jtree.TreeNode(program.getInPlaceCellTypeTree())
+   const tagTree = new jtree.TreeNode(program.toCellTypeTree())
    // const outlineFn = node => node.getIndex()
    // use language to get dict, use dict to get type overlay to get tag types.
    const randomFn = jtree.Utils.makeSemiRandomFn()
@@ -33083,7 +33083,7 @@ treenotationWordTypesNode
    const app = this.getWebApp()
    const language = app.getLanguageBestGuess(sourceCode) // todo: use treeLanguage setting
    const program = app.generateProgram(sourceCode, language)
-   return [{ text: program.getInPlaceCellTypeTree() }]
+   return [{ text: program.toCellTypeTree() }]
   }
 abstractColumnFilterTileNode
  abstract
