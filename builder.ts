@@ -146,7 +146,7 @@ ${maiaPath}maia/maia.browser.js`.split("\n")
 
   produceTemplatesFile() {
     // # todo: pipe without echoing a newline?
-    exec(`${rootDir}node_modules/jtree/langs/stamp/stamp.cli.js ${rootDir}maia/packages/templates/templates content > maia/packages/templates/Templates.stamp`)
+    exec(`jtree stamp ${rootDir}maia/packages/templates/templates content > maia/packages/templates/Templates.stamp`)
   }
 
   _makeOhayoHtmlPage(header: string, footer: string, faviconPath: string) {

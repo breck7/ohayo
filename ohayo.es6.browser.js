@@ -26155,6 +26155,7 @@ ${new jtree.TreeNode(options).toString(1)}`
 ol
  class TileSelectable
 ${options}`
+      console.log(code)
       return code
     }
   }
@@ -26168,8 +26169,10 @@ ${options}`
     }
     getGalleryNodes() {
       // todo: cleanup.
+      const templates = this._getTheTemplates()
+      console.log(templates)
       return new jtree.TreeNode(
-        this._getTheTemplates().map(node => {
+        templates.map(node => {
           const id = node
             .getWord(1)
             .replace("templates/", "")
@@ -30492,6 +30495,7 @@ abstractTemplateGalleryNode
   ol
    class TileSelectable
   \${options}\`
+   console.log(code)
    return code
   }
 templatesListNode
@@ -30504,8 +30508,10 @@ templatesListNode
  javascript
   getGalleryNodes() {
    // todo: cleanup.
+   const templates = this._getTheTemplates()
+   console.log(templates)
    return new jtree.TreeNode(
-    this._getTheTemplates().map(node => {
+    templates.map(node => {
      const id = node
       .getWord(1)
       .replace("templates/", "")
@@ -34488,89 +34494,6 @@ mounted edit insertAdjacentTileCommand shift+i Insert Tile
 panel ohayo toggleHelpCommand ? Help
 panel ohayo confirmAndResetAppStateCommand  Reset Ohayo
 panel ohayo toggleTreeComponentFrameworkDebuggerCommand shift+d Toggle TCF Debugger`
-
-
-class TerminalCommander extends AbstractCommander {
-  async saveChangesCommand() {
-    const terminal = this.getTarget()
-    // tood: this is broken. needs to unmount first.
-    // todo: add a patch method to tree.
-    if (terminal.hasChanges()) await terminal._getTab().autosaveAndReloadWith(terminal.getCode())
-  }
-
-  async executeLineCommand(lineNumber) {
-    const terminal = this.getTarget()
-    const program = terminal._makeProgramFromLineNumber(lineNumber)
-    let result = await program.execute(terminal.getRootNode())
-
-    if (typeof result !== "string") result = result.join("\n")
-
-    terminal._getTab().logMessageText(encodeURIComponent(result))
-    terminal.getRootNode().renderApp()
-  }
-
-  async executeFirstLineCommand() {
-    return this.executeLineCommand(0)
-  }
-
-  async compileFirstLineCommand() {
-    return this.compileLineCommand(0)
-  }
-
-  _compileLine(lineNumber) {
-    const terminal = this.getTarget()
-    const program = terminal._makeProgramFromLineNumber(lineNumber)
-    const grammarProgram = program.getDefinition()
-    return program.compile()
-  }
-
-  async compileLineCommand(lineNumber) {
-    const terminal = this.getTarget()
-    terminal._getTab().logMessageText(this._compileLine(lineNumber))
-    terminal.getRootNode().renderApp()
-  }
-}
-
-window.TerminalCommander
- = TerminalCommander
-;
-
-
-
-class TileToolbarCommander extends AbstractCommander {
-  get _targetTileCommander() {
-    return this.getTarget()
-      .getTargetTile()
-      .getCommander()
-  }
-
-  createProgramFromFocusedTileExampleCommand(uno, dos) {
-    return this._targetTileCommander.createProgramFromTileExampleCommand(uno, dos)
-  }
-
-  cloneFocusedTileCommand(uno, dos) {
-    return this._targetTileCommander.cloneTileCommand(uno, dos)
-  }
-  destroyFocusedTileCommand(uno, dos) {
-    return this._targetTileCommander.destroyTileCommand(uno, dos)
-  }
-  inspectFocusedTileCommand(uno, dos) {
-    return this._targetTileCommander.inspectTileCommand(uno, dos)
-  }
-  changeFocusedTileTypeCommand(uno, dos) {
-    return this._targetTileCommander.changeTileTypeCommand(uno, dos)
-  }
-  changeFocusedTileParentCommand(uno, dos) {
-    return this._targetTileCommander.changeParentCommand(uno, dos)
-  }
-  changeFocusedTileContentAndRenderCommand(uno, dos) {
-    return this._targetTileCommander.changeTileContentAndRenderCommand(uno, dos)
-  }
-}
-window.TileToolbarCommander
- = TileToolbarCommander
-;
-
 class AbstractPath {
   constructor(path) {
     this._checkPath(path)
@@ -36150,111 +36073,6 @@ window.TilesConstants
  = TilesConstants
 ;
 
-
-
-
-class WallCommander extends AbstractCommander {
-  async openWallContextMenuCommand() {
-    this.getTarget()
-      .getRootNode()
-      .toggleAndRender("tabContextMenu")
-  }
-
-  async insertAdjacentTileCommand() {
-    const wall = this.getTarget()
-    const app = wall.getRootNode()
-    const tilesProgram = app.getMountedTilesProgram()
-    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
-    const newTiles = app
-      .getNodeCursors()
-      .slice(0, 1)
-      .map(cursor => cursor.appendLine(TilesConstants.pickerTile))
-    const promise = await app.getMountedTab().autosaveAndRender()
-    tilesProgram.clearSelection()
-    newTiles.forEach(tile => tile.selectTile())
-    return promise
-  }
-
-  async insertPickerTileCommand() {
-    const wall = this.getTarget()
-    const app = wall.getRootNode()
-    const evt = app.getMouseEvent()
-    const tilesProgram = app.getMountedTilesProgram()
-
-    if (!evt.shiftKey) {
-      tilesProgram.clearSelection()
-    }
-    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
-    const newTiles = app
-      .getNodeCursors()
-      .slice(0, 1)
-      .map(cursor => cursor.appendLineAndChildren(TilesConstants.pickerTile, wall.getPickerBlock(evt)))
-    await app.getMountedTab().autosaveAndRender()
-    tilesProgram.clearSelection()
-    newTiles.forEach(tile => {
-      tile.selectTile()
-    })
-  }
-}
-
-window.WallCommander
- = WallCommander
-;
-
-
-
-
-
-
-class WallFlexCommander extends WallCommander {
-  setLayoutToCustomCommand() {
-    const wall = this.getTarget()
-    const app = wall.getRootNode()
-    const tab = app.getMountedTab()
-    const tabProgram = tab.getTabProgram()
-    tabProgram.touchNode(TilesConstants.layout).setContent(TilesConstants.custom)
-    return tab.autosaveAndRender()
-  }
-
-  moveTilesFromShadowsCommand() {
-    // todo: remove this. ditch jqery ui.
-    const wall = this.getTarget()
-    const app = wall.getRootNode()
-    app
-      .getWillowProgram()
-      .getBodyStumpNode()
-      .findStumpNodesWithClass(TilesConstants.abstractTileTreeComponentNode)
-      .filter(stumpNode => stumpNode.getStumpNodeTreeComponent().isVisible())
-      .forEach(stumpNode => wall._moveStumpNode(stumpNode))
-    return this.setLayoutToCustomCommand()
-  }
-
-  _getLayoutOptions(mountedProgram) {
-    // only include custom IF there are custom properties.
-    const toggleOptions = Object.keys(TilesConstants.layouts).filter(key => key !== TilesConstants.layouts.custom)
-    if (mountedProgram.canUseCustomLayout()) toggleOptions.push(TilesConstants.layouts.custom)
-    return toggleOptions
-  }
-
-  async toggleLayoutCommand() {
-    const mountedProgram = this.getTarget()
-      .getRootNode()
-      .getMountedTilesProgram()
-    const currentLayoutNode = mountedProgram.touchNode(TilesConstants.layout)
-    const currentLayout = currentLayoutNode.getContent() || TilesConstants.layouts.tiled
-    const newLayout = jtree.Utils.toggle(currentLayout, this._getLayoutOptions(mountedProgram))
-    currentLayoutNode.setContent(newLayout)
-    mountedProgram.getTiles().forEach(tile => tile.makeDirty()) // todo: delete this
-    const tab = mountedProgram.getTab()
-    tab.addStumpCodeMessageToLog(`div Layout changed to '${newLayout}'.`)
-    await tab.autosaveAndRender()
-  }
-}
-
-window.WallFlexCommander
- = WallFlexCommander
-;
-
 {
   class defaultRootNode extends jtree.GrammarBackedNode {
     createParser() {
@@ -37831,6 +37649,46 @@ window.AbstractModalTreeComponent
 
 
 
+class TerminalCommander extends AbstractCommander {
+  async saveChangesCommand() {
+    const terminal = this.getTarget()
+    // tood: this is broken. needs to unmount first.
+    // todo: add a patch method to tree.
+    if (terminal.hasChanges()) await terminal._getTab().autosaveAndReloadWith(terminal.getCode())
+  }
+
+  async executeLineCommand(lineNumber) {
+    const terminal = this.getTarget()
+    const program = terminal._makeProgramFromLineNumber(lineNumber)
+    let result = await program.execute(terminal.getRootNode())
+
+    if (typeof result !== "string") result = result.join("\n")
+
+    terminal._getTab().logMessageText(encodeURIComponent(result))
+    terminal.getRootNode().renderApp()
+  }
+
+  async executeFirstLineCommand() {
+    return this.executeLineCommand(0)
+  }
+
+  async compileFirstLineCommand() {
+    return this.compileLineCommand(0)
+  }
+
+  _compileLine(lineNumber) {
+    const terminal = this.getTarget()
+    const program = terminal._makeProgramFromLineNumber(lineNumber)
+    const grammarProgram = program.getDefinition()
+    return program.compile()
+  }
+
+  async compileLineCommand(lineNumber) {
+    const terminal = this.getTarget()
+    terminal._getTab().logMessageText(this._compileLine(lineNumber))
+    terminal.getRootNode().renderApp()
+  }
+}
 
 class BasicTerminalTreeComponent extends AbstractTreeComponent {
   toHakonCode() {
@@ -39917,6 +39775,36 @@ window.TileContextMenuTreeComponent
 
 
 
+class TileToolbarCommander extends AbstractCommander {
+  get _targetTileCommander() {
+    return this.getTarget()
+      .getTargetTile()
+      .getCommander()
+  }
+
+  createProgramFromFocusedTileExampleCommand(uno, dos) {
+    return this._targetTileCommander.createProgramFromTileExampleCommand(uno, dos)
+  }
+
+  cloneFocusedTileCommand(uno, dos) {
+    return this._targetTileCommander.cloneTileCommand(uno, dos)
+  }
+  destroyFocusedTileCommand(uno, dos) {
+    return this._targetTileCommander.destroyTileCommand(uno, dos)
+  }
+  inspectFocusedTileCommand(uno, dos) {
+    return this._targetTileCommander.inspectTileCommand(uno, dos)
+  }
+  changeFocusedTileTypeCommand(uno, dos) {
+    return this._targetTileCommander.changeTileTypeCommand(uno, dos)
+  }
+  changeFocusedTileParentCommand(uno, dos) {
+    return this._targetTileCommander.changeParentCommand(uno, dos)
+  }
+  changeFocusedTileContentAndRenderCommand(uno, dos) {
+    return this._targetTileCommander.changeTileContentAndRenderCommand(uno, dos)
+  }
+}
 
 class TileToolbarTreeComponent extends AbstractTreeComponent {
   toHakonCode() {
@@ -40106,6 +39994,49 @@ if (typeof exports !== "undefined") module.exports = Version
 
 
 
+class WallCommander extends AbstractCommander {
+  async openWallContextMenuCommand() {
+    this.getTarget()
+      .getRootNode()
+      .toggleAndRender("tabContextMenu")
+  }
+
+  async insertAdjacentTileCommand() {
+    const wall = this.getTarget()
+    const app = wall.getRootNode()
+    const tilesProgram = app.getMountedTilesProgram()
+    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
+    const newTiles = app
+      .getNodeCursors()
+      .slice(0, 1)
+      .map(cursor => cursor.appendLine(TilesConstants.pickerTile))
+    const promise = await app.getMountedTab().autosaveAndRender()
+    tilesProgram.clearSelection()
+    newTiles.forEach(tile => tile.selectTile())
+    return promise
+  }
+
+  async insertPickerTileCommand() {
+    const wall = this.getTarget()
+    const app = wall.getRootNode()
+    const evt = app.getMouseEvent()
+    const tilesProgram = app.getMountedTilesProgram()
+
+    if (!evt.shiftKey) {
+      tilesProgram.clearSelection()
+    }
+    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
+    const newTiles = app
+      .getNodeCursors()
+      .slice(0, 1)
+      .map(cursor => cursor.appendLineAndChildren(TilesConstants.pickerTile, wall.getPickerBlock(evt)))
+    await app.getMountedTab().autosaveAndRender()
+    tilesProgram.clearSelection()
+    newTiles.forEach(tile => {
+      tile.selectTile()
+    })
+  }
+}
 
 class WallTreeComponent extends AbstractTreeComponent {
   // pin?
@@ -40243,8 +40174,9 @@ class WallTreeComponent extends AbstractTreeComponent {
   }
 }
 
-window.WallTreeComponent
- = WallTreeComponent
+window.WallTreeComponent = WallTreeComponent
+
+window.WallCommander = WallCommander
 ;
 
 
@@ -40253,6 +40185,51 @@ window.WallTreeComponent
 
 
 
+
+class WallFlexCommander extends WallCommander {
+  setLayoutToCustomCommand() {
+    const wall = this.getTarget()
+    const app = wall.getRootNode()
+    const tab = app.getMountedTab()
+    const tabProgram = tab.getTabProgram()
+    tabProgram.touchNode(TilesConstants.layout).setContent(TilesConstants.custom)
+    return tab.autosaveAndRender()
+  }
+
+  moveTilesFromShadowsCommand() {
+    // todo: remove this. ditch jqery ui.
+    const wall = this.getTarget()
+    const app = wall.getRootNode()
+    app
+      .getWillowProgram()
+      .getBodyStumpNode()
+      .findStumpNodesWithClass(TilesConstants.abstractTileTreeComponentNode)
+      .filter(stumpNode => stumpNode.getStumpNodeTreeComponent().isVisible())
+      .forEach(stumpNode => wall._moveStumpNode(stumpNode))
+    return this.setLayoutToCustomCommand()
+  }
+
+  _getLayoutOptions(mountedProgram) {
+    // only include custom IF there are custom properties.
+    const toggleOptions = Object.keys(TilesConstants.layouts).filter(key => key !== TilesConstants.layouts.custom)
+    if (mountedProgram.canUseCustomLayout()) toggleOptions.push(TilesConstants.layouts.custom)
+    return toggleOptions
+  }
+
+  async toggleLayoutCommand() {
+    const mountedProgram = this.getTarget()
+      .getRootNode()
+      .getMountedTilesProgram()
+    const currentLayoutNode = mountedProgram.touchNode(TilesConstants.layout)
+    const currentLayout = currentLayoutNode.getContent() || TilesConstants.layouts.tiled
+    const newLayout = jtree.Utils.toggle(currentLayout, this._getLayoutOptions(mountedProgram))
+    currentLayoutNode.setContent(newLayout)
+    mountedProgram.getTiles().forEach(tile => tile.makeDirty()) // todo: delete this
+    const tab = mountedProgram.getTab()
+    tab.addStumpCodeMessageToLog(`div Layout changed to '${newLayout}'.`)
+    await tab.autosaveAndRender()
+  }
+}
 
 class WallFlexTreeComponent extends WallTreeComponent {
   _resizeTiles(stumpNode) {

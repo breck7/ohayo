@@ -4,7 +4,7 @@ const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework
 const { FullDiskPath } = require("../storage/FilePaths.js")
 
 const TabTreeComponent = require("./TabTreeComponent.js")
-const WallTreeComponent = require("./WallTreeComponent.js")
+const { WallTreeComponent } = require("./WallTreeComponent.js")
 const WallFlexTreeComponent = require("./WallFlexTreeComponent.js")
 const OhayoConstants = require("./OhayoConstants.js")
 
