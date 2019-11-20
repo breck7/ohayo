@@ -1,9 +1,9 @@
 #! /usr/bin/env node /usr/local/bin/jtree
 test columnsKeepDropsColumns
  createNewBlankProgramCommand
-  assertStringExcludes getStumpNodeStringWithoutCssAndSvg Gallons
+  assertStringExcludes getTextContent Gallons
   pasteCommand
    withParagraph
     debug.sleep 10 waterBill
      tables.basic
-   assertStringIncludes getStumpNodeStringWithoutCssAndSvg Gallons
+   assertStringIncludes getTextContent Gallons

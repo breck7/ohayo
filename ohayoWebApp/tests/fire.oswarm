@@ -17,10 +17,10 @@ test compile2
      pin 8 4
    assertLengthIs getRenderedTilesDiagnostic 1
    assertStringIncludes getTextContent hello-world
-   assertStringExcludes getTextContent errors
+   assertStringExcludes getStumpNodeStringWithoutCssAndSvg errors
    assertStringExcludes getTextContent Ohayo!
    cellCheckProgramCommand
-    assertStringIncludes getTextContent errors
+    assertStringIncludes getStumpNodeStringWithoutCssAndSvg errors
 test executeProgramCommand
  createNewBlankProgramCommand hello-world.fire
   clearTabMessagesCommand
