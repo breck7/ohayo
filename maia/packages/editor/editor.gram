@@ -90,26 +90,27 @@ editorGalleryNode
     .filter(tile => tile.isVisible())
     .map(
      tile => `div
-  style ${dimensions.get(tile).getScaledCss(0.1)}`
+   style ${dimensions.get(tile).getScaledCss(0.1)}`
     )
     .join("\n")
    return `a
-  class miniMap
-  ${permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"}
-  ${permalink ? `value ${permalink}` : "stumpNoOp"}
-  ${permalink ? `href ${permalink}` : "stumpNoOp"}
-  div
-   class miniPreview${jtree.TreeNode.nest(theTiles, 2)}
-  div ${filename}
-   class miniFooter`
+   class miniMap
+   ${permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"}
+   ${permalink ? `value ${permalink}` : "stumpNoOp"}
+   ${permalink ? `href ${permalink}` : "stumpNoOp"}
+   div
+    class miniPreview${jtree.TreeNode.nest(theTiles, 2)}
+   div ${filename}
+    class miniFooter`
   }
   getTileBodyStumpCode() {
    // todo: cache.
    const minis = this.getRowsWithRowDisplayLimit()
     .map(row => this._getMiniStumpCode(row.getRowOriginalValue("bytes"), row.getRowOriginalValue("filename"), row.getRowOriginalValue("link")))
     .join("\n")
-   return `div
-  class MiniMapTile${jtree.TreeNode.nest(minis, 1)}`
+   const stump = `div
+   class MiniMapTile${jtree.TreeNode.nest(minis, 1)}`
+  return stump
   }
 editorHelloWorldNode
  description Prints hello world

@@ -1,14 +1,15 @@
 #! /usr/bin/env node /usr/local/bin/jtree
 test browseFiles
  createNewBlankProgramCommand
+  assertStringIncludes getTextContent untitled.maia
   closeMountedProgramCommand
-   assertStringExcludes getStumpNodeStringWithoutCssAndSvg untitled.maia
+   assertStringExcludes getTextContent untitled.maia
    createNewBlankProgramCommand
     assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 0
-    assertStringExcludes getStumpNodeStringWithoutCssAndSvg untitled.maia
+    assertStringExcludes getTextContent untitled.maia
     pasteCommand
      withParagraph
       editor.files
        editor.gallery
      assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 2
-     assertStringIncludes getStumpNodeStringWithoutCssAndSvg untitled.maia
+     assertStringIncludes getTextContent untitled.maia

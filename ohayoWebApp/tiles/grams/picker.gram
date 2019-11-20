@@ -3,6 +3,10 @@ PickerTileNode
  description Displays list of available tiles.
  string hakonTemplate
   .PickerTileNode
+   .PickerCategory
+    width 100%
+    margin-top 20px
+    text-align center
    .TileBody
     display flex
     flex-flow row wrap
@@ -44,7 +48,7 @@ PickerTileNode
      let breaker = ""
      if (lastCat !== category)
       breaker = `div ${category}
-   style width: 100%; margin-top: 20px; text-align: center;\n`
+   class PickerCategory\n`
      lastCat = category
      return `${breaker}a ${name}
    br

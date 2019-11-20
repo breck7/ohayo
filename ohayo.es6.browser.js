@@ -13430,10 +13430,11 @@ class TreeUtils {
     parts.pop()
     return parts.join("/")
   }
-  static shuffleInPlace(arr) {
+  static shuffleInPlace(arr, seed = Date.now()) {
     // https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
+    const randFn = TreeUtils._getPseudoRandom0to1FloatGenerator(seed)
     for (let index = arr.length - 1; index > 0; index--) {
-      const tempIndex = Math.floor(Math.random() * (index + 1))
+      const tempIndex = Math.floor(randFn() * (index + 1))
       ;[arr[index], arr[tempIndex]] = [arr[tempIndex], arr[index]]
     }
     return arr
@@ -13644,25 +13645,26 @@ class TreeUtils {
       }
     })
   }
-  // todo: add seed!
-  static getRandomString(length = 30, letters = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")) {
+  static getRandomString(length = 30, letters = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), seed = Date.now()) {
     let str = ""
+    const randFn = TreeUtils._getPseudoRandom0to1FloatGenerator(seed)
     while (length) {
-      str += letters[Math.round(Math.min(Math.random() * letters.length, letters.length - 1))]
+      str += letters[Math.round(Math.min(randFn() * letters.length, letters.length - 1))]
       length--
     }
     return str
   }
   // todo: add seed!
-  static makeRandomTree(lines = 1000) {
+  static makeRandomTree(lines = 1000, seed = Date.now()) {
     let str = ""
     let letters = " 123abc".split("")
+    const randFn = TreeUtils._getPseudoRandom0to1FloatGenerator(seed)
     while (lines) {
-      let indent = " ".repeat(Math.round(Math.random() * 6))
+      let indent = " ".repeat(Math.round(randFn() * 6))
       let bit = indent
-      let rand = Math.floor(Math.random() * 30)
+      let rand = Math.floor(randFn() * 30)
       while (rand) {
-        bit += letters[Math.round(Math.min(Math.random() * letters.length, letters.length - 1))]
+        bit += letters[Math.round(Math.min(randFn() * letters.length, letters.length - 1))]
         rand--
       }
       bit += "\n"
@@ -13673,14 +13675,14 @@ class TreeUtils {
   }
   // adapted from https://gist.github.com/blixt/f17b47c62508be59987b
   // 1993 Park-Miller LCG
-  static _getPRNG(seed) {
+  static _getPseudoRandom0to1FloatGenerator(seed) {
     return function() {
       seed = Math.imul(48271, seed) | 0 % 2147483647
       return (seed & 2147483647) / 2147483648
     }
   }
   static sampleWithoutReplacement(population = [], quantity, seed) {
-    const prng = this._getPRNG(seed)
+    const prng = this._getPseudoRandom0to1FloatGenerator(seed)
     const sampled = {}
     const populationSize = population.length
     const picked = []
@@ -13821,18 +13823,18 @@ TreeUtils.linkify = text => {
   return replacedText
 }
 // todo: switch algo to: http://indiegamr.com/generate-repeatable-random-numbers-in-js/?
-TreeUtils.makeSemiRandomFn = (seed = 1) => {
+TreeUtils.makeSemiRandomFn = (seed = Date.now()) => {
   return () => {
     const semiRand = Math.sin(seed++) * 10000
     return semiRand - Math.floor(semiRand)
   }
 }
-TreeUtils.randomUniformInt = (min, max, seed = 1) => {
-  return Math.round(TreeUtils.randomUniformFloat(min, max, seed))
+TreeUtils.randomUniformInt = (min, max, seed = Date.now()) => {
+  return Math.floor(TreeUtils.randomUniformFloat(min, max, seed))
 }
-TreeUtils.randomUniformFloat = (min, max, seed = 1) => {
-  const rand = TreeUtils.makeSemiRandomFn(seed)
-  return min + (max - min) * rand()
+TreeUtils.randomUniformFloat = (min, max, seed = Date.now()) => {
+  const randFn = TreeUtils.makeSemiRandomFn(seed)
+  return min + (max - min) * randFn()
 }
 TreeUtils.getRange = (startIndex, endIndexExclusive, increment = 1) => {
   const range = []
@@ -14111,18 +14113,27 @@ var TreeNotationConstants
 class Parser {
   constructor(catchAllNodeConstructor, firstWordMap = {}, regexTests = undefined) {
     this._catchAllNodeConstructor = catchAllNodeConstructor
-    this._firstWordMap = firstWordMap
+    this._firstWordMap = new Map(Object.entries(firstWordMap))
     this._regexTests = regexTests
   }
   getFirstWordOptions() {
-    return Object.keys(this._firstWordMap)
+    return Array.from(this._getFirstWordMap().keys())
   }
   // todo: remove
   _getFirstWordMap() {
     return this._firstWordMap
   }
+  // todo: remove
+  _getFirstWordMapAsObject() {
+    let obj = {}
+    const map = this._getFirstWordMap()
+    for (let [key, val] of map.entries()) {
+      obj[key] = val
+    }
+    return obj
+  }
   _getNodeConstructor(line, contextNode, wordBreakSymbol = " ") {
-    return this._firstWordMap[this._getFirstWord(line, wordBreakSymbol)] || this._getConstructorFromRegexTests(line) || this._getCatchAllNodeConstructor(contextNode)
+    return this._getFirstWordMap().get(this._getFirstWord(line, wordBreakSymbol)) || this._getConstructorFromRegexTests(line) || this._getCatchAllNodeConstructor(contextNode)
   }
   _getCatchAllNodeConstructor(contextNode) {
     if (this._catchAllNodeConstructor) return this._catchAllNodeConstructor
@@ -14251,6 +14262,10 @@ class TreeNode extends AbstractNode {
       wordCount += node.getWords().length
     }
     return wordCount
+  }
+  getLineNumber() {
+    // todo: remove Y coordinate stuff? Now that we use the more abstract nodeBreakSymbols?
+    return this._getYCoordinate()
   }
   _getLineNumber(target = this) {
     if (this._cachedLineNumber) return this._cachedLineNumber
@@ -14643,14 +14658,25 @@ class TreeNode extends AbstractNode {
     this.getTopDownArray().forEach(node => node._rightPad(newWidth, padCharacter))
     return this
   }
+  lengthen(numberOfLines) {
+    let linesToAdd = numberOfLines - this.getNumberOfLines()
+    while (linesToAdd > 0) {
+      this.appendLine("")
+      linesToAdd--
+    }
+    return this
+  }
   toSideBySide(treesOrStrings, delimiter = " ") {
+    treesOrStrings = treesOrStrings.map(tree => (tree instanceof TreeNode ? tree : new TreeNode(tree)))
     const clone = this.toTreeNode()
+    const nodeBreakSymbol = "\n"
     let next
     while ((next = treesOrStrings.shift())) {
+      clone.lengthen(next.getNumberOfLines())
       clone.rightPad()
       next
         .toString()
-        .split("\n")
+        .split(nodeBreakSymbol)
         .forEach((line, index) => {
           const node = clone.nodeAtLine(index)
           node.setLine(node.getLine() + delimiter + line)
@@ -15428,7 +15454,7 @@ class TreeNode extends AbstractNode {
   map(fn) {
     return this.getChildren().map(fn)
   }
-  filter(fn) {
+  filter(fn = item => item) {
     return this.getChildren().filter(fn)
   }
   find(fn) {
@@ -15445,6 +15471,12 @@ class TreeNode extends AbstractNode {
   forEach(fn) {
     this.getChildren().forEach(fn)
     return this
+  }
+  // Recurse if predicate passes
+  visit(predicate, boolean) {
+    this.forEach(node => {
+      if (predicate(node) !== false) node.visit(predicate)
+    })
   }
   // todo: protected?
   _clearIndex() {
@@ -16333,7 +16365,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "44.0.3"
+TreeNode.getVersion = () => "45.0.1"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -16475,6 +16507,8 @@ var GrammarConstants
   GrammarConstants["enumFromCellTypes"] = "enumFromCellTypes"
   GrammarConstants["enum"] = "enum"
   GrammarConstants["examples"] = "examples"
+  GrammarConstants["min"] = "min"
+  GrammarConstants["max"] = "max"
   // baseNodeTypes
   GrammarConstants["baseNodeType"] = "baseNodeType"
   GrammarConstants["blobNode"] = "blobNode"
@@ -16609,13 +16643,13 @@ class GrammarBackedNode extends TreeNode {
   findAllNodesWithNodeType(nodeTypeId) {
     return this.getTopDownArray().filter(node => node.getDefinition().getNodeTypeIdFromDefinition() === nodeTypeId)
   }
-  getInPlaceCellTypeTree() {
+  toCellTypeTree() {
     return this.getTopDownArray()
       .map(child => child.getIndentation() + child.getLineCellTypes())
       .join("\n")
   }
   getParseTable(maxColumnWidth = 40) {
-    const tree = new TreeNode(this.getInPlaceCellTypeTree())
+    const tree = new TreeNode(this.toCellTypeTree())
     return new TreeNode(
       tree.getTopDownArray().map((node, lineNumber) => {
         const sourceNode = this.nodeAtLine(lineNumber)
@@ -16714,17 +16748,22 @@ class GrammarBackedNode extends TreeNode {
     })
     return usage
   }
-  getInPlaceHighlightScopeTree() {
+  toHighlightScopeTree() {
     return this.getTopDownArray()
       .map(child => child.getIndentation() + child.getLineHighlightScopes())
       .join("\n")
   }
-  getInPlaceCellTypeTreeWithNodeConstructorNames() {
+  toDefinitionLineNumberTree() {
+    return this.getTopDownArray()
+      .map(child => child.getDefinition().getLineNumber() + " " + child.getIndentation() + child.getCellDefinitionLineNumbers().join(" "))
+      .join("\n")
+  }
+  toCellTypeTreeWithNodeConstructorNames() {
     return this.getTopDownArray()
       .map(child => child.constructor.name + this.getWordBreakSymbol() + child.getIndentation() + child.getLineCellTypes())
       .join("\n")
   }
-  getInPlacePreludeCellTypeTreeWithNodeConstructorNames() {
+  toPreludeCellTypeTreeWithNodeConstructorNames() {
     return this.getTopDownArray()
       .map(child => child.constructor.name + this.getWordBreakSymbol() + child.getIndentation() + child.getLineCellPreludeTypes())
       .join("\n")
@@ -16742,8 +16781,8 @@ class GrammarBackedNode extends TreeNode {
   _initCellTypeCache() {
     const treeMTime = this.getLineOrChildrenModifiedTime()
     if (this._cache_programCellTypeStringMTime === treeMTime) return undefined
-    this._cache_typeTree = new TreeNode(this.getInPlaceCellTypeTree())
-    this._cache_highlightScopeTree = new TreeNode(this.getInPlaceHighlightScopeTree())
+    this._cache_typeTree = new TreeNode(this.toCellTypeTree())
+    this._cache_highlightScopeTree = new TreeNode(this.toHighlightScopeTree())
     this._cache_programCellTypeStringMTime = treeMTime
   }
   createParser() {
@@ -16765,7 +16804,7 @@ class GrammarBackedNode extends TreeNode {
   getErrors() {
     const errors = this._getParsedCells()
       .map(check => check.getErrorIfAny())
-      .filter(i => i)
+      .filter(identity => identity)
     const firstWord = this.getFirstWord()
     if (this.getDefinition().has(GrammarConstants.single))
       this.getParent()
@@ -16799,6 +16838,9 @@ class GrammarBackedNode extends TreeNode {
     return this._getParsedCells()
       .map(slot => slot.getHighlightScope() || defaultScope)
       .join(" ")
+  }
+  getCellDefinitionLineNumbers() {
+    return this._getParsedCells().map(cell => cell.getDefinitionLineNumber())
   }
   _getCompiledIndentation() {
     const indentCharacter = this.getDefinition()._getCompilerObject()[GrammarConstantsCompiler.indentCharacter]
@@ -16900,6 +16942,9 @@ class AbstractGrammarBackedCell {
   getWord() {
     return this._node.getWord(this._index)
   }
+  getDefinitionLineNumber() {
+    return this._typeDef.getLineNumber()
+  }
   getCellTypeId() {
     return this._cellTypeId
   }
@@ -16911,6 +16956,15 @@ class AbstractGrammarBackedCell {
   }
   isCatchAll() {
     return this._isCatchAll
+  }
+  get min() {
+    return this._getCellTypeDefinition().get(GrammarConstants.min) || "0"
+  }
+  get max() {
+    return this._getCellTypeDefinition().get(GrammarConstants.max) || "100"
+  }
+  get placeholder() {
+    return this._getCellTypeDefinition().get(GrammarConstants.examples) || ""
   }
   getHighlightScope() {
     const definition = this._getCellTypeDefinition()
@@ -16929,11 +16983,35 @@ class AbstractGrammarBackedCell {
       }
     })
   }
-  synthesizeCell() {
+  synthesizeCell(seed = Date.now()) {
     // todo: cleanup
     const cellDef = this._getCellTypeDefinition()
     const enumOptions = cellDef._getFromExtended(GrammarConstants.enum)
-    return enumOptions ? TreeUtils.getRandomString(1, enumOptions.split(" ")) : this._synthesizeCell()
+    if (enumOptions) return TreeUtils.getRandomString(1, enumOptions.split(" "))
+    return this._synthesizeCell(seed)
+  }
+  _getStumpEnumInput(crux) {
+    const cellDef = this._getCellTypeDefinition()
+    const enumOptions = cellDef._getFromExtended(GrammarConstants.enum)
+    if (!enumOptions) return undefined
+    const options = new TreeNode(
+      enumOptions
+        .split(" ")
+        .map(option => `option ${option}`)
+        .join("\n")
+    )
+    return `select
+ name ${crux}
+${options.toString(1)}`
+  }
+  _toStumpInput(crux) {
+    // todo: remove
+    const enumInput = this._getStumpEnumInput(crux)
+    if (enumInput) return enumInput
+    // todo: cleanup. We shouldn't have these dual cellType classes.
+    return `input
+ name ${crux}
+ placeholder ${this.placeholder}`
   }
   _getCellTypeDefinition() {
     return this._typeDef
@@ -16958,26 +17036,6 @@ class AbstractGrammarBackedCell {
   }
 }
 AbstractGrammarBackedCell.parserFunctionName = ""
-class GrammarIntCell extends AbstractGrammarBackedCell {
-  _isValid() {
-    const word = this.getWord()
-    const num = parseInt(word)
-    if (isNaN(num)) return false
-    return num.toString() === word
-  }
-  _synthesizeCell() {
-    return TreeUtils.getRandomString(2, "123456789".split(""))
-  }
-  getRegexString() {
-    return "-?[0-9]+"
-  }
-  getParsed() {
-    const word = this.getWord()
-    return parseInt(word)
-  }
-}
-GrammarIntCell.defaultHighlightScope = "constant.numeric.integer"
-GrammarIntCell.parserFunctionName = "parseInt"
 class GrammarBitCell extends AbstractGrammarBackedCell {
   _isValid() {
     const word = this.getWord()
@@ -16995,14 +17053,44 @@ class GrammarBitCell extends AbstractGrammarBackedCell {
   }
 }
 GrammarBitCell.defaultHighlightScope = "constant.numeric"
-class GrammarFloatCell extends AbstractGrammarBackedCell {
+class GrammarNumericCell extends AbstractGrammarBackedCell {
+  _toStumpInput(crux) {
+    return `input
+ name ${crux}
+ type number
+ placeholder ${this.placeholder}
+ min ${this.min}
+ max ${this.max}`
+  }
+}
+class GrammarIntCell extends GrammarNumericCell {
+  _isValid() {
+    const word = this.getWord()
+    const num = parseInt(word)
+    if (isNaN(num)) return false
+    return num.toString() === word
+  }
+  _synthesizeCell(seed) {
+    return TreeUtils.randomUniformInt(parseInt(this.min), parseInt(this.max), seed).toString()
+  }
+  getRegexString() {
+    return "-?[0-9]+"
+  }
+  getParsed() {
+    const word = this.getWord()
+    return parseInt(word)
+  }
+}
+GrammarIntCell.defaultHighlightScope = "constant.numeric.integer"
+GrammarIntCell.parserFunctionName = "parseInt"
+class GrammarFloatCell extends GrammarNumericCell {
   _isValid() {
     const word = this.getWord()
     const num = parseFloat(word)
     return !isNaN(num) && /^-?\d*(\.\d+)?$/.test(word)
   }
-  _synthesizeCell() {
-    return TreeUtils.getRandomString(2, "123456789".split("")) + "." + TreeUtils.getRandomString(2, "0123456789".split(""))
+  _synthesizeCell(seed) {
+    return TreeUtils.randomUniformFloat(parseFloat(this.min), parseFloat(this.max), seed).toString()
   }
   getRegexString() {
     return "-?d*(.d+)?"
@@ -17387,6 +17475,8 @@ class cellTypeDefinitionNode extends AbstractExtendibleTreeNode {
     types[GrammarConstants.highlightScope] = TreeNode
     types[GrammarConstants.todoComment] = TreeNode
     types[GrammarConstants.examples] = TreeNode
+    types[GrammarConstants.min] = TreeNode
+    types[GrammarConstants.max] = TreeNode
     types[GrammarConstants.description] = TreeNode
     types[GrammarConstants.extends] = TreeNode
     return new TreeNode.Parser(undefined, types)
@@ -17825,7 +17915,7 @@ class AbstractGrammarDefinitionNode extends AbstractExtendibleTreeNode {
     const catchAllConstructor = this._getCatchAllNodeConstructorToJavascript()
     if (!hasFirstWords && !catchAllConstructor && !regexRules.length) return ""
     const firstWordsStr = hasFirstWords
-      ? `Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {` + firstWords.map(firstWord => `"${firstWord}" : ${myFirstWordMap[firstWord].getNodeTypeIdFromDefinition()}`).join(",\n") + "})"
+      ? `Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {` + firstWords.map(firstWord => `"${firstWord}" : ${myFirstWordMap[firstWord].getNodeTypeIdFromDefinition()}`).join(",\n") + "})"
       : "undefined"
     const regexStr = regexRules.length
       ? `[${regexRules
@@ -17848,7 +17938,7 @@ class AbstractGrammarDefinitionNode extends AbstractExtendibleTreeNode {
     return nodeDef._getGeneratedClassName()
   }
   _nodeDefToJavascriptClass() {
-    const components = [this._getParserToJavascript(), this._getErrorMethodToJavascript(), this._getCellGettersAndNodeTypeConstants(), this._getCustomJavascriptMethods()].filter(code => code)
+    const components = [this._getParserToJavascript(), this._getErrorMethodToJavascript(), this._getCellGettersAndNodeTypeConstants(), this._getCustomJavascriptMethods()].filter(identity => identity)
     if (this._amIRoot()) {
       components.push(`getGrammarProgram() {
         if (!this._cachedGrammarProgramRoot)
@@ -17962,12 +18052,32 @@ ${captures}
     const ancestorIds = this.getAncestorNodeTypeIdsArray()
     if (ancestorIds.length > 1) return ancestorIds[ancestorIds.length - 2]
   }
-  _generateSimulatedLine() {
+  _toStumpString() {
+    const crux = this._getCruxIfAny()
+    const cellArray = this.getCellParser()
+      .getCellArray()
+      .filter((item, index) => index) // for now this only works for keyword langs
+    if (!cellArray.length)
+      // todo: remove this! just doing it for now until we refactor getCellArray to handle catchAlls better.
+      return ""
+    const cells = new TreeNode(cellArray.map((cell, index) => cell._toStumpInput(crux)).join("\n"))
+    return `div
+ label ${crux}
+${cells.toString(1)}`
+  }
+  toStumpString() {
+    const nodeBreakSymbol = "\n"
+    return this._getConcreteNonErrorInScopeNodeDefinitions(this._getInScopeNodeTypeIds())
+      .map(def => def._toStumpString())
+      .filter(identity => identity)
+      .join(nodeBreakSymbol)
+  }
+  _generateSimulatedLine(seed) {
     // todo: generate simulated data from catch all
     const crux = this._getCruxIfAny()
     return this.getCellParser()
       .getCellArray()
-      .map((cell, index) => (!index && crux ? crux : cell.synthesizeCell()))
+      .map((cell, index) => (!index && crux ? crux : cell.synthesizeCell(seed)))
       .join(" ")
   }
   _shouldSynthesize(def, nodeTypeChain) {
@@ -17977,8 +18087,21 @@ ${captures}
     if (tags && tags.includes("doNotSynthesize")) return false
     return true
   }
+  _getConcreteNonErrorInScopeNodeDefinitions(nodeTypeIds) {
+    const results = []
+    nodeTypeIds.forEach(nodeTypeId => {
+      const def = this.getNodeTypeDefinitionByNodeTypeId(nodeTypeId)
+      if (def._isErrorNodeType()) return true
+      else if (def._isAbstract()) {
+        def._getConcreteDescendantDefinitions().forEach(def => results.push(def))
+      } else {
+        results.push(def)
+      }
+    })
+    return results
+  }
   // todo: refactor
-  synthesizeNode(nodeCount = 1, indentCount = -1, nodeTypesAlreadySynthesized = []) {
+  synthesizeNode(nodeCount = 1, indentCount = -1, nodeTypesAlreadySynthesized = [], seed = Date.now()) {
     let inScopeNodeTypeIds = this._getInScopeNodeTypeIds()
     const catchAllNodeTypeId = this._getFromExtended(GrammarConstants.catchAllNodeType)
     if (catchAllNodeTypeId) inScopeNodeTypeIds.push(catchAllNodeTypeId)
@@ -17986,29 +18109,14 @@ ${captures}
     if (!nodeTypesAlreadySynthesized.includes(thisId)) nodeTypesAlreadySynthesized.push(thisId)
     const lines = []
     while (nodeCount) {
-      const line = this._generateSimulatedLine()
+      const line = this._generateSimulatedLine(seed)
       if (line) lines.push(" ".repeat(indentCount >= 0 ? indentCount : 0) + line)
-      const concreteNodeTypeDefsToSynthesize = []
-      inScopeNodeTypeIds
-        .filter(nodeTypeId => {
-          if (nodeTypesAlreadySynthesized.includes(nodeTypeId)) return false
-          return true
-        })
-        .forEach(nodeTypeId => {
-          const def = this.getNodeTypeDefinitionByNodeTypeId(nodeTypeId)
-          if (def._isErrorNodeType()) return true
-          else if (def._isAbstract()) {
-            def._getConcreteDescendantDefinitions().forEach(def => concreteNodeTypeDefsToSynthesize.push(def))
-          } else {
-            concreteNodeTypeDefsToSynthesize.push(def)
-          }
-        })
-      concreteNodeTypeDefsToSynthesize
+      this._getConcreteNonErrorInScopeNodeDefinitions(inScopeNodeTypeIds.filter(nodeTypeId => !nodeTypesAlreadySynthesized.includes(nodeTypeId)))
         .filter(def => this._shouldSynthesize(def, nodeTypesAlreadySynthesized))
         .forEach(def => {
           const chain = nodeTypesAlreadySynthesized // .slice(0)
           chain.push(def._getId())
-          def.synthesizeNode(1, indentCount + 1, chain).forEach(line => {
+          def.synthesizeNode(1, indentCount + 1, chain, seed).forEach(line => {
             lines.push(line)
           })
         })
@@ -18411,7 +18519,7 @@ class UnknownGrammarProgram extends TreeNode {
  ${GrammarConstants.root}`)
     // note: right now we assume 1 global cellTypeMap and nodeTypeMap per grammar. But we may have scopes in the future?
     const rootNodeNames = this.getFirstWords()
-      .filter(word => word)
+      .filter(identity => identity)
       .map(word => GrammarProgram.makeNodeTypeId(word))
     rootNode
       .nodeAt(0)
@@ -18449,7 +18557,7 @@ class UnknownGrammarProgram extends TreeNode {
     if (childNodeTypeIds.length) nodeDefNode.touchNode(GrammarConstants.inScope).setWordsFrom(1, childNodeTypeIds)
     const cellsForAllInstances = instances
       .map(line => line.getContent())
-      .filter(line => line)
+      .filter(identity => identity)
       .map(line => line.split(edgeSymbol))
     const instanceCellCounts = new Set(cellsForAllInstances.map(cells => cells.length))
     const maxCellsOnLine = Math.max(...Array.from(instanceCellCounts))
@@ -18497,12 +18605,12 @@ class UnknownGrammarProgram extends TreeNode {
     const globalCellTypeMap = new Map()
     globalCellTypeMap.set(PreludeCellTypeIds.keywordCell, undefined)
     const nodeTypeDefs = Object.keys(keywordsToChildKeywords)
-      .filter(word => word)
+      .filter(identity => identity)
       .map(firstWord => this._inferNodeTypeDef(firstWord, globalCellTypeMap, Object.keys(keywordsToChildKeywords[firstWord]), keywordsToNodeInstances[firstWord]))
     const cellTypeDefs = []
     globalCellTypeMap.forEach((def, id) => cellTypeDefs.push(def ? def : id))
     const nodeBreakSymbol = this.getNodeBreakSymbol()
-    return this._formatCode([this._inferRootNodeForAPrefixLanguage(grammarName).toString(), cellTypeDefs.join(nodeBreakSymbol), nodeTypeDefs.join(nodeBreakSymbol)].filter(def => def).join("\n"))
+    return this._formatCode([this._inferRootNodeForAPrefixLanguage(grammarName).toString(), cellTypeDefs.join(nodeBreakSymbol), nodeTypeDefs.join(nodeBreakSymbol)].filter(identity => identity).join("\n"))
   }
   _formatCode(code) {
     // todo: make this run in browser too
@@ -18515,7 +18623,7 @@ class UnknownGrammarProgram extends TreeNode {
   _getBestCellType(firstWord, instanceCount, maxCellsOnLine, allValues) {
     const asSet = new Set(allValues)
     const edgeSymbol = this.getEdgeSymbol()
-    const values = Array.from(asSet).filter(c => c)
+    const values = Array.from(asSet).filter(identity => identity)
     const every = fn => {
       for (let index = 0; index < values.length; index++) {
         if (!fn(values[index])) return false
@@ -21094,7 +21202,7 @@ class Table {
     const notEqualTests = tests
       .filter(test => test.startsWith("!"))
       .map(test => propertyNameToColumnNameMap[test.substr(1)])
-      .filter(i => i)
+      .filter(identity => identity)
       .forEach(name => {
         notIn[name] = true
       })
@@ -21204,7 +21312,7 @@ class Table {
     // will often miss columns.
     return Object.keys(this._getUnionSample(this._getSampleSet()))
       .map(columnName => columnName.trim()) // todo: why do we filter empties?
-      .filter(col => col)
+      .filter(identity => identity)
       .filter(col => !columns[col]) // do not overwrite any custom columns
   }
   toTypeScriptInterface() {
@@ -21383,7 +21491,7 @@ window.ComparisonOperators = ComparisonOperators
     createParser() {
       return new jtree.TreeNode.Parser(
         errorNode,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           blockquote: htmlTagNode,
           colgroup: htmlTagNode,
           datalist: htmlTagNode,
@@ -21501,6 +21609,9 @@ window.ComparisonOperators = ComparisonOperators
     compile() {
       return this.toHtml()
     }
+    _getHtmlJoinByCharacter() {
+      return ""
+    }
     getGrammarProgram() {
       if (!this._cachedGrammarProgramRoot)
         this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`anyCell
@@ -21535,6 +21646,9 @@ stumpNode
   compile() {
    return this.toHtml()
   }
+  _getHtmlJoinByCharacter() {
+    return ""
+  }
 htmlTagNode
  inScope bernNode htmlTagNode htmlAttributeNode
  catchAllCellType anyHtmlContentCell
@@ -21550,7 +21664,7 @@ htmlTagNode
    return map[firstWord] || firstWord
   }
   _getHtmlJoinByCharacter() {
-   return \`\`
+   return ""
   }
   toHtmlWithSuids() {
    return this._toHtml(undefined, true)
@@ -21558,6 +21672,9 @@ htmlTagNode
   _getOneLiner() {
    const oneLinerWords = this.getWordsFrom(1)
    return oneLinerWords.length ? oneLinerWords.join(" ") : ""
+  }
+  getTextContent() {
+    return this._getOneLiner()
   }
   shouldCollapse() {
    return this.has("stumpCollapse")
@@ -21709,6 +21826,7 @@ htmlAttributeNode
   _toHtml() {
    return ""
   }
+  getTextContent() {return ""}
   getAttribute() {
    return \` \${this.getFirstWord()}="\${this.getContent()}"\`
   }
@@ -21728,6 +21846,8 @@ lineOfHtmlContentNode
  boolean isTileAttribute true
  catchAllNodeType lineOfHtmlContentNode
  catchAllCellType anyHtmlContentCell
+ javascript
+  getTextContent() {return this.getLine()}
 bernNode
  boolean isTileAttribute true
  todo Rename this node type
@@ -21737,6 +21857,7 @@ bernNode
   _toHtml() {
    return this.childrenToString()
   }
+  getTextContent() {return ""}
  cells bernKeywordCell`)
       return this._cachedGrammarProgramRoot
     }
@@ -21757,7 +21878,7 @@ bernNode
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           blockquote: htmlTagNode,
           colgroup: htmlTagNode,
           datalist: htmlTagNode,
@@ -22062,7 +22183,7 @@ bernNode
       return map[firstWord] || firstWord
     }
     _getHtmlJoinByCharacter() {
-      return ``
+      return ""
     }
     toHtmlWithSuids() {
       return this._toHtml(undefined, true)
@@ -22070,6 +22191,9 @@ bernNode
     _getOneLiner() {
       const oneLinerWords = this.getWordsFrom(1)
       return oneLinerWords.length ? oneLinerWords.join(" ") : ""
+    }
+    getTextContent() {
+      return this._getOneLiner()
     }
     shouldCollapse() {
       return this.has("stumpCollapse")
@@ -22241,6 +22365,9 @@ bernNode
     _toHtml() {
       return ""
     }
+    getTextContent() {
+      return ""
+    }
     getAttribute() {
       return ` ${this.getFirstWord()}="${this.getContent()}"`
     }
@@ -22262,6 +22389,9 @@ bernNode
     get isTileAttribute() {
       return true
     }
+    getTextContent() {
+      return this.getLine()
+    }
   }
 
   class bernNode extends jtree.GrammarBackedNode {
@@ -22277,6 +22407,9 @@ bernNode
     _toHtml() {
       return this.childrenToString()
     }
+    getTextContent() {
+      return ""
+    }
   }
 
   window.stumpNode = stumpNode
@@ -22288,7 +22421,7 @@ bernNode
     createParser() {
       return new jtree.TreeNode.Parser(
         errorNode,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           block: blockNode,
           function: functionNode,
           if: ifNode,
@@ -22742,7 +22875,7 @@ errorNode
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           block: blockNode,
           function: functionNode,
           if: ifNode,
@@ -23128,7 +23261,7 @@ errorNode
     createParser() {
       return new jtree.TreeNode.Parser(
         selectorNode,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { comment: commentNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { comment: commentNode }),
         undefined
       )
     }
@@ -23281,7 +23414,7 @@ selectorNode
     createParser() {
       return new jtree.TreeNode.Parser(
         selectorNode,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           "border-bottom-right-radius": propertyNode,
           "transition-timing-function": propertyNode,
           "animation-iteration-count": propertyNode,
@@ -23770,6 +23903,12 @@ class AbstractWillowProgram extends stumpNode {
   _getPort() {
     return this.location.port ? ":" + this.location.port : ""
   }
+  getHash() {
+    return this.location.hash || ""
+  }
+  setHash(value) {
+    this.location.hash = value
+  }
   queryObjectToQueryString(obj) {
     const params = new URLSearchParams()
     for (const [key, value] of Object.entries(obj)) {
@@ -24189,6 +24328,12 @@ class WillowBrowserProgram extends AbstractWillowProgram {
   getStore() {
     return window.store
   }
+  getHash() {
+    return location.hash || ""
+  }
+  setHash(value) {
+    location.hash = value
+  }
   getHost() {
     return location.host
   }
@@ -24473,7 +24618,18 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
       .getHtmlStumpNode()
       .toString()
   }
+  _getHtmlOnlyNodes() {
+    const nodes = []
+    this.getWillowProgram()
+      .getHtmlStumpNode()
+      .visit(node => {
+        if (node.getFirstWord() === "styleTag" || (node.getContent() || "").startsWith("<svg ")) return false
+        nodes.push(node)
+      })
+    return nodes
+  }
   getStumpNodeStringWithoutCssAndSvg() {
+    // todo: cleanup. feels hacky.
     const clone = new jtree.TreeNode(
       this.getWillowProgram()
         .getHtmlStumpNode()
@@ -24484,12 +24640,18 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
     })
     return clone.toString()
   }
+  getTextContent() {
+    return this._getHtmlOnlyNodes()
+      .map(node => node.getTextContent())
+      .filter(text => text)
+      .join("\n")
+  }
   async _executeStumpNodeCommand(stumpNode, commandMethod) {
     const params = this._getCommandArguments(stumpNode, commandMethod)
     if (commandMethod.includes(" "))
       // todo: cleanup
       commandMethod = commandMethod.split(" ")[0]
-    this.addToCommandLog([commandMethod, params.uno, params.dos].filter(item => item).join(" "))
+    this.addToCommandLog([commandMethod, params.uno, params.dos].filter(identity => identity).join(" "))
     this._onCommandWillRun() // todo: remove. currently used by ohayo
     let treeComponent = stumpNode.getStumpNodeTreeComponent()
     let commander = treeComponent.getCommander()
@@ -24543,6 +24705,12 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
   getDefaultStartState() {
     return ""
   }
+  async start() {
+    this._setTreeComponentFrameworkEventListeners()
+    await this.appWillFirstRender()
+    this.renderAndGetRenderReport(this.getWillowProgram().getBodyStumpNode())
+    this.appDidFirstRender()
+  }
   static async startApp(appClass) {
     document.addEventListener(
       "DOMContentLoaded",
@@ -24552,10 +24720,7 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
           const startState = appClass.getDefaultStartState()
           const anyAppClass = appClass // todo: cleanup
           win.app = new anyAppClass(startState)
-          win.app._setTreeComponentFrameworkEventListeners()
-          await win.app.appWillFirstRender()
-          win.app.renderAndGetRenderReport(win.app.getWillowProgram().getBodyStumpNode())
-          win.app.appDidFirstRender()
+          await win.app.start()
         }
       },
       false
@@ -24933,7 +25098,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
     createParser() {
       return new jtree.TreeNode.Parser(
         catchAllErrorNode,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           "tiles.didyoumean": DidYouMeanTileNode,
           "tiles.picker": PickerTileNode,
           "templates.list": templatesListNode,
@@ -25501,6 +25666,10 @@ span ?`
     }
     get hakonTemplate() {
       return `.PickerTileNode
+ .PickerCategory
+  width 100%
+  margin-top 20px
+  text-align center
  .TileBody
   display flex
   flex-flow row wrap
@@ -25542,7 +25711,7 @@ span ?`
           let breaker = ""
           if (lastCat !== category)
             breaker = `div ${category}
- style width: 100%; margin-top: 20px; text-align: center;\n`
+ class PickerCategory\n`
           lastCat = category
           return `${breaker}a ${name}
  br
@@ -25563,7 +25732,7 @@ span ?`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           "templates.list": templatesListNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
@@ -25886,7 +26055,7 @@ span ?`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { rowDisplayLimit: rowDisplayLimitNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { rowDisplayLimit: rowDisplayLimitNode }),
         undefined
       )
     }
@@ -26258,7 +26427,7 @@ bern${jtree.TreeNode.nest(box, 2)}`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { style: styleNode, content: contentNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { style: styleNode, content: contentNode }),
         undefined
       )
     }
@@ -26377,7 +26546,7 @@ bern${jtree.TreeNode.nest(box, 2)}`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { content: contentNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
         undefined
       )
     }
@@ -26568,7 +26737,7 @@ class divWhereVegaWillGo`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           colorColumn: colorColumnNode,
           shapeColumn: shapeColumnNode,
           xColumn: xColumnNode,
@@ -26622,7 +26791,7 @@ yColumn isString=false,!xColumn`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { sizeColumn: sizeColumnNode, colorColumn: colorColumnNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { sizeColumn: sizeColumnNode, colorColumn: colorColumnNode }),
         undefined
       )
     }
@@ -26656,7 +26825,7 @@ xColumn isString=false`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { yColumn: yColumnNode, emojiColumn: emojiColumnNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { yColumn: yColumnNode, emojiColumn: emojiColumnNode }),
         undefined
       )
     }
@@ -26688,7 +26857,7 @@ yColumn isString=false`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { xColumn: xColumnNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { xColumn: xColumnNode }),
         undefined
       )
     }
@@ -26786,7 +26955,7 @@ yColumn isString=false`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { count: countNode, dayColumn: dayColumnNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { count: countNode, dayColumn: dayColumnNode }),
         undefined
       )
     }
@@ -26939,7 +27108,7 @@ ${quinSvgs}
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { genderColumn: genderColumnNode, headSize: headSizeNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { genderColumn: genderColumnNode, headSize: headSizeNode }),
         undefined
       )
     }
@@ -26984,7 +27153,11 @@ bern${jtree.TreeNode.nest(bern, 2)}`
 
   class iconsCircleNode extends iconsIconNode {
     createParser() {
-      return new jtree.TreeNode.Parser(undefined, Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { radius: radiusNode }), undefined)
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { radius: radiusNode }),
+        undefined
+      )
     }
     get dummyDataSet() {
       return `playerGoals`
@@ -27007,7 +27180,7 @@ bern${jtree.TreeNode.nest(bern, 2)}`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { content: contentNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
         undefined
       )
     }
@@ -27071,7 +27244,7 @@ bern${jtree.TreeNode.nest(bern, 2)}`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { content: contentNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
         undefined
       )
     }
@@ -27324,26 +27497,27 @@ a Run Tile Quality Check
         .filter(tile => tile.isVisible())
         .map(
           tile => `div
-style ${dimensions.get(tile).getScaledCss(0.1)}`
+ style ${dimensions.get(tile).getScaledCss(0.1)}`
         )
         .join("\n")
       return `a
-class miniMap
-${permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"}
-${permalink ? `value ${permalink}` : "stumpNoOp"}
-${permalink ? `href ${permalink}` : "stumpNoOp"}
-div
- class miniPreview${jtree.TreeNode.nest(theTiles, 2)}
-div ${filename}
- class miniFooter`
+ class miniMap
+ ${permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"}
+ ${permalink ? `value ${permalink}` : "stumpNoOp"}
+ ${permalink ? `href ${permalink}` : "stumpNoOp"}
+ div
+  class miniPreview${jtree.TreeNode.nest(theTiles, 2)}
+ div ${filename}
+  class miniFooter`
     }
     getTileBodyStumpCode() {
       // todo: cache.
       const minis = this.getRowsWithRowDisplayLimit()
         .map(row => this._getMiniStumpCode(row.getRowOriginalValue("bytes"), row.getRowOriginalValue("filename"), row.getRowOriginalValue("link")))
         .join("\n")
-      return `div
-class MiniMapTile${jtree.TreeNode.nest(minis, 1)}`
+      const stump = `div
+ class MiniMapTile${jtree.TreeNode.nest(minis, 1)}`
+      return stump
     }
   }
 
@@ -27404,7 +27578,11 @@ class hot`
 
   class listBasicNode extends abstractChartNode {
     createParser() {
-      return new jtree.TreeNode.Parser(undefined, Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { label: labelNode }), undefined)
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { label: labelNode }),
+        undefined
+      )
     }
     get columnNameCell() {
       return this.getWordsFrom(0)
@@ -27439,7 +27617,7 @@ ${this.getRowsWithRowDisplayLimit()
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { label: labelNode, link: linkNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { label: labelNode, link: linkNode }),
         undefined
       )
     }
@@ -27470,7 +27648,7 @@ a ${label}
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { columnLimit: columnLimitNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { columnLimit: columnLimitNode }),
         undefined
       )
     }
@@ -27611,7 +27789,7 @@ a ${label}
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { column: columnNode, count: countNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { column: columnNode, count: countNode }),
         undefined
       )
     }
@@ -27670,7 +27848,11 @@ style width: 100%; height: 100%;`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { size: sizeNode, cameraPosition: cameraPositionNode, content: contentNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
+          size: sizeNode,
+          cameraPosition: cameraPositionNode,
+          content: contentNode
+        }),
         undefined
       )
     }
@@ -27871,7 +28053,7 @@ span Rows Out: ${table.getRowCount()} Columns Out: ${table.getColumnCount()} Tim
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { parser: parserNode, useCache: useCacheNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { parser: parserNode, useCache: useCacheNode }),
         undefined
       )
     }
@@ -28092,7 +28274,11 @@ input
 
   class webPostNode extends abstractUrlNode {
     createParser() {
-      return new jtree.TreeNode.Parser(undefined, Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { post: postNode }), undefined)
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { post: postNode }),
+        undefined
+      )
     }
     get tileSize() {
       return `400 130`
@@ -28352,7 +28538,7 @@ input
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { sourceColumn: sourceColumnNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { sourceColumn: sourceColumnNode }),
         undefined
       )
     }
@@ -28576,7 +28762,7 @@ input
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { content: contentNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
         undefined
       )
     }
@@ -28936,7 +29122,11 @@ class LargeLabel`
 
   class groupByNode extends abstractTransformerNode {
     createParser() {
-      return new jtree.TreeNode.Parser(undefined, Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { reduce: reduceNode }), undefined)
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { reduce: reduceNode }),
+        undefined
+      )
     }
     get columnNameCell() {
       return this.getWordsFrom(0)
@@ -28987,7 +29177,11 @@ class LargeLabel`
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), { parser: parserNode, treeLanguage: treeLanguageNode, content: contentNode }),
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
+          parser: parserNode,
+          treeLanguage: treeLanguageNode,
+          content: contentNode
+        }),
         undefined
       )
     }
@@ -29299,7 +29493,7 @@ bern${jtree.TreeNode.nest(text, 2)}`
     createParser() {
       return new jtree.TreeNode.Parser(
         DidYouMeanTileNode,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           "tiles.picker": PickerTileNode,
           "templates.list": templatesListNode,
           "challenge.list": challengeListNode,
@@ -29991,6 +30185,10 @@ PickerTileNode
  description Displays list of available tiles.
  string hakonTemplate
   .PickerTileNode
+   .PickerCategory
+    width 100%
+    margin-top 20px
+    text-align center
    .TileBody
     display flex
     flex-flow row wrap
@@ -30032,7 +30230,7 @@ PickerTileNode
      let breaker = ""
      if (lastCat !== category)
       breaker = \`div \${category}
-   style width: 100%; margin-top: 20px; text-align: center;\\n\`
+   class PickerCategory\\n\`
      lastCat = category
      return \`\${breaker}a \${name}
    br
@@ -31523,26 +31721,27 @@ editorGalleryNode
     .filter(tile => tile.isVisible())
     .map(
      tile => \`div
-  style \${dimensions.get(tile).getScaledCss(0.1)}\`
+   style \${dimensions.get(tile).getScaledCss(0.1)}\`
     )
     .join("\\n")
    return \`a
-  class miniMap
-  \${permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"}
-  \${permalink ? \`value \${permalink}\` : "stumpNoOp"}
-  \${permalink ? \`href \${permalink}\` : "stumpNoOp"}
-  div
-   class miniPreview\${jtree.TreeNode.nest(theTiles, 2)}
-  div \${filename}
-   class miniFooter\`
+   class miniMap
+   \${permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"}
+   \${permalink ? \`value \${permalink}\` : "stumpNoOp"}
+   \${permalink ? \`href \${permalink}\` : "stumpNoOp"}
+   div
+    class miniPreview\${jtree.TreeNode.nest(theTiles, 2)}
+   div \${filename}
+    class miniFooter\`
   }
   getTileBodyStumpCode() {
    // todo: cache.
    const minis = this.getRowsWithRowDisplayLimit()
     .map(row => this._getMiniStumpCode(row.getRowOriginalValue("bytes"), row.getRowOriginalValue("filename"), row.getRowOriginalValue("link")))
     .join("\\n")
-   return \`div
-  class MiniMapTile\${jtree.TreeNode.nest(minis, 1)}\`
+   const stump = \`div
+   class MiniMapTile\${jtree.TreeNode.nest(minis, 1)}\`
+   return stump
   }
 handsontableBasicNode
  description A spreadsheet-like table.
@@ -34251,138 +34450,7 @@ challenge
      filter.where word = people
       show.max count Count`
 "use strict";
-window.TemplatesStamp = `file templates/amazon-purchase-history.maia
- data
-  html.h1 Amazon Purchase History
-  comment Delete the below line and replace with your data
-  amazon.history
-   columns.keep Category ItemTotal OrderDate Title
-    tables.basic All Amazon Purchases
-    group.by Category
-     reduce ItemTotal sum sum
-     vega.bar Amount Spent by Category
-      xColumn Category
-      yColumn sum
-    date.addColumns year
-     group.by year
-      reduce ItemTotal sum totalSpent
-      vega.bar Amount Spent by Year
-       yColumn totalSpent
-       xColumn year
-      vega.bar Items Purchases by Year
-       yColumn count
-       xColumn year
-  layout column
-file templates/cancer-in-the-us.maia
- data
-  html.h1 Cancer in the U.S.
-  cancer.cases
-   tables.basic
-   show.sum Female Total female cases
-   vega.bar
-    xColumn CancerType
-    yColumn Female
-   show.sum Male Total male cases
-   columns.setType Male number
-    vega.bar
-     xColumn CancerType
-     yColumn Male
-  layout column
-file templates/git-repo-dashboard.maia
- data
-  html.h1 Desktop Only: Statistics for Local Git Repo
-  web.get http://localhost:2222/shell?command=gitlog
-   date.addColumns
-    group.by day
-     date.heatcal
-      count count
-     show.median count Median Commits Per Coding Day
-     show.rowCount # Coding Days
-    group.by month
-     vega.line Monthly Commit Trends
-      xColumn month
-      yColumn count
-     vega.bar Days worked by month
-      xColumn month
-      yColumn count
-   show.rowCount Total Commits
-   show.max time Most Recent Commit
-   show.min time First Commit
-  layout column
-file templates/loc-with-bars.maia
- data
-  html.h1 Desktop Only: Analyze lines of code in a folder
-  web.get /disk?path=/ohayo/ohayoWebApp&lineStats=true&recursive=true
-   filter.without .DS_Store min.js node_modules ignore package-lock.json
-    show.sum lines Total LoC
-    columns.keep name extension lines words bytes wordsPerLine
-     rows.sortByReverse lines
-      tables.basic All files
-    group.by extension
-     reduce words sum words
-     reduce bytes sum bytes
-     reduce lines sum lines
-     vega.bar Lines of Code
-      yColumn lines
-     vega.bar Words
-      yColumn words
-     tables.basic Top Extensions
-  layout column
-file templates/reddit.maia
- data
-  html.h1 Top Stories on Reddit
-  reddit.all
-   hidden
-   columns.keep title created_utc score subreddit url
-    hidden
-    rows.sortByReverse score
-     tables.basic Top Stories on Reddit
-    vega.scatter
-     yColumn score
-     xColumn created_utc
-    vega.bar Top Stories on Reddit Right Now
-     yColumn score
-  layout column
-file templates/trends-in-baby-names.maia
- data
-  html.h1 Trends in Baby Names
-  comment Uncomment the below line, and delete the following line, to use the full dataset
-  comment  web.get https://raw.githubusercontent.com/hadley/data-baby-names/master/baby-names.csv
-  samples.babyNames
-   filter.where name = Aria
-    filter.where sex = girl
-     vega.line
-      xColumn year
-      yColumn percent
-  layout column
-file templates/ucimlr-overview.maia
- data
-  html.h1 UCIMLR Dataset Overview
-  layout column
-  ucimlr.datasets
-   show.rowCount Total Datasets
-   group.by Category
-    vega.bar
-   comment  Filter out missing data:
-   filter.where Year > 1910
-    group.by Year
-     columns.setType Year year
-      vega.bar
-       xColumn Year
-       yColumn count
-file templates/word-cloud.maia
- data
-  html.h1 Word Cloud
-  layout column
-  data.inline
-   text.wordCount
-    text.wordcloud
-    rows.sortByReverse count
-     tables.basic
-   parser text
-   content
-    If you put some text here, you will make yourself a word cloud. The more text you add, the better it will be. So keep writing, writing, writing, and you will get something that looks good.
-`
+window.TemplatesStamp = ``
 "use strict";
 window.OhayoDrums = `panel new createNewBlankProgramCommand ctrl+n New file
 mounted new cloneTabCommand ctrl+shift+n Clone file
@@ -36224,7 +36292,7 @@ BlobNode
     createParser() {
       return new jtree.TreeNode.Parser(
         catchAllErrorNode,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMap()), {
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           "tiles.didyoumean": DidYouMeanTileNode,
           "tiles.picker": PickerTileNode,
           "#!": hashBangNode,
@@ -36663,6 +36731,10 @@ span ?`
     }
     get hakonTemplate() {
       return `.PickerTileNode
+ .PickerCategory
+  width 100%
+  margin-top 20px
+  text-align center
  .TileBody
   display flex
   flex-flow row wrap
@@ -36704,7 +36776,7 @@ span ?`
           let breaker = ""
           if (lastCat !== category)
             breaker = `div ${category}
- style width: 100%; margin-top: 20px; text-align: center;\n`
+ class PickerCategory\n`
           lastCat = category
           return `${breaker}a ${name}
  br
@@ -37265,6 +37337,10 @@ PickerTileNode
  description Displays list of available tiles.
  string hakonTemplate
   .PickerTileNode
+   .PickerCategory
+    width 100%
+    margin-top 20px
+    text-align center
    .TileBody
     display flex
     flex-flow row wrap
@@ -37306,7 +37382,7 @@ PickerTileNode
      let breaker = ""
      if (lastCat !== category)
       breaker = \`div \${category}
-   style width: 100%; margin-top: 20px; text-align: center;\\n\`
+   class PickerCategory\\n\`
      lastCat = category
      return \`\${breaker}a \${name}
    br
