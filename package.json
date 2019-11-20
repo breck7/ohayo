@@ -10,7 +10,7 @@
     "useTabs": false,
     "tabWidth": 2,
     "semi": false,
-    "printWidth": 160
+    "printWidth": 180
   },
   "dependencies": {
     "@types/node": "^12.7.12",

@@ -101,7 +101,7 @@ abstractTileTreeComponentNode
     class TileGrabber`
   }
   getCommander() {
-   const TileCommander = this.require("TileCommander", this._getProjectRootDir() + "ohayoWebApp/commanders/TileCommander.js")
+   const TileCommander = this.require("TileCommander", this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileCommander.js")
    return new TileCommander(this)
   }
   // todo: delete this
