@@ -3,12 +3,17 @@ const { WillowConstants } = require("jtree/products/TreeComponentFramework.node.
 
 const TilesConstants = require("../tiles/TilesConstants.js")
 
-const { WallTreeComponent, WallCommander } = require("./WallTreeComponent.js")
+const { WallTreeComponent } = require("./WallTreeComponent.js")
 
-class WallFlexCommander extends WallCommander {
+class WallFlexTreeComponent extends WallTreeComponent {
+  _resizeTiles(stumpNode) {
+    const selected = this._getSelectedTileStumpNodes()
+    selected.length > 1 ? selected.forEach(stumpNode => this._resizeStumpNode(stumpNode)) : this._resizeStumpNode(stumpNode)
+    this.setLayoutToCustomCommand()
+  }
+
   setLayoutToCustomCommand() {
-    const wall = this.getTarget()
-    const app = wall.getRootNode()
+    const app = this.getRootNode()
     const tab = app.getMountedTab()
     const tabProgram = tab.getTabProgram()
     tabProgram.touchNode(TilesConstants.layout).setContent(TilesConstants.custom)
@@ -17,14 +22,13 @@ class WallFlexCommander extends WallCommander {
 
   moveTilesFromShadowsCommand() {
     // todo: remove this. ditch jqery ui.
-    const wall = this.getTarget()
-    const app = wall.getRootNode()
+    const app = this.getRootNode()
     app
       .getWillowProgram()
       .getBodyStumpNode()
       .findStumpNodesWithClass(TilesConstants.abstractTileTreeComponentNode)
       .filter(stumpNode => stumpNode.getStumpNodeTreeComponent().isVisible())
-      .forEach(stumpNode => wall._moveStumpNode(stumpNode))
+      .forEach(stumpNode => this._moveStumpNode(stumpNode))
     return this.setLayoutToCustomCommand()
   }
 
@@ -36,9 +40,7 @@ class WallFlexCommander extends WallCommander {
   }
 
   async toggleLayoutCommand() {
-    const mountedProgram = this.getTarget()
-      .getRootNode()
-      .getMountedTilesProgram()
+    const mountedProgram = this.getRootNode().getMountedTilesProgram()
     const currentLayoutNode = mountedProgram.touchNode(TilesConstants.layout)
     const currentLayout = currentLayoutNode.getContent() || TilesConstants.layouts.tiled
     const newLayout = jtree.Utils.toggle(currentLayout, this._getLayoutOptions(mountedProgram))
@@ -48,27 +50,14 @@ class WallFlexCommander extends WallCommander {
     tab.addStumpCodeMessageToLog(`div Layout changed to '${newLayout}'.`)
     await tab.autosaveAndRender()
   }
-}
-
-class WallFlexTreeComponent extends WallTreeComponent {
-  _resizeTiles(stumpNode) {
-    const selected = this._getSelectedTileStumpNodes()
-    selected.length > 1 ? selected.forEach(stumpNode => this._resizeStumpNode(stumpNode)) : this._resizeStumpNode(stumpNode)
-    this.getCommander().setLayoutToCustomCommand()
-  }
-
-  getCommander() {
-    return new WallFlexCommander(this)
-  }
 
   _resizeStumpNode(stumpNode) {
     const tile = stumpNode.getStumpNodeTreeComponent()
     const shadow = stumpNode.getShadow()
     const gridSize = this.getGridSize()
-    const commander = tile.getCommander()
     const position = shadow.getPositionAndDimensions(gridSize)
-    commander.changeTileSettingCommand(TilesConstants.width, position.width)
-    commander.changeTileSettingCommand(TilesConstants.height, position.height)
+    tile.changeTileSettingCommand(TilesConstants.width, position.width)
+    tile.changeTileSettingCommand(TilesConstants.height, position.height)
   }
 
   getPickerBlock(event) {
@@ -85,8 +74,8 @@ ${TilesConstants.top} ${_top}`
     const shadow = stumpNode.getShadow()
     const gridSize = this.getGridSize()
     const position = shadow.getPositionAndDimensions(gridSize)
-    tile.getCommander().changeTileSettingCommand(TilesConstants.left, position.left)
-    tile.getCommander().changeTileSettingCommand(TilesConstants.top, position.top)
+    tile.changeTileSettingCommand(TilesConstants.left, position.left)
+    tile.changeTileSettingCommand(TilesConstants.top, position.top)
   }
 
   getGridSize() {
@@ -175,7 +164,7 @@ ${TilesConstants.top} ${_top}`
         const change = that._getElementChangeInPixels(ui, offset)
         that._updateSelectedOnMove(stumpNode, change)
         offset = ui // todo: what does this do?
-        app.getCommander().moveTilesFromShadowsCommand()
+        app.moveTilesFromShadowsCommand()
       },
       grid: [gridSize, gridSize],
       handle: ".TileGrabber",

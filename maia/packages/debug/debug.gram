@@ -100,7 +100,6 @@ debugSleepNode
   async fetchTableInputs() {
    const ms = parseInt(this.getWord(1) || 1)
    await this.getWebApp()
-    .getCommander()
     .sleepCommand(ms)
    return { rows: jtree.Utils.javascriptTableWithHeaderRowToObjects(DummyDataSets[this.getWord(2) || "stockPrice"]) }
   }

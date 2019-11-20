@@ -15473,9 +15473,9 @@ class TreeNode extends AbstractNode {
     return this
   }
   // Recurse if predicate passes
-  visit(predicate, boolean) {
+  deepVisit(predicate) {
     this.forEach(node => {
-      if (predicate(node) !== false) node.visit(predicate)
+      if (predicate(node) !== false) node.deepVisit(predicate)
     })
   }
   // todo: protected?
@@ -16365,7 +16365,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "45.0.1"
+TreeNode.getVersion = () => "46.0.0"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -24519,25 +24519,6 @@ class WillowBrowserProgram extends AbstractWillowProgram {
     return stumpNode && stumpNode.getShadow()
   }
 }
-class AbstractCommander {
-  constructor(target) {
-    this._target = target
-  }
-  getTarget() {
-    return this._target
-  }
-  toggleTreeComponentFrameworkDebuggerCommand() {
-    // todo: cleanup
-    const app = this._target.getRootNode()
-    const node = app.getNode("TreeComponentFrameworkDebuggerComponent")
-    if (node) {
-      node.unmountAndDestroy()
-    } else {
-      app.appendLine("TreeComponentFrameworkDebuggerComponent")
-      app.renderAndGetRenderReport()
-    }
-  }
-}
 class AbstractTheme {
   hakonToCss(str) {
     const hakonProgram = new hakonNode(str)
@@ -24546,24 +24527,7 @@ class AbstractTheme {
   }
 }
 class DefaultTheme extends AbstractTheme {}
-class TreeComponentCommander extends AbstractCommander {
-  stopPropagationCommand() {
-    // intentional noop
-  }
-  async clearMessageBufferCommand() {
-    const treeComponent = this.getTarget()
-    delete treeComponent._messageBuffer
-  }
-  async unmountAndDestroyCommand() {
-    const treeComponent = this.getTarget()
-    treeComponent.unmountAndDestroy()
-  }
-}
 class AbstractTreeComponent extends jtree.GrammarBackedNode {
-  constructor() {
-    super(...arguments)
-    this._commander = new TreeComponentCommander(this)
-  }
   getWillowProgram() {
     if (!this._willowProgram) {
       if (this.isNodeJs()) {
@@ -24622,7 +24586,7 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
     const nodes = []
     this.getWillowProgram()
       .getHtmlStumpNode()
-      .visit(node => {
+      .deepVisit(node => {
         if (node.getFirstWord() === "styleTag" || (node.getContent() || "").startsWith("<svg ")) return false
         nodes.push(node)
       })
@@ -24646,6 +24610,9 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
       .filter(text => text)
       .join("\n")
   }
+  getCommandNames() {
+    return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(word => word.endsWith("Command"))
+  }
   async _executeStumpNodeCommand(stumpNode, commandMethod) {
     const params = this._getCommandArguments(stumpNode, commandMethod)
     if (commandMethod.includes(" "))
@@ -24654,16 +24621,14 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
     this.addToCommandLog([commandMethod, params.uno, params.dos].filter(identity => identity).join(" "))
     this._onCommandWillRun() // todo: remove. currently used by ohayo
     let treeComponent = stumpNode.getStumpNodeTreeComponent()
-    let commander = treeComponent.getCommander()
-    while (!commander[commandMethod]) {
+    while (!treeComponent[commandMethod]) {
       const parent = treeComponent.getParent()
       if (parent === treeComponent) throw new Error(`Unknown command "${commandMethod}"`)
       if (!parent) debugger
       treeComponent = parent
-      commander = treeComponent.getCommander()
     }
     try {
-      await commander[commandMethod](params.uno, params.dos)
+      await treeComponent[commandMethod](params.uno, params.dos)
     } catch (err) {
       this.onCommandError(err)
     }
@@ -24671,7 +24636,6 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
   _setTreeComponentFrameworkEventListeners() {
     const willowBrowser = this.getWillowProgram()
     const bodyShadow = willowBrowser.getBodyStumpNode().getShadow()
-    const commander = this.getCommander()
     const app = this
     const checkAndExecute = (el, attr, evt) => {
       const stumpNode = willowBrowser.getStumpNodeFromElement(el)
@@ -24726,8 +24690,29 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
       false
     )
   }
-  getCommander() {
-    return this._commander
+  stopPropagationCommand() {
+    // todo: remove?
+    // intentional noop
+  }
+  // todo: remove?
+  async clearMessageBufferCommand() {
+    delete this._messageBuffer
+  }
+  // todo: remove?
+  async unmountAndDestroyCommand() {
+    this.unmountAndDestroy()
+  }
+  toggleTreeComponentFrameworkDebuggerCommand() {
+    // todo: move somewhere else?
+    // todo: cleanup
+    const app = this.getRootNode()
+    const node = app.getNode("TreeComponentFrameworkDebuggerComponent")
+    if (node) {
+      node.unmountAndDestroy()
+    } else {
+      app.appendLine("TreeComponentFrameworkDebuggerComponent")
+      app.renderAndGetRenderReport()
+    }
   }
   getStumpNode() {
     return this._htmlStumpNode
@@ -25087,7 +25072,6 @@ class AbstractGithubTriangleComponent extends AbstractTreeComponent {
 }
 window.AbstractGithubTriangleComponent = AbstractGithubTriangleComponent
 window.AbstractTreeComponent = AbstractTreeComponent
-window.AbstractCommander = AbstractCommander
 window.WillowConstants = WillowConstants
 window.WillowProgram = WillowProgram
 window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerComponent
@@ -25342,10 +25326,6 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
  div
   class TileGrabber`
     }
-    getCommander() {
-      const TileCommander = this.require("TileCommander", this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileCommander.js")
-      return new TileCommander(this)
-    }
     // todo: delete this
     makeDirty() {
       delete this._cache_settingsObject
@@ -25584,6 +25564,193 @@ pre
    style color: ${theme.errorColor};`)
       }
       return this
+    }
+    cloneTileCommand() {
+      this.cloneAndOffset()
+      return this.getTab().autosaveAndRender()
+    }
+    async updateContentFromHtmlCommand(val) {
+      const clean = jtree.Utils.stripHtml(val.replace(/\<br\>/g, "\n").replace(/\<div\>/g, "\n"))
+      return this.changeTileContentAndRenderCommand(clean)
+    }
+    async toggleTileMaximizeCommand() {
+      if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
+      else this.touchNode(TilesConstants.maximized)
+      await this._runAfterTileUpdate(this)
+    }
+    async triggerTileMethodCommand(value, methodName) {
+      await this[methodName](value)
+      await this._runAfterTileUpdate(tile)
+    }
+    // todo: refactor.
+    async changeTileTypeCommand(newValue) {
+      this.setFirstWord(newValue)
+      const newNode = this.duplicate()
+      // todo: destroy or something? how do we reparse.
+      this.unmountAndDestroy()
+      const app = this.getTab().getRootNode()
+      await this.getRootNode().loadRequirements()
+      await this.getTab().autosaveAndRender()
+      newNode.runAndrenderAndGetRenderReport()
+    }
+    changeParentCommand(pathVector) {
+      // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
+      const program = this.getRootNode()
+      const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
+      const destinationTree = indexPath ? program.nodeAt(indexPath) : program
+      // todo: on jtree should we make copyTo second param optional?
+      this.copyTo(destinationTree, destinationTree.length)
+      this.unmountAndDestroy()
+      return this.getTab().autosaveAndRender()
+    }
+    async openTileContextMenuCommand() {
+      this.getTab()
+        .getRootNode()
+        .setTargetNode(this)
+        .toggleAndRender(OhayoConstants.tileContextMenu)
+    }
+    destroyTileCommand() {
+      this.unmountAndDestroy()
+      return this.getTab().autosaveAndRender()
+    }
+    getNewDataCommand() {
+      // todo: have some type of paging system to fetch new data.
+    }
+    async changeTileSettingAndRenderCommand(value, settingName) {
+      // note the unusual ordering of params.
+      this.touchNode(settingName).setContent(value.toString())
+      // todo: sometimes size needs to be redone (maximize, for example)
+      await this._runAfterTileUpdate(this)
+    }
+    // todo: remove
+    async changeTileSettingMultilineCommand(val, settingName) {
+      this.touchNode(settingName).setChildren(val)
+      await this._runAfterTileUpdate(this)
+    }
+    async changeTileSettingCommand(settingName, value) {
+      this.touchNode(settingName).setContent(value)
+    }
+    async changeWordAndRenderCommand(value, index) {
+      this.setWord(parseInt(index), value)
+      await this._runAfterTileUpdate(this)
+    }
+    async changeWordsAndRenderCommand(value, index) {
+      index = parseInt(index)
+      const edgeSymbol = this.getEdgeSymbol()
+      const words = this.getWords().slice(0, index)
+      this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
+      await this._runAfterTileUpdate(this)
+    }
+    async updateChildrenCommand(val) {
+      this.setChildren(val)
+      // reload the whole doc for now.
+      await this._runAfterTileUpdate(this)
+    }
+    async _runAfterTileUpdate(tile) {
+      tile.makeDirty() // ugly!
+      tile.getChildTiles().forEach(tile => {
+        tile.makeDirty() // todo: ugly!
+      })
+      // todo: what if you have a tile that has a contextare that allows editing of its children/
+      // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
+      await tile.getTab().autosaveTab()
+      await tile.runAndrenderAndGetRenderReport()
+      tile
+        .getTab()
+        .getRootNode()
+        .renderApp() // Need to render full app because of code editor
+    }
+    // todo: downstream data changes?
+    async changeTileContentAndRenderCommand(value) {
+      this.setContent(value)
+      await this._runAfterTileUpdate(this)
+    }
+    async copyTileCommand() {
+      // todo: remove cousin tiles?
+      this.getRootNode()
+        .getWillowProgram()
+        .copyTextToClipboard(this.getFirstAncestor().toString())
+    }
+    async createProgramFromTileExampleCommand(index) {
+      const template = this.getExampleTemplate(index)
+      if (!template) return undefined
+      const fileExtension = "maia" // todo: generalize
+      const tab = await this.getTab()
+        .getRootNode()
+        ._createAndOpen(template, `help-for-${this.getFirstWord()}.${fileExtension}`)
+      tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+    }
+    async inspectTileCommand() {
+      if (!this.isNodeJs()) {
+        console.log("Tile available at window.tile")
+        window.tile = this
+        console.log(this)
+      }
+      const output = this.toInspection()
+      this.getTab().addStumpCodeMessageToLog(output)
+      this.getTab()
+        .getRootNode()
+        .renderApp()
+    }
+    async toggleToolbarCommand() {
+      this.toggleToolbar()
+    }
+    async createProgramFromTemplateCommand(id) {
+      const programTemplate = this.getProgramTemplate(id)
+      if (!programTemplate) return undefined
+      const tab = await this.getTab()
+        .getRootNode()
+        ._createAndOpen(programTemplate.template, programTemplate.name)
+      tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+    }
+    async appendSnippetTemplateCommand(id) {
+      const snippet = this.getSnippetTemplate(id)
+      if (!snippet) return undefined
+      const tab = this.getTab()
+      const tabProgram = tab.getTabProgram()
+      const newNodes = tabProgram.concat(snippet)
+      const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
+      tab.autosaveTab()
+      tabProgram.clearSelection()
+      tab.getTabWall().unmount()
+      await tabProgram.loadAndIncrementalRender()
+      newTiles.forEach(tile => tile.selectTile())
+      newTiles[0].scrollIntoView()
+    }
+    async copyDataCommand(delimiter) {
+      this.getRootNode()
+        .getWillowProgram()
+        .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
+    }
+    async copyDataAsJavascriptCommand() {
+      const table = this.getOutputOrInputTable()
+      this.getRootNode()
+        .getWillowProgram()
+        .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
+    }
+    async copyDataAsTreeCommand() {
+      const text = this.getOutputOrInputTable()
+        .toTree()
+        .toString()
+      this.getRootNode()
+        .getWillowProgram()
+        .copyTextToClipboard(text)
+    }
+    async exportTileDataCommand(format = "csv") {
+      // todo: figure this out. use the browsers filename? tile title? id?
+      let extension = "csv"
+      let type = "text/csv"
+      let str = this.getOutputOrInputTable().toDelimited(",")
+      if (format === "tree") {
+        extension = "tree"
+        type = "text"
+        str = this.getOutputOrInputTable()
+          .toTree()
+          .toString()
+      }
+      this.getRootNode()
+        .getWillowProgram()
+        .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
     }
   }
 
@@ -27412,9 +27579,7 @@ a Run Tile Quality Check
     }
     async fetchTableInputs() {
       const ms = parseInt(this.getWord(1) || 1)
-      await this.getWebApp()
-        .getCommander()
-        .sleepCommand(ms)
+      await this.getWebApp().sleepCommand(ms)
       return { rows: jtree.Utils.javascriptTableWithHeaderRowToObjects(DummyDataSets[this.getWord(2) || "stockPrice"]) }
     }
   }
@@ -27488,6 +27653,11 @@ a Run Tile Quality Check
     }
     get tileSize() {
       return `1080 600`
+    }
+    async openFullPathInNewTabAndFocusCommand(url) {
+      return this.getTab()
+        .getRootNode()
+        .openFullPathInNewTabAndFocusCommand(url)
     }
     _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
       const maiaProgram = new maiaNode(sourceCode)
@@ -29866,10 +30036,6 @@ abstractTileTreeComponentNode
    div
     class TileGrabber\`
   }
-  getCommander() {
-   const TileCommander = this.require("TileCommander", this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileCommander.js")
-   return new TileCommander(this)
-  }
   // todo: delete this
   makeDirty() {
    delete this._cache_settingsObject
@@ -30105,6 +30271,193 @@ abstractTileTreeComponentNode
      style color: \${theme.errorColor};\`)
    }
    return this
+  }
+  cloneTileCommand() {
+   this.cloneAndOffset()
+   return this.getTab().autosaveAndRender()
+  }
+  async updateContentFromHtmlCommand(val) {
+   const clean = jtree.Utils.stripHtml(val.replace(/\\<br\\>/g, "\\n").replace(/\\<div\\>/g, "\\n"))
+   return this.changeTileContentAndRenderCommand(clean)
+  }
+  async toggleTileMaximizeCommand() {
+   if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
+   else this.touchNode(TilesConstants.maximized)
+   await this._runAfterTileUpdate(this)
+  }
+  async triggerTileMethodCommand(value, methodName) {
+   await this[methodName](value)
+   await this._runAfterTileUpdate(tile)
+  }
+  // todo: refactor.
+  async changeTileTypeCommand(newValue) {
+   this.setFirstWord(newValue)
+   const newNode = this.duplicate()
+   // todo: destroy or something? how do we reparse.
+   this.unmountAndDestroy()
+   const app = this.getTab().getRootNode()
+   await this.getRootNode().loadRequirements()
+   await this.getTab().autosaveAndRender()
+   newNode.runAndrenderAndGetRenderReport()
+  }
+  changeParentCommand(pathVector) {
+   // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
+   const program = this.getRootNode()
+   const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
+   const destinationTree = indexPath ? program.nodeAt(indexPath) : program
+   // todo: on jtree should we make copyTo second param optional?
+   this.copyTo(destinationTree, destinationTree.length)
+   this.unmountAndDestroy()
+   return this.getTab().autosaveAndRender()
+  }
+  async openTileContextMenuCommand() {
+   this.getTab()
+    .getRootNode()
+    .setTargetNode(this)
+    .toggleAndRender(OhayoConstants.tileContextMenu)
+  }
+  destroyTileCommand() {
+   this.unmountAndDestroy()
+   return this.getTab().autosaveAndRender()
+  }
+  getNewDataCommand() {
+   // todo: have some type of paging system to fetch new data.
+  }
+  async changeTileSettingAndRenderCommand(value, settingName) {
+   // note the unusual ordering of params.
+   this.touchNode(settingName).setContent(value.toString())
+   // todo: sometimes size needs to be redone (maximize, for example)
+   await this._runAfterTileUpdate(this)
+  }
+  // todo: remove
+  async changeTileSettingMultilineCommand(val, settingName) {
+   this.touchNode(settingName).setChildren(val)
+   await this._runAfterTileUpdate(this)
+  }
+  async changeTileSettingCommand(settingName, value) {
+   this.touchNode(settingName).setContent(value)
+  }
+  async changeWordAndRenderCommand(value, index) {
+   this.setWord(parseInt(index), value)
+   await this._runAfterTileUpdate(this)
+  }
+  async changeWordsAndRenderCommand(value, index) {
+   index = parseInt(index)
+   const edgeSymbol = this.getEdgeSymbol()
+   const words = this.getWords().slice(0, index)
+   this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
+   await this._runAfterTileUpdate(this)
+  }
+  async updateChildrenCommand(val) {
+   this.setChildren(val)
+   // reload the whole doc for now.
+   await this._runAfterTileUpdate(this)
+  }
+  async _runAfterTileUpdate(tile) {
+   tile.makeDirty() // ugly!
+   tile.getChildTiles().forEach(tile => {
+    tile.makeDirty() // todo: ugly!
+   })
+   // todo: what if you have a tile that has a contextare that allows editing of its children/
+   // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
+   await tile.getTab().autosaveTab()
+   await tile.runAndrenderAndGetRenderReport()
+   tile
+    .getTab()
+    .getRootNode()
+    .renderApp() // Need to render full app because of code editor
+  }
+  // todo: downstream data changes?
+  async changeTileContentAndRenderCommand(value) {
+   this.setContent(value)
+   await this._runAfterTileUpdate(this)
+  }
+  async copyTileCommand() {
+   // todo: remove cousin tiles?
+   this.getRootNode()
+    .getWillowProgram()
+    .copyTextToClipboard(this.getFirstAncestor().toString())
+  }
+  async createProgramFromTileExampleCommand(index) {
+   const template = this.getExampleTemplate(index)
+   if (!template) return undefined
+   const fileExtension = "maia" // todo: generalize
+   const tab = await this.getTab()
+    .getRootNode()
+    ._createAndOpen(template, \`help-for-\${this.getFirstWord()}.\${fileExtension}\`)
+   tab.addStumpCodeMessageToLog(\`div Created '\${tab.getFullTabFilePath()}'\`)
+  }
+  async inspectTileCommand() {
+   if (!this.isNodeJs()) {
+    console.log("Tile available at window.tile")
+    window.tile = this
+    console.log(this)
+   }
+   const output = this.toInspection()
+   this.getTab().addStumpCodeMessageToLog(output)
+   this.getTab()
+    .getRootNode()
+    .renderApp()
+  }
+  async toggleToolbarCommand() {
+   this.toggleToolbar()
+  }
+  async createProgramFromTemplateCommand(id) {
+   const programTemplate = this.getProgramTemplate(id)
+   if (!programTemplate) return undefined
+   const tab = await this.getTab()
+    .getRootNode()
+    ._createAndOpen(programTemplate.template, programTemplate.name)
+   tab.addStumpCodeMessageToLog(\`div Created '\${tab.getFullTabFilePath()}'\`)
+  }
+  async appendSnippetTemplateCommand(id) {
+   const snippet = this.getSnippetTemplate(id)
+   if (!snippet) return undefined
+   const tab = this.getTab()
+   const tabProgram = tab.getTabProgram()
+   const newNodes = tabProgram.concat(snippet)
+   const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
+   tab.autosaveTab()
+   tabProgram.clearSelection()
+   tab.getTabWall().unmount()
+   await tabProgram.loadAndIncrementalRender()
+   newTiles.forEach(tile => tile.selectTile())
+   newTiles[0].scrollIntoView()
+  }
+  async copyDataCommand(delimiter) {
+   this.getRootNode()
+    .getWillowProgram()
+    .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
+  }
+  async copyDataAsJavascriptCommand() {
+   const table = this.getOutputOrInputTable()
+   this.getRootNode()
+    .getWillowProgram()
+    .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
+  }
+  async copyDataAsTreeCommand() {
+   const text = this.getOutputOrInputTable()
+    .toTree()
+    .toString()
+   this.getRootNode()
+    .getWillowProgram()
+    .copyTextToClipboard(text)
+  }
+  async exportTileDataCommand(format = "csv") {
+   // todo: figure this out. use the browsers filename? tile title? id?
+   let extension = "csv"
+   let type = "text/csv"
+   let str = this.getOutputOrInputTable().toDelimited(",")
+   if (format === "tree") {
+    extension = "tree"
+    type = "text"
+    str = this.getOutputOrInputTable()
+     .toTree()
+     .toString()
+   }
+   this.getRootNode()
+    .getWillowProgram()
+    .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
   }
 basicRecursiveTileNode
  extends abstractTileTreeComponentNode
@@ -31636,9 +31989,7 @@ debugSleepNode
  javascript
   async fetchTableInputs() {
    const ms = parseInt(this.getWord(1) || 1)
-   await this.getWebApp()
-    .getCommander()
-    .sleepCommand(ms)
+   await this.getWebApp().sleepCommand(ms)
    return { rows: jtree.Utils.javascriptTableWithHeaderRowToObjects(DummyDataSets[this.getWord(2) || "stockPrice"]) }
   }
 debugThrowNode
@@ -31713,6 +32064,11 @@ editorGalleryNode
       position absolute
       background {linkColor}
  javascript
+  async openFullPathInNewTabAndFocusCommand(url) {
+   return this.getTab()
+    .getRootNode()
+    .openFullPathInNewTabAndFocusCommand(url)
+  }
   _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
    const maiaProgram = new maiaNode(sourceCode)
    const dimensions = maiaProgram.getTileDimensionMap(width, height)
@@ -36350,10 +36706,6 @@ BlobNode
  div
   class TileGrabber`
     }
-    getCommander() {
-      const TileCommander = this.require("TileCommander", this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileCommander.js")
-      return new TileCommander(this)
-    }
     // todo: delete this
     makeDirty() {
       delete this._cache_settingsObject
@@ -36592,6 +36944,193 @@ pre
    style color: ${theme.errorColor};`)
       }
       return this
+    }
+    cloneTileCommand() {
+      this.cloneAndOffset()
+      return this.getTab().autosaveAndRender()
+    }
+    async updateContentFromHtmlCommand(val) {
+      const clean = jtree.Utils.stripHtml(val.replace(/\<br\>/g, "\n").replace(/\<div\>/g, "\n"))
+      return this.changeTileContentAndRenderCommand(clean)
+    }
+    async toggleTileMaximizeCommand() {
+      if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
+      else this.touchNode(TilesConstants.maximized)
+      await this._runAfterTileUpdate(this)
+    }
+    async triggerTileMethodCommand(value, methodName) {
+      await this[methodName](value)
+      await this._runAfterTileUpdate(tile)
+    }
+    // todo: refactor.
+    async changeTileTypeCommand(newValue) {
+      this.setFirstWord(newValue)
+      const newNode = this.duplicate()
+      // todo: destroy or something? how do we reparse.
+      this.unmountAndDestroy()
+      const app = this.getTab().getRootNode()
+      await this.getRootNode().loadRequirements()
+      await this.getTab().autosaveAndRender()
+      newNode.runAndrenderAndGetRenderReport()
+    }
+    changeParentCommand(pathVector) {
+      // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
+      const program = this.getRootNode()
+      const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
+      const destinationTree = indexPath ? program.nodeAt(indexPath) : program
+      // todo: on jtree should we make copyTo second param optional?
+      this.copyTo(destinationTree, destinationTree.length)
+      this.unmountAndDestroy()
+      return this.getTab().autosaveAndRender()
+    }
+    async openTileContextMenuCommand() {
+      this.getTab()
+        .getRootNode()
+        .setTargetNode(this)
+        .toggleAndRender(OhayoConstants.tileContextMenu)
+    }
+    destroyTileCommand() {
+      this.unmountAndDestroy()
+      return this.getTab().autosaveAndRender()
+    }
+    getNewDataCommand() {
+      // todo: have some type of paging system to fetch new data.
+    }
+    async changeTileSettingAndRenderCommand(value, settingName) {
+      // note the unusual ordering of params.
+      this.touchNode(settingName).setContent(value.toString())
+      // todo: sometimes size needs to be redone (maximize, for example)
+      await this._runAfterTileUpdate(this)
+    }
+    // todo: remove
+    async changeTileSettingMultilineCommand(val, settingName) {
+      this.touchNode(settingName).setChildren(val)
+      await this._runAfterTileUpdate(this)
+    }
+    async changeTileSettingCommand(settingName, value) {
+      this.touchNode(settingName).setContent(value)
+    }
+    async changeWordAndRenderCommand(value, index) {
+      this.setWord(parseInt(index), value)
+      await this._runAfterTileUpdate(this)
+    }
+    async changeWordsAndRenderCommand(value, index) {
+      index = parseInt(index)
+      const edgeSymbol = this.getEdgeSymbol()
+      const words = this.getWords().slice(0, index)
+      this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
+      await this._runAfterTileUpdate(this)
+    }
+    async updateChildrenCommand(val) {
+      this.setChildren(val)
+      // reload the whole doc for now.
+      await this._runAfterTileUpdate(this)
+    }
+    async _runAfterTileUpdate(tile) {
+      tile.makeDirty() // ugly!
+      tile.getChildTiles().forEach(tile => {
+        tile.makeDirty() // todo: ugly!
+      })
+      // todo: what if you have a tile that has a contextare that allows editing of its children/
+      // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
+      await tile.getTab().autosaveTab()
+      await tile.runAndrenderAndGetRenderReport()
+      tile
+        .getTab()
+        .getRootNode()
+        .renderApp() // Need to render full app because of code editor
+    }
+    // todo: downstream data changes?
+    async changeTileContentAndRenderCommand(value) {
+      this.setContent(value)
+      await this._runAfterTileUpdate(this)
+    }
+    async copyTileCommand() {
+      // todo: remove cousin tiles?
+      this.getRootNode()
+        .getWillowProgram()
+        .copyTextToClipboard(this.getFirstAncestor().toString())
+    }
+    async createProgramFromTileExampleCommand(index) {
+      const template = this.getExampleTemplate(index)
+      if (!template) return undefined
+      const fileExtension = "maia" // todo: generalize
+      const tab = await this.getTab()
+        .getRootNode()
+        ._createAndOpen(template, `help-for-${this.getFirstWord()}.${fileExtension}`)
+      tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+    }
+    async inspectTileCommand() {
+      if (!this.isNodeJs()) {
+        console.log("Tile available at window.tile")
+        window.tile = this
+        console.log(this)
+      }
+      const output = this.toInspection()
+      this.getTab().addStumpCodeMessageToLog(output)
+      this.getTab()
+        .getRootNode()
+        .renderApp()
+    }
+    async toggleToolbarCommand() {
+      this.toggleToolbar()
+    }
+    async createProgramFromTemplateCommand(id) {
+      const programTemplate = this.getProgramTemplate(id)
+      if (!programTemplate) return undefined
+      const tab = await this.getTab()
+        .getRootNode()
+        ._createAndOpen(programTemplate.template, programTemplate.name)
+      tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+    }
+    async appendSnippetTemplateCommand(id) {
+      const snippet = this.getSnippetTemplate(id)
+      if (!snippet) return undefined
+      const tab = this.getTab()
+      const tabProgram = tab.getTabProgram()
+      const newNodes = tabProgram.concat(snippet)
+      const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
+      tab.autosaveTab()
+      tabProgram.clearSelection()
+      tab.getTabWall().unmount()
+      await tabProgram.loadAndIncrementalRender()
+      newTiles.forEach(tile => tile.selectTile())
+      newTiles[0].scrollIntoView()
+    }
+    async copyDataCommand(delimiter) {
+      this.getRootNode()
+        .getWillowProgram()
+        .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
+    }
+    async copyDataAsJavascriptCommand() {
+      const table = this.getOutputOrInputTable()
+      this.getRootNode()
+        .getWillowProgram()
+        .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
+    }
+    async copyDataAsTreeCommand() {
+      const text = this.getOutputOrInputTable()
+        .toTree()
+        .toString()
+      this.getRootNode()
+        .getWillowProgram()
+        .copyTextToClipboard(text)
+    }
+    async exportTileDataCommand(format = "csv") {
+      // todo: figure this out. use the browsers filename? tile title? id?
+      let extension = "csv"
+      let type = "text/csv"
+      let str = this.getOutputOrInputTable().toDelimited(",")
+      if (format === "tree") {
+        extension = "tree"
+        type = "text"
+        str = this.getOutputOrInputTable()
+          .toTree()
+          .toString()
+      }
+      this.getRootNode()
+        .getWillowProgram()
+        .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
     }
   }
 
@@ -36961,10 +37500,6 @@ abstractTileTreeComponentNode
    div
     class TileGrabber\`
   }
-  getCommander() {
-   const TileCommander = this.require("TileCommander", this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileCommander.js")
-   return new TileCommander(this)
-  }
   // todo: delete this
   makeDirty() {
    delete this._cache_settingsObject
@@ -37200,6 +37735,193 @@ abstractTileTreeComponentNode
      style color: \${theme.errorColor};\`)
    }
    return this
+  }
+  cloneTileCommand() {
+   this.cloneAndOffset()
+   return this.getTab().autosaveAndRender()
+  }
+  async updateContentFromHtmlCommand(val) {
+   const clean = jtree.Utils.stripHtml(val.replace(/\\<br\\>/g, "\\n").replace(/\\<div\\>/g, "\\n"))
+   return this.changeTileContentAndRenderCommand(clean)
+  }
+  async toggleTileMaximizeCommand() {
+   if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
+   else this.touchNode(TilesConstants.maximized)
+   await this._runAfterTileUpdate(this)
+  }
+  async triggerTileMethodCommand(value, methodName) {
+   await this[methodName](value)
+   await this._runAfterTileUpdate(tile)
+  }
+  // todo: refactor.
+  async changeTileTypeCommand(newValue) {
+   this.setFirstWord(newValue)
+   const newNode = this.duplicate()
+   // todo: destroy or something? how do we reparse.
+   this.unmountAndDestroy()
+   const app = this.getTab().getRootNode()
+   await this.getRootNode().loadRequirements()
+   await this.getTab().autosaveAndRender()
+   newNode.runAndrenderAndGetRenderReport()
+  }
+  changeParentCommand(pathVector) {
+   // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
+   const program = this.getRootNode()
+   const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
+   const destinationTree = indexPath ? program.nodeAt(indexPath) : program
+   // todo: on jtree should we make copyTo second param optional?
+   this.copyTo(destinationTree, destinationTree.length)
+   this.unmountAndDestroy()
+   return this.getTab().autosaveAndRender()
+  }
+  async openTileContextMenuCommand() {
+   this.getTab()
+    .getRootNode()
+    .setTargetNode(this)
+    .toggleAndRender(OhayoConstants.tileContextMenu)
+  }
+  destroyTileCommand() {
+   this.unmountAndDestroy()
+   return this.getTab().autosaveAndRender()
+  }
+  getNewDataCommand() {
+   // todo: have some type of paging system to fetch new data.
+  }
+  async changeTileSettingAndRenderCommand(value, settingName) {
+   // note the unusual ordering of params.
+   this.touchNode(settingName).setContent(value.toString())
+   // todo: sometimes size needs to be redone (maximize, for example)
+   await this._runAfterTileUpdate(this)
+  }
+  // todo: remove
+  async changeTileSettingMultilineCommand(val, settingName) {
+   this.touchNode(settingName).setChildren(val)
+   await this._runAfterTileUpdate(this)
+  }
+  async changeTileSettingCommand(settingName, value) {
+   this.touchNode(settingName).setContent(value)
+  }
+  async changeWordAndRenderCommand(value, index) {
+   this.setWord(parseInt(index), value)
+   await this._runAfterTileUpdate(this)
+  }
+  async changeWordsAndRenderCommand(value, index) {
+   index = parseInt(index)
+   const edgeSymbol = this.getEdgeSymbol()
+   const words = this.getWords().slice(0, index)
+   this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
+   await this._runAfterTileUpdate(this)
+  }
+  async updateChildrenCommand(val) {
+   this.setChildren(val)
+   // reload the whole doc for now.
+   await this._runAfterTileUpdate(this)
+  }
+  async _runAfterTileUpdate(tile) {
+   tile.makeDirty() // ugly!
+   tile.getChildTiles().forEach(tile => {
+    tile.makeDirty() // todo: ugly!
+   })
+   // todo: what if you have a tile that has a contextare that allows editing of its children/
+   // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
+   await tile.getTab().autosaveTab()
+   await tile.runAndrenderAndGetRenderReport()
+   tile
+    .getTab()
+    .getRootNode()
+    .renderApp() // Need to render full app because of code editor
+  }
+  // todo: downstream data changes?
+  async changeTileContentAndRenderCommand(value) {
+   this.setContent(value)
+   await this._runAfterTileUpdate(this)
+  }
+  async copyTileCommand() {
+   // todo: remove cousin tiles?
+   this.getRootNode()
+    .getWillowProgram()
+    .copyTextToClipboard(this.getFirstAncestor().toString())
+  }
+  async createProgramFromTileExampleCommand(index) {
+   const template = this.getExampleTemplate(index)
+   if (!template) return undefined
+   const fileExtension = "maia" // todo: generalize
+   const tab = await this.getTab()
+    .getRootNode()
+    ._createAndOpen(template, \`help-for-\${this.getFirstWord()}.\${fileExtension}\`)
+   tab.addStumpCodeMessageToLog(\`div Created '\${tab.getFullTabFilePath()}'\`)
+  }
+  async inspectTileCommand() {
+   if (!this.isNodeJs()) {
+    console.log("Tile available at window.tile")
+    window.tile = this
+    console.log(this)
+   }
+   const output = this.toInspection()
+   this.getTab().addStumpCodeMessageToLog(output)
+   this.getTab()
+    .getRootNode()
+    .renderApp()
+  }
+  async toggleToolbarCommand() {
+   this.toggleToolbar()
+  }
+  async createProgramFromTemplateCommand(id) {
+   const programTemplate = this.getProgramTemplate(id)
+   if (!programTemplate) return undefined
+   const tab = await this.getTab()
+    .getRootNode()
+    ._createAndOpen(programTemplate.template, programTemplate.name)
+   tab.addStumpCodeMessageToLog(\`div Created '\${tab.getFullTabFilePath()}'\`)
+  }
+  async appendSnippetTemplateCommand(id) {
+   const snippet = this.getSnippetTemplate(id)
+   if (!snippet) return undefined
+   const tab = this.getTab()
+   const tabProgram = tab.getTabProgram()
+   const newNodes = tabProgram.concat(snippet)
+   const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
+   tab.autosaveTab()
+   tabProgram.clearSelection()
+   tab.getTabWall().unmount()
+   await tabProgram.loadAndIncrementalRender()
+   newTiles.forEach(tile => tile.selectTile())
+   newTiles[0].scrollIntoView()
+  }
+  async copyDataCommand(delimiter) {
+   this.getRootNode()
+    .getWillowProgram()
+    .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
+  }
+  async copyDataAsJavascriptCommand() {
+   const table = this.getOutputOrInputTable()
+   this.getRootNode()
+    .getWillowProgram()
+    .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
+  }
+  async copyDataAsTreeCommand() {
+   const text = this.getOutputOrInputTable()
+    .toTree()
+    .toString()
+   this.getRootNode()
+    .getWillowProgram()
+    .copyTextToClipboard(text)
+  }
+  async exportTileDataCommand(format = "csv") {
+   // todo: figure this out. use the browsers filename? tile title? id?
+   let extension = "csv"
+   let type = "text/csv"
+   let str = this.getOutputOrInputTable().toDelimited(",")
+   if (format === "tree") {
+    extension = "tree"
+    type = "text"
+    str = this.getOutputOrInputTable()
+     .toTree()
+     .toString()
+   }
+   this.getRootNode()
+    .getWillowProgram()
+    .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
   }
 basicRecursiveTileNode
  extends abstractTileTreeComponentNode
@@ -37683,7 +38405,7 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
     const bodyShadow = bodyStumpNode.getShadow()
     const unmountOnClick = function() {
       bodyShadow.offShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick)
-      app.getCommander().closeAllDropDownMenusCommand()
+      app.closeAllDropDownMenusCommand()
     }
     setTimeout(() => bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick), 100) // todo: fix this.
   }
@@ -37774,23 +38496,30 @@ window.AbstractModalTreeComponent
 
 
 
-class TerminalCommander extends AbstractCommander {
+class BasicTerminalTreeComponent extends AbstractTreeComponent {
+  toHakonCode() {
+    return `.sourceTextarea
+ height ${this._getHeight()}px
+ font-size 110%
+ border 0
+ white-space nowrap
+ width 100%`
+  }
+
   async saveChangesCommand() {
-    const terminal = this.getTarget()
     // tood: this is broken. needs to unmount first.
     // todo: add a patch method to tree.
-    if (terminal.hasChanges()) await terminal._getTab().autosaveAndReloadWith(terminal.getCode())
+    if (this.hasChanges()) await this._getTab().autosaveAndReloadWith(this.getCode())
   }
 
   async executeLineCommand(lineNumber) {
-    const terminal = this.getTarget()
-    const program = terminal._makeProgramFromLineNumber(lineNumber)
-    let result = await program.execute(terminal.getRootNode())
+    const program = this._makeProgramFromLineNumber(lineNumber)
+    let result = await program.execute(this.getRootNode())
 
     if (typeof result !== "string") result = result.join("\n")
 
-    terminal._getTab().logMessageText(encodeURIComponent(result))
-    terminal.getRootNode().renderApp()
+    this._getTab().logMessageText(encodeURIComponent(result))
+    this.getRootNode().renderApp()
   }
 
   async executeFirstLineCommand() {
@@ -37802,31 +38531,14 @@ class TerminalCommander extends AbstractCommander {
   }
 
   _compileLine(lineNumber) {
-    const terminal = this.getTarget()
-    const program = terminal._makeProgramFromLineNumber(lineNumber)
+    const program = this._makeProgramFromLineNumber(lineNumber)
     const grammarProgram = program.getDefinition()
     return program.compile()
   }
 
   async compileLineCommand(lineNumber) {
-    const terminal = this.getTarget()
-    terminal._getTab().logMessageText(this._compileLine(lineNumber))
-    terminal.getRootNode().renderApp()
-  }
-}
-
-class BasicTerminalTreeComponent extends AbstractTreeComponent {
-  toHakonCode() {
-    return `.sourceTextarea
- height ${this._getHeight()}px
- font-size 110%
- border 0
- white-space nowrap
- width 100%`
-  }
-
-  getCommander() {
-    return new TerminalCommander(this)
+    this._getTab().logMessageText(this._compileLine(lineNumber))
+    this.getRootNode().renderApp()
   }
 
   _getHeight() {
@@ -37992,27 +38704,24 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
 
   _getKeyMap() {
     const cm = this._getCMEditorInstance()
-    const commander = this.getCommander()
     const keyMap = {}
 
     keyMap[CodeMirrorConstants.keyMap.cmdEnter] = () => {
       const range = cm.listSelections()[0]
       const line = range.head.line
-      commander.executeLineCommand(line)
+      this.executeLineCommand(line)
     }
     keyMap[CodeMirrorConstants.keyMap.shiftCmdEnter] = () => {
       const range = cm.listSelections()[0]
       const line = range.head.line
-      commander.compileLineCommand(line)
+      this.compileLineCommand(line)
     }
     keyMap[CodeMirrorConstants.keyMap.cmdBackSlash] = () => {
-      this.getRootNode()
-        .getCommander()
-        .clearTabMessagesCommand()
+      this.getRootNode().clearTabMessagesCommand()
     }
 
     keyMap[CodeMirrorConstants.keyMap.cmdS] = async () => {
-      await commander.saveChangesCommand()
+      await this.saveChangesCommand()
       // todo: scroll to proper tile
       const tile = this._getClosestTileAtCurrentLine()
       if (tile) tile.scrollIntoView()
@@ -38062,14 +38771,13 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
 
     cmInstance.setSize(undefined, this._getHeight())
 
-    const commander = this.getCommander()
     cmInstance.on(CodeMirrorConstants.events.gutterClick, (instance, line, gutter, clickEvent) => {
-      commander.executeLineCommand(line)
+      this.executeLineCommand(line)
     })
 
     cmInstance.on(CodeMirrorConstants.events.blur, () => {
       // note: if you have changes in terminal/gutter, they will be saved. no cancel yet.
-      commander.saveChangesCommand()
+      this.saveChangesCommand()
     })
     cmInstance.addKeyMap(this._getKeyMap())
 
@@ -38934,278 +39642,6 @@ window.ThemeTreeComponent
 
 
 
-
-
-
-
-
-class TileCommander extends AbstractCommander {
-  cloneTileCommand() {
-    const tile = this.getTarget()
-    tile.cloneAndOffset()
-    return tile.getTab().autosaveAndRender()
-  }
-
-  async updateContentFromHtmlCommand(val) {
-    const clean = jtree.Utils.stripHtml(val.replace(/\<br\>/g, "\n").replace(/\<div\>/g, "\n"))
-    return this.changeTileContentAndRenderCommand(clean)
-  }
-
-  async toggleTileMaximizeCommand() {
-    const tile = this.getTarget()
-    if (tile.has(TilesConstants.maximized)) tile.delete(TilesConstants.maximized)
-    else tile.touchNode(TilesConstants.maximized)
-    await this._runAfterTileUpdate(tile)
-  }
-
-  async triggerTileMethodCommand(value, methodName) {
-    const tile = this.getTarget()
-    await tile[methodName](value)
-    await this._runAfterTileUpdate(tile)
-  }
-
-  // todo: refactor.
-  async changeTileTypeCommand(newValue) {
-    const tile = this.getTarget()
-    tile.setFirstWord(newValue)
-    const newNode = tile.duplicate()
-    // todo: destroy or something? how do we reparse.
-    tile.unmountAndDestroy()
-    const app = tile.getTab().getRootNode()
-    await tile.getRootNode().loadRequirements()
-
-    await tile.getTab().autosaveAndRender()
-
-    newNode.runAndrenderAndGetRenderReport()
-  }
-
-  changeParentCommand(pathVector) {
-    const tile = this.getTarget()
-    // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
-    const program = tile.getRootNode()
-    const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
-    const destinationTree = indexPath ? program.nodeAt(indexPath) : program
-    // todo: on jtree should we make copyTo second param optional?
-    tile.copyTo(destinationTree, destinationTree.length)
-    tile.unmountAndDestroy()
-    return tile.getTab().autosaveAndRender()
-  }
-
-  async openTileContextMenuCommand() {
-    const tile = this.getTarget()
-    tile
-      .getTab()
-      .getRootNode()
-      .setTargetNode(tile)
-      .toggleAndRender(OhayoConstants.tileContextMenu)
-  }
-
-  destroyTileCommand() {
-    const tile = this.getTarget()
-    tile.unmountAndDestroy()
-    return tile.getTab().autosaveAndRender()
-  }
-
-  getNewDataCommand() {
-    // todo: have some type of paging system to fetch new data.
-  }
-
-  async changeTileSettingAndRenderCommand(value, settingName) {
-    const tile = this.getTarget()
-    // note the unusual ordering of params.
-    tile.touchNode(settingName).setContent(value.toString())
-    // todo: sometimes size needs to be redone (maximize, for example)
-    await this._runAfterTileUpdate(tile)
-  }
-
-  // todo: remove
-  async changeTileSettingMultilineCommand(val, settingName) {
-    const tile = this.getTarget()
-    tile.touchNode(settingName).setChildren(val)
-    await this._runAfterTileUpdate(tile)
-  }
-
-  async changeTileSettingCommand(settingName, value) {
-    const tile = this.getTarget()
-    tile.touchNode(settingName).setContent(value)
-  }
-
-  async changeWordAndRenderCommand(value, index) {
-    const tile = this.getTarget()
-    tile.setWord(parseInt(index), value)
-    await this._runAfterTileUpdate(tile)
-  }
-
-  async changeWordsAndRenderCommand(value, index) {
-    index = parseInt(index)
-    const tile = this.getTarget()
-    const edgeSymbol = tile.getEdgeSymbol()
-    const words = tile.getWords().slice(0, index)
-    tile.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
-    await this._runAfterTileUpdate(tile)
-  }
-
-  async updateChildrenCommand(val) {
-    const tile = this.getTarget()
-    tile.setChildren(val)
-
-    // reload the whole doc for now.
-
-    await this._runAfterTileUpdate(tile)
-  }
-
-  async _runAfterTileUpdate(tile) {
-    tile.makeDirty() // ugly!
-    tile.getChildTiles().forEach(tile => {
-      tile.makeDirty() // todo: ugly!
-    })
-    // todo: what if you have a tile that has a contextare that allows editing of its children/
-    // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
-    await tile.getTab().autosaveTab()
-    await tile.runAndrenderAndGetRenderReport()
-    tile
-      .getTab()
-      .getRootNode()
-      .renderApp() // Need to render full app because of code editor
-  }
-
-  // todo: downstream data changes?
-  async changeTileContentAndRenderCommand(value) {
-    const tile = this.getTarget()
-    tile.setContent(value)
-    await this._runAfterTileUpdate(tile)
-  }
-
-  async copyTileCommand() {
-    const tile = this.getTarget()
-    // todo: remove cousin tiles?
-    tile
-      .getRootNode()
-      .getWillowProgram()
-      .copyTextToClipboard(tile.getFirstAncestor().toString())
-  }
-
-  async createProgramFromTileExampleCommand(index) {
-    const tile = this.getTarget()
-    const template = tile.getExampleTemplate(index)
-    if (!template) return undefined
-    const fileExtension = "maia" // todo: generalize
-    const tab = await tile
-      .getTab()
-      .getRootNode()
-      ._createAndOpen(template, `help-for-${tile.getFirstWord()}.${fileExtension}`)
-    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-  }
-
-  async inspectTileCommand() {
-    const tile = this.getTarget()
-    if (!tile.isNodeJs()) {
-      console.log("Tile available at window.tile")
-      window.tile = tile
-      console.log(tile)
-    }
-    const output = tile.toInspection()
-    tile.getTab().addStumpCodeMessageToLog(output)
-    tile
-      .getTab()
-      .getRootNode()
-      .renderApp()
-  }
-
-  async toggleToolbarCommand() {
-    const tile = this.getTarget()
-    tile.toggleToolbar()
-  }
-
-  async createProgramFromTemplateCommand(id) {
-    const tile = this.getTarget()
-    const programTemplate = tile.getProgramTemplate(id)
-    if (!programTemplate) return undefined
-    const tab = await tile
-      .getTab()
-      .getRootNode()
-      ._createAndOpen(programTemplate.template, programTemplate.name)
-    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-  }
-
-  async appendSnippetTemplateCommand(id) {
-    const tile = this.getTarget()
-    const snippet = tile.getSnippetTemplate(id)
-    if (!snippet) return undefined
-
-    const tab = tile.getTab()
-    const tabProgram = tab.getTabProgram()
-    const newNodes = tabProgram.concat(snippet)
-    const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
-    tab.autosaveTab()
-    tabProgram.clearSelection()
-    tab.getTabWall().unmount()
-
-    await tabProgram.loadAndIncrementalRender()
-    newTiles.forEach(tile => tile.selectTile())
-    newTiles[0].scrollIntoView()
-  }
-
-  async copyDataCommand(delimiter) {
-    const tile = this.getTarget()
-    tile
-      .getRootNode()
-      .getWillowProgram()
-      .copyTextToClipboard(tile.getOutputOrInputTable().toDelimited(delimiter))
-  }
-
-  async copyDataAsJavascriptCommand() {
-    const tile = this.getTarget()
-    const table = tile.getOutputOrInputTable()
-    tile
-      .getRootNode()
-      .getWillowProgram()
-      .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
-  }
-
-  async copyDataAsTreeCommand() {
-    const tile = this.getTarget()
-    const text = tile
-      .getOutputOrInputTable()
-      .toTree()
-      .toString()
-    tile
-      .getRootNode()
-      .getWillowProgram()
-      .copyTextToClipboard(text)
-  }
-
-  async exportTileDataCommand(format = "csv") {
-    const tile = this.getTarget()
-
-    // todo: figure this out. use the browsers filename? tile title? id?
-
-    let extension = "csv"
-    let type = "text/csv"
-    let str = tile.getOutputOrInputTable().toDelimited(",")
-
-    if (format === "tree") {
-      extension = "tree"
-      type = "text"
-      str = tile
-        .getOutputOrInputTable()
-        .toTree()
-        .toString()
-    }
-
-    tile
-      .getRootNode()
-      .getWillowProgram()
-      .downloadFile(str, tile.getTab().getFileName() + "." + extension, type)
-  }
-}
-
-window.TileCommander
- = TileCommander
-;
-
-
-
 class TileContextMenuTreeComponent extends AbstractContextMenuTreeComponent {
   getContextMenuBodyStumpCode() {
     const targetTile = this.getRootNode().getTargetNode()
@@ -39243,37 +39679,6 @@ window.TileContextMenuTreeComponent
 
 
 
-class TileToolbarCommander extends AbstractCommander {
-  get _targetTileCommander() {
-    return this.getTarget()
-      .getTargetTile()
-      .getCommander()
-  }
-
-  createProgramFromFocusedTileExampleCommand(uno, dos) {
-    return this._targetTileCommander.createProgramFromTileExampleCommand(uno, dos)
-  }
-
-  cloneFocusedTileCommand(uno, dos) {
-    return this._targetTileCommander.cloneTileCommand(uno, dos)
-  }
-  destroyFocusedTileCommand(uno, dos) {
-    return this._targetTileCommander.destroyTileCommand(uno, dos)
-  }
-  inspectFocusedTileCommand(uno, dos) {
-    return this._targetTileCommander.inspectTileCommand(uno, dos)
-  }
-  changeFocusedTileTypeCommand(uno, dos) {
-    return this._targetTileCommander.changeTileTypeCommand(uno, dos)
-  }
-  changeFocusedTileParentCommand(uno, dos) {
-    return this._targetTileCommander.changeParentCommand(uno, dos)
-  }
-  changeFocusedTileContentAndRenderCommand(uno, dos) {
-    return this._targetTileCommander.changeTileContentAndRenderCommand(uno, dos)
-  }
-}
-
 class TileToolbarTreeComponent extends AbstractTreeComponent {
   toHakonCode() {
     const theme = this.getTheme()
@@ -39307,8 +39712,27 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
     return this.getParent()
   }
 
-  getCommander() {
-    return new TileToolbarCommander(this)
+  createProgramFromFocusedTileExampleCommand(uno, dos) {
+    return this.getTargetTile().createProgramFromTileExampleCommand(uno, dos)
+  }
+
+  cloneFocusedTileCommand(uno, dos) {
+    return this.getTargetTile().cloneTileCommand(uno, dos)
+  }
+  destroyFocusedTileCommand(uno, dos) {
+    return this.getTargetTile().destroyTileCommand(uno, dos)
+  }
+  inspectFocusedTileCommand(uno, dos) {
+    return this.getTargetTile().inspectTileCommand(uno, dos)
+  }
+  changeFocusedTileTypeCommand(uno, dos) {
+    return this.getTargetTile().changeTileTypeCommand(uno, dos)
+  }
+  changeFocusedTileParentCommand(uno, dos) {
+    return this.getTargetTile().changeParentCommand(uno, dos)
+  }
+  changeFocusedTileContentAndRenderCommand(uno, dos) {
+    return this.getTargetTile().changeTileContentAndRenderCommand(uno, dos)
   }
 
   toStumpCode() {
@@ -39462,50 +39886,6 @@ if (typeof exports !== "undefined") module.exports = Version
 
 
 
-class WallCommander extends AbstractCommander {
-  async openWallContextMenuCommand() {
-    this.getTarget()
-      .getRootNode()
-      .toggleAndRender("tabContextMenu")
-  }
-
-  async insertAdjacentTileCommand() {
-    const wall = this.getTarget()
-    const app = wall.getRootNode()
-    const tilesProgram = app.getMountedTilesProgram()
-    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
-    const newTiles = app
-      .getNodeCursors()
-      .slice(0, 1)
-      .map(cursor => cursor.appendLine(TilesConstants.pickerTile))
-    const promise = await app.getMountedTab().autosaveAndRender()
-    tilesProgram.clearSelection()
-    newTiles.forEach(tile => tile.selectTile())
-    return promise
-  }
-
-  async insertPickerTileCommand() {
-    const wall = this.getTarget()
-    const app = wall.getRootNode()
-    const evt = app.getMouseEvent()
-    const tilesProgram = app.getMountedTilesProgram()
-
-    if (!evt.shiftKey) {
-      tilesProgram.clearSelection()
-    }
-    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
-    const newTiles = app
-      .getNodeCursors()
-      .slice(0, 1)
-      .map(cursor => cursor.appendLineAndChildren(TilesConstants.pickerTile, wall.getPickerBlock(evt)))
-    await app.getMountedTab().autosaveAndRender()
-    tilesProgram.clearSelection()
-    newTiles.forEach(tile => {
-      tile.selectTile()
-    })
-  }
-}
-
 class WallTreeComponent extends AbstractTreeComponent {
   // pin?
   // duplicate?
@@ -39532,8 +39912,42 @@ class WallTreeComponent extends AbstractTreeComponent {
 
   getPickerBlock(event) {}
 
-  getCommander() {
-    return new WallCommander(this)
+  async openWallContextMenuCommand() {
+    this.getRootNode().toggleAndRender("tabContextMenu")
+  }
+
+  async insertAdjacentTileCommand() {
+    const app = this.getRootNode()
+    const tilesProgram = app.getMountedTilesProgram()
+    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
+    const newTiles = app
+      .getNodeCursors()
+      .slice(0, 1)
+      .map(cursor => cursor.appendLine(TilesConstants.pickerTile))
+    const promise = await app.getMountedTab().autosaveAndRender()
+    tilesProgram.clearSelection()
+    newTiles.forEach(tile => tile.selectTile())
+    return promise
+  }
+
+  async insertPickerTileCommand() {
+    const app = this.getRootNode()
+    const evt = app.getMouseEvent()
+    const tilesProgram = app.getMountedTilesProgram()
+
+    if (!evt.shiftKey) {
+      tilesProgram.clearSelection()
+    }
+    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
+    const newTiles = app
+      .getNodeCursors()
+      .slice(0, 1)
+      .map(cursor => cursor.appendLineAndChildren(TilesConstants.pickerTile, this.getPickerBlock(evt)))
+    await app.getMountedTab().autosaveAndRender()
+    tilesProgram.clearSelection()
+    newTiles.forEach(tile => {
+      tile.selectTile()
+    })
   }
 
   getDependencies() {
@@ -39623,7 +40037,7 @@ class WallTreeComponent extends AbstractTreeComponent {
                 .forEach(stumpNode => {
                   stumpNode.addClassToStumpNode(TilesConstants.staySelectedClass)
                 })
-            else app.getCommander().clearSelectionCommand()
+            else app.clearSelectionCommand()
           },
           stop: function() {
             willowBrowser
@@ -39633,7 +40047,7 @@ class WallTreeComponent extends AbstractTreeComponent {
                 stumpNode.removeClassFromStumpNode(TilesConstants.staySelectedClass)
                 stumpNode.addClassToStumpNode(TilesConstants.selectedClass)
               })
-            app.getCommander().selectTilesByShadowClassCommand()
+            app.selectTilesByShadowClassCommand()
             return true
           }
         })
@@ -39643,8 +40057,6 @@ class WallTreeComponent extends AbstractTreeComponent {
 }
 
 window.WallTreeComponent = WallTreeComponent
-
-window.WallCommander = WallCommander
 ;
 
 
@@ -39654,10 +40066,15 @@ window.WallCommander = WallCommander
 
 
 
-class WallFlexCommander extends WallCommander {
+class WallFlexTreeComponent extends WallTreeComponent {
+  _resizeTiles(stumpNode) {
+    const selected = this._getSelectedTileStumpNodes()
+    selected.length > 1 ? selected.forEach(stumpNode => this._resizeStumpNode(stumpNode)) : this._resizeStumpNode(stumpNode)
+    this.setLayoutToCustomCommand()
+  }
+
   setLayoutToCustomCommand() {
-    const wall = this.getTarget()
-    const app = wall.getRootNode()
+    const app = this.getRootNode()
     const tab = app.getMountedTab()
     const tabProgram = tab.getTabProgram()
     tabProgram.touchNode(TilesConstants.layout).setContent(TilesConstants.custom)
@@ -39666,14 +40083,13 @@ class WallFlexCommander extends WallCommander {
 
   moveTilesFromShadowsCommand() {
     // todo: remove this. ditch jqery ui.
-    const wall = this.getTarget()
-    const app = wall.getRootNode()
+    const app = this.getRootNode()
     app
       .getWillowProgram()
       .getBodyStumpNode()
       .findStumpNodesWithClass(TilesConstants.abstractTileTreeComponentNode)
       .filter(stumpNode => stumpNode.getStumpNodeTreeComponent().isVisible())
-      .forEach(stumpNode => wall._moveStumpNode(stumpNode))
+      .forEach(stumpNode => this._moveStumpNode(stumpNode))
     return this.setLayoutToCustomCommand()
   }
 
@@ -39685,9 +40101,7 @@ class WallFlexCommander extends WallCommander {
   }
 
   async toggleLayoutCommand() {
-    const mountedProgram = this.getTarget()
-      .getRootNode()
-      .getMountedTilesProgram()
+    const mountedProgram = this.getRootNode().getMountedTilesProgram()
     const currentLayoutNode = mountedProgram.touchNode(TilesConstants.layout)
     const currentLayout = currentLayoutNode.getContent() || TilesConstants.layouts.tiled
     const newLayout = jtree.Utils.toggle(currentLayout, this._getLayoutOptions(mountedProgram))
@@ -39697,27 +40111,14 @@ class WallFlexCommander extends WallCommander {
     tab.addStumpCodeMessageToLog(`div Layout changed to '${newLayout}'.`)
     await tab.autosaveAndRender()
   }
-}
-
-class WallFlexTreeComponent extends WallTreeComponent {
-  _resizeTiles(stumpNode) {
-    const selected = this._getSelectedTileStumpNodes()
-    selected.length > 1 ? selected.forEach(stumpNode => this._resizeStumpNode(stumpNode)) : this._resizeStumpNode(stumpNode)
-    this.getCommander().setLayoutToCustomCommand()
-  }
-
-  getCommander() {
-    return new WallFlexCommander(this)
-  }
 
   _resizeStumpNode(stumpNode) {
     const tile = stumpNode.getStumpNodeTreeComponent()
     const shadow = stumpNode.getShadow()
     const gridSize = this.getGridSize()
-    const commander = tile.getCommander()
     const position = shadow.getPositionAndDimensions(gridSize)
-    commander.changeTileSettingCommand(TilesConstants.width, position.width)
-    commander.changeTileSettingCommand(TilesConstants.height, position.height)
+    tile.changeTileSettingCommand(TilesConstants.width, position.width)
+    tile.changeTileSettingCommand(TilesConstants.height, position.height)
   }
 
   getPickerBlock(event) {
@@ -39734,8 +40135,8 @@ ${TilesConstants.top} ${_top}`
     const shadow = stumpNode.getShadow()
     const gridSize = this.getGridSize()
     const position = shadow.getPositionAndDimensions(gridSize)
-    tile.getCommander().changeTileSettingCommand(TilesConstants.left, position.left)
-    tile.getCommander().changeTileSettingCommand(TilesConstants.top, position.top)
+    tile.changeTileSettingCommand(TilesConstants.left, position.left)
+    tile.changeTileSettingCommand(TilesConstants.top, position.top)
   }
 
   getGridSize() {
@@ -39824,7 +40225,7 @@ ${TilesConstants.top} ${_top}`
         const change = that._getElementChangeInPixels(ui, offset)
         that._updateSelectedOnMove(stumpNode, change)
         offset = ui // todo: what does this do?
-        app.getCommander().moveTilesFromShadowsCommand()
+        app.moveTilesFromShadowsCommand()
       },
       grid: [gridSize, gridSize],
       handle: ".TileGrabber",
@@ -40190,643 +40591,6 @@ DataShadowEvents.onDblClickCommand = "stumpOnDblClickCommand"
 
 
 
-class AppCommander extends AbstractCommander {
-  async playFirstVisitCommand() {
-    // await this.openOhayoProgramCommand("faq.maia")
-    // todo: make this create in memory?
-    await this.openOhayoProgramCommand(OhayoConstants.productName + OhayoConstants.fileExtensions.maia)
-  }
-
-  get _targetCommander() {
-    return this.app.getTargetNode().getCommander()
-  }
-
-  copyTargetTileCommand(uno, dos) {
-    return this._targetCommander.copyTileCommand(uno, dos)
-  }
-
-  copyTargetTileDataAsTreeCommand(uno, dos) {
-    return this._targetCommander.copyDataAsTreeCommand(uno, dos)
-  }
-
-  copyTargetTileDataAsJavascriptCommand(uno, dos) {
-    return this._targetCommander.copyDataAsJavascriptCommand(uno, dos)
-  }
-
-  copyTargetTileDataCommand(uno, dos) {
-    return this._targetCommander.copyDataCommand(uno, dos)
-  }
-
-  exportTargetTileDataCommand(uno, dos) {
-    return this._targetCommander.exportTileDataCommand(uno, dos)
-  }
-
-  moveTilesFromShadowsCommand() {
-    return this.app
-      .getAppWall()
-      .getCommander()
-      .moveTilesFromShadowsCommand()
-  }
-
-  async toggleLayoutCommand() {
-    const wallCommander = this.app.getAppWall().getCommander()
-    return wallCommander.toggleLayoutCommand && wallCommander.toggleLayoutCommand() // todo: cleanup
-  }
-
-  async togglePerfModeCommand() {
-    const settings = this.app.getPerfSettings()
-    Object.keys(settings).forEach(key => {
-      settings[key] = !settings[key]
-    })
-
-    // todo: what is this?.. ah, codeMirror vs terminal should be different.
-    this.app.getFocusedPanel().toggleGutter()
-    this.app.getFocusedPanel().toggleGutter()
-    this.renderApp()
-  }
-
-  async cellCheckProgramCommand() {
-    const program = this.mountedTab.getTabProgram()
-    const errors = program.getAllErrors().map(err => err.getMessage())
-    this.mountedTab.addStumpCodeMessageToLog(
-      `strong ${errors.length} errors in ${this.mountedTab.getFileName()}
-div - ${errors.join("\ndiv - ")}`
-    )
-    this.renderApp()
-  }
-
-  async printProgramStatsCommand() {
-    const stats = new jtree.TreeNode(this.mountedProgram.toRunTimeStats()).toString()
-    this.mountedTab.logMessageText(stats)
-    this.renderApp()
-  }
-
-  createProgramFromFileCommand(filename, data) {
-    // todo: how do we handle multi-table-csv?
-    // there are multiple types of CSVs.
-    const extension = jtree.Utils.getFileExtension(filename)
-    if (this.app.getGrammars()[extension]) return this.app._createAndOpen(data, filename)
-
-    const templateFn = MaiaTemplates[extension]
-    const program = templateFn ? templateFn(filename, data, this.app) : `html.h1 No visualization templates for ${filename}`
-    return this.app._createAndOpen(program, filename + OhayoConstants.fileExtensions.maia)
-  }
-
-  async toggleShadowByIdCommand(id) {
-    this.willowProgram
-      .getBodyStumpNode()
-      .findStumpNodeByChild("id " + id)
-      .getShadow()
-      .toggleShadow()
-  }
-
-  async fillShadowInputOrTextAreaByClassNameCommand(className, value) {
-    this.willowProgram
-      .getBodyStumpNode()
-      .findStumpNodesWithClass(className)
-      .forEach(stumpNode => {
-        stumpNode.getShadow().setInputOrTextAreaValue(value)
-      })
-  }
-
-  async openDeleteAllTabsPromptCommand() {
-    const tabs = this.focusedPanel.getTabs()
-
-    const shouldProceed = await this.willowProgram.confirmThen(`Are you sure you want to delete ${tabs.length} open files?`)
-
-    return shouldProceed ? Promise.all(tabs.map(tab => tab.unlinkTab())) : false
-  }
-
-  async toggleAndRenderNewDropDownCommand() {
-    this.app.getNode(OhayoConstants.menu).toggleAndRender(OhayoConstants.newDropDownMenu)
-  }
-
-  renderApp() {
-    this.app.renderApp()
-  }
-
-  async closeAllDropDownMenusCommand() {
-    this.app.getTopDownArray().forEach(treeComponent => {
-      if (treeComponent.getLine().includes(OhayoConstants.DropDownMenuSubstring)) treeComponent.unmountAndDestroy()
-    })
-  }
-
-  async appendTileAndSelectCommand(line, children) {
-    const app = this.app
-    const tiles = app._appendTiles(line, children)
-    tiles.forEach(tile => tile.execute())
-    this.mountedProgram.clearSelection()
-    await this.mountedProgram.getTab().autosaveAndRender()
-
-    tiles.forEach(tile => tile.selectTile())
-  }
-
-  insertPickerTileCommand() {
-    return this.app
-      .getAppWall()
-      .getCommander()
-      .insertPickerTileCommand()
-  }
-
-  insertAdjacentTileCommand() {
-    return this.app
-      .getAppWall()
-      .getCommander()
-      .insertAdjacentTileCommand()
-  }
-
-  async appendTileCommand(line, children) {
-    // Todo: we just removed race condition. But does UI suffer?
-    await Promise.all(this.app._appendTiles(line, children).map(tile => tile.execute()))
-    return this.mountedTab.autosaveAndRender()
-  }
-
-  async deleteAllRowsInTargetTileCommand() {
-    const inputTable = this.app.getTargetNode().getParentOrDummyTable()
-    const app = this.app
-    await Promise.all(inputTable.getRows().map(row => row.destroyRow(app)))
-    this.renderApp() // todo: cleanup
-  }
-
-  openOhayoProgramCommand(names) {
-    return Promise.all(names.split(" ").map(name => this.app._openOhayoProgram(name)))
-  }
-
-  deleteFileCommand(filepath) {
-    return this.app.unlinkFile(filepath)
-  }
-
-  async moveFileCommand(existingFullDiskFilePath, newFullDiskFilePath) {
-    return this.app.moveFile(existingFullDiskFilePath, newFullDiskFilePath)
-  }
-
-  async createNewBlankProgramCommand(filename = "untitled" + OhayoConstants.fileExtensions.maia) {
-    const tab = await this.app._createAndOpen("", filename)
-    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-  }
-
-  async copyDeepLinkCommand() {
-    this.app.getWillowProgram().copyTextToClipboard(this.mountedTab.getDeepLink())
-  }
-
-  async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
-    const uri = new URLSearchParams(new URL(deepLink).search)
-    const fileName = decodeURIComponent(uri.get(OhayoConstants.deepLinks.filename))
-    let sourceCode = decodeURIComponent(uri.get(OhayoConstants.deepLinks.data))
-    if (uri.get(OhayoConstants.deepLinks.edgeSymbol)) sourceCode = sourceCode.replace(new RegExp(uri.get(OhayoConstants.deepLinks.edgeSymbol), "g"), " ")
-    if (uri.get(OhayoConstants.deepLinks.nodeBreakSymbol)) sourceCode = sourceCode.replace(new RegExp(uri.get(OhayoConstants.deepLinks.nodeBreakSymbol), "g"), "\n")
-
-    // todo: sec scan
-
-    await this.app._createAndOpen(sourceCode, fileName)
-    // Now remove the current page from history.
-    // todo: cleanup by moving to willow
-    if (typeof window !== "undefined") window.history.replaceState({}, document.title, location.pathname)
-  }
-
-  async openCreateNewProgramFromUrlDialogCommand() {
-    const url = await this.willowProgram.promptThen(`Enter the url to clone and edit`, "")
-
-    if (!url) return undefined
-
-    const res = await this.willowProgram.httpGetUrl(url)
-
-    const tab = await this.app._createAndOpen(res.text, "untitled" + OhayoConstants.fileExtensions.maia)
-    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-  }
-
-  async openFolderPromptCommand() {
-    const folder = await this.willowProgram.promptThen(`Enter a folder path to open multiple files`, this.app.getDefaultDisk().getPathBase())
-    return folder ? this.openFolderCommand(folder) : undefined
-  }
-
-  async changeWorkingFolderPromptCommand() {
-    const current = this.app.getDefaultDisk().getPathBase()
-    const newWorkingFolder = await this.willowProgram.promptThen(`Enter a folder path`, current)
-    if (!newWorkingFolder || current === newWorkingFolder) return undefined
-    return this.changeWorkingFolderCommand(newWorkingFolder)
-  }
-
-  async changeWorkingFolderCommand(newWorkingFolder) {
-    newWorkingFolder = newWorkingFolder.replace(/\/$/, "") + "/"
-    this.app.setWorkingFolder(newWorkingFolder)
-  }
-
-  async openFullDiskFilePathPromptCommand(suggestion) {
-    const fullPath = await this.willowProgram.promptThen(`Enter a full path to open`, suggestion || this.app.getDefaultDisk().getPathBase())
-
-    if (!fullPath) return undefined
-    new FullDiskPath(fullPath)
-    // Todo: what if it does not exist.
-    return this.app.openFullPathInNewTabAndFocus(fullPath)
-  }
-
-  async openFolderCommand(fullFolderPath) {
-    const app = this.app
-    fullFolderPath = new FullFolderPath(fullFolderPath, app)
-    const files = await fullFolderPath.getFiles()
-
-    return Promise.all(files.map(file => app._openFullDiskFilePathInNewTab(file.getFileLink())))
-  }
-
-  async confirmAndResetAppStateCommand() {
-    const app = this.app
-    const result = await this.willowProgram.confirmThen(`Are you sure you want to reset the Ohayo UI? Your files will not be lost.`)
-    if (!result) return undefined
-    this.app.resetAppState()
-    this.willowProgram.reload()
-  }
-
-  openUrlInNewTabCommand(url) {
-    return this.app._openFullDiskFilePathInNewTab(new FullDiskPath(url).toString())
-  }
-
-  async mountTabByIndexCommand(index) {
-    this.focusedPanel.mountTabByIndex(index)
-  }
-
-  async closeTabByIndexCommand(index) {
-    this.focusedPanel.closeTabByIndex(index)
-    this.renderApp()
-  }
-
-  async toggleAutoSaveCommand() {
-    const app = this.app
-    const newSetting = !app.isAutoSaveEnabled()
-    if (!newSetting) app.storeValue(StorageKeys.autoSave, "false")
-    else app.removeValue(StorageKeys.autoSave)
-    app.addStumpCodeMessageToLog(`div Autosave is ${newSetting}`)
-  }
-
-  async saveCompiledCommand() {
-    const grammarProgram = this.mountedProgram.getGrammarProgram()
-    const outputExtension = grammarProgram.getTargetExtension()
-    const filename = jtree.Utils.stringToPermalink(jtree.Utils.removeFileExtension(this.mountedTab.getFileName())) + "." + outputExtension
-    this.willowProgram.downloadFile(this.mountedProgram.compile(), filename, "text/" + outputExtension)
-  }
-
-  async executeProgramCommand() {
-    // todo: sec considerations? prevent someone from triggering this command w/o user input.
-    let result = await this.mountedTab.getTabProgram().execute()
-    if (typeof result !== "string") result = result.join("\n")
-    this.mountedTab.logMessageText(encodeURIComponent(result))
-    this.renderApp()
-  }
-
-  get focusedPanel() {
-    return this.app.getFocusedPanel()
-  }
-
-  get willowProgram() {
-    return this.app.getWillowProgram()
-  }
-
-  get app() {
-    return this.getTarget()
-  }
-
-  get mountedProgram() {
-    return this.app.getMountedTilesProgram()
-  }
-
-  get mountedTab() {
-    return this.app.getMountedTab()
-  }
-
-  async toggleThemeCommand() {
-    this.app._toggleTheme()
-  }
-
-  openFullPathInNewTabAndFocusCommand(url) {
-    return this.app.openFullPathInNewTabAndFocus(url)
-  }
-
-  async _showTabMoveFilePromptCommand(suggestedNewFilename, isRenameOp = false) {
-    const mountedTab = this.mountedTab
-
-    const newName = await this.app.promptToMoveFile(mountedTab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
-    if (!newName) return false
-    const tab = await this.app.openFullPathInNewTabAndFocus(newName)
-    this.focusedPanel.closeTab(mountedTab)
-    this.renderApp()
-    return tab
-  }
-
-  async showTabMoveFilePromptCommand(suggestedNewFilename) {
-    return this._showTabMoveFilePromptCommand(suggestedNewFilename)
-  }
-
-  async showTabRenameFilePromptCommand(suggestedNewFilename) {
-    return this._showTabMoveFilePromptCommand(suggestedNewFilename, true)
-  }
-
-  async toggleOfflineModeCommand() {
-    this.willowProgram.toggleOfflineMode()
-  }
-
-  async sleepCommand(ms = 1000) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
-
-  async toggleHelpCommand() {
-    this.app.toggleAndRender(OhayoConstants.helpModal)
-  }
-
-  async closeMountedProgramCommand() {
-    this.focusedPanel.closeTab(this.mountedTab)
-    this.renderApp()
-  }
-
-  fetchAndReloadFocusedTabCommand() {
-    return this.mountedTab.reloadFromDisk()
-  }
-
-  async selectAllTilesCommand() {
-    // todo: bug. they are not showing selected state.
-    this.mountedProgram.getTiles().forEach(tile => tile.selectTile())
-  }
-
-  async selectTilesByShadowClassCommand(className) {
-    this.app.addToCommandLog("app selectTilesByShadowClassCommand")
-    this.mountedTab.getTabWall().selectTilesByShadowClass(className)
-  }
-
-  async clearSelectionCommand() {
-    this.app.addToCommandLog("app clearSelectionCommand")
-    this.mountedProgram.clearSelection()
-  }
-
-  async deleteSelectionCommand() {
-    this._deleteSelection()
-    await this.mountedProgram.getTab().autosaveAndRender()
-    // Todo: need to reposition all tiles if not using a custom layout
-    // todo: makes me think we should put css top/left/width/height separately from css and stump (so mount 3 things)
-  }
-
-  _deleteSelection() {
-    const tiles = this.mountedProgram.getSelectedNodes()
-    if (!tiles.length) return undefined
-    tiles.forEach(tile => {
-      // New behavior is: shift children left 1. Dont delete them along with parent.
-      tile
-        .filter(tile => tile.doesExtend("abstractTileTreeComponentNode") && !tile.isSelected())
-        .forEach(child => {
-          child.unmount()
-          child.shiftLeft()
-        })
-      tile.unmountAndDestroy()
-    })
-  }
-
-  async duplicateSelectionCommand() {
-    const newTiles = this.mountedProgram.getSelectedNodes().map(tile => tile.cloneAndOffset())
-    await this.app.renderApp()
-    this.mountedProgram.clearSelection()
-    newTiles.forEach(tile => tile.selectTile())
-    await this.mountedProgram.getTab().autosaveAndRender()
-  }
-
-  async showDeleteFileConfirmDialogCommand() {
-    const filename = this.mountedTab.getFileName()
-    // todo: make this an undo operation. on web should be easyish. on desktop via move to trash.
-    const result = await this.willowProgram.confirmThen(`Are you sure you want to delete ${filename}?`)
-    return result ? this.deleteFocusedTabCommand() : undefined
-  }
-
-  async deleteFocusedTabCommand() {
-    const tab = this.mountedTab
-    await tab.unlinkTab()
-
-    this.focusedPanel.closeTab(tab)
-    this.renderApp()
-  }
-
-  async mountPreviousTabCommand() {
-    this.focusedPanel.mountPreviousTab()
-  }
-
-  async mountNextTabCommand() {
-    this.focusedPanel.mountNextTab()
-  }
-
-  async closeAllTabsCommand() {
-    this.focusedPanel.closeAllTabs() // todo: confirm before closing if unsaved changes?
-    this.renderApp()
-  }
-
-  async closeAllTabsExceptFocusedTabCommand() {
-    this.focusedPanel.closeAllTabsExceptFocusedTab() // todo: confirm before closing if unsaved changes?
-    this.renderApp()
-  }
-
-  async toggleFullScreenCommand() {
-    this.willowProgram.toggleFullScreen()
-  }
-
-  toggleFocusedModeCommand() {
-    this.app.toggle(OhayoConstants.menu)
-    return this.toggleFullScreenCommand()
-  }
-
-  // TODO: make it slidable.?
-  async toggleGutterWidthCommand() {
-    this.focusedPanel.toggleGutterWidth()
-    this.renderApp()
-  }
-
-  async toggleGutterCommand() {
-    this.app.getFocusedPanel().toggleGutter()
-    this.renderApp()
-  }
-
-  async selectNextTileCommand() {
-    this._selectTileByDelta(1)
-  }
-
-  _selectTileByDelta(delta) {
-    const program = this.mountedProgram
-    const arr = program.getTiles()
-    if (arr.length < 2) return true
-    let currentIndex = arr.indexOf(program.getSelectedNodes()[0])
-    const potentialNewIndex = currentIndex + delta
-    program.clearSelection()
-    arr[potentialNewIndex > arr.length - 1 ? 0 : potentialNewIndex === -1 ? arr.length - 1 : potentialNewIndex].selectTile()
-  }
-
-  async selectFirstTileCommand() {
-    const firstTile = this.mountedProgram.getTiles()[0]
-    firstTile && firstTile.selectTile()
-  }
-
-  async selectPreviousTileCommand() {
-    this._selectTileByDelta(-1)
-  }
-
-  async createNewSourceCodeVisualizationProgramCommand() {
-    // todo: make this create in memory? but then a refresh will end it.
-    const sourceCode = this.mountedProgram.childrenToString()
-    const template = MaiaCodeEditorTemplate(sourceCode, this.mountedTab.getFileName(), OhayoConstants.fileExtensions.maia.substr(1))
-    const tab = await this.app._createAndOpen(template, this.mountedTab.getFileName() + "-source-code-vis.maia")
-
-    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-  }
-
-  async createMiniMapCommand() {
-    // todo: make this create in memory? but then a refresh will end it.
-    const tab = await this.app._createAndOpen(MiniTemplate, "myPrograms" + OhayoConstants.fileExtensions.maia)
-
-    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-  }
-
-  async clearTabMessagesCommand() {
-    await this.mountedTab.getCommander().clearMessageBufferCommand()
-
-    this.renderApp()
-  }
-
-  async undoFocusedProgramCommand() {
-    return this._undoOrRedo()
-  }
-
-  async redoFocusedProgramCommand() {
-    return this._undoOrRedo(false)
-  }
-
-  async _undoOrRedo(undo = true) {
-    this.mountedTab.getTabWall().unmount()
-    undo ? this.mountedProgram.undo() : this.mountedProgram.redo()
-    await this.mountedProgram.loadAndIncrementalRender()
-  }
-
-  async closeModalCommand() {
-    this.app.closeModal()
-  }
-
-  async clearStoreCommand() {
-    // todo: only clear this app values?
-    return this.app.getStore().disabled ? undefined : this.app.getStore().clearAll()
-  }
-
-  async copySelectionCommand(evt) {
-    if (!this.mountedProgram) return true
-
-    const str = this._copySelection(evt)
-    if (!str) return undefined
-    this.mountedProgram.getRootNode().addStumpCodeMessageToLog(`div Items copied`)
-    return str
-  }
-
-  async cutSelectionCommand(evt) {
-    const str = this._copySelection(evt)
-    if (!str) return undefined
-    this._deleteSelection()
-    this.mountedProgram.getRootNode().addStumpCodeMessageToLog(`div Items cut`)
-    await this.mountedProgram.getTab().autosaveAndRender()
-  }
-
-  _copySelection(evt) {
-    const app = this.app
-    const willowBrowser = app.getWillowProgram()
-    if (app.terminalHasFocus() || willowBrowser.someInputHasFocus()) return ""
-    // copy selected tiles
-    const str = this.mountedProgram.selectionToString()
-    if (!str) return ""
-    willowBrowser.setCopyData(evt, str)
-    return str
-  }
-
-  async echoCommand(...words) {
-    this.app.addStumpCodeMessageToLog(`div ${words.join(" ")}`)
-  }
-
-  async saveTabAndNotifyCommand() {
-    const tab = this.mountedTab
-    await tab.forceSaveToFile()
-    tab.addStumpCodeMessageToLog(`div Saved ${tab.getFileName()}
- title Saved ${tab.getFullTabFilePath()}`)
-    this.renderApp()
-  }
-
-  cloneTabCommand() {
-    return this.app._createAndOpen(this.mountedTab.getTabProgram().childrenToString(), this.mountedTab.getFileName())
-  }
-
-  async pasteCommand(pastedText) {
-    if (this.mountedTab) await this.mountedTab.appendFromPaste(pastedText)
-    else await this.app._createProgramFromPaste(pastedText)
-  }
-
-  async executeStumpNodeCommandByStumpNodeIdCommand(commandName, stumpNodeId) {
-    await this.app._executeStumpNodeCommandByStumpNodeChild(commandName, "id " + stumpNodeId)
-  }
-
-  async executeStumpNodeCommandByStumpNodeClassCommand(commandName, stumpNodeClass) {
-    await this.app._executeStumpNodeCommandByStumpNodeChild(commandName, "class " + stumpNodeClass)
-  }
-
-  async executeStumpNodeCommandByStumpNodeStringCommand(commandName, str) {
-    await this.app._executeStumpNodeCommandByStumpNodeString(commandName, str)
-  }
-
-  async executeCommandOnFirstSelectedTileCommand(command, valueParam, nameParam) {
-    const commander = this.mountedProgram.getSelectedNodes()[0].getCommander()
-    return commander[command](valueParam, nameParam)
-  }
-
-  async executeCommandOnLastSelectedTileCommand(command, valueParam, nameParam) {
-    const tile = this.mountedProgram.getSelectedNodes()[this.mountedProgram.getSelectedNodes().length - 1]
-    const commander = tile.getCommander()
-    return commander[command](valueParam, nameParam)
-  }
-
-  async _doTileQualityCheckCommand() {
-    // Note: currently required a mountedProgram
-    const grammarProgram = this.mountedProgram.getGrammarProgram()
-    const topNodeTypes = grammarProgram.getTopNodeTypeDefinitions().map(def => def.get("crux"))
-
-    const sourceCode = topNodeTypes.join("\n") + `\n${TilesConstants.layout} ${TilesConstants.layouts.column}`
-    const tab = await this.app._createAndOpen(sourceCode, "all-tiles" + OhayoConstants.fileExtensions.maia)
-    const data = tab
-      .getTabProgram()
-      .getTiles()
-      .filter(tile => tile.getTileQualityCheck) // only check Maia tiles
-      .map(tile => tile.getTileQualityCheck())
-
-    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-    const sourceCode2 = new jtree.TreeNode(`data.inline
- tables.basic Quality Check Results`)
-    sourceCode2.getNode("data.inline").appendLineAndChildren("content", new jtree.TreeNode(data).toCsv())
-    const tab2 = await this.app._createAndOpen(sourceCode2.toString(), "tiles-quality-check-results" + OhayoConstants.fileExtensions.maia)
-
-    tab2.addStumpCodeMessageToLog(`div Created '${tab2.getFullTabFilePath()}'`)
-  }
-
-  async _runSpeedTestCommand() {
-    const app = this.app
-    const files = await app.getDefaultDisk().readFiles()
-    const startTime = Date.now()
-    const focusedPanel = this.focusedPanel
-
-    const timePromises = files.map(async file => {
-      const url = file.getFileLink()
-      const newTab = await app._openFullDiskFilePathInNewTab(url)
-      const mountedTab = focusedPanel.getMountedTab()
-      focusedPanel.setMountedTab(newTab)
-      if (mountedTab) focusedPanel.closeTab(mountedTab)
-      app.renderApp()
-      return newTab.getTabProgram().toRunTimeStats()
-    })
-
-    const times = await Promise.all(timePromises)
-    // todo: trigger shift+w shortcut instead of this if clause.
-    if (focusedPanel.getMountedTab()) this.closeMountedProgramCommand()
-    const rowsAsCsv = new jtree.TreeNode(times)
-    const runTime = Date.now() - startTime
-    const title = `Program Load Times ${moment().format("MM/DD/YYYY")} version ${app.getVersion()}. Run time: ${runTime}`
-    return app._createAndOpen(SpeedTestTemplate(title, rowsAsCsv.toCsv()), "program-load-times" + OhayoConstants.fileExtensions.maia)
-  }
-}
-
 class GlobalShortcutNode extends jtree.TreeNode {
   getKeyCombo() {
     return this.getWord(3)
@@ -40852,7 +40616,7 @@ class GlobalShortcutNode extends jtree.TreeNode {
     if (!this.isEnabled(app)) return false
     const fn = this.getFn()
     app.addToCommandLog(fn)
-    app.getCommander()[fn]()
+    app[fn]()
   }
 }
 
@@ -40875,7 +40639,6 @@ class DrumsProgram extends jtree.TreeNode {
 class OhayoWebApp extends AbstractTreeComponent {
   treeComponentWillMount() {
     this._startVisitCounter()
-    this._commander = new AppCommander(this)
 
     const defaultState = this.getFromStore(StorageKeys.appState) || OhayoWebApp.getDefaultStartState()
     this.setChildren(defaultState)
@@ -40891,15 +40654,15 @@ class OhayoWebApp extends AbstractTreeComponent {
     willowDoc.setResizeEndHandler(event => this._onResizeEndEvent(event))
     willowDoc.setPasteHandler(event => this._onPasteEvent(event))
     willowDoc.setLoadedDroppedFileHandler(files => {
-      files.forEach(file => this.getCommander().createProgramFromFileCommand(file.filename, file.data))
+      files.forEach(file => this.createProgramFromFileCommand(file.filename, file.data))
     }, "Drop to create a new program.")
 
     this._setErrorHandlers()
     this.addStumpCodeMessageToLog(`div Ohayo!`)
 
     const deepLink = this._getDeepLink()
-    if (deepLink) this.getCommander().createAndOpenNewProgramFromDeepLinkCommand(deepLink)
-    else if (this._getVisitCount() === 1) this.getCommander().playFirstVisitCommand()
+    if (deepLink) this.createAndOpenNewProgramFromDeepLinkCommand(deepLink)
+    else if (this._getVisitCount() === 1) this.playFirstVisitCommand()
   }
 
   _getDeepLink() {
@@ -40910,7 +40673,7 @@ class OhayoWebApp extends AbstractTreeComponent {
   async _onPasteEvent(event) {
     // Return true if worker is editing an input
     if (this.terminalHasFocus() || this.getWillowProgram().someInputHasFocus()) return true
-    if (event.clipboardData && event.clipboardData.getData) await this.getCommander().pasteCommand(event.clipboardData.getData("text/plain"))
+    if (event.clipboardData && event.clipboardData.getData) await this.pasteCommand(event.clipboardData.getData("text/plain"))
   }
 
   _onResizeEndEvent(event) {
@@ -40971,10 +40734,6 @@ class OhayoWebApp extends AbstractTreeComponent {
     }
   }
 
-  getCommander() {
-    return this._commander
-  }
-
   getWindowSizeMTime() {
     const node = this.getNode(OhayoConstants.windowSize)
     return node ? node.getLineModifiedTime() : 0
@@ -41001,7 +40760,7 @@ ${OhayoConstants.panel} 400
 
   executeCommandLine(args) {
     this.addToCommandLog(args.join(" "))
-    return this.getCommander()[args[0]].apply(this, args.slice(1))
+    return this[args[0]].apply(this, args.slice(1))
   }
 
   getProgramConstructorFromFileExtension(treeLanguageName) {
@@ -41287,7 +41046,7 @@ ${OhayoConstants.panel} 400
 
     newFullDiskFilePath = newFullDiskFilePath.getWithoutFilename() + jtree.Utils.stringToPermalink(newFullDiskFilePath.getFilename())
     if (!newFullDiskFilePath) return undefined
-    const resultingName = await this.getCommander().moveFileCommand(existingFullDiskFilePath, newFullDiskFilePath)
+    const resultingName = await this.moveFileCommand(existingFullDiskFilePath, newFullDiskFilePath)
 
     this.addStumpCodeMessageToLog(`div Moved`)
     return resultingName
@@ -41392,10 +41151,9 @@ ${OhayoConstants.panel} 400
 
   _makeDocumentCopyableAndCuttable() {
     const app = this
-    app
-      .getWillowProgram()
-      .setCopyHandler(evt => app.getCommander().copySelectionCommand(evt))
-      .setCutHandler(evt => app.getCommander().cutSelectionCommand(evt))
+    this.getWillowProgram()
+      .setCopyHandler(evt => app.copySelectionCommand(evt))
+      .setCutHandler(evt => app.cutSelectionCommand(evt))
   }
 
   _handleLinkClick(stumpNode, evt) {
@@ -41531,7 +41289,7 @@ ${OhayoConstants.panel} 400
 
   _onCommandWillRun() {
     this.closeAllContextMenus() // todo: move these to a body handler?
-    this.getCommander().closeAllDropDownMenusCommand()
+    this.closeAllDropDownMenusCommand()
   }
 
   async _executeStumpNodeCommandByStumpNodeChild(commandName, stumpNodeChild) {
@@ -41544,6 +41302,612 @@ ${OhayoConstants.panel} 400
     const willowBrowser = this.getWillowProgram()
     const stumpNode = willowBrowser.getBodyStumpNode().findStumpNodeByChildString(str)
     await this._executeStumpNodeCommand(stumpNode, stumpNode.getStumpNodeAttr(commandName))
+  }
+
+  async playFirstVisitCommand() {
+    // await this.openOhayoProgramCommand("faq.maia")
+    // todo: make this create in memory?
+    await this.openOhayoProgramCommand(OhayoConstants.productName + OhayoConstants.fileExtensions.maia)
+  }
+
+  copyTargetTileCommand(uno, dos) {
+    return this.getTargetNode().copyTileCommand(uno, dos)
+  }
+
+  copyTargetTileDataAsTreeCommand(uno, dos) {
+    return this.getTargetNode().copyDataAsTreeCommand(uno, dos)
+  }
+
+  copyTargetTileDataAsJavascriptCommand(uno, dos) {
+    return this.getTargetNode().copyDataAsJavascriptCommand(uno, dos)
+  }
+
+  copyTargetTileDataCommand(uno, dos) {
+    return this.getTargetNode().copyDataCommand(uno, dos)
+  }
+
+  exportTargetTileDataCommand(uno, dos) {
+    return this.getTargetNode().exportTileDataCommand(uno, dos)
+  }
+
+  moveTilesFromShadowsCommand() {
+    return this.getAppWall().moveTilesFromShadowsCommand()
+  }
+
+  async toggleLayoutCommand() {
+    const wall = this.getAppWall()
+    return wall.toggleLayoutCommand && wall.toggleLayoutCommand() // todo: cleanup
+  }
+
+  async togglePerfModeCommand() {
+    const settings = this.getPerfSettings()
+    Object.keys(settings).forEach(key => {
+      settings[key] = !settings[key]
+    })
+
+    // todo: what is this?.. ah, codeMirror vs terminal should be different.
+    this.getFocusedPanel().toggleGutter()
+    this.getFocusedPanel().toggleGutter()
+    this.renderApp()
+  }
+
+  async cellCheckProgramCommand() {
+    const program = this.mountedTab.getTabProgram()
+    const errors = program.getAllErrors().map(err => err.getMessage())
+    this.mountedTab.addStumpCodeMessageToLog(
+      `strong ${errors.length} errors in ${this.mountedTab.getFileName()}
+div - ${errors.join("\ndiv - ")}`
+    )
+    this.renderApp()
+  }
+
+  async printProgramStatsCommand() {
+    const stats = new jtree.TreeNode(this.mountedProgram.toRunTimeStats()).toString()
+    this.mountedTab.logMessageText(stats)
+    this.renderApp()
+  }
+
+  createProgramFromFileCommand(filename, data) {
+    // todo: how do we handle multi-table-csv?
+    // there are multiple types of CSVs.
+    const extension = jtree.Utils.getFileExtension(filename)
+    if (this.getGrammars()[extension]) return this._createAndOpen(data, filename)
+
+    const templateFn = MaiaTemplates[extension]
+    const program = templateFn ? templateFn(filename, data, this) : `html.h1 No visualization templates for ${filename}`
+    return this._createAndOpen(program, filename + OhayoConstants.fileExtensions.maia)
+  }
+
+  async toggleShadowByIdCommand(id) {
+    this.willowProgram
+      .getBodyStumpNode()
+      .findStumpNodeByChild("id " + id)
+      .getShadow()
+      .toggleShadow()
+  }
+
+  async fillShadowInputOrTextAreaByClassNameCommand(className, value) {
+    this.willowProgram
+      .getBodyStumpNode()
+      .findStumpNodesWithClass(className)
+      .forEach(stumpNode => {
+        stumpNode.getShadow().setInputOrTextAreaValue(value)
+      })
+  }
+
+  async openDeleteAllTabsPromptCommand() {
+    const tabs = this.focusedPanel.getTabs()
+
+    const shouldProceed = await this.willowProgram.confirmThen(`Are you sure you want to delete ${tabs.length} open files?`)
+
+    return shouldProceed ? Promise.all(tabs.map(tab => tab.unlinkTab())) : false
+  }
+
+  async toggleAndRenderNewDropDownCommand() {
+    this.getNode(OhayoConstants.menu).toggleAndRender(OhayoConstants.newDropDownMenu)
+  }
+
+  async closeAllDropDownMenusCommand() {
+    this.getTopDownArray().forEach(treeComponent => {
+      if (treeComponent.getLine().includes(OhayoConstants.DropDownMenuSubstring)) treeComponent.unmountAndDestroy()
+    })
+  }
+
+  async appendTileAndSelectCommand(line, children) {
+    const tiles = this._appendTiles(line, children)
+    tiles.forEach(tile => tile.execute())
+    this.mountedProgram.clearSelection()
+    await this.mountedProgram.getTab().autosaveAndRender()
+
+    tiles.forEach(tile => tile.selectTile())
+  }
+
+  insertPickerTileCommand() {
+    return this.getAppWall().insertPickerTileCommand()
+  }
+
+  insertAdjacentTileCommand() {
+    return this.getAppWall().insertAdjacentTileCommand()
+  }
+
+  async appendTileCommand(line, children) {
+    // Todo: we just removed race condition. But does UI suffer?
+    await Promise.all(this._appendTiles(line, children).map(tile => tile.execute()))
+    return this.mountedTab.autosaveAndRender()
+  }
+
+  async deleteAllRowsInTargetTileCommand() {
+    const inputTable = this.getTargetNode().getParentOrDummyTable()
+    await Promise.all(inputTable.getRows().map(row => row.destroyRow(this)))
+    this.renderApp() // todo: cleanup
+  }
+
+  openOhayoProgramCommand(names) {
+    return Promise.all(names.split(" ").map(name => this._openOhayoProgram(name)))
+  }
+
+  deleteFileCommand(filepath) {
+    return this.unlinkFile(filepath)
+  }
+
+  async moveFileCommand(existingFullDiskFilePath, newFullDiskFilePath) {
+    return this.moveFile(existingFullDiskFilePath, newFullDiskFilePath)
+  }
+
+  async createNewBlankProgramCommand(filename = "untitled" + OhayoConstants.fileExtensions.maia) {
+    const tab = await this._createAndOpen("", filename)
+    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+  }
+
+  async copyDeepLinkCommand() {
+    this.getWillowProgram().copyTextToClipboard(this.mountedTab.getDeepLink())
+  }
+
+  async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
+    const uri = new URLSearchParams(new URL(deepLink).search)
+    const fileName = decodeURIComponent(uri.get(OhayoConstants.deepLinks.filename))
+    let sourceCode = decodeURIComponent(uri.get(OhayoConstants.deepLinks.data))
+    if (uri.get(OhayoConstants.deepLinks.edgeSymbol)) sourceCode = sourceCode.replace(new RegExp(uri.get(OhayoConstants.deepLinks.edgeSymbol), "g"), " ")
+    if (uri.get(OhayoConstants.deepLinks.nodeBreakSymbol)) sourceCode = sourceCode.replace(new RegExp(uri.get(OhayoConstants.deepLinks.nodeBreakSymbol), "g"), "\n")
+
+    // todo: sec scan
+
+    await this._createAndOpen(sourceCode, fileName)
+    // Now remove the current page from history.
+    // todo: cleanup by moving to willow
+    if (typeof window !== "undefined") window.history.replaceState({}, document.title, location.pathname)
+  }
+
+  async openCreateNewProgramFromUrlDialogCommand() {
+    const url = await this.willowProgram.promptThen(`Enter the url to clone and edit`, "")
+
+    if (!url) return undefined
+
+    const res = await this.willowProgram.httpGetUrl(url)
+
+    const tab = await this._createAndOpen(res.text, "untitled" + OhayoConstants.fileExtensions.maia)
+    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+  }
+
+  async openFolderPromptCommand() {
+    const folder = await this.willowProgram.promptThen(`Enter a folder path to open multiple files`, this.getDefaultDisk().getPathBase())
+    return folder ? this.openFolderCommand(folder) : undefined
+  }
+
+  async changeWorkingFolderPromptCommand() {
+    const current = this.getDefaultDisk().getPathBase()
+    const newWorkingFolder = await this.willowProgram.promptThen(`Enter a folder path`, current)
+    if (!newWorkingFolder || current === newWorkingFolder) return undefined
+    return this.changeWorkingFolderCommand(newWorkingFolder)
+  }
+
+  async changeWorkingFolderCommand(newWorkingFolder) {
+    newWorkingFolder = newWorkingFolder.replace(/\/$/, "") + "/"
+    this.setWorkingFolder(newWorkingFolder)
+  }
+
+  async openFullDiskFilePathPromptCommand(suggestion) {
+    const fullPath = await this.willowProgram.promptThen(`Enter a full path to open`, suggestion || this.getDefaultDisk().getPathBase())
+
+    if (!fullPath) return undefined
+    new FullDiskPath(fullPath)
+    // Todo: what if it does not exist.
+    return this.openFullPathInNewTabAndFocus(fullPath)
+  }
+
+  async openFolderCommand(fullFolderPath) {
+    fullFolderPath = new FullFolderPath(fullFolderPath, this)
+    const files = await fullFolderPath.getFiles()
+
+    return Promise.all(files.map(file => this._openFullDiskFilePathInNewTab(file.getFileLink())))
+  }
+
+  async confirmAndResetAppStateCommand() {
+    const result = await this.willowProgram.confirmThen(`Are you sure you want to reset the Ohayo UI? Your files will not be lost.`)
+    if (!result) return undefined
+    this.resetAppState()
+    this.willowProgram.reload()
+  }
+
+  openUrlInNewTabCommand(url) {
+    return this._openFullDiskFilePathInNewTab(new FullDiskPath(url).toString())
+  }
+
+  async mountTabByIndexCommand(index) {
+    this.focusedPanel.mountTabByIndex(index)
+  }
+
+  async closeTabByIndexCommand(index) {
+    this.focusedPanel.closeTabByIndex(index)
+    this.renderApp()
+  }
+
+  async toggleAutoSaveCommand() {
+    const newSetting = !this.isAutoSaveEnabled()
+    if (!newSetting) this.storeValue(StorageKeys.autoSave, "false")
+    else this.removeValue(StorageKeys.autoSave)
+    this.addStumpCodeMessageToLog(`div Autosave is ${newSetting}`)
+  }
+
+  async saveCompiledCommand() {
+    const grammarProgram = this.mountedProgram.getGrammarProgram()
+    const outputExtension = grammarProgram.getTargetExtension()
+    const filename = jtree.Utils.stringToPermalink(jtree.Utils.removeFileExtension(this.mountedTab.getFileName())) + "." + outputExtension
+    this.willowProgram.downloadFile(this.mountedProgram.compile(), filename, "text/" + outputExtension)
+  }
+
+  async executeProgramCommand() {
+    // todo: sec considerations? prevent someone from triggering this command w/o user input.
+    let result = await this.mountedTab.getTabProgram().execute()
+    if (typeof result !== "string") result = result.join("\n")
+    this.mountedTab.logMessageText(encodeURIComponent(result))
+    this.renderApp()
+  }
+
+  get focusedPanel() {
+    return this.getFocusedPanel()
+  }
+
+  get willowProgram() {
+    return this.getWillowProgram()
+  }
+
+  get mountedProgram() {
+    return this.getMountedTilesProgram()
+  }
+
+  get mountedTab() {
+    return this.getMountedTab()
+  }
+
+  async toggleThemeCommand() {
+    this._toggleTheme()
+  }
+
+  openFullPathInNewTabAndFocusCommand(url) {
+    return this.openFullPathInNewTabAndFocus(url)
+  }
+
+  async _showTabMoveFilePromptCommand(suggestedNewFilename, isRenameOp = false) {
+    const mountedTab = this.mountedTab
+
+    const newName = await this.promptToMoveFile(mountedTab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
+    if (!newName) return false
+    const tab = await this.openFullPathInNewTabAndFocus(newName)
+    this.focusedPanel.closeTab(mountedTab)
+    this.renderApp()
+    return tab
+  }
+
+  async showTabMoveFilePromptCommand(suggestedNewFilename) {
+    return this._showTabMoveFilePromptCommand(suggestedNewFilename)
+  }
+
+  async showTabRenameFilePromptCommand(suggestedNewFilename) {
+    return this._showTabMoveFilePromptCommand(suggestedNewFilename, true)
+  }
+
+  async toggleOfflineModeCommand() {
+    this.willowProgram.toggleOfflineMode()
+  }
+
+  async sleepCommand(ms = 1000) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  async toggleHelpCommand() {
+    this.toggleAndRender(OhayoConstants.helpModal)
+  }
+
+  async closeMountedProgramCommand() {
+    this.focusedPanel.closeTab(this.mountedTab)
+    this.renderApp()
+  }
+
+  fetchAndReloadFocusedTabCommand() {
+    return this.mountedTab.reloadFromDisk()
+  }
+
+  async selectAllTilesCommand() {
+    // todo: bug. they are not showing selected state.
+    this.mountedProgram.getTiles().forEach(tile => tile.selectTile())
+  }
+
+  async selectTilesByShadowClassCommand(className) {
+    this.addToCommandLog("app selectTilesByShadowClassCommand") // todo: what is this?
+    this.mountedTab.getTabWall().selectTilesByShadowClass(className)
+  }
+
+  async clearSelectionCommand() {
+    this.addToCommandLog("app clearSelectionCommand") // todo: what is this?
+    this.mountedProgram.clearSelection()
+  }
+
+  async deleteSelectionCommand() {
+    this._deleteSelection()
+    await this.mountedProgram.getTab().autosaveAndRender()
+    // Todo: need to reposition all tiles if not using a custom layout
+    // todo: makes me think we should put css top/left/width/height separately from css and stump (so mount 3 things)
+  }
+
+  _deleteSelection() {
+    const tiles = this.mountedProgram.getSelectedNodes()
+    if (!tiles.length) return undefined
+    tiles.forEach(tile => {
+      // New behavior is: shift children left 1. Dont delete them along with parent.
+      tile
+        .filter(tile => tile.doesExtend("abstractTileTreeComponentNode") && !tile.isSelected())
+        .forEach(child => {
+          child.unmount()
+          child.shiftLeft()
+        })
+      tile.unmountAndDestroy()
+    })
+  }
+
+  async duplicateSelectionCommand() {
+    const newTiles = this.mountedProgram.getSelectedNodes().map(tile => tile.cloneAndOffset())
+    await this.renderApp()
+    this.mountedProgram.clearSelection()
+    newTiles.forEach(tile => tile.selectTile())
+    await this.mountedProgram.getTab().autosaveAndRender()
+  }
+
+  async showDeleteFileConfirmDialogCommand() {
+    const filename = this.mountedTab.getFileName()
+    // todo: make this an undo operation. on web should be easyish. on desktop via move to trash.
+    const result = await this.willowProgram.confirmThen(`Are you sure you want to delete ${filename}?`)
+    return result ? this.deleteFocusedTabCommand() : undefined
+  }
+
+  async deleteFocusedTabCommand() {
+    const tab = this.mountedTab
+    await tab.unlinkTab()
+
+    this.focusedPanel.closeTab(tab)
+    this.renderApp()
+  }
+
+  async mountPreviousTabCommand() {
+    this.focusedPanel.mountPreviousTab()
+  }
+
+  async mountNextTabCommand() {
+    this.focusedPanel.mountNextTab()
+  }
+
+  async closeAllTabsCommand() {
+    this.focusedPanel.closeAllTabs() // todo: confirm before closing if unsaved changes?
+    this.renderApp()
+  }
+
+  async closeAllTabsExceptFocusedTabCommand() {
+    this.focusedPanel.closeAllTabsExceptFocusedTab() // todo: confirm before closing if unsaved changes?
+    this.renderApp()
+  }
+
+  async toggleFullScreenCommand() {
+    this.willowProgram.toggleFullScreen()
+  }
+
+  toggleFocusedModeCommand() {
+    this.toggle(OhayoConstants.menu)
+    return this.toggleFullScreenCommand()
+  }
+
+  // TODO: make it slidable.?
+  async toggleGutterWidthCommand() {
+    this.focusedPanel.toggleGutterWidth()
+    this.renderApp()
+  }
+
+  async toggleGutterCommand() {
+    this.getFocusedPanel().toggleGutter()
+    this.renderApp()
+  }
+
+  async selectNextTileCommand() {
+    this._selectTileByDelta(1)
+  }
+
+  _selectTileByDelta(delta) {
+    const program = this.mountedProgram
+    const arr = program.getTiles()
+    if (arr.length < 2) return true
+    let currentIndex = arr.indexOf(program.getSelectedNodes()[0])
+    const potentialNewIndex = currentIndex + delta
+    program.clearSelection()
+    arr[potentialNewIndex > arr.length - 1 ? 0 : potentialNewIndex === -1 ? arr.length - 1 : potentialNewIndex].selectTile()
+  }
+
+  async selectFirstTileCommand() {
+    const firstTile = this.mountedProgram.getTiles()[0]
+    firstTile && firstTile.selectTile()
+  }
+
+  async selectPreviousTileCommand() {
+    this._selectTileByDelta(-1)
+  }
+
+  async createNewSourceCodeVisualizationProgramCommand() {
+    // todo: make this create in memory? but then a refresh will end it.
+    const sourceCode = this.mountedProgram.childrenToString()
+    const template = MaiaCodeEditorTemplate(sourceCode, this.mountedTab.getFileName(), OhayoConstants.fileExtensions.maia.substr(1))
+    const tab = await this._createAndOpen(template, this.mountedTab.getFileName() + "-source-code-vis.maia")
+
+    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+  }
+
+  async createMiniMapCommand() {
+    // todo: make this create in memory? but then a refresh will end it.
+    const tab = await this._createAndOpen(MiniTemplate, "myPrograms" + OhayoConstants.fileExtensions.maia)
+
+    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+  }
+
+  async clearTabMessagesCommand() {
+    await this.mountedTab.clearMessageBufferCommand()
+
+    this.renderApp()
+  }
+
+  async undoFocusedProgramCommand() {
+    return this._undoOrRedo()
+  }
+
+  async redoFocusedProgramCommand() {
+    return this._undoOrRedo(false)
+  }
+
+  async _undoOrRedo(undo = true) {
+    this.mountedTab.getTabWall().unmount()
+    undo ? this.mountedProgram.undo() : this.mountedProgram.redo()
+    await this.mountedProgram.loadAndIncrementalRender()
+  }
+
+  async closeModalCommand() {
+    this.closeModal()
+  }
+
+  async clearStoreCommand() {
+    // todo: only clear this app values?
+    return this.getStore().disabled ? undefined : this.getStore().clearAll()
+  }
+
+  async copySelectionCommand(evt) {
+    if (!this.mountedProgram) return true
+
+    const str = this._copySelection(evt)
+    if (!str) return undefined
+    this.mountedProgram.getRootNode().addStumpCodeMessageToLog(`div Items copied`)
+    return str
+  }
+
+  async cutSelectionCommand(evt) {
+    const str = this._copySelection(evt)
+    if (!str) return undefined
+    this._deleteSelection()
+    this.mountedProgram.getRootNode().addStumpCodeMessageToLog(`div Items cut`)
+    await this.mountedProgram.getTab().autosaveAndRender()
+  }
+
+  _copySelection(evt) {
+    const willowBrowser = this.getWillowProgram()
+    if (this.terminalHasFocus() || willowBrowser.someInputHasFocus()) return ""
+    // copy selected tiles
+    const str = this.mountedProgram.selectionToString()
+    if (!str) return ""
+    willowBrowser.setCopyData(evt, str)
+    return str
+  }
+
+  async echoCommand(...words) {
+    this.addStumpCodeMessageToLog(`div ${words.join(" ")}`)
+  }
+
+  async saveTabAndNotifyCommand() {
+    const tab = this.mountedTab
+    await tab.forceSaveToFile()
+    tab.addStumpCodeMessageToLog(`div Saved ${tab.getFileName()}
+ title Saved ${tab.getFullTabFilePath()}`)
+    this.renderApp()
+  }
+
+  cloneTabCommand() {
+    return this._createAndOpen(this.mountedTab.getTabProgram().childrenToString(), this.mountedTab.getFileName())
+  }
+
+  async pasteCommand(pastedText) {
+    if (this.mountedTab) await this.mountedTab.appendFromPaste(pastedText)
+    else await this._createProgramFromPaste(pastedText)
+  }
+
+  async executeStumpNodeCommandByStumpNodeIdCommand(commandName, stumpNodeId) {
+    await this._executeStumpNodeCommandByStumpNodeChild(commandName, "id " + stumpNodeId)
+  }
+
+  async executeStumpNodeCommandByStumpNodeClassCommand(commandName, stumpNodeClass) {
+    await this._executeStumpNodeCommandByStumpNodeChild(commandName, "class " + stumpNodeClass)
+  }
+
+  async executeStumpNodeCommandByStumpNodeStringCommand(commandName, str) {
+    await this._executeStumpNodeCommandByStumpNodeString(commandName, str)
+  }
+
+  async executeCommandOnFirstSelectedTileCommand(command, valueParam, nameParam) {
+    const tile = this.mountedProgram.getSelectedNodes()[0]
+    return tile[command](valueParam, nameParam)
+  }
+
+  async executeCommandOnLastSelectedTileCommand(command, valueParam, nameParam) {
+    const tile = this.mountedProgram.getSelectedNodes()[this.mountedProgram.getSelectedNodes().length - 1]
+    return tile[command](valueParam, nameParam)
+  }
+
+  async _doTileQualityCheckCommand() {
+    // Note: currently required a mountedProgram
+    const grammarProgram = this.mountedProgram.getGrammarProgram()
+    const topNodeTypes = grammarProgram.getTopNodeTypeDefinitions().map(def => def.get("crux"))
+
+    const sourceCode = topNodeTypes.join("\n") + `\n${TilesConstants.layout} ${TilesConstants.layouts.column}`
+    const tab = await this._createAndOpen(sourceCode, "all-tiles" + OhayoConstants.fileExtensions.maia)
+    const data = tab
+      .getTabProgram()
+      .getTiles()
+      .filter(tile => tile.getTileQualityCheck) // only check Maia tiles
+      .map(tile => tile.getTileQualityCheck())
+
+    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+    const sourceCode2 = new jtree.TreeNode(`data.inline
+ tables.basic Quality Check Results`)
+    sourceCode2.getNode("data.inline").appendLineAndChildren("content", new jtree.TreeNode(data).toCsv())
+    const tab2 = await this._createAndOpen(sourceCode2.toString(), "tiles-quality-check-results" + OhayoConstants.fileExtensions.maia)
+
+    tab2.addStumpCodeMessageToLog(`div Created '${tab2.getFullTabFilePath()}'`)
+  }
+
+  async _runSpeedTestCommand() {
+    const files = await this.getDefaultDisk().readFiles()
+    const startTime = Date.now()
+    const focusedPanel = this.focusedPanel
+
+    const timePromises = files.map(async file => {
+      const url = file.getFileLink()
+      const newTab = await this._openFullDiskFilePathInNewTab(url)
+      const mountedTab = focusedPanel.getMountedTab()
+      focusedPanel.setMountedTab(newTab)
+      if (mountedTab) focusedPanel.closeTab(mountedTab)
+      this.renderApp()
+      return newTab.getTabProgram().toRunTimeStats()
+    })
+
+    const times = await Promise.all(timePromises)
+    // todo: trigger shift+w shortcut instead of this if clause.
+    if (focusedPanel.getMountedTab()) this.closeMountedProgramCommand()
+    const rowsAsCsv = new jtree.TreeNode(times)
+    const runTime = Date.now() - startTime
+    const title = `Program Load Times ${moment().format("MM/DD/YYYY")} version ${this.getVersion()}. Run time: ${runTime}`
+    return this._createAndOpen(SpeedTestTemplate(title, rowsAsCsv.toCsv()), "program-load-times" + OhayoConstants.fileExtensions.maia)
   }
 }
 

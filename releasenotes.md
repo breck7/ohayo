@@ -1,3 +1,7 @@
+15.2.0 2019-11-20
+-----------------
+-
+
 15.1.0 2019-11-19
 -----------------
 - New: easier to create distributable copies via `jtree build buildDist destFolder`

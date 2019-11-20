@@ -1,47 +1,6 @@
 const { jtree } = require("jtree")
 
-const { AbstractTreeComponent, AbstractCommander } = require("jtree/products/TreeComponentFramework.node.js")
-
-class TerminalCommander extends AbstractCommander {
-  async saveChangesCommand() {
-    const terminal = this.getTarget()
-    // tood: this is broken. needs to unmount first.
-    // todo: add a patch method to tree.
-    if (terminal.hasChanges()) await terminal._getTab().autosaveAndReloadWith(terminal.getCode())
-  }
-
-  async executeLineCommand(lineNumber) {
-    const terminal = this.getTarget()
-    const program = terminal._makeProgramFromLineNumber(lineNumber)
-    let result = await program.execute(terminal.getRootNode())
-
-    if (typeof result !== "string") result = result.join("\n")
-
-    terminal._getTab().logMessageText(encodeURIComponent(result))
-    terminal.getRootNode().renderApp()
-  }
-
-  async executeFirstLineCommand() {
-    return this.executeLineCommand(0)
-  }
-
-  async compileFirstLineCommand() {
-    return this.compileLineCommand(0)
-  }
-
-  _compileLine(lineNumber) {
-    const terminal = this.getTarget()
-    const program = terminal._makeProgramFromLineNumber(lineNumber)
-    const grammarProgram = program.getDefinition()
-    return program.compile()
-  }
-
-  async compileLineCommand(lineNumber) {
-    const terminal = this.getTarget()
-    terminal._getTab().logMessageText(this._compileLine(lineNumber))
-    terminal.getRootNode().renderApp()
-  }
-}
+const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework.node.js")
 
 class BasicTerminalTreeComponent extends AbstractTreeComponent {
   toHakonCode() {
@@ -53,8 +12,39 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
  width 100%`
   }
 
-  getCommander() {
-    return new TerminalCommander(this)
+  async saveChangesCommand() {
+    // tood: this is broken. needs to unmount first.
+    // todo: add a patch method to tree.
+    if (this.hasChanges()) await this._getTab().autosaveAndReloadWith(this.getCode())
+  }
+
+  async executeLineCommand(lineNumber) {
+    const program = this._makeProgramFromLineNumber(lineNumber)
+    let result = await program.execute(this.getRootNode())
+
+    if (typeof result !== "string") result = result.join("\n")
+
+    this._getTab().logMessageText(encodeURIComponent(result))
+    this.getRootNode().renderApp()
+  }
+
+  async executeFirstLineCommand() {
+    return this.executeLineCommand(0)
+  }
+
+  async compileFirstLineCommand() {
+    return this.compileLineCommand(0)
+  }
+
+  _compileLine(lineNumber) {
+    const program = this._makeProgramFromLineNumber(lineNumber)
+    const grammarProgram = program.getDefinition()
+    return program.compile()
+  }
+
+  async compileLineCommand(lineNumber) {
+    this._getTab().logMessageText(this._compileLine(lineNumber))
+    this.getRootNode().renderApp()
   }
 
   _getHeight() {

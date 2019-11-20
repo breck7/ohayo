@@ -82,6 +82,9 @@ editorGalleryNode
       position absolute
       background {linkColor}
  javascript
+  async openFullPathInNewTabAndFocusCommand(url) {
+   return this.getTab().getRootNode().openFullPathInNewTabAndFocusCommand(url)
+  }
   _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
    const maiaProgram = new maiaNode(sourceCode)
    const dimensions = maiaProgram.getTileDimensionMap(width, height)

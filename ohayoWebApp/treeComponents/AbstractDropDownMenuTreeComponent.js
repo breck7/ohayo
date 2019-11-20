@@ -39,7 +39,7 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
     const bodyShadow = bodyStumpNode.getShadow()
     const unmountOnClick = function() {
       bodyShadow.offShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick)
-      app.getCommander().closeAllDropDownMenusCommand()
+      app.closeAllDropDownMenusCommand()
     }
     setTimeout(() => bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick), 100) // todo: fix this.
   }

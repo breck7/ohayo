@@ -63,27 +63,24 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
 
   _getKeyMap() {
     const cm = this._getCMEditorInstance()
-    const commander = this.getCommander()
     const keyMap = {}
 
     keyMap[CodeMirrorConstants.keyMap.cmdEnter] = () => {
       const range = cm.listSelections()[0]
       const line = range.head.line
-      commander.executeLineCommand(line)
+      this.executeLineCommand(line)
     }
     keyMap[CodeMirrorConstants.keyMap.shiftCmdEnter] = () => {
       const range = cm.listSelections()[0]
       const line = range.head.line
-      commander.compileLineCommand(line)
+      this.compileLineCommand(line)
     }
     keyMap[CodeMirrorConstants.keyMap.cmdBackSlash] = () => {
-      this.getRootNode()
-        .getCommander()
-        .clearTabMessagesCommand()
+      this.getRootNode().clearTabMessagesCommand()
     }
 
     keyMap[CodeMirrorConstants.keyMap.cmdS] = async () => {
-      await commander.saveChangesCommand()
+      await this.saveChangesCommand()
       // todo: scroll to proper tile
       const tile = this._getClosestTileAtCurrentLine()
       if (tile) tile.scrollIntoView()
@@ -133,14 +130,13 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
 
     cmInstance.setSize(undefined, this._getHeight())
 
-    const commander = this.getCommander()
     cmInstance.on(CodeMirrorConstants.events.gutterClick, (instance, line, gutter, clickEvent) => {
-      commander.executeLineCommand(line)
+      this.executeLineCommand(line)
     })
 
     cmInstance.on(CodeMirrorConstants.events.blur, () => {
       // note: if you have changes in terminal/gutter, they will be saved. no cancel yet.
-      commander.saveChangesCommand()
+      this.saveChangesCommand()
     })
     cmInstance.addKeyMap(this._getKeyMap())
 

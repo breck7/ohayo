@@ -100,10 +100,6 @@ abstractTileTreeComponentNode
    div
     class TileGrabber`
   }
-  getCommander() {
-   const TileCommander = this.require("TileCommander", this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileCommander.js")
-   return new TileCommander(this)
-  }
   // todo: delete this
   makeDirty() {
    delete this._cache_settingsObject
@@ -339,4 +335,202 @@ abstractTileTreeComponentNode
      style color: ${theme.errorColor};`)
    }
    return this
+  }
+  cloneTileCommand() {
+    this.cloneAndOffset()
+    return this.getTab().autosaveAndRender()
+  }
+  async updateContentFromHtmlCommand(val) {
+    const clean = jtree.Utils.stripHtml(val.replace(/\<br\>/g, "\n").replace(/\<div\>/g, "\n"))
+    return this.changeTileContentAndRenderCommand(clean)
+  }
+  async toggleTileMaximizeCommand() {
+    if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
+    else this.touchNode(TilesConstants.maximized)
+    await this._runAfterTileUpdate(this)
+  }
+  async triggerTileMethodCommand(value, methodName) {
+    await this[methodName](value)
+    await this._runAfterTileUpdate(tile)
+  }
+  // todo: refactor.
+  async changeTileTypeCommand(newValue) {
+    this.setFirstWord(newValue)
+    const newNode = this.duplicate()
+    // todo: destroy or something? how do we reparse.
+    this.unmountAndDestroy()
+    const app = this.getTab().getRootNode()
+    await this.getRootNode().loadRequirements()
+    await this.getTab().autosaveAndRender()
+    newNode.runAndrenderAndGetRenderReport()
+  }
+  changeParentCommand(pathVector) {
+    // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
+    const program = this.getRootNode()
+    const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
+    const destinationTree = indexPath ? program.nodeAt(indexPath) : program
+    // todo: on jtree should we make copyTo second param optional?
+    this.copyTo(destinationTree, destinationTree.length)
+    this.unmountAndDestroy()
+    return this.getTab().autosaveAndRender()
+  }
+  async openTileContextMenuCommand() {
+    this
+      .getTab()
+      .getRootNode()
+      .setTargetNode(this)
+      .toggleAndRender(OhayoConstants.tileContextMenu)
+  }
+  destroyTileCommand() {
+    this.unmountAndDestroy()
+    return this.getTab().autosaveAndRender()
+  }
+  getNewDataCommand() {
+    // todo: have some type of paging system to fetch new data.
+  }
+  async changeTileSettingAndRenderCommand(value, settingName) {
+    // note the unusual ordering of params.
+    this.touchNode(settingName).setContent(value.toString())
+    // todo: sometimes size needs to be redone (maximize, for example)
+    await this._runAfterTileUpdate(this)
+  }
+  // todo: remove
+  async changeTileSettingMultilineCommand(val, settingName) {
+    this.touchNode(settingName).setChildren(val)
+    await this._runAfterTileUpdate(this)
+  }
+  async changeTileSettingCommand(settingName, value) {
+    this.touchNode(settingName).setContent(value)
+  }
+  async changeWordAndRenderCommand(value, index) {
+    this.setWord(parseInt(index), value)
+    await this._runAfterTileUpdate(this)
+  }
+  async changeWordsAndRenderCommand(value, index) {
+    index = parseInt(index)
+    const edgeSymbol = this.getEdgeSymbol()
+    const words = this.getWords().slice(0, index)
+    this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
+    await this._runAfterTileUpdate(this)
+  }
+  async updateChildrenCommand(val) {
+    this.setChildren(val)
+    // reload the whole doc for now.
+    await this._runAfterTileUpdate(this)
+  }
+  async _runAfterTileUpdate(tile) {
+    tile.makeDirty() // ugly!
+    tile.getChildTiles().forEach(tile => {
+      tile.makeDirty() // todo: ugly!
+    })
+    // todo: what if you have a tile that has a contextare that allows editing of its children/
+    // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
+    await tile.getTab().autosaveTab()
+    await tile.runAndrenderAndGetRenderReport()
+    tile
+      .getTab()
+      .getRootNode()
+      .renderApp() // Need to render full app because of code editor
+  }
+  // todo: downstream data changes?
+  async changeTileContentAndRenderCommand(value) {
+    this.setContent(value)
+    await this._runAfterTileUpdate(this)
+  }
+  async copyTileCommand() {
+    // todo: remove cousin tiles?
+    this
+      .getRootNode()
+      .getWillowProgram()
+      .copyTextToClipboard(this.getFirstAncestor().toString())
+  }
+  async createProgramFromTileExampleCommand(index) {
+    const template = this.getExampleTemplate(index)
+    if (!template) return undefined
+    const fileExtension = "maia" // todo: generalize
+    const tab = await this
+      .getTab()
+      .getRootNode()
+      ._createAndOpen(template, `help-for-${this.getFirstWord()}.${fileExtension}`)
+    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+  }
+  async inspectTileCommand() {
+    if (!this.isNodeJs()) {
+      console.log("Tile available at window.tile")
+      window.tile = this
+      console.log(this)
+    }
+    const output = this.toInspection()
+    this.getTab().addStumpCodeMessageToLog(output)
+    this
+      .getTab()
+      .getRootNode()
+      .renderApp()
+  }
+  async toggleToolbarCommand() {
+    this.toggleToolbar()
+  }
+  async createProgramFromTemplateCommand(id) {
+    const programTemplate = this.getProgramTemplate(id)
+    if (!programTemplate) return undefined
+    const tab = await this
+      .getTab()
+      .getRootNode()
+      ._createAndOpen(programTemplate.template, programTemplate.name)
+    tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+  }
+  async appendSnippetTemplateCommand(id) {
+    const snippet = this.getSnippetTemplate(id)
+    if (!snippet) return undefined
+    const tab = this.getTab()
+    const tabProgram = tab.getTabProgram()
+    const newNodes = tabProgram.concat(snippet)
+    const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
+    tab.autosaveTab()
+    tabProgram.clearSelection()
+    tab.getTabWall().unmount()
+    await tabProgram.loadAndIncrementalRender()
+    newTiles.forEach(tile => tile.selectTile())
+    newTiles[0].scrollIntoView()
+  }
+  async copyDataCommand(delimiter) {
+    this
+      .getRootNode()
+      .getWillowProgram()
+      .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
+  }
+  async copyDataAsJavascriptCommand() {
+    const table = this.getOutputOrInputTable()
+    this
+      .getRootNode()
+      .getWillowProgram()
+      .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
+  }
+  async copyDataAsTreeCommand() {
+    const text = this
+      .getOutputOrInputTable()
+      .toTree()
+      .toString()
+    this
+      .getRootNode()
+      .getWillowProgram()
+      .copyTextToClipboard(text)
+  }
+  async exportTileDataCommand(format = "csv") {
+    // todo: figure this out. use the browsers filename? tile title? id?
+    let extension = "csv"
+    let type = "text/csv"
+    let str = this.getOutputOrInputTable().toDelimited(",")
+    if (format === "tree") {
+      extension = "tree"
+      type = "text"
+      str = this
+        .getOutputOrInputTable()
+        .toTree()
+        .toString()
+    }
+    this
+      .getRootNode()
+      .getWillowProgram()
+      .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
   }

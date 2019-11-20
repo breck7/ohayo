@@ -4,9 +4,6 @@ oswarmNode
  root
  extends swarmNode
  javascript
-  processArranged(arrangedInstance) {
-   return arrangedInstance.getCommander()
-  }
   _getProjectRootDir() {
    return this.isNodeJs() ? jtree.Utils.findProjectRoot(__dirname, "ohayo") : ""
   }

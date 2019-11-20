@@ -1,39 +1,8 @@
 const { jtree } = require("jtree")
 
-const { AbstractTreeComponent, AbstractCommander } = require("jtree/products/TreeComponentFramework.node.js")
+const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework.node.js")
 
 const Icons = require("../themes/Icons.js")
-
-class TileToolbarCommander extends AbstractCommander {
-  get _targetTileCommander() {
-    return this.getTarget()
-      .getTargetTile()
-      .getCommander()
-  }
-
-  createProgramFromFocusedTileExampleCommand(uno, dos) {
-    return this._targetTileCommander.createProgramFromTileExampleCommand(uno, dos)
-  }
-
-  cloneFocusedTileCommand(uno, dos) {
-    return this._targetTileCommander.cloneTileCommand(uno, dos)
-  }
-  destroyFocusedTileCommand(uno, dos) {
-    return this._targetTileCommander.destroyTileCommand(uno, dos)
-  }
-  inspectFocusedTileCommand(uno, dos) {
-    return this._targetTileCommander.inspectTileCommand(uno, dos)
-  }
-  changeFocusedTileTypeCommand(uno, dos) {
-    return this._targetTileCommander.changeTileTypeCommand(uno, dos)
-  }
-  changeFocusedTileParentCommand(uno, dos) {
-    return this._targetTileCommander.changeParentCommand(uno, dos)
-  }
-  changeFocusedTileContentAndRenderCommand(uno, dos) {
-    return this._targetTileCommander.changeTileContentAndRenderCommand(uno, dos)
-  }
-}
 
 class TileToolbarTreeComponent extends AbstractTreeComponent {
   toHakonCode() {
@@ -68,8 +37,27 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
     return this.getParent()
   }
 
-  getCommander() {
-    return new TileToolbarCommander(this)
+  createProgramFromFocusedTileExampleCommand(uno, dos) {
+    return this.getTargetTile().createProgramFromTileExampleCommand(uno, dos)
+  }
+
+  cloneFocusedTileCommand(uno, dos) {
+    return this.getTargetTile().cloneTileCommand(uno, dos)
+  }
+  destroyFocusedTileCommand(uno, dos) {
+    return this.getTargetTile().destroyTileCommand(uno, dos)
+  }
+  inspectFocusedTileCommand(uno, dos) {
+    return this.getTargetTile().inspectTileCommand(uno, dos)
+  }
+  changeFocusedTileTypeCommand(uno, dos) {
+    return this.getTargetTile().changeTileTypeCommand(uno, dos)
+  }
+  changeFocusedTileParentCommand(uno, dos) {
+    return this.getTargetTile().changeParentCommand(uno, dos)
+  }
+  changeFocusedTileContentAndRenderCommand(uno, dos) {
+    return this.getTargetTile().changeTileContentAndRenderCommand(uno, dos)
   }
 
   toStumpCode() {
