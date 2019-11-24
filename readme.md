@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/treenotation/ohayo.svg?branch=master)](https://travis-ci.org/treenotation/ohayo)
 
-Ohayo is a fast and free data science studio. Imagine if you could do data science at the speed of thought.
+Ohayo is a fast and free data science studio. Imagine if you could do data science at the speed of voice.
 
 ![Slides](slides.gif)
 
