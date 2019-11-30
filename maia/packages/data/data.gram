@@ -12,19 +12,22 @@ dataInlineNode
     4.9,1.8,virginica
     4.9,2,virginica
     1.5,0.2,setosa
+ string bodyStumpTemplate
+  textarea
+   name content
+   stumpOnChangeCommand changeTileSettingMultilineCommand
+   placeholder Enter data in any format here. It will be saved directly in your document.
+   class TileTextArea savable
+   bern
+    {text}
  javascript
   getDataContent() {
    const node = this.getNode("content")
    return node ? node.childrenToString() : ""
   }
   getTileBodyStumpCode() {
-   const text = lodash.escape(this.getDataContent())
-   return `textarea
-   name content
-   stumpOnChangeCommand changeTileSettingMultilineCommand
-   placeholder Enter data in any format here. It will be saved directly in your document.
-   class TileTextArea savable
-   bern${jtree.TreeNode.nest(text, 2)}`
+    const text = lodash.escape(this.getDataContent())
+    return this.qFormat(this.bodyStumpTemplate, {text})
   }
   getRowClass() {
    class InlineDataTileRow extends Row {}
@@ -42,6 +45,14 @@ dataInlineNode
 dataLocalStorageNode
  cells tileKeywordCell localStorageKeyCell
  description Use your browser's localStorage for storing data.
+ string bodyStumpTemplate
+  textarea
+   stumpOnChangeCommand triggerTileMethodCommand
+   placeholder Enter data in any format here. It will be saved in your browser's localStorage.
+   name storeValueCommand
+   class TileTextArea savable
+   bern
+    {text}
  example
   data.localStorage a-dropped-file.csv
  javascript
@@ -59,13 +70,8 @@ dataLocalStorageNode
    else this.setContent(this.getWebApp().initLocalDataStorage(this.constructor.name + ".data", value))
   }
   getTileBodyStumpCode() {
-   const text = encodeURIComponent(this.getDataContent())
-   return `textarea
-   stumpOnChangeCommand triggerTileMethodCommand
-   placeholder Enter data in any format here. It will be saved in your browser's localStorage.
-   name storeValueCommand
-   class TileTextArea savable
-   bern${jtree.TreeNode.nest(text, 2)}`
+    const text = encodeURIComponent(this.getDataContent())
+    return this.qFormat(this.bodyStumpTemplate, {text})
   }
  extends dataInlineNode
  crux data.localStorage

@@ -42,9 +42,9 @@ class ConsoleTreeComponent extends AbstractTreeComponent {
   }
 
   toStumpCode() {
-    const messageBuffer = this._getConsoleOutput()
-    return `div
- class consoleOutput${jtree.TreeNode.nest(messageBuffer, 1)}`
+    return new jtree.TreeNode(`div
+ class consoleOutput
+ {messageBuffer}`).templateToString({ messageBuffer: this._getConsoleOutput() })
   }
 }
 

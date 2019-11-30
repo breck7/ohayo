@@ -34,9 +34,14 @@ dateHeatcalNode
  string columnPredictionHints
   count getPrimitiveTypeName=number
   dayColumn getPrimitiveTypeName=day
- string dummyDataSet waterBill
+ string dummyDataSetName waterBill
  extends abstractHeaderlessChartTileNode
  crux date.heatcal
+ string bodyStumpTemplate
+  div
+   class heatCal
+   bern
+    {svg}
  string hakonTemplate
   .heatCal
    rect
@@ -62,9 +67,8 @@ dateHeatcalNode
   </g>`
   }
   getTileBodyStumpCode() {
-   return `div
-   class heatCal
-   bern${jtree.TreeNode.nest(this.getSvg(), 2)}`
+    const svg = this.getSvg()
+    return this.qFormat(this.bodyStumpTemplate,{svg})
   }
   _getDayMap(quins, rows, dayColumnName, countColumnName) {
    const getQuin = val => {

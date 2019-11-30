@@ -52,7 +52,7 @@ textWordcloudNode
    WordCloud(element, options)
   }
  string tileScript maia/packages/text/wordcloud2.min.js
- string dummyDataSet wordCounts
+ string dummyDataSetName wordCounts
  string columnPredictionHints
   name isString=true
   count isString=false
@@ -90,7 +90,7 @@ textSplitNode
   vega.data descriptions.json
    text.split filename . name extension
     tables.basic
- string dummyDataSet poem
+ string dummyDataSetName poem
  javascript
   // note: delimiter can probably be ""
   // todo: how would we split on a space???
@@ -125,7 +125,7 @@ textToLowerCaseNode
     tables.basic
    text.toLowerCase text
     tables.basic
- string dummyDataSet poem
+ string dummyDataSetName poem
  javascript
   getNewColumns() {
    const sourceColumnName = this.getWord(1) || "text"
@@ -146,7 +146,7 @@ textSubstringNode
   samples.presidents
    text.substring name firstLetter 0 1
     tables.basic
- string dummyDataSet poem
+ string dummyDataSetName poem
  extends abstractColumnAdderTileNode
  crux text.substring
  javascript
@@ -165,7 +165,7 @@ textSubstringNode
   }
 textWordCountNode
  description Splits a string into words and counts the number of uses of each word.
- string dummyDataSet poem
+ string dummyDataSetName poem
  extends abstractNewRowsTransformerTileNode
  crux text.wordCount
  javascript
@@ -196,7 +196,7 @@ textWordCountNode
   }
 textLineCountNode
  description Counts the number of lines in the input data.
- string dummyDataSet poem
+ string dummyDataSetName poem
  javascript
   makeNewRows() {
    return [{ lines: this.getPipishInput().split(/\n/g).length }]

@@ -33,15 +33,17 @@ webPostNode
  frequency .02
  description Post data to a URL and parse the returned data.
  inScope postNode
- javascript
-  getTileBodyStumpCode() {
-   return `${super.getTileBodyStumpCode()}
+ string webPostBodyStumpTemplate
   textarea
-   bern${jtree.TreeNode.nest(jtree.Utils.stripHtml(this.getSettingsStruct().post || ""), 2)}
+   bern
+    {post}
    placeholder This data will be sent as the value of the 'q' param
    name post
    stumpOnChangeCommand changeTileSettingMultilineCommand
-   class TileTextArea`
+   class TileTextArea
+ javascript
+  getTileBodyStumpCode() {
+   return super.getTileBodyStumpCode() + this.qFormat(this.webPostBodyStumpTemplate, {post: jtree.Utils.stripHtml(this.getSettingsStruct().post || "")})
   }
   async _getData(url) {
    const settings = this.getSettingsStruct()

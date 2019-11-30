@@ -38,6 +38,7 @@ Ohayo is still beta, and we are still iterating quickly. We encourage you to pos
 |Amazon QuickSight|https://aws.amazon.com/quicksight/|2015||
 |xsv|https://github.com/BurntSushi/xsv|2014||
 |JupyterLab|https://github.com/jupyterlab/jupyterlab|2014|https://en.wikipedia.org/wiki/Project_Jupyter|
+|OmniSci|https://www.omnisci.com/|2013|https://en.wikipedia.org/wiki/OmniSci|
 |xlwings|https://www.xlwings.org/|2013||
 |Julia|https://julialang.org/|2012|https://en.wikipedia.org/wiki/Julia_(programming_language)|
 |Looker|https://looker.com/|2012|https://en.wikipedia.org/wiki/Looker_(company)|

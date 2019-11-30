@@ -52,6 +52,22 @@ tablesBasicNode
     box-sizing border-box
     padding 0
     font-family {fonts}
+ string cellStumpTemplate
+  td
+   bern
+    {content}
+ string cellLinkStumpTemplate
+  td
+   a
+    href {content}
+    bern
+     {content}
+ string rowStumpTemplate
+  tr
+   class tableRow
+   value {value}
+   td {number}
+   {cols}
  javascript
   getTileHeaderBern() {
    return this.getContent() || super.getTileHeaderBern()
@@ -61,41 +77,22 @@ tablesBasicNode
     .map((row, index) => {
      const cols = columns
       .map(column => {
-       const box = row.getRowHtmlSafeValue(column.getColumnName()) // todo: cache?
-       if (column.isLink())
-        return `td
-   a
-    href ${box}
-    bern${jtree.TreeNode.nest(box, 3)}`
-       return `td
-   bern${jtree.TreeNode.nest(box, 2)}`
+       return this.qFormat(column.isLink() ? this.cellLinkStumpTemplate : this.cellStumpTemplate, { content: row.getRowHtmlSafeValue(column.getColumnName()) })
       })
       .join("\n")
-     return `tr
-   class tableRow
-   value ${row.getPuid()}
-   td ${index + 1}${jtree.TreeNode.nest(cols, 1)}`
+     return this.qFormat(this.rowStumpTemplate, { number: index + 1, value: row.getPuid(), cols })
     })
     .join("\n")
   }
   getContextMenuStumpCode() {
-   return `a Delete all rows
-   stumpOnClickCommand deleteAllRowsInTargetTileCommand`
+   return this.contextMenuStumpTemplate
   }
   _getHeaderRowsStumpCode(columns) {
    // todo: can we get a copy column command?
-   return (
-    "th #\n" +
-    columns
-     .map(
-      colName =>
-       `th
-   value ${colName}
-   span ${colName}
-    value ${colName}`
-     )
-     .join("\n")
-   )
+   return ["Row"]
+    .concat(columns)
+    .map(colName => this.qFormat(this.headerRowStumpTemplate, { colName }))
+    .join("\n")
   }
   getTileBodyStumpCode() {
    const tileStruct = this.getSettingsStruct()
@@ -106,16 +103,26 @@ tablesBasicNode
    const columnNames = columnDefs.map(col => col.getColumnName())
    // todo: if the types for a column are all equal, add a total row to the bottom.
    // todo: if the types for a row are all equal, add a total column to the right.
-   const header = this._getHeaderRowsStumpCode(columnNames)
-   const rowsStumpCode = this._getTableRowsStumpCode(columnDefs)
-   return `div
+   const headerRows = this._getHeaderRowsStumpCode(columnNames)
+   const bodyRows = this._getTableRowsStumpCode(columnDefs)
+   return this.qFormat(this.bodyStumpTemplate, { headerRows, bodyRows })
+  }
+ string contextMenuStumpTemplate
+  a Delete all rows
+   stumpOnClickCommand deleteAllRowsInTargetTileCommand
+ string headerRowStumpTemplate
+  th
+   value {colName}
+   span {colName}
+   value {colName}
+ string bodyStumpTemplate
+  div
    class tablesBasicNode
    table
     thead
-     tr
-      title Click to sort.${jtree.TreeNode.nest(header, 4)}
-    tbody ${jtree.TreeNode.nest(rowsStumpCode, 2)}`
-  }
+     {headerRows}
+    tbody
+     {bodyRows}
  extends abstractChartNode
  crux tables.basic
 tablesInterestingNode

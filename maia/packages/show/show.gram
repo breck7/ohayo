@@ -15,8 +15,8 @@ abstractShowTileNode
    show.max Amount
   layout bin
  string tileSize 140 120
- string dummyDataSet stockPrice
- extends abstractBodyOnlyTileNode
+ string dummyDataSetName stockPrice
+ extends abstractEmptyFooterTileNode
  abstract
  string hakonTemplate
   .abstractShowTileNode
@@ -26,6 +26,9 @@ abstractShowTileNode
     text-align center
     height 40px
     overflow hidden
+ string bodyStumpTemplate
+  h6 {title}
+  h3 {number}
  javascript
   getTileBodyStumpCode() {
    const columnName = this.getWord(1)
@@ -34,23 +37,36 @@ abstractShowTileNode
    if (!col) return ""
    const reductionName = this.getWord(0).split(".")[1]
    const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
-   return `h6 ${title}
-  h3 ${this.toDisplayString(col.getReductions()[reductionName], columnName)}`
+   const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
+   return this.qFormat(this.bodyStumpTemplate, {title, number})
   }
 showRowCountNode
  catchAllCellType titleCell
  description Show the total number of rows
  frequency .02
  string tileSize 140 120
- string dummyDataSet stockPrice
+ string dummyDataSetName stockPrice
  cells tileKeywordCell
  extends abstractShowTileNode
  crux show.rowCount
  javascript
   getTileBodyStumpCode() {
    const title = this.getWordsFrom(1).join(" ") || "Total rows"
-   return `h6 ${title}
-  h3 ${this.getParentOrDummyTable().getRowCount()}`
+   const number = this.getParentOrDummyTable().getRowCount()
+   return this.qFormat(this.bodyStumpTemplate, {title, number})
+  }
+showStaticNode
+ description Show a hard coded number
+ extends abstractShowTileNode
+ example
+  show.static 20 Sales
+ cells tileKeywordCell numberCell
+ catchAllCellType titleCell
+ crux show.static
+ javascript
+  getTileBodyStumpCode() {
+   const title = this.getWordsFrom(2).join(" ")
+   return this.qFormat(this.bodyStumpTemplate, {title, number: this.getWord(1) || ""})
   }
 showMedianNode
  description Show the median value of a column

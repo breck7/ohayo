@@ -3,6 +3,22 @@ abstractProviderNode
  string tileSize 140 60
  extends abstractMaiaTileNode
  abstract
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div
+    class TileBody HeaderLess
+    {body}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
  javascript
   getTileFooterStumpCode() {
    const table = this.getOutputOrInputTable()
@@ -19,20 +35,7 @@ abstractProviderNode
    return "div " + (description ? jtree.Utils.linkify(description) : "")
   }
   toStumpCode() {
-   // todo: just use super and modify?
-   return `div
-   class ${this.getCssClassNames().join(" ")}
-   id ${this.getTreeComponentId()}
-   stumpOnContextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
-   div
-    class TileBody HeaderLess${this._getBodyStumpCodeCache()}
-   div
-    class TileFooter${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
-   div
-    class TileGrabber`
+   return this.qFormat(this.tileStumpTemplate, {classes:this.getCssClassNames().join(" "), id : this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer : this.getTileFooterStumpCode()})
   }
   getParserId() {
    return this.getSettingsStruct().parser

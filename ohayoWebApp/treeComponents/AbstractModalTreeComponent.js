@@ -47,7 +47,7 @@ ${theme.enableTextSelect2}
   }
 
   toStumpCode() {
-    return `section
+    return new jtree.TreeNode(`section
  stumpOnClickCommand unmountAndDestroyCommand
  class modalBackground
  section
@@ -56,7 +56,8 @@ ${theme.enableTextSelect2}
   a X
    id closeModalX
    stumpOnClickCommand unmountAndDestroyCommand
-   class modalClose${jtree.TreeNode.nest(this.getModalStumpCode(), 2)}`
+   class modalClose
+  {modelStumpCode}`).templateToString({ modelStumpCode: this.getModalStumpCode() })
   }
 }
 

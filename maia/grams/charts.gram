@@ -28,110 +28,92 @@ abstractChartNode
     .getRows()
     .slice(0, this._getRowDisplayLimit())
   }
-abstractBodyOnlyTileNode
- abstract
- extends abstractChartNode
- int headerHeight 0
- int footerHeight 0
- javascript
-  toStumpCode() {
-   // todo: just use super and modify?
-   return `div
-   class ${this.getCssClassNames().join(" ")}
-   id ${this.getTreeComponentId()}
-   stumpOnContextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
-   div
-    class TileBody BodyOnly${this._getBodyStumpCodeCache()}
-   div
-    class TileFooter TileFooterLess${jtree.TreeNode.nest(this.getTileToolbarButtonStumpCode(), 2)}
-   div
-    class TileGrabber`
-  }
 abstractHeaderlessChartTileNode
  abstract
  extends abstractChartNode
  int headerHeight 0
- javascript
-  toStumpCode() {
-   // todo: just use super and modify?
-   return `div
-   class ${this.getCssClassNames().join(" ")}
-   id ${this.getTreeComponentId()}
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
    stumpOnContextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
     stumpOnDblClickCommand toggleTileMaximizeCommand
    div
-    class TileBody HeaderLess${this._getBodyStumpCodeCache()}
+    class TileBody HeaderLess
+    {body}
    div
-    class TileFooter${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
+    class TileFooter
+    {footer}
    div
-    class TileGrabber`
+    class TileGrabber
+ javascript
+  toStumpCode() {
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileToolbarButtonStumpCode() })
   }
+  get _tileWidth() {
+   return this.getTileDimensionIfAny().width - 10
+  }
+  get _tileHeight() {
+   return this.getTileDimensionIfAny().height - 60 // 10 for padding. 10 for top grabber. 30 for footer. 10 fot bottom grabber.
+  }
+abstractEmptyFooterTileNode
+ abstract
+ extends abstractHeaderlessChartTileNode
+ int footerHeight 0
 abstractTextNode
  catchAllCellType stringCell
  frequency 0
  description Prints a message
  inScope contentNode
+ string bodyStumpTemplate
+  div
+   class TileSelectable
+   bern
+    {content}
  javascript
   getTileBodyStumpCode() {
-   const content = this.getDefinition().getConstantsObject().content
-   return `div
-   class TileSelectable
-   bern${jtree.TreeNode.nest(content ? jtree.Utils.linkify(content) : "", 2)}`
+   return this.qFormat(this.bodyStumpTemplate, { content: this.content ? jtree.Utils.linkify(this.content) : ""})
   }
  extends abstractChartNode
  abstract
 abstractSnippetGalleryNode
  string tileSize 600 240
- extends abstractBodyOnlyTileNode
+ extends abstractEmptyFooterTileNode
  abstract
+ string bodyStumpTemplate
+  h4 {title}
+   ol
+    class TileSelectable
+    {options}
+ string optionStumpTemplate
+  li
+   a {title}
+    value {value}
+    class appendSnippetButton
+    stumpOnClickCommand appendSnippetTemplateCommand
  javascript
   getGalleryNodes() {}
   getTileBodyStumpCode() {
-   const constants = this.getDefinition().getConstantsObject()
-   const itemFormat = constants.itemFormat
-   const options = this.getGalleryNodes()
-    .map(
-     node => `li
-   a ${node.evalTemplateString(itemFormat)}
-    value ${node.get("id")}
-    class appendSnippetButton
-    stumpOnClickCommand appendSnippetTemplateCommand`
-    )
-    .join("\n")
-   const code = `h4 ${constants.title}
-  ol
-   class TileSelectable
-  ${new jtree.TreeNode(options).toString(1)}`
-   return code
+   return this.qFormat(this.bodyStumpTemplate, {
+    title: this.title,
+    options: new jtree.TreeNode(
+     this.getGalleryNodes()
+      .map(node => this.qFormat(this.optionStumpTemplate, { title: node.evalTemplateString(this.itemFormat), value: node.get("id") }))
+      .join("\n")
+    ).toString()
+   })
   }
 abstractTemplateGalleryNode
  extends abstractSnippetGalleryNode
  abstract
- javascript
-  getGalleryNodes() {}
-  getTileBodyStumpCode() {
-   const constants = this.getDefinition().getConstantsObject()
-   const itemFormat = constants.itemFormat
-   const options = this.getGalleryNodes()
-    .map(
-     node => ` li
-    a ${node.evalTemplateString(itemFormat)}
-     value ${node.get("id")}
-     class createProgramButton
-     stumpOnClickCommand createProgramFromTemplateCommand`
-    )
-    .join("\n")
-   const code = `h4 ${constants.title}
-  ol
-   class TileSelectable
-  ${options}`
-   return code
-  }
+ string optionStumpTemplate
+  li
+   a {title}
+    value {value}
+    class createProgramButton
+    stumpOnClickCommand createProgramFromTemplateCommand
 abstractInstructionsNode
  string tileSize 600 240
  string content Instructions go here.

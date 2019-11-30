@@ -34,9 +34,9 @@ editorCommandHistoryNode
    tables.basic
  javascript
   async fetchTableInputs() {
-   return { rows: this.getWebApp()[this.getDefinition().getConstantsObject().method]() }
+   return { rows: this.getWebApp()[this.methodName]() }
   }
- string method getCommandsBuffer
+ string methodName getCommandsBuffer
  extends abstractProviderNode
  crux editor.commandHistory
 editorGalleryNode
@@ -45,7 +45,7 @@ editorGalleryNode
   editor.files
    editor.gallery
  string tileSize 1080 600
- string dummyDataSet maiaPrograms
+ string dummyDataSetName maiaPrograms
  extends abstractChartNode
  crux editor.gallery
  string hakonTemplate
@@ -81,6 +81,24 @@ editorGalleryNode
      div
       position absolute
       background {linkColor}
+ string miniStumpTemplate
+  a
+   class miniMap
+   {onClick}
+   {value}
+   {href}
+   div
+    class miniPreview
+    {theTiles}
+   div {filename}
+    class miniFooter
+ string bodyStumpTemplate
+  div
+   class MiniMapTile
+   {minis}
+ string miniStyleTemplate
+  div
+   style {style}
  javascript
   async openFullPathInNewTabAndFocusCommand(url) {
    return this.getTab().getRootNode().openFullPathInNewTabAndFocusCommand(url)
@@ -92,28 +110,20 @@ editorGalleryNode
     .getTiles()
     .filter(tile => tile.isVisible())
     .map(
-     tile => `div
-   style ${dimensions.get(tile).getScaledCss(0.1)}`
+     tile => this.qFormat(this.miniStyleTemplate, {style: dimensions.get(tile).getScaledCss(0.1)})
     )
     .join("\n")
-   return `a
-   class miniMap
-   ${permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"}
-   ${permalink ? `value ${permalink}` : "stumpNoOp"}
-   ${permalink ? `href ${permalink}` : "stumpNoOp"}
-   div
-    class miniPreview${jtree.TreeNode.nest(theTiles, 2)}
-   div ${filename}
-    class miniFooter`
+   const onClick = permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"
+   const value = permalink ? `value ${permalink}` : "stumpNoOp"
+   const href = permalink ? `href ${permalink}` : "stumpNoOp"
+   return this.qFormat(this.miniStumpTemplate, {filename, theTiles, onClick, value, href})
   }
   getTileBodyStumpCode() {
    // todo: cache.
    const minis = this.getRowsWithRowDisplayLimit()
     .map(row => this._getMiniStumpCode(row.getRowOriginalValue("bytes"), row.getRowOriginalValue("filename"), row.getRowOriginalValue("link")))
     .join("\n")
-   const stump = `div
-   class MiniMapTile${jtree.TreeNode.nest(minis, 1)}`
-  return stump
+  return this.qFormat(this.bodyStumpTemplate, {minis})
   }
 editorHelloWorldNode
  description Prints hello world

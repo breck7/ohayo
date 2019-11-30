@@ -1,6 +1,17 @@
+15.3.0 2019-11-29
+-----------------
+- New: show.static tiles for issue #42.
+- New: footer styling is now more minimal.
+- Fix: fixed pencil icon too low in some tiles.
+- Infra: updated to JTree 47.1 for new stump and perf improvements from parser cacheing.
+- Infra: moved off nest method in grams and toward typed stump templates.
+
 15.2.0 2019-11-20
 -----------------
--
+- Infra: Updated to JTree 46. Removed Commander Classes
+- Infra: switched some tests to use getTextContent
+- Fix: inplace cellTypeTree bug
+- Fix: for #36
 
 15.1.0 2019-11-19
 -----------------

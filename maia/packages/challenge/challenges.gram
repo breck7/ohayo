@@ -14,7 +14,7 @@ challengePlayNode
   challenge.play 2
   layout tiled
  string tileSize 640 240
- extends abstractBodyOnlyTileNode
+ extends abstractEmptyFooterTileNode
  crux challenge.play
  javascript
   getProgramTemplate(id) {

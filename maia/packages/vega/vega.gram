@@ -10,15 +10,15 @@ abstractVegaNode
  catchAllCellType titleCell
  string tileSize 800 300
  string tileScript maia/packages/vega/vega.combined.min.js
- string dummyDataSet stockPrice
- string mark bar
- extends abstractBodyOnlyTileNode
+ string dummyDataSetName stockPrice
+ string markName bar
+ extends abstractEmptyFooterTileNode
  abstract
  javascript
   // todo: I don't think vega handles . in column names.
   getTileBodyStumpCode() {
    return `div
-  class divWhereVegaWillGo`
+  class divForExternalLibrary`
   }
   _getColumnToField(columnName) {
    if (!columnName) return undefined
@@ -31,29 +31,31 @@ abstractVegaNode
    }
    return obj
   }
-  async _createVegaEmbedded(el, spec) {
-   const embedded = await vegaEmbed(el, spec)
-   return embedded
-  }
   _adjustVegaSize() {
    const adjustSize = !this.has("width")
    if (adjustSize) {
     const shadow = this.getStumpNode()
-     .findStumpNodeByChild("class divWhereVegaWillGo")
+     .findStumpNodeByChild("class divForExternalLibrary")
      .getShadow()
     this.set("width", Math.round((30 + shadow.getShadowOuterWidth()) / 20) + "")
     this.set("height", Math.round((30 + shadow.getShadowOuterHeight()) / 20) + "")
    }
   }
+  _getElementForVega() {
+   return this.getStumpNode()
+    .findStumpNodeByChild("class divForExternalLibrary")
+    .getShadow()
+    .getShadowElement()
+  }
+  async _drawVega() {
+   // todo: don't rerun this if we dont need to.
+   await vegaEmbed(this._getElementForVega(), this._getVegaSpec())
+   // this._adjustVegaSize()
+  }
   treeComponentDidUpdate() {
    super.treeComponentDidUpdate()
    if (this.isNodeJs()) return undefined
-   const shadow = this.getStumpNode()
-    .findStumpNodeByChild("class divWhereVegaWillGo")
-    .getShadow()
-   // todo: don't rerun this if we dont need to.
-   this._createVegaEmbedded(shadow.getShadowElement(), this._getVegaSpec())
-   // this._adjustVegaSize()
+   this._drawVega()
   }
   _getTileWidth() {
    return this.getTileDimensionIfAny().width - 120
@@ -101,7 +103,7 @@ abstractVegaNode
    return { type: this._getVegaMark(), tooltip: { content: "data" } }
   }
   _getVegaMark() {
-   return this.getDefinition().getConstantsObject()["mark"]
+   return this.markName
   }
 vegaBarNode
  description A bar chart
@@ -140,7 +142,7 @@ vegaHistogramNode
   }
  string columnPredictionHints
   xColumn isString=false
- string dummyDataSet wordCounts
+ string dummyDataSetName wordCounts
  extends abstractVegaNode
  crux vega.histogram
 vegaDataNode
@@ -252,17 +254,17 @@ vegaExampleNode
   }
 vegaLineNode
  description A line chart
- string mark line
+ string markName line
  extends vegaBarNode
  crux vega.line
 vegaAreaNode
  description An area chart
- string mark area
+ string markName area
  extends vegaLineNode
  crux vega.area
 vegaScatterNode
  description A scatterplot
- string mark point
+ string markName point
  extends vegaBarNode
  crux vega.scatter
  javascript
@@ -278,8 +280,8 @@ vegaScatterNode
 vegaBubbleNode
  description A bubble plot
  inScope sizeColumnNode colorColumnNode
- string mark circle
- string dummyDataSet gapMinder
+ string markName circle
+ string dummyDataSetName gapMinder
  string columnPredictionHints
   sizeColumn isString=false
   xColumn isString=false
@@ -310,7 +312,7 @@ vegaEmojiNode
  string columnPredictionHints
   emojiColumn isString=true
   yColumn isString=false
- string dummyDataSet emojis
+ string dummyDataSetName emojis
  javascript
   _getVegaConfig() {
    return { view: { stroke: "" } }

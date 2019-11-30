@@ -13853,11 +13853,12 @@ class TestRacerTestBlock {
   }
   _emitMessage(message) {
     this._parentFile.getRunner()._emitMessage(message)
+    return message
   }
   async execute() {
     let passes = []
     let failures = []
-    const assertEqual = (actual, expected, message) => {
+    const assertEqual = (actual, expected, message = "") => {
       if (expected === actual) {
         passes.push(message)
       } else {
@@ -13895,8 +13896,9 @@ class TestRacerTestBlock {
       failures
         .map(failure => {
           const actualVal = failure[0] === undefined ? "undefined" : failure[0].toString()
+          const expectedVal = failure[1] === undefined ? "undefined" : failure[1].toString()
           const actual = new jtree.TreeNode(`actual\n${new jtree.TreeNode(actualVal).toString(1)}`)
-          const expected = new jtree.TreeNode(`expected\n${new jtree.TreeNode(failure[1].toString()).toString(1)}`)
+          const expected = new jtree.TreeNode(`expected\n${new jtree.TreeNode(expectedVal.toString()).toString(1)}`)
           const comparison = actual.toComparison(expected)
           return new jtree.TreeNode(` assertion ${failure[2]}\n${comparison.toSideBySide([actual, expected]).toString(2)}`)
         })
@@ -14017,10 +14019,11 @@ class TestRacer {
     return this
   }
   finish() {
-    this._emitSessionFinishMessage()
+    return this._emitSessionFinishMessage()
   }
   _emitMessage(message) {
     this._logFunction(message)
+    return message
   }
   get length() {
     return Object.values(this._fileTestTree).length
@@ -14039,7 +14042,7 @@ class TestRacer {
 ${new TreeNode(this._sessionFilesFailed).forEach(row => row.forEach(line => line.deleteWordAt(0))).toString(2)}`
   }
   _emitSessionFinishMessage() {
-    this._emitMessage(`finished in ${this._timer.getTotalElapsedTime()}ms
+    return this._emitMessage(`finished in ${this._timer.getTotalElapsedTime()}ms
  passed
   ${this._sessionFilesPassed} files
   ${this._sessionBlocksPassed} blocks
@@ -14090,6 +14093,18 @@ class ChildAddedTreeEvent extends AbstractTreeEvent {}
 class ChildRemovedTreeEvent extends AbstractTreeEvent {}
 class DescendantChangedTreeEvent extends AbstractTreeEvent {}
 class LineChangedTreeEvent extends AbstractTreeEvent {}
+class TreeWord {
+  constructor(node, cellIndex) {
+    this._node = node
+    this._cellIndex = cellIndex
+  }
+  replace(newWord) {
+    this._node.setWord(this._cellIndex, newWord)
+  }
+  get word() {
+    return this._node.getWord(this._cellIndex)
+  }
+}
 const TreeEvents = { ChildAddedTreeEvent, ChildRemovedTreeEvent, DescendantChangedTreeEvent, LineChangedTreeEvent }
 var WhereOperators
 ;(function(WhereOperators) {
@@ -14207,23 +14222,11 @@ class TreeNode extends AbstractNode {
   getParent() {
     return this._parent
   }
-  getPoint() {
-    return this._getPoint()
-  }
-  _getPoint(relativeTo) {
-    return {
-      x: this._getXCoordinate(relativeTo),
-      y: this._getYCoordinate(relativeTo)
-    }
-  }
-  getPointRelativeTo(relativeTo) {
-    return this._getPoint(relativeTo)
-  }
   getIndentLevel(relativeTo) {
-    return this._getXCoordinate(relativeTo) - 1
+    return this._getIndentLevel(relativeTo)
   }
   getIndentation(relativeTo) {
-    return this.getEdgeSymbol().repeat(this._getXCoordinate(relativeTo) - 1)
+    return this.getEdgeSymbol().repeat(this._getIndentLevel(relativeTo) - 1)
   }
   _getTopDownArray(arr) {
     this.forEach(child => {
@@ -14256,6 +14259,14 @@ class TreeNode extends AbstractNode {
     }
     return lineCount
   }
+  _getMaxUnitsOnALine() {
+    let max = 0
+    for (let node of this.getTopDownArrayIterator()) {
+      const count = node.getWords().length + node.getIndentLevel()
+      if (count > max) max = count
+    }
+    return max
+  }
   getNumberOfWords() {
     let wordCount = 0
     for (let node of this.getTopDownArrayIterator()) {
@@ -14264,8 +14275,7 @@ class TreeNode extends AbstractNode {
     return wordCount
   }
   getLineNumber() {
-    // todo: remove Y coordinate stuff? Now that we use the more abstract nodeBreakSymbols?
-    return this._getYCoordinate()
+    return this._getLineNumberRelativeTo()
   }
   _getLineNumber(target = this) {
     if (this._cachedLineNumber) return this._cachedLineNumber
@@ -14285,7 +14295,7 @@ class TreeNode extends AbstractNode {
   isEmpty() {
     return !this.length && !this.getContent()
   }
-  _getYCoordinate(relativeTo) {
+  _getLineNumberRelativeTo(relativeTo) {
     if (this.isRoot(relativeTo)) return 0
     const start = relativeTo || this.getRootNode()
     return start._getLineNumber(this)
@@ -14423,7 +14433,7 @@ class TreeNode extends AbstractNode {
   }
   _getWordIndexCharacterStartPosition(wordIndex) {
     const xiLength = this.getEdgeSymbol().length
-    const numIndents = this._getXCoordinate(undefined) - 1
+    const numIndents = this._getIndentLevel(undefined) - 1
     const indentPosition = xiLength * numIndents
     if (wordIndex < 1) return xiLength * (numIndents + wordIndex)
     return (
@@ -14454,43 +14464,43 @@ class TreeNode extends AbstractNode {
       word: word
     }
   }
+  fill(fill = "") {
+    this.getTopDownArray().forEach(line => {
+      line.getWords().forEach((word, index) => {
+        line.setWord(index, fill)
+      })
+    })
+    return this
+  }
   getAllWordBoundaryCoordinates() {
     const coordinates = []
-    let line = 0
+    let lineIndex = 0
     for (let node of this.getTopDownArrayIterator()) {
-      node.getWordBoundaryIndices().forEach(index => {
+      node.getWordBoundaryCharIndices().forEach((charIndex, wordIndex) => {
         coordinates.push({
-          y: line,
-          x: index
+          lineIndex: lineIndex,
+          charIndex: charIndex,
+          wordIndex: wordIndex
         })
       })
-      line++
+      lineIndex++
     }
     return coordinates
   }
-  getWordBoundaryIndices() {
-    const boundaries = [0]
-    let numberOfIndents = this._getXCoordinate(undefined) - 1
-    let start = numberOfIndents
-    // Add indents
-    while (numberOfIndents) {
-      boundaries.push(boundaries.length)
-      numberOfIndents--
-    }
-    // Add columns
-    const ziIncrement = this.getWordBreakSymbol().length
-    this.getWords().forEach(word => {
-      if (boundaries[boundaries.length - 1] !== start) boundaries.push(start)
-      start += word.length
-      if (boundaries[boundaries.length - 1] !== start) boundaries.push(start)
-      start += ziIncrement
+  getWordBoundaryCharIndices() {
+    let indentLevel = this._getIndentLevel()
+    const wordBreakSymbolLength = this.getWordBreakSymbol().length
+    let elapsed = indentLevel
+    return this.getWords().map((word, wordIndex) => {
+      const boundary = elapsed
+      elapsed += word.length + wordBreakSymbolLength
+      return boundary
     })
-    return boundaries
   }
   getWordIndexAtCharacterIndex(charIndex) {
     // todo: is this correct thinking for handling root?
     if (this.isRoot()) return 0
-    const numberOfIndents = this._getXCoordinate(undefined) - 1
+    const numberOfIndents = this._getIndentLevel(undefined) - 1
     // todo: probably want to rewrite this in a performant way.
     const spots = []
     while (spots.length < numberOfIndents) {
@@ -14818,7 +14828,7 @@ class TreeNode extends AbstractNode {
       arr.push(child)
     })
   }
-  _getXCoordinate(relativeTo) {
+  _getIndentLevel(relativeTo) {
     return this._getStack(relativeTo).length
   }
   getParentFirstArray() {
@@ -14832,7 +14842,7 @@ class TreeNode extends AbstractNode {
   _getLevels() {
     const levels = {}
     this.getTopDownArray().forEach(node => {
-      const level = node._getXCoordinate()
+      const level = node._getIndentLevel()
       if (!levels[level]) levels[level] = []
       levels[level].push(node)
     })
@@ -14873,6 +14883,21 @@ class TreeNode extends AbstractNode {
   }
   toHtml() {
     return this._childrenToHtml(0)
+  }
+  _toHtmlCubeLine(indents = 0, lineIndex = 0, planeIndex = 0) {
+    const getLine = (cellIndex, word = "") =>
+      `<span class="htmlCubeSpan" style="top: calc(var(--topIncrement) * ${planeIndex} + var(--rowHeight) * ${lineIndex}); left:calc(var(--leftIncrement) * ${planeIndex} + var(--cellWidth) * ${cellIndex});">${word}</span>`
+    let cells = []
+    this.getWords().forEach((word, index) => (word ? cells.push(getLine(index + indents, word)) : ""))
+    return cells.join("")
+  }
+  toHtmlCube() {
+    return this.map((plane, planeIndex) =>
+      plane
+        .getTopDownArray()
+        .map((line, lineIndex) => line._toHtmlCubeLine(line.getIndentLevel() - 2, lineIndex, planeIndex))
+        .join("")
+    ).join("")
   }
   _getHtmlJoinByCharacter() {
     return `<span class="nodeBreakSymbol">${this.getNodeBreakSymbol()}</span>`
@@ -15502,8 +15527,8 @@ class TreeNode extends AbstractNode {
     return this.isRoot() || this.getParent().isRoot() ? undefined : this.getParent().getParent()
   }
   _getParser() {
-    if (!this._parser) this._parser = this.createParser()
-    return this._parser
+    if (!TreeNode._parsers.has(this.constructor)) TreeNode._parsers.set(this.constructor, this.createParser())
+    return TreeNode._parsers.get(this.constructor)
   }
   createParser() {
     return new Parser(this.constructor)
@@ -16037,6 +16062,38 @@ class TreeNode extends AbstractNode {
     this.destroy()
     return newNode
   }
+  pasteText(text) {
+    const parent = this.getParent()
+    const index = this.getIndex()
+    const newNodes = new TreeNode(text)
+    const firstNode = newNodes.nodeAt(0)
+    if (firstNode) {
+      this.setLine(firstNode.getLine())
+      if (firstNode.length) this.setChildren(firstNode.childrenToString())
+    } else {
+      this.setLine("")
+    }
+    newNodes.forEach((child, childIndex) => {
+      if (!childIndex)
+        // skip first
+        return true
+      parent.insertLineAndChildren(child.getLine(), child.childrenToString(), index + childIndex)
+    })
+    return this
+  }
+  templateToString(obj) {
+    // todo: compile/cache for perf?
+    const tree = this.clone()
+    tree.getTopDownArray().forEach(node => {
+      const line = node.getLine().replace(/{([^\}]+)}/g, (match, path) => {
+        const replacement = obj[path]
+        if (replacement === undefined) throw new Error(`In string template no match found on line "${node.getLine()}"`)
+        return replacement
+      })
+      node.pasteText(line)
+    })
+    return tree.toString()
+  }
   shiftRight() {
     const olderSibling = this._getClosestOlderSibling()
     if (!olderSibling) return this
@@ -16353,6 +16410,7 @@ class TreeNode extends AbstractNode {
     return methods[format](content)
   }
 }
+TreeNode._parsers = new Map()
 TreeNode.Parser = Parser
 TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 6.1,3,4.9,1.8,virginica
@@ -16365,7 +16423,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "46.0.0"
+TreeNode.getVersion = () => "47.1.0"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -16448,6 +16506,7 @@ window.TreeNode = TreeNode
 window.ExtendibleTreeNode = ExtendibleTreeNode
 window.AbstractExtendibleTreeNode = AbstractExtendibleTreeNode
 window.TreeEvents = TreeEvents
+window.TreeWord = TreeWord
 var GrammarConstantsCompiler
 ;(function(GrammarConstantsCompiler) {
   GrammarConstantsCompiler["stringTemplate"] = "stringTemplate"
@@ -16544,6 +16603,18 @@ var GrammarConstants
   GrammarConstants["frequency"] = "frequency"
   GrammarConstants["highlightScope"] = "highlightScope"
 })(GrammarConstants || (GrammarConstants = {}))
+class TypedWord extends TreeWord {
+  constructor(node, cellIndex, type) {
+    super(node, cellIndex)
+    this._type = type
+  }
+  get type() {
+    return this._type
+  }
+  toString() {
+    return this.word + ":" + this.type
+  }
+}
 // todo: can we merge these methods into base TreeNode and ditch this class?
 class GrammarBackedNode extends TreeNode {
   getDefinition() {
@@ -16615,9 +16686,10 @@ class GrammarBackedNode extends TreeNode {
     return errors
   }
   getProgramAsCells() {
+    // todo: what is this?
     return this.getTopDownArray().map(node => {
       const cells = node._getParsedCells()
-      let indents = node.getIndentLevel()
+      let indents = node.getIndentLevel() - 1
       while (indents) {
         cells.unshift(undefined)
         indents--
@@ -16677,16 +16749,34 @@ class GrammarBackedNode extends TreeNode {
       )
     )
   }
-  getAllSuggestions() {
+  _getAllAutoCompleteWords() {
+    return this.getAllWordBoundaryCoordinates().map(coordinate => {
+      const results = this.getAutocompleteResultsAt(coordinate.lineIndex, coordinate.charIndex)
+      return {
+        lineIndex: coordinate.lineIndex,
+        charIndex: coordinate.charIndex,
+        wordIndex: coordinate.wordIndex,
+        word: results.word,
+        suggestions: results.matches
+      }
+    })
+  }
+  toAutoCompleteCube(fillChar = "") {
+    const trees = [this.clone()]
+    const filled = this.clone().fill(fillChar)
+    this._getAllAutoCompleteWords().forEach(hole => {
+      hole.suggestions.forEach((suggestion, index) => {
+        if (!trees[index + 1]) trees[index + 1] = filled.clone()
+        trees[index + 1].nodeAtLine(hole.lineIndex).setWord(hole.wordIndex, suggestion.text)
+      })
+    })
+    return new TreeNode(trees)
+  }
+  toAutoCompleteTable() {
     return new TreeNode(
-      this.getAllWordBoundaryCoordinates().map(coordinate => {
-        const results = this.getAutocompleteResultsAt(coordinate.y, coordinate.x)
-        return {
-          line: coordinate.y,
-          char: coordinate.x,
-          word: results.word,
-          suggestions: results.matches.map(node => node.text).join(" ")
-        }
+      this._getAllAutoCompleteWords().map(result => {
+        result.suggestions = result.suggestions.map(node => node.text).join(" ")
+        return result
       })
     ).toTable()
   }
@@ -16889,25 +16979,6 @@ ${indent}${closeChildrenString}`
       }
     })
     return cells
-  }
-}
-class TypedWord {
-  constructor(node, cellIndex, type) {
-    this._node = node
-    this._cellIndex = cellIndex
-    this._type = type
-  }
-  replace(newWord) {
-    this._node.setWord(this._cellIndex, newWord)
-  }
-  get word() {
-    return this._node.getWord(this._cellIndex)
-  }
-  get type() {
-    return this._type
-  }
-  toString() {
-    return this.word + ":" + this.type
   }
 }
 class BlobNode extends GrammarBackedNode {
@@ -21603,7 +21674,7 @@ window.ComparisonOperators = ComparisonOperators
           s: htmlTagNode,
           u: htmlTagNode
         }),
-        undefined
+        [{ regex: /^$/, nodeConstructor: blankLineNode }]
       )
     }
     compile() {
@@ -21616,6 +21687,7 @@ window.ComparisonOperators = ComparisonOperators
       if (!this._cachedGrammarProgramRoot)
         this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`anyCell
 keywordCell
+emptyCell
 extraCell
  highlightScope invalid
 anyHtmlContentCell
@@ -21637,7 +21709,7 @@ stumpNode
  root
  description A prefix Tree Language that compiles to HTML.
  catchAllNodeType errorNode
- inScope htmlTagNode
+ inScope htmlTagNode blankLineNode
  example
   div
    h1 hello world
@@ -21649,8 +21721,17 @@ stumpNode
   _getHtmlJoinByCharacter() {
     return ""
   }
+blankLineNode
+ pattern ^$
+ tags doNotSynthesize
+ cells emptyCell
+ javascript
+  _toHtml() {
+   return ""
+  }
+  getTextContent() {return ""}
 htmlTagNode
- inScope bernNode htmlTagNode htmlAttributeNode
+ inScope bernNode htmlTagNode htmlAttributeNode blankLineNode
  catchAllCellType anyHtmlContentCell
  cells htmlTagNameCell
  javascript
@@ -21786,13 +21867,6 @@ htmlTagNode
   getShadowClass() {
    return this.getParent().getShadowClass()
   }
-  // todo: whats this? move to base?
-  getLines(start = 0, end) {
-   return this.toString()
-    .split("\\n")
-    .slice(start, end)
-    .join("\\n")
-  }
   // todo: should not be here
   getStumpNodeTreeComponent() {
    return this._treeComponent || this.getParent().getStumpNodeTreeComponent()
@@ -21864,6 +21938,7 @@ bernNode
     static getNodeTypeMap() {
       return {
         stumpNode: stumpNode,
+        blankLineNode: blankLineNode,
         htmlTagNode: htmlTagNode,
         errorNode: errorNode,
         htmlAttributeNode: htmlAttributeNode,
@@ -21871,6 +21946,18 @@ bernNode
         lineOfHtmlContentNode: lineOfHtmlContentNode,
         bernNode: bernNode
       }
+    }
+  }
+
+  class blankLineNode extends jtree.GrammarBackedNode {
+    get emptyCell() {
+      return this.getWord(0)
+    }
+    _toHtml() {
+      return ""
+    }
+    getTextContent() {
+      return ""
     }
   }
 
@@ -22164,7 +22251,7 @@ bernNode
           stumpNoOp: stumpExtendedAttributeNode,
           bern: bernNode
         }),
-        undefined
+        [{ regex: /^$/, nodeConstructor: blankLineNode }]
       )
     }
     get htmlTagNameCell() {
@@ -22304,13 +22391,6 @@ bernNode
     }
     getShadowClass() {
       return this.getParent().getShadowClass()
-    }
-    // todo: whats this? move to base?
-    getLines(start = 0, end) {
-      return this.toString()
-        .split("\n")
-        .slice(start, end)
-        .join("\n")
     }
     // todo: should not be here
     getStumpNodeTreeComponent() {
@@ -23332,6 +23412,9 @@ propertyNode
    return \`\${spaces}\${this.getFirstWord()}: \${this.getContent()};\`
   }
  cells propertyKeywordCell
+variableNode
+ extends propertyNode
+ pattern --
 errorNode
  catchAllNodeType errorNode
  catchAllCellType errorCell
@@ -23341,7 +23424,7 @@ commentNode
  catchAllCellType commentCell
  catchAllNodeType commentNode
 selectorNode
- inScope propertyNode commentNode
+ inScope propertyNode variableNode commentNode
  catchAllNodeType selectorNode
  boolean isSelectorNode true
  javascript
@@ -23367,7 +23450,14 @@ selectorNode
       return this._cachedGrammarProgramRoot
     }
     static getNodeTypeMap() {
-      return { hakonNode: hakonNode, propertyNode: propertyNode, errorNode: errorNode, commentNode: commentNode, selectorNode: selectorNode }
+      return {
+        hakonNode: hakonNode,
+        propertyNode: propertyNode,
+        variableNode: variableNode,
+        errorNode: errorNode,
+        commentNode: commentNode,
+        selectorNode: selectorNode
+      }
     }
   }
 
@@ -23385,6 +23475,8 @@ selectorNode
       return `${spaces}${this.getFirstWord()}: ${this.getContent()};`
     }
   }
+
+  class variableNode extends propertyNode {}
 
   class errorNode extends jtree.GrammarBackedNode {
     createParser() {
@@ -23607,7 +23699,7 @@ selectorNode
           top: propertyNode,
           comment: commentNode
         }),
-        undefined
+        [{ regex: /--/, nodeConstructor: variableNode }]
       )
     }
     get selectorCell() {
@@ -25099,6 +25191,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "html.iframe": htmlIframeNode,
           "html.custom": htmlCustomNode,
           "show.rowCount": showRowCountNode,
+          "show.static": showStaticNode,
           "show.median": showMedianNode,
           "show.sum": showSumNode,
           "show.mean": showMeanNode,
@@ -25160,6 +25253,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "samples.populations": samplesPopulationsNode,
           "samples.babyNames": samplesBabyNamesNode,
           "samples.declaration": samplesDeclarationNode,
+          "samples.letters": samplesLettersNode,
           "samples.presidents": samplesPresidentsNode,
           "ucimlr.datasets": ucimlrDatasetsNode,
           "vega.data": vegaDataNode,
@@ -25228,6 +25322,64 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
     get tileNameCell() {
       return this.getWord(0)
     }
+    get tileStumpTemplate() {
+      return `div
+ class {classes}
+ id {id}
+ stumpOnContextMenuCommand openTileContextMenuCommand
+ div
+  class TileGrabber
+  stumpOnDblClickCommand toggleTileMaximizeCommand
+ div {header}
+  class TileHeader
+ div
+  style {bodyStyle}
+  class TileBody
+  {body}
+ div
+  class TileFooter
+  {footer}
+ div
+  class TileGrabber`
+    }
+    get errorStateStumpTemplate() {
+      return `div
+ class {classes}
+ id {id}
+ stumpOnContextMenuCommand openTileContextMenuCommand
+ div
+  class TileGrabber
+  stumpOnDblClickCommand toggleTileMaximizeCommand
+ div ERROR
+  class TileHeader
+ div
+  class TileBody
+  {content}
+ div
+  class TileFooter
+  {footer}
+ div
+  class TileGrabber`
+    }
+    get inspectionStumpTemplate() {
+      return `div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
+div Messages:
+ol
+ {messages}
+div Tree:
+pre
+ bern
+  {sourceCode}
+div All Tile Settings:
+pre
+ bern
+  {settings}`
+    }
+    get pencilStumpTemplate() {
+      return `span {icon}
+ class TilePencilButton
+ stumpOnClickCommand toggleToolbarCommand`
+    }
     get hiddenKey() {
       return `hidden`
     }
@@ -25251,6 +25403,9 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
     }
     getTheme() {
       return this.getTab().getTheme()
+    }
+    qFormat(str, obj) {
+      return new jtree.TreeNode(str).templateToString(obj)
     }
     scrollIntoView() {
       const el = this.getStumpNode()
@@ -25291,9 +25446,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
         )
     }
     _hasRequirements() {
-      const def = this.getDefinition()
-      const constants = def.getConstantsObject()
-      return constants[TilesConstants.tileScript]
+      return this.tileScript
     }
     _areRequirementsLoaded() {
       const loadingMap = this.getTab()
@@ -25309,22 +25462,12 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
       return errors.length ? ` <span style="color: ${this.getTheme().errorColor};">${errors.join(" ")}</span>` : "" //todo: cleanup
     }
     toStumpErrorStateCode(err) {
-      const errorMessage = `Error on tile '${this.getFirstWord()}'. ${err}`
-      return `div
- class ${this.getCssClassNames().join(" ")}
- id ${this.getTreeComponentId()}
- stumpOnContextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
- div ERROR
-  class TileHeader
- div
-  class TileBody${jtree.TreeNode.nest(`div ` + errorMessage, 2)}
- div
-  class TileFooter${jtree.TreeNode.nest(this.getTileToolbarButtonStumpCode(), 2)}
- div
-  class TileGrabber`
+      return this.qFormat(this.errorStateStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        id: this.getTreeComponentId(),
+        content: `div ` + err,
+        footer: this.getTileToolbarButtonStumpCode()
+      })
     }
     // todo: delete this
     makeDirty() {
@@ -25366,25 +25509,17 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
       return classNames
     }
     toStumpCode() {
-      return `div
- class ${this.getCssClassNames().join(" ")}
- id ${this.getTreeComponentId()}
- stumpOnContextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
- div ${this.getTileHeaderBern()}
-  class TileHeader
- div
-  style ${this.customBodyStyle || ""}
-  class TileBody${this._getBodyStumpCodeCache()}
- div
-  class TileFooter${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
- div
-  class TileGrabber`
+      return this.qFormat(this.tileStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        id: this.getTreeComponentId(),
+        header: this.getTileHeaderBern(),
+        bodyStyle: this.customBodyStyle || "",
+        body: this._getBodyStumpCodeCache() || "",
+        footer: this.getTileFooterStumpCode()
+      })
     }
     _getBodyStumpCodeCache() {
-      if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = jtree.TreeNode.nest(this.getTileBodyStumpCode(), 2)
+      if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
       return this._bodyStumpCodeCache
     }
     getTileHeaderBern() {
@@ -25453,9 +25588,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
       return this.getTileToolbarButtonStumpCode()
     }
     getTileToolbarButtonStumpCode() {
-      return `span ${Icons("pencil", 16)}
- class TilePencilButton
- stumpOnClickCommand toggleToolbarCommand`
+      return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
     }
     getDefinedOrSuggestedSize() {
       const size = this.getSuggestedSize()
@@ -25521,22 +25654,22 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
     _treeComponentDidMount() {
       if (this.isLoaded()) this.treeComponentDidMount()
     }
-    toInspection() {
+    toInspectionStumpCode() {
       const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
       const settingsDefinitions = this.getAllTileSettingsDefinitions()
         .map(setting => `${setting.getFirstWord()} ${setting.getDescription()}`)
         .join("\n")
-      const parentTile = this.getParent().getFirstWord()
-      return `div TileConstructor: ${this.constructor.name} Parent: ${parentTile}
-div Messages:
-ol
- ${messages}
-div Tree:
-pre
- bern${jtree.TreeNode.nest(this.toString(), 2)}
-div All Tile Settings:
-pre
- bern${jtree.TreeNode.nest(settingsDefinitions, 2)}`
+      const parentConstructorName = this.getParent().constructor.name
+      const constructorName = this.constructor.name
+      const sourceCode = this.toString()
+      const settings = settingsDefinitions
+      return this.qFormat(this.inspectionStumpTemplate, {
+        constructorName,
+        parentConstructorName,
+        sourceCode,
+        messages,
+        settings
+      })
     }
     isVisible() {
       return !this.has(this.hiddenKey)
@@ -25568,10 +25701,6 @@ pre
     cloneTileCommand() {
       this.cloneAndOffset()
       return this.getTab().autosaveAndRender()
-    }
-    async updateContentFromHtmlCommand(val) {
-      const clean = jtree.Utils.stripHtml(val.replace(/\<br\>/g, "\n").replace(/\<div\>/g, "\n"))
-      return this.changeTileContentAndRenderCommand(clean)
     }
     async toggleTileMaximizeCommand() {
       if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
@@ -25686,8 +25815,7 @@ pre
         window.tile = this
         console.log(this)
       }
-      const output = this.toInspection()
-      this.getTab().addStumpCodeMessageToLog(output)
+      this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
       this.getTab()
         .getRootNode()
         .renderApp()
@@ -25914,6 +26042,7 @@ span ?`
           "html.iframe": htmlIframeNode,
           "html.custom": htmlCustomNode,
           "show.rowCount": showRowCountNode,
+          "show.static": showStaticNode,
           "show.median": showMedianNode,
           "show.sum": showSumNode,
           "show.mean": showMeanNode,
@@ -25975,6 +26104,7 @@ span ?`
           "samples.populations": samplesPopulationsNode,
           "samples.babyNames": samplesBabyNamesNode,
           "samples.declaration": samplesDeclarationNode,
+          "samples.letters": samplesLettersNode,
           "samples.presidents": samplesPresidentsNode,
           "ucimlr.datasets": ucimlrDatasetsNode,
           "vega.data": vegaDataNode,
@@ -26042,6 +26172,34 @@ span ?`
     get tileKeywordCell() {
       return this.getWord(0)
     }
+    get maiaStumpInspectionTemplate() {
+      return `div TileStruct:
+ pre
+  bern
+   {settings}
+div Input rows: {inputCount} Output rows: {outputCount}
+div Load time: {timeToLoad} Render time: {renderTime}
+div Input Columns:
+pre
+ bern
+  {inputColumnsAsTable}
+div Output Columns
+pre
+ bern
+  {outputColumnsAsTable}
+div Output Numeric Values:
+pre
+ bern
+  {outputNumericValues}
+div TypeScript Interface:
+pre
+ bern
+  {typeScriptInterface}
+div Input Numeric Values:
+pre
+ bern
+  {inputNumericValues}`
+    }
     get yearKey() {
       return `year`
     }
@@ -26071,9 +26229,6 @@ span ?`
     }
     get xColumnKey() {
       return `xColumn`
-    }
-    get dummyDataSetKey() {
-      return `dummyDataSet`
     }
     get contentKey() {
       return `content`
@@ -26119,8 +26274,7 @@ span ?`
       return this._getDummyTable() || parentTable
     }
     _getDummyTable() {
-      const name = this.getDefinition().getConstantsObject()[this.dummyDataSetKey]
-      const dataSet = DummyDataSets[name]
+      const dataSet = DummyDataSets[this.dummyDataSetName]
       if (!this._dummyTable && dataSet) this._dummyTable = new Table(jtree.Utils.javascriptTableWithHeaderRowToObjects(dataSet))
       return this._dummyTable
     }
@@ -26156,7 +26310,7 @@ span ?`
         name: name,
         namespace: name.split(".")[0],
         description: definition.getDescription() ? 1 : 0,
-        dummyDataSet: definition.getConstantsObject()[this.dummyDataSetKey],
+        dummyDataSetName: this.dummyDataSetName,
         runTimeErrors: Object.values(this.getRunTimePhaseErrors()).length,
         examples: definition.getExamples().length,
         edgeTests: 0,
@@ -26187,34 +26341,37 @@ span ?`
         )
       return settingsFromCache
     }
-    toInspection() {
+    toInspectionStumpCode() {
       const inputTable = this.getParentOrDummyTable()
       const outputTable = this.getOutputOrInputTable()
       const outputColumns = outputTable.getColumnsArrayOfObjects()
       const inputCols = inputTable.getColumnsArrayOfObjects()
       const inputCount = inputTable.getRowCount()
       const outputCount = outputTable.getRowCount()
-      return `${super.toInspection()}
-  div TileStruct:
-   pre
-    bern${jtree.TreeNode.nest(JSON.stringify(this.getSettingsStruct(), null, 2), 2)}
-  div Input rows: ${inputCount} Output rows: ${outputCount}
-  div Load time: ${this.getTimeToLoad()} Render time: ${this.getNewestTimeToRender()}
-  div Input Columns:
-  pre
-   bern${jtree.TreeNode.nest(new jtree.TreeNode(inputCols).toTable(), 2)}
-  div Output Columns
-  pre
-   bern${jtree.TreeNode.nest(new jtree.TreeNode(outputColumns).toTable(), 2)}
-  div Output Numeric Values:
-  pre
-   bern${jtree.TreeNode.nest(new jtree.TreeNode(outputTable.getJavascriptNativeTypedValues()).toTable(), 2)}
-  div TypeScript Interface:
-  pre
-   bern${jtree.TreeNode.nest(outputTable.toTypeScriptInterface(), 2)}
-  div Input Numeric Values:
-  pre
-   bern${jtree.TreeNode.nest(new jtree.TreeNode(inputTable.getJavascriptNativeTypedValues()).toTable(), 2)}`
+      const timeToLoad = this.getTimeToLoad()
+      const renderTime = this.getNewestTimeToRender()
+      const inputColumnsAsTable = new jtree.TreeNode(inputCols).toTable()
+      const outputColumnsAsTable = new jtree.TreeNode(outputColumns).toTable()
+      const settings = JSON.stringify(this.getSettingsStruct(), null, 2)
+      const outputNumericValues = new jtree.TreeNode(outputTable.getJavascriptNativeTypedValues()).toTable()
+      const typeScriptInterface = outputTable.toTypeScriptInterface()
+      const inputNumericValues = new jtree.TreeNode(inputTable.getJavascriptNativeTypedValues()).toTable()
+      return (
+        super.toInspectionStumpCode() +
+        "\n" +
+        this.qFormat(this.maiaStumpInspectionTemplate, {
+          settings,
+          inputCount,
+          outputCount,
+          timeToLoad,
+          renderTime,
+          inputColumnsAsTable,
+          outputColumnsAsTable,
+          outputNumericValues,
+          typeScriptInterface,
+          inputNumericValues
+        })
+      )
     }
   }
 
@@ -26254,75 +26411,86 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
     }
   }
 
-  class abstractBodyOnlyTileNode extends abstractChartNode {
-    get footerHeight() {
-      return 0
-    }
-    get headerHeight() {
-      return 0
-    }
-    toStumpCode() {
-      // todo: just use super and modify?
+  class abstractHeaderlessChartTileNode extends abstractChartNode {
+    get tileStumpTemplate() {
       return `div
- class ${this.getCssClassNames().join(" ")}
- id ${this.getTreeComponentId()}
+ class {classes}
+ id {id}
  stumpOnContextMenuCommand openTileContextMenuCommand
  div
   class TileGrabber
   stumpOnDblClickCommand toggleTileMaximizeCommand
  div
-  class TileBody BodyOnly${this._getBodyStumpCodeCache()}
+  class TileBody HeaderLess
+  {body}
  div
-  class TileFooter TileFooterLess${jtree.TreeNode.nest(this.getTileToolbarButtonStumpCode(), 2)}
+  class TileFooter
+  {footer}
  div
   class TileGrabber`
     }
+    get headerHeight() {
+      return 0
+    }
+    toStumpCode() {
+      return this.qFormat(this.tileStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        id: this.getTreeComponentId(),
+        body: this._getBodyStumpCodeCache(),
+        footer: this.getTileToolbarButtonStumpCode()
+      })
+    }
+    get _tileWidth() {
+      return this.getTileDimensionIfAny().width - 10
+    }
+    get _tileHeight() {
+      return this.getTileDimensionIfAny().height - 60 // 10 for padding. 10 for top grabber. 30 for footer. 10 fot bottom grabber.
+    }
   }
 
-  class abstractSnippetGalleryNode extends abstractBodyOnlyTileNode {
+  class abstractEmptyFooterTileNode extends abstractHeaderlessChartTileNode {
+    get footerHeight() {
+      return 0
+    }
+  }
+
+  class abstractSnippetGalleryNode extends abstractEmptyFooterTileNode {
+    get optionStumpTemplate() {
+      return `li
+ a {title}
+  value {value}
+  class appendSnippetButton
+  stumpOnClickCommand appendSnippetTemplateCommand`
+    }
+    get bodyStumpTemplate() {
+      return `h4 {title}
+ ol
+  class TileSelectable
+  {options}`
+    }
     get tileSize() {
       return `600 240`
     }
     getGalleryNodes() {}
     getTileBodyStumpCode() {
-      const constants = this.getDefinition().getConstantsObject()
-      const itemFormat = constants.itemFormat
-      const options = this.getGalleryNodes()
-        .map(
-          node => `li
- a ${node.evalTemplateString(itemFormat)}
-  value ${node.get("id")}
-  class appendSnippetButton
-  stumpOnClickCommand appendSnippetTemplateCommand`
-        )
-        .join("\n")
-      const code = `h4 ${constants.title}
-ol
- class TileSelectable
-${new jtree.TreeNode(options).toString(1)}`
-      return code
+      return this.qFormat(this.bodyStumpTemplate, {
+        title: this.title,
+        options: new jtree.TreeNode(
+          this.getGalleryNodes()
+            .map(node => this.qFormat(this.optionStumpTemplate, { title: node.evalTemplateString(this.itemFormat), value: node.get("id") }))
+            .join("\n")
+        ).toString()
+      })
     }
   }
 
   class abstractTemplateGalleryNode extends abstractSnippetGalleryNode {
-    getGalleryNodes() {}
-    getTileBodyStumpCode() {
-      const constants = this.getDefinition().getConstantsObject()
-      const itemFormat = constants.itemFormat
-      const options = this.getGalleryNodes()
-        .map(
-          node => ` li
-  a ${node.evalTemplateString(itemFormat)}
-   value ${node.get("id")}
-   class createProgramButton
-   stumpOnClickCommand createProgramFromTemplateCommand`
-        )
-        .join("\n")
-      const code = `h4 ${constants.title}
-ol
- class TileSelectable
-${options}`
-      return code
+    get optionStumpTemplate() {
+      return `li
+ a {title}
+  value {value}
+  class createProgramButton
+  stumpOnClickCommand createProgramFromTemplateCommand`
     }
   }
 
@@ -26461,7 +26629,7 @@ ${options}`
     }
   }
 
-  class challengePlayNode extends abstractBodyOnlyTileNode {
+  class challengePlayNode extends abstractEmptyFooterTileNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
@@ -26516,7 +26684,26 @@ div
     }
   }
 
-  class dtjsBasicNode extends abstractBodyOnlyTileNode {
+  class dtjsBasicNode extends abstractEmptyFooterTileNode {
+    get rowStumpTemplate() {
+      return `tr
+ {cols}`
+    }
+    get cellStumpTemplate() {
+      return `td
+ bern
+  {box}`
+    }
+    get bodyStumpTemplate() {
+      return `div
+table
+ class DataTable
+ thead
+  tr
+   {headerRows}
+ tbody
+  {rows}`
+    }
     get tileScript() {
       return `maia/packages/dtjs/datatables.min.js`
     }
@@ -26530,14 +26717,9 @@ div
       const columnDefs = this.getParentOrDummyTable()
         .getColumnsArray()
         .slice(0, 10)
-      const header = this._getHeaderRowsStumpCode(columnDefs.map(col => col.getColumnName()))
-      const rowsStumpCode = this._getTableRowsStumpCode(columnDefs)
-      return `div
-table
- class DataTable
- thead
-  tr${jtree.TreeNode.nest(header, 4)}
- tbody ${jtree.TreeNode.nest(rowsStumpCode, 2)}`
+      const headerRows = this._getHeaderRowsStumpCode(columnDefs.map(col => col.getColumnName()))
+      const rows = this._getTableRowsStumpCode(columnDefs)
+      return this.qFormat(this.bodyStumpTemplate, { headerRows, rows })
     }
     _getHeaderRowsStumpCode(columns) {
       return columns.map(colName => `th ${colName}`).join("\n")
@@ -26549,11 +26731,10 @@ table
           const cols = columns
             .map(column => {
               const box = row.getRowHtmlSafeValue(column.getColumnName()) // todo: cache?
-              return `td
-bern${jtree.TreeNode.nest(box, 2)}`
+              return this.qFormat(this.cellStumpTemplate, { box })
             })
             .join("\n")
-          return `tr${jtree.TreeNode.nest(cols, 1)}`
+          return this.qFormat(this.cellStumpTemplate, { cols })
         })
         .join("\n")
     }
@@ -26590,7 +26771,7 @@ bern${jtree.TreeNode.nest(box, 2)}`
     }
   }
 
-  class abstractHtmlNode extends abstractBodyOnlyTileNode {
+  class abstractHtmlNode extends abstractEmptyFooterTileNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -26600,6 +26781,13 @@ bern${jtree.TreeNode.nest(box, 2)}`
     }
     get htmlCell() {
       return this.getWordsFrom(0)
+    }
+    get bodyStumpTemplate() {
+      return `{tag}
+ {style}
+ {src}
+ bern
+  {content}`
     }
     getTileFooterStumpCode() {
       return this.getTileToolbarButtonStumpCode()
@@ -26617,11 +26805,12 @@ bern${jtree.TreeNode.nest(box, 2)}`
       return this.getSettingsStruct().src
     }
     getTileBodyStumpCode() {
-      const obj = this.getDefinition().getConstantsObject()
-      return `${this.getTag()}
- ${obj.style ? `style ${obj.style}` : "stumpNoOp"}
- ${this.getSrc() ? `src ${this.getSrc()}` : "stumpNoOp"}
- bern${jtree.TreeNode.nest(this.getHtmlContent(), 2)}`
+      return this.qFormat(this.bodyStumpTemplate, {
+        tag: this.getTag(),
+        style: this.style ? `style ${this.style}` : "stumpNoOp",
+        src: this.getSrc() ? `src ${this.getSrc()}` : "stumpNoOp",
+        content: this.getHtmlContent() || ""
+      })
     }
   }
 
@@ -26654,7 +26843,7 @@ bern${jtree.TreeNode.nest(box, 2)}`
       return this.getContent()
     }
     getTag() {
-      return this.getDefinition().getConstantsObject().htmlTag
+      return this.htmlTagName
     }
   }
 
@@ -26665,7 +26854,7 @@ bern${jtree.TreeNode.nest(box, 2)}`
     get style() {
       return `text-align:center;`
     }
-    get htmlTag() {
+    get htmlTagName() {
       return `h1`
     }
     get tileSize() {
@@ -26692,7 +26881,7 @@ bern${jtree.TreeNode.nest(box, 2)}`
     get style() {
       return `width:100%;`
     }
-    get htmlTag() {
+    get htmlTagName() {
       return `img`
     }
   }
@@ -26704,12 +26893,12 @@ bern${jtree.TreeNode.nest(box, 2)}`
     get urlCell() {
       return this.getWord(1)
     }
-    get htmlTag() {
+    get htmlTagName() {
       return `iframe`
     }
   }
 
-  class htmlCustomNode extends abstractBodyOnlyTileNode {
+  class htmlCustomNode extends abstractEmptyFooterTileNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -26717,17 +26906,21 @@ bern${jtree.TreeNode.nest(box, 2)}`
         undefined
       )
     }
+    get bodyStumpTemplate() {
+      return `div
+ bern
+  {content}`
+    }
     getTileBodyStumpCode() {
       // https://meta.stackexchange.com/questions/1777/what-html-tags-are-allowed-on-stack-exchange-sites
       // todo: sanitize tags
       const contentNode = this.getNode("content")
       const content = contentNode ? contentNode.childrenToString() : "No HTML content to show"
-      return `div
-bern${jtree.TreeNode.nest(content, 2)}`
+      return this.qFormat(this.bodyStumpTemplate, { content })
     }
   }
 
-  class abstractShowTileNode extends abstractBodyOnlyTileNode {
+  class abstractShowTileNode extends abstractEmptyFooterTileNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
@@ -26736,6 +26929,10 @@ bern${jtree.TreeNode.nest(content, 2)}`
     }
     get titleCell() {
       return this.getWordsFrom(2)
+    }
+    get bodyStumpTemplate() {
+      return `h6 {title}
+h3 {number}`
     }
     get hakonTemplate() {
       return `.abstractShowTileNode
@@ -26746,7 +26943,7 @@ bern${jtree.TreeNode.nest(content, 2)}`
   height 40px
   overflow hidden`
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `stockPrice`
     }
     get tileSize() {
@@ -26759,8 +26956,8 @@ bern${jtree.TreeNode.nest(content, 2)}`
       if (!col) return ""
       const reductionName = this.getWord(0).split(".")[1]
       const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
-      return `h6 ${title}
-h3 ${this.toDisplayString(col.getReductions()[reductionName], columnName)}`
+      const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
+      return this.qFormat(this.bodyStumpTemplate, { title, number })
     }
   }
 
@@ -26771,7 +26968,7 @@ h3 ${this.toDisplayString(col.getReductions()[reductionName], columnName)}`
     get titleCell() {
       return this.getWordsFrom(1)
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `stockPrice`
     }
     get tileSize() {
@@ -26779,8 +26976,24 @@ h3 ${this.toDisplayString(col.getReductions()[reductionName], columnName)}`
     }
     getTileBodyStumpCode() {
       const title = this.getWordsFrom(1).join(" ") || "Total rows"
-      return `h6 ${title}
-h3 ${this.getParentOrDummyTable().getRowCount()}`
+      const number = this.getParentOrDummyTable().getRowCount()
+      return this.qFormat(this.bodyStumpTemplate, { title, number })
+    }
+  }
+
+  class showStaticNode extends abstractShowTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get numberCell() {
+      return parseFloat(this.getWord(1))
+    }
+    get titleCell() {
+      return this.getWordsFrom(2)
+    }
+    getTileBodyStumpCode() {
+      const title = this.getWordsFrom(2).join(" ")
+      return this.qFormat(this.bodyStumpTemplate, { title, number: this.getWord(1) || "" })
     }
   }
 
@@ -26794,14 +27007,14 @@ h3 ${this.getParentOrDummyTable().getRowCount()}`
 
   class showMaxNode extends abstractShowTileNode {}
 
-  class abstractVegaNode extends abstractBodyOnlyTileNode {
+  class abstractVegaNode extends abstractEmptyFooterTileNode {
     get titleCell() {
       return this.getWordsFrom(0)
     }
-    get mark() {
+    get markName() {
       return `bar`
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `stockPrice`
     }
     get tileScript() {
@@ -26813,7 +27026,7 @@ h3 ${this.getParentOrDummyTable().getRowCount()}`
     // todo: I don't think vega handles . in column names.
     getTileBodyStumpCode() {
       return `div
-class divWhereVegaWillGo`
+class divForExternalLibrary`
     }
     _getColumnToField(columnName) {
       if (!columnName) return undefined
@@ -26826,29 +27039,31 @@ class divWhereVegaWillGo`
       }
       return obj
     }
-    async _createVegaEmbedded(el, spec) {
-      const embedded = await vegaEmbed(el, spec)
-      return embedded
-    }
     _adjustVegaSize() {
       const adjustSize = !this.has("width")
       if (adjustSize) {
         const shadow = this.getStumpNode()
-          .findStumpNodeByChild("class divWhereVegaWillGo")
+          .findStumpNodeByChild("class divForExternalLibrary")
           .getShadow()
         this.set("width", Math.round((30 + shadow.getShadowOuterWidth()) / 20) + "")
         this.set("height", Math.round((30 + shadow.getShadowOuterHeight()) / 20) + "")
       }
     }
+    _getElementForVega() {
+      return this.getStumpNode()
+        .findStumpNodeByChild("class divForExternalLibrary")
+        .getShadow()
+        .getShadowElement()
+    }
+    async _drawVega() {
+      // todo: don't rerun this if we dont need to.
+      await vegaEmbed(this._getElementForVega(), this._getVegaSpec())
+      // this._adjustVegaSize()
+    }
     treeComponentDidUpdate() {
       super.treeComponentDidUpdate()
       if (this.isNodeJs()) return undefined
-      const shadow = this.getStumpNode()
-        .findStumpNodeByChild("class divWhereVegaWillGo")
-        .getShadow()
-      // todo: don't rerun this if we dont need to.
-      this._createVegaEmbedded(shadow.getShadowElement(), this._getVegaSpec())
-      // this._adjustVegaSize()
+      this._drawVega()
     }
     _getTileWidth() {
       return this.getTileDimensionIfAny().width - 120
@@ -26896,7 +27111,7 @@ class divWhereVegaWillGo`
       return { type: this._getVegaMark(), tooltip: { content: "data" } }
     }
     _getVegaMark() {
-      return this.getDefinition().getConstantsObject()["mark"]
+      return this.markName
     }
   }
 
@@ -26928,19 +27143,19 @@ yColumn isString=false,!xColumn`
   }
 
   class vegaLineNode extends vegaBarNode {
-    get mark() {
+    get markName() {
       return `line`
     }
   }
 
   class vegaAreaNode extends vegaLineNode {
-    get mark() {
+    get markName() {
       return `area`
     }
   }
 
   class vegaScatterNode extends vegaBarNode {
-    get mark() {
+    get markName() {
       return `point`
     }
     _getEncodingMap() {
@@ -26966,10 +27181,10 @@ yColumn isString=false,!xColumn`
       return `sizeColumn isString=false
 xColumn isString=false`
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `gapMinder`
     }
-    get mark() {
+    get markName() {
       return `circle`
     }
     _getEncodingMap() {
@@ -26996,7 +27211,7 @@ xColumn isString=false`
         undefined
       )
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `emojis`
     }
     get columnPredictionHints() {
@@ -27028,7 +27243,7 @@ yColumn isString=false`
         undefined
       )
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `wordCounts`
     }
     get columnPredictionHints() {
@@ -27096,28 +27311,6 @@ yColumn isString=false`
     }
   }
 
-  class abstractHeaderlessChartTileNode extends abstractChartNode {
-    get headerHeight() {
-      return 0
-    }
-    toStumpCode() {
-      // todo: just use super and modify?
-      return `div
- class ${this.getCssClassNames().join(" ")}
- id ${this.getTreeComponentId()}
- stumpOnContextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
- div
-  class TileBody HeaderLess${this._getBodyStumpCodeCache()}
- div
-  class TileFooter${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
- div
-  class TileGrabber`
-    }
-  }
-
   class dateHeatcalNode extends abstractHeaderlessChartTileNode {
     createParser() {
       return new jtree.TreeNode.Parser(
@@ -27135,7 +27328,13 @@ yColumn isString=false`
   font-size 10px
   fill #ddd`
     }
-    get dummyDataSet() {
+    get bodyStumpTemplate() {
+      return `div
+ class heatCal
+ bern
+  {svg}`
+    }
+    get dummyDataSetName() {
       return `waterBill`
     }
     get columnPredictionHints() {
@@ -27161,9 +27360,8 @@ ${quinSvgs}
 </g>`
     }
     getTileBodyStumpCode() {
-      return `div
- class heatCal
- bern${jtree.TreeNode.nest(this.getSvg(), 2)}`
+      const svg = this.getSvg()
+      return this.qFormat(this.bodyStumpTemplate, { svg })
     }
     _getDayMap(quins, rows, dayColumnName, countColumnName) {
       const getQuin = val => {
@@ -27279,8 +27477,13 @@ ${quinSvgs}
         undefined
       )
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `patients`
+    }
+    get bodyStumpTemplate() {
+      return `div
+ bern
+  {bern}`
     }
     get columnPredictionHints() {
       return `headSize isString=false
@@ -27313,8 +27516,7 @@ genderColumn isString=true`
           return `<span title="${title}" style="font-size:${percent}px; color:${gender};">${character}</span>`
         })
         .join(" ")
-      return `div
-bern${jtree.TreeNode.nest(bern, 2)}`
+      return this.qFormat(this.bodyStumpTemplate, { bern: bern })
     }
   }
 
@@ -27326,7 +27528,12 @@ bern${jtree.TreeNode.nest(bern, 2)}`
         undefined
       )
     }
-    get dummyDataSet() {
+    get bodyStumpTemplate() {
+      return `div
+ bern
+  {bern}`
+    }
+    get dummyDataSetName() {
       return `playerGoals`
     }
     get columnPredictionHints() {
@@ -27338,8 +27545,7 @@ bern${jtree.TreeNode.nest(bern, 2)}`
         .getRows()
         .map(row => `<span style="font-size:${row.rowToObjectWithOnlyNativeJavascriptTypes()[column] / 3}em;">O</span>`)
         .join(" ")
-      return `div
-bern${jtree.TreeNode.nest(bern, 2)}`
+      return this.qFormat(this.bodyStumpTemplate, { bern: bern })
     }
   }
 
@@ -27351,44 +27557,46 @@ bern${jtree.TreeNode.nest(bern, 2)}`
         undefined
       )
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `markdown`
     }
     get tileSize() {
       return `400 400`
     }
-    getTileBodyStumpCode() {
-      const markdown = this.getPipishInput()
-      const md = marked(markdown)
-      // todo: add formatting
-      // todo: sanitize below
+    get bodyStumpTemplate() {
       return `div
-class TileSelectable
-bern${jtree.TreeNode.nest(md, 2)}`
+ class TileSelectable
+ bern
+  {md}`
+    }
+    getTileBodyStumpCode() {
+      return this.qFormat(this.bodyStumpTemplate, { md: marked(this.getPipishInput()) })
     }
   }
 
   class treenotationOutlineNode extends abstractHeaderlessChartTileNode {
+    get bodyStumpTemplate() {
+      return `pre
+ style overflow: scroll; width: 100%; height: 100%; margin: 0; box-sizing: border-box; font-family: monospace; line-height: 13px;
+ bern
+  {bern}`
+    }
     get tileSize() {
       return `800 500`
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `outerSpace`
     }
     _getTheBern() {
       return new jtree.TreeNode(this.getPipishInput()).toOutline()
     }
     getTileBodyStumpCode() {
-      const tree = new jtree.TreeNode(this.getPipishInput())
-      const bern = this._getTheBern()
-      return `pre
-style overflow: scroll; width: 100%; height: 100%; margin: 0; box-sizing: border-box; font-family: monospace; line-height: 13px;
-bern${jtree.TreeNode.nest(bern, 2)}`
+      return this.qFormat(this.bodyStumpTemplate, { bern: this._getTheBern() })
     }
   }
 
   class treenotationDotlineNode extends treenotationOutlineNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `outerSpace`
     }
     get dots() {
@@ -27418,11 +27626,14 @@ bern${jtree.TreeNode.nest(bern, 2)}`
     get stringCell() {
       return this.getWordsFrom(0)
     }
-    getTileBodyStumpCode() {
-      const content = this.getDefinition().getConstantsObject().content
+    get bodyStumpTemplate() {
       return `div
  class TileSelectable
- bern${jtree.TreeNode.nest(content ? jtree.Utils.linkify(content) : "", 2)}`
+ bern
+  {content}`
+    }
+    getTileBodyStumpCode() {
+      return this.qFormat(this.bodyStumpTemplate, { content: this.content ? jtree.Utils.linkify(this.content) : "" })
     }
   }
 
@@ -27436,11 +27647,11 @@ bern${jtree.TreeNode.nest(bern, 2)}`
   }
 
   class amazonHistoryNode extends abstractInstructionsNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `amazonPurchases`
     }
     get content() {
-      return `Step 1. Go to <a target="_blank" href="https://www.amazon.com/gp/b2b/reports">https://www.amazon.com/gp/b2b/reports</a> to download your Amazon order history.<br> Step 2. Add the data here.`
+      return `Step 1. Go to https://www.amazon.com/gp/b2b/reports to download your Amazon order history.<br> Step 2. Add the data here.`
     }
   }
 
@@ -27508,6 +27719,12 @@ bern${jtree.TreeNode.nest(bern, 2)}`
   }
 
   class debugDumpNode extends abstractChartNode {
+    get bodyStumpTemplate() {
+      return `div
+ style overflow: scroll; width: 100%; height: 100%; white-space: pre;
+ bern
+  {text}`
+    }
     _getCharacterLimit() {
       // Todo: great example of a scale test. I found it to be slow with:
       /*
@@ -27524,9 +27741,7 @@ So some tiles will have characterLimit, rowDisplayLimit, et cetera. And have "sp
       if (text.length > characterLimit)
         // todo: Show standardized truncation warning
         sub = `<i>(Notice: Results truncated to ${characterLimit} characters)</i><br>` + sub
-      return `div
- style overflow: scroll; width: 100%; height: 100%; white-space: pre;
- bern${jtree.TreeNode.nest(sub || "No data to dump", 2)}`
+      return this.qFormat(this.bodyStumpTemplate, { text: sub || "No data to dump" })
     }
     _getTextToDump() {
       return this.getPipishInput()
@@ -27540,12 +27755,15 @@ So some tiles will have characterLimit, rowDisplayLimit, et cetera. And have "sp
   }
 
   class debugCommandsNode extends abstractChartNode {
-    getTileBodyStumpCode() {
+    get bodyStumpTemplate() {
       return `a Run Speed Test on all Files in Working Directory
  stumpOnClickCommand _runSpeedTestCommand
 br
 a Run Tile Quality Check
  stumpOnClickCommand _doTileQualityCheckCommand`
+    }
+    getTileBodyStumpCode() {
+      return this.bodyStumpTemplate
     }
   }
 
@@ -27574,7 +27792,7 @@ a Run Tile Quality Check
     get dummyDataSetIdCell() {
       return this.getWord(2)
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `waterBill`
     }
     async fetchTableInputs() {
@@ -27614,6 +27832,27 @@ a Run Tile Quality Check
   }
 
   class editorGalleryNode extends abstractChartNode {
+    get miniStyleTemplate() {
+      return `div
+ style {style}`
+    }
+    get bodyStumpTemplate() {
+      return `div
+ class MiniMapTile
+ {minis}`
+    }
+    get miniStumpTemplate() {
+      return `a
+ class miniMap
+ {onClick}
+ {value}
+ {href}
+ div
+  class miniPreview
+  {theTiles}
+ div {filename}
+  class miniFooter`
+    }
     get hakonTemplate() {
       return `.MiniMapTile
  .miniMap
@@ -27648,7 +27887,7 @@ a Run Tile Quality Check
     position absolute
     background {linkColor}`
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `maiaPrograms`
     }
     get tileSize() {
@@ -27665,29 +27904,19 @@ a Run Tile Quality Check
       const theTiles = maiaProgram
         .getTiles()
         .filter(tile => tile.isVisible())
-        .map(
-          tile => `div
- style ${dimensions.get(tile).getScaledCss(0.1)}`
-        )
+        .map(tile => this.qFormat(this.miniStyleTemplate, { style: dimensions.get(tile).getScaledCss(0.1) }))
         .join("\n")
-      return `a
- class miniMap
- ${permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"}
- ${permalink ? `value ${permalink}` : "stumpNoOp"}
- ${permalink ? `href ${permalink}` : "stumpNoOp"}
- div
-  class miniPreview${jtree.TreeNode.nest(theTiles, 2)}
- div ${filename}
-  class miniFooter`
+      const onClick = permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"
+      const value = permalink ? `value ${permalink}` : "stumpNoOp"
+      const href = permalink ? `href ${permalink}` : "stumpNoOp"
+      return this.qFormat(this.miniStumpTemplate, { filename, theTiles, onClick, value, href })
     }
     getTileBodyStumpCode() {
       // todo: cache.
       const minis = this.getRowsWithRowDisplayLimit()
         .map(row => this._getMiniStumpCode(row.getRowOriginalValue("bytes"), row.getRowOriginalValue("filename"), row.getRowOriginalValue("link")))
         .join("\n")
-      const stump = `div
- class MiniMapTile${jtree.TreeNode.nest(minis, 1)}`
-      return stump
+      return this.qFormat(this.bodyStumpTemplate, { minis })
     }
   }
 
@@ -27760,7 +27989,7 @@ class hot`
     get columnPredictionHints() {
       return `label getTitlePotential`
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `telescopes`
     }
     get tileSize() {
@@ -27798,7 +28027,7 @@ ${this.getRowsWithRowDisplayLimit()
       return `label getTitlePotential
 link isLink`
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `telescopes`
     }
     _getUrlColumnName() {
@@ -27824,6 +28053,44 @@ a ${label}
     }
     get titleCell() {
       return this.getWordsFrom(0)
+    }
+    get bodyStumpTemplate() {
+      return `div
+ class tablesBasicNode
+ table
+  thead
+   {headerRows}
+  tbody
+   {bodyRows}`
+    }
+    get headerRowStumpTemplate() {
+      return `th
+ value {colName}
+ span {colName}
+ value {colName}`
+    }
+    get contextMenuStumpTemplate() {
+      return `a Delete all rows
+ stumpOnClickCommand deleteAllRowsInTargetTileCommand`
+    }
+    get rowStumpTemplate() {
+      return `tr
+ class tableRow
+ value {value}
+ td {number}
+ {cols}`
+    }
+    get cellLinkStumpTemplate() {
+      return `td
+ a
+  href {content}
+  bern
+   {content}`
+    }
+    get cellStumpTemplate() {
+      return `td
+ bern
+  {content}`
     }
     get hakonTemplate() {
       return `.tablesBasicNode
@@ -27886,41 +28153,24 @@ a ${label}
         .map((row, index) => {
           const cols = columns
             .map(column => {
-              const box = row.getRowHtmlSafeValue(column.getColumnName()) // todo: cache?
-              if (column.isLink())
-                return `td
- a
-  href ${box}
-  bern${jtree.TreeNode.nest(box, 3)}`
-              return `td
- bern${jtree.TreeNode.nest(box, 2)}`
+              return this.qFormat(column.isLink() ? this.cellLinkStumpTemplate : this.cellStumpTemplate, {
+                content: row.getRowHtmlSafeValue(column.getColumnName())
+              })
             })
             .join("\n")
-          return `tr
- class tableRow
- value ${row.getPuid()}
- td ${index + 1}${jtree.TreeNode.nest(cols, 1)}`
+          return this.qFormat(this.rowStumpTemplate, { number: index + 1, value: row.getPuid(), cols })
         })
         .join("\n")
     }
     getContextMenuStumpCode() {
-      return `a Delete all rows
- stumpOnClickCommand deleteAllRowsInTargetTileCommand`
+      return this.contextMenuStumpTemplate
     }
     _getHeaderRowsStumpCode(columns) {
       // todo: can we get a copy column command?
-      return (
-        "th #\n" +
-        columns
-          .map(
-            colName =>
-              `th
- value ${colName}
- span ${colName}
-  value ${colName}`
-          )
-          .join("\n")
-      )
+      return ["Row"]
+        .concat(columns)
+        .map(colName => this.qFormat(this.headerRowStumpTemplate, { colName }))
+        .join("\n")
     }
     getTileBodyStumpCode() {
       const tileStruct = this.getSettingsStruct()
@@ -27931,15 +28181,9 @@ a ${label}
       const columnNames = columnDefs.map(col => col.getColumnName())
       // todo: if the types for a column are all equal, add a total row to the bottom.
       // todo: if the types for a row are all equal, add a total column to the right.
-      const header = this._getHeaderRowsStumpCode(columnNames)
-      const rowsStumpCode = this._getTableRowsStumpCode(columnDefs)
-      return `div
- class tablesBasicNode
- table
-  thead
-   tr
-    title Click to sort.${jtree.TreeNode.nest(header, 4)}
-  tbody ${jtree.TreeNode.nest(rowsStumpCode, 2)}`
+      const headerRows = this._getHeaderRowsStumpCode(columnNames)
+      const bodyRows = this._getTableRowsStumpCode(columnDefs)
+      return this.qFormat(this.bodyStumpTemplate, { headerRows, bodyRows })
     }
   }
 
@@ -27967,7 +28211,7 @@ a ${label}
       return `name isString=true
 count isString=false`
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `wordCounts`
     }
     get tileScript() {
@@ -28026,7 +28270,7 @@ style width: 100%; height: 100%;`
         undefined
       )
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `treeProgram`
     }
     get tileScript() {
@@ -28136,14 +28380,13 @@ class visjs`
       }
       const points = []
       const nodeToPoint = (node, index) => {
-        const point = node.getPoint(program)
         const nodePath = node.getPathVector(program)
         const tagNode = tagTree.nodeAt(nodePath)
         node.getWords().forEach((word, wordIndex) => {
           const wordType = tagNode.getWord(wordIndex)
           const colorNumber = makeColor(wordType)
-          const xcc = point.x + wordIndex
-          const ycc = -point.y
+          const xcc = node.getIndentLevel(program) + wordIndex
+          const ycc = -node.getLineNumber()
           const zcc = 0
           points.push({
             x: xcc,
@@ -28160,6 +28403,23 @@ class visjs`
   }
 
   class abstractProviderNode extends abstractMaiaTileNode {
+    get tileStumpTemplate() {
+      return `div
+ class {classes}
+ id {id}
+ stumpOnContextMenuCommand openTileContextMenuCommand
+ div
+  class TileGrabber
+  stumpOnDblClickCommand toggleTileMaximizeCommand
+ div
+  class TileBody HeaderLess
+  {body}
+ div
+  class TileFooter
+  {footer}
+ div
+  class TileGrabber`
+    }
     get tileSize() {
       return `140 60`
     }
@@ -28178,20 +28438,12 @@ span Rows Out: ${table.getRowCount()} Columns Out: ${table.getColumnCount()} Tim
       return "div " + (description ? jtree.Utils.linkify(description) : "")
     }
     toStumpCode() {
-      // todo: just use super and modify?
-      return `div
- class ${this.getCssClassNames().join(" ")}
- id ${this.getTreeComponentId()}
- stumpOnContextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
- div
-  class TileBody HeaderLess${this._getBodyStumpCodeCache()}
- div
-  class TileFooter${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
- div
-  class TileGrabber`
+      return this.qFormat(this.tileStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        id: this.getTreeComponentId(),
+        body: this._getBodyStumpCodeCache(),
+        footer: this.getTileFooterStumpCode()
+      })
     }
     getParserId() {
       return this.getSettingsStruct().parser
@@ -28453,14 +28705,17 @@ input
     get tileSize() {
       return `400 130`
     }
-    getTileBodyStumpCode() {
-      return `${super.getTileBodyStumpCode()}
-textarea
- bern${jtree.TreeNode.nest(jtree.Utils.stripHtml(this.getSettingsStruct().post || ""), 2)}
+    get webPostBodyStumpTemplate() {
+      return `textarea
+ bern
+  {post}
  placeholder This data will be sent as the value of the 'q' param
  name post
  stumpOnChangeCommand changeTileSettingMultilineCommand
  class TileTextArea`
+    }
+    getTileBodyStumpCode() {
+      return super.getTileBodyStumpCode() + this.qFormat(this.webPostBodyStumpTemplate, { post: jtree.Utils.stripHtml(this.getSettingsStruct().post || "") })
     }
     async _getData(url) {
       const settings = this.getSettingsStruct()
@@ -28561,6 +28816,12 @@ textarea
     }
   }
 
+  class samplesLettersNode extends abstractFixedDatasetFromMaiaCollectionNode {
+    get url() {
+      return `maia/packages/samples/letters.tsv`
+    }
+  }
+
   class samplesPresidentsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/presidents.csv`
@@ -28634,37 +28895,37 @@ textarea
   }
 
   class samplesPatientsNode extends abstractDummyNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `patients`
     }
   }
 
   class samplesPoemNode extends abstractDummyNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `poem`
     }
   }
 
   class samplesOuterSpaceNode extends abstractDummyNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `outerSpace`
     }
   }
 
   class samplesTreeProgramNode extends abstractDummyNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `treeProgram`
     }
   }
 
   class samplesWaterBillNode extends abstractDummyNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `waterBill`
     }
   }
 
   class samplesGapMinderNode extends abstractDummyNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `gapMinder`
     }
   }
@@ -28826,7 +29087,7 @@ input
     get newColumnNamesCell() {
       return this.getWordsFrom(3)
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `poem`
     }
     // note: delimiter can probably be ""
@@ -28860,7 +29121,7 @@ input
     get columnNameCell() {
       return this.getWord(1)
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `poem`
     }
     getNewColumns() {
@@ -28891,7 +29152,7 @@ input
     get lengthCell() {
       return parseInt(this.getWord(4))
     }
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `poem`
     }
     getNewColumns() {
@@ -29029,7 +29290,7 @@ input
   }
 
   class textWordCountNode extends abstractNewRowsTransformerTileNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `poem`
     }
     makeNewRows() {
@@ -29060,7 +29321,7 @@ input
   }
 
   class textLineCountNode extends abstractNewRowsTransformerTileNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `poem`
     }
     makeNewRows() {
@@ -29069,7 +29330,7 @@ input
   }
 
   class treenotationWordTypesNode extends abstractNewRowsTransformerTileNode {
-    get dummyDataSet() {
+    get dummyDataSetName() {
       return `treeProgram`
     }
     makeNewRows() {
@@ -29358,18 +29619,22 @@ class LargeLabel`
     get tileSize() {
       return `280 220`
     }
+    get bodyStumpTemplate() {
+      return `textarea
+ name content
+ stumpOnChangeCommand changeTileSettingMultilineCommand
+ placeholder Enter data in any format here. It will be saved directly in your document.
+ class TileTextArea savable
+ bern
+  {text}`
+    }
     getDataContent() {
       const node = this.getNode("content")
       return node ? node.childrenToString() : ""
     }
     getTileBodyStumpCode() {
       const text = lodash.escape(this.getDataContent())
-      return `textarea
- name content
- stumpOnChangeCommand changeTileSettingMultilineCommand
- placeholder Enter data in any format here. It will be saved directly in your document.
- class TileTextArea savable
- bern${jtree.TreeNode.nest(text, 2)}`
+      return this.qFormat(this.bodyStumpTemplate, { text })
     }
     getRowClass() {
       class InlineDataTileRow extends Row {}
@@ -29390,6 +29655,15 @@ class LargeLabel`
     get localStorageKeyCell() {
       return this.getWord(1)
     }
+    get bodyStumpTemplate() {
+      return `textarea
+ stumpOnChangeCommand triggerTileMethodCommand
+ placeholder Enter data in any format here. It will be saved in your browser's localStorage.
+ name storeValueCommand
+ class TileTextArea savable
+ bern
+  {text}`
+    }
     // Note: for now, only way to clear a key is to do it manually through UI (select all delete) or console. That might be good enough.
     _getStoreKey() {
       return this.getContent()
@@ -29405,12 +29679,7 @@ class LargeLabel`
     }
     getTileBodyStumpCode() {
       const text = encodeURIComponent(this.getDataContent())
-      return `textarea
- stumpOnChangeCommand triggerTileMethodCommand
- placeholder Enter data in any format here. It will be saved in your browser's localStorage.
- name storeValueCommand
- class TileTextArea savable
- bern${jtree.TreeNode.nest(text, 2)}`
+      return this.qFormat(this.bodyStumpTemplate, { text })
     }
   }
 
@@ -29458,11 +29727,11 @@ class LargeLabel`
   }
 
   class editorCommandHistoryNode extends abstractProviderNode {
-    get method() {
+    get methodName() {
       return `getCommandsBuffer`
     }
     async fetchTableInputs() {
-      return { rows: this.getWebApp()[this.getDefinition().getConstantsObject().method]() }
+      return { rows: this.getWebApp()[this.methodName]() }
     }
   }
 
@@ -29515,6 +29784,13 @@ class LargeLabel`
   }
 
   class samplesTinyIrisNode extends abstractProviderNode {
+    get bodyStumpTemplate() {
+      return `pre
+ class TileSelectable
+ style overflow: scroll; max-height: 100%;
+ bern
+  {text}`
+    }
     get data() {
       return `petal_length,petal_width,species
 4.9,1.8,virginica
@@ -29523,15 +29799,10 @@ class LargeLabel`
 1.5,0.2,setosa`
     }
     getDataContent() {
-      const data = this.getDefinition().getConstantsObject().data
-      return data
+      return this.data
     }
     getTileBodyStumpCode() {
-      const text = this.getDataContent()
-      return `pre
-class TileSelectable
-style overflow: scroll; max-height: 100%;
-bern${jtree.TreeNode.nest(text, 2)}`
+      return this.qFormat(this.bodyStumpTemplate, { text: this.getDataContent() })
     }
     getParserId() {
       return super.getParserId() || new TableParser().guessTableParserId(this.getDataContent())
@@ -29679,6 +29950,7 @@ bern${jtree.TreeNode.nest(text, 2)}`
           "html.iframe": htmlIframeNode,
           "html.custom": htmlCustomNode,
           "show.rowCount": showRowCountNode,
+          "show.static": showStaticNode,
           "show.median": showMedianNode,
           "show.sum": showSumNode,
           "show.mean": showMeanNode,
@@ -29740,6 +30012,7 @@ bern${jtree.TreeNode.nest(text, 2)}`
           "samples.populations": samplesPopulationsNode,
           "samples.babyNames": samplesBabyNamesNode,
           "samples.declaration": samplesDeclarationNode,
+          "samples.letters": samplesLettersNode,
           "samples.presidents": samplesPresidentsNode,
           "ucimlr.datasets": ucimlrDatasetsNode,
           "vega.data": vegaDataNode,
@@ -29946,6 +30219,60 @@ abstractTileTreeComponentNode
  int headerHeight 30
  int footerHeight 30
  string hiddenKey hidden
+ string pencilStumpTemplate
+  span {icon}
+   class TilePencilButton
+   stumpOnClickCommand toggleToolbarCommand
+ string inspectionStumpTemplate
+  div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
+  div Messages:
+  ol
+   {messages}
+  div Tree:
+  pre
+   bern
+    {sourceCode}
+  div All Tile Settings:
+  pre
+   bern
+    {settings}
+ string errorStateStumpTemplate
+  div
+   class {classes}
+   id {id}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div ERROR
+    class TileHeader
+   div
+    class TileBody
+    {content}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div {header}
+    class TileHeader
+   div
+    style {bodyStyle}
+    class TileBody
+    {body}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
  javascript
   getProgramTemplate(id) {}
   getSnippetTemplate(id) {}
@@ -29961,6 +30288,9 @@ abstractTileTreeComponentNode
   }
   getTheme() {
    return this.getTab().getTheme()
+  }
+  qFormat(str, obj) {
+   return new jtree.TreeNode(str).templateToString(obj)
   }
   scrollIntoView() {
    const el = this.getStumpNode()
@@ -30001,9 +30331,7 @@ abstractTileTreeComponentNode
     )
   }
   _hasRequirements() {
-   const def = this.getDefinition()
-   const constants = def.getConstantsObject()
-   return constants[TilesConstants.tileScript]
+   return this.tileScript
   }
   _areRequirementsLoaded() {
    const loadingMap = this.getTab()
@@ -30019,22 +30347,7 @@ abstractTileTreeComponentNode
    return errors.length ? \` <span style="color: \${this.getTheme().errorColor};">\${errors.join(" ")}</span>\` : "" //todo: cleanup
   }
   toStumpErrorStateCode(err) {
-   const errorMessage = \`Error on tile '\${this.getFirstWord()}'. \${err}\`
-   return \`div
-   class \${this.getCssClassNames().join(" ")}
-   id \${this.getTreeComponentId()}
-   stumpOnContextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
-   div ERROR
-    class TileHeader
-   div
-    class TileBody\${jtree.TreeNode.nest(\`div \` + errorMessage, 2)}
-   div
-    class TileFooter\${jtree.TreeNode.nest(this.getTileToolbarButtonStumpCode(), 2)}
-   div
-    class TileGrabber\`
+   return this.qFormat(this.errorStateStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), content: \`div \` + err, footer: this.getTileToolbarButtonStumpCode() })
   }
   // todo: delete this
   makeDirty() {
@@ -30073,25 +30386,17 @@ abstractTileTreeComponentNode
    return classNames
   }
   toStumpCode() {
-   return \`div
-   class \${this.getCssClassNames().join(" ")}
-   id \${this.getTreeComponentId()}
-   stumpOnContextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
-   div \${this.getTileHeaderBern()}
-    class TileHeader
-   div
-    style \${this.customBodyStyle || ""}
-    class TileBody\${this._getBodyStumpCodeCache()}
-   div
-    class TileFooter\${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
-   div
-    class TileGrabber\`
+   return this.qFormat(this.tileStumpTemplate, {
+    classes: this.getCssClassNames().join(" "),
+    id: this.getTreeComponentId(),
+    header: this.getTileHeaderBern(),
+    bodyStyle: this.customBodyStyle || "",
+    body: this._getBodyStumpCodeCache() || "",
+    footer: this.getTileFooterStumpCode()
+   })
   }
   _getBodyStumpCodeCache() {
-   if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = jtree.TreeNode.nest(this.getTileBodyStumpCode(), 2)
+   if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
    return this._bodyStumpCodeCache
   }
   getTileHeaderBern() {
@@ -30160,9 +30465,7 @@ abstractTileTreeComponentNode
    return this.getTileToolbarButtonStumpCode()
   }
   getTileToolbarButtonStumpCode() {
-   return \`span \${Icons("pencil", 16)}
-   class TilePencilButton
-   stumpOnClickCommand toggleToolbarCommand\`
+   return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
   }
   getDefinedOrSuggestedSize() {
    const size = this.getSuggestedSize()
@@ -30228,22 +30531,22 @@ abstractTileTreeComponentNode
   _treeComponentDidMount() {
    if (this.isLoaded()) this.treeComponentDidMount()
   }
-  toInspection() {
+  toInspectionStumpCode() {
    const messages = this.getMessageBuffer().map(message => \`li \${moment(message.getLineModifiedTime()).fromNow()} - \${message.childrenToString()}\`)
    const settingsDefinitions = this.getAllTileSettingsDefinitions()
     .map(setting => \`\${setting.getFirstWord()} \${setting.getDescription()}\`)
     .join("\\n")
-   const parentTile = this.getParent().getFirstWord()
-   return \`div TileConstructor: \${this.constructor.name} Parent: \${parentTile}
-  div Messages:
-  ol
-   \${messages}
-  div Tree:
-  pre
-   bern\${jtree.TreeNode.nest(this.toString(), 2)}
-  div All Tile Settings:
-  pre
-   bern\${jtree.TreeNode.nest(settingsDefinitions, 2)}\`
+   const parentConstructorName = this.getParent().constructor.name
+   const constructorName = this.constructor.name
+   const sourceCode = this.toString()
+   const settings = settingsDefinitions
+   return this.qFormat(this.inspectionStumpTemplate, {
+    constructorName,
+    parentConstructorName,
+    sourceCode,
+    messages,
+    settings
+   })
   }
   isVisible() {
    return !this.has(this.hiddenKey)
@@ -30275,10 +30578,6 @@ abstractTileTreeComponentNode
   cloneTileCommand() {
    this.cloneAndOffset()
    return this.getTab().autosaveAndRender()
-  }
-  async updateContentFromHtmlCommand(val) {
-   const clean = jtree.Utils.stripHtml(val.replace(/\\<br\\>/g, "\\n").replace(/\\<div\\>/g, "\\n"))
-   return this.changeTileContentAndRenderCommand(clean)
   }
   async toggleTileMaximizeCommand() {
    if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
@@ -30393,8 +30692,7 @@ abstractTileTreeComponentNode
     window.tile = this
     console.log(this)
    }
-   const output = this.toInspection()
-   this.getTab().addStumpCodeMessageToLog(output)
+   this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
    this.getTab()
     .getRootNode()
     .renderApp()
@@ -30609,7 +30907,6 @@ abstractMaiaTileNode
  string settingKey setting
  string rowDisplayLimitKey rowDisplayLimit
  string contentKey content
- string dummyDataSetKey dummyDataSet
  string xColumnKey xColumn
  string yColumnKey yColumn
  string colorColumnKey colorColumn
@@ -30620,6 +30917,33 @@ abstractMaiaTileNode
  string dayKey day
  string monthKey month
  string yearKey year
+ string maiaStumpInspectionTemplate
+  div TileStruct:
+   pre
+    bern
+     {settings}
+  div Input rows: {inputCount} Output rows: {outputCount}
+  div Load time: {timeToLoad} Render time: {renderTime}
+  div Input Columns:
+  pre
+   bern
+    {inputColumnsAsTable}
+  div Output Columns
+  pre
+   bern
+    {outputColumnsAsTable}
+  div Output Numeric Values:
+  pre
+   bern
+    {outputNumericValues}
+  div TypeScript Interface:
+  pre
+   bern
+    {typeScriptInterface}
+  div Input Numeric Values:
+  pre
+   bern
+    {inputNumericValues}
  javascript
   // todo: ADD TYPINGS
   getPipishInput() {
@@ -30656,8 +30980,7 @@ abstractMaiaTileNode
    return this._getDummyTable() || parentTable
   }
   _getDummyTable() {
-   const name = this.getDefinition().getConstantsObject()[this.dummyDataSetKey]
-   const dataSet = DummyDataSets[name]
+   const dataSet = DummyDataSets[this.dummyDataSetName]
    if (!this._dummyTable && dataSet) this._dummyTable = new Table(jtree.Utils.javascriptTableWithHeaderRowToObjects(dataSet))
    return this._dummyTable
   }
@@ -30693,7 +31016,7 @@ abstractMaiaTileNode
     name: name,
     namespace: name.split(".")[0],
     description: definition.getDescription() ? 1 : 0,
-    dummyDataSet: definition.getConstantsObject()[this.dummyDataSetKey],
+    dummyDataSetName: this.dummyDataSetName,
     runTimeErrors: Object.values(this.getRunTimePhaseErrors()).length,
     examples: definition.getExamples().length,
     edgeTests: 0,
@@ -30720,34 +31043,37 @@ abstractMaiaTileNode
    if (hintsNode) Object.assign(settingsFromCache, this.getParentOrDummyTable().getPredictionsForAPropertyNameToColumnNameMapGivenHintsNode(new jtree.TreeNode(hintsNode), settingsFromCache))
    return settingsFromCache
   }
-  toInspection() {
+  toInspectionStumpCode() {
    const inputTable = this.getParentOrDummyTable()
    const outputTable = this.getOutputOrInputTable()
    const outputColumns = outputTable.getColumnsArrayOfObjects()
    const inputCols = inputTable.getColumnsArrayOfObjects()
    const inputCount = inputTable.getRowCount()
    const outputCount = outputTable.getRowCount()
-   return \`\${super.toInspection()}
-    div TileStruct:
-     pre
-      bern\${jtree.TreeNode.nest(JSON.stringify(this.getSettingsStruct(), null, 2), 2)}
-    div Input rows: \${inputCount} Output rows: \${outputCount}
-    div Load time: \${this.getTimeToLoad()} Render time: \${this.getNewestTimeToRender()}
-    div Input Columns:
-    pre
-     bern\${jtree.TreeNode.nest(new jtree.TreeNode(inputCols).toTable(), 2)}
-    div Output Columns
-    pre
-     bern\${jtree.TreeNode.nest(new jtree.TreeNode(outputColumns).toTable(), 2)}
-    div Output Numeric Values:
-    pre
-     bern\${jtree.TreeNode.nest(new jtree.TreeNode(outputTable.getJavascriptNativeTypedValues()).toTable(), 2)}
-    div TypeScript Interface:
-    pre
-     bern\${jtree.TreeNode.nest(outputTable.toTypeScriptInterface(), 2)}
-    div Input Numeric Values:
-    pre
-     bern\${jtree.TreeNode.nest(new jtree.TreeNode(inputTable.getJavascriptNativeTypedValues()).toTable(), 2)}\`
+   const timeToLoad = this.getTimeToLoad()
+   const renderTime = this.getNewestTimeToRender()
+   const inputColumnsAsTable = new jtree.TreeNode(inputCols).toTable()
+   const outputColumnsAsTable = new jtree.TreeNode(outputColumns).toTable()
+   const settings = JSON.stringify(this.getSettingsStruct(), null, 2)
+   const outputNumericValues = new jtree.TreeNode(outputTable.getJavascriptNativeTypedValues()).toTable()
+   const typeScriptInterface = outputTable.toTypeScriptInterface()
+   const inputNumericValues = new jtree.TreeNode(inputTable.getJavascriptNativeTypedValues()).toTable()
+   return (
+    super.toInspectionStumpCode() +
+    "\\n" +
+    this.qFormat(this.maiaStumpInspectionTemplate, {
+     settings,
+     inputCount,
+     outputCount,
+     timeToLoad,
+     renderTime,
+     inputColumnsAsTable,
+     outputColumnsAsTable,
+     outputNumericValues,
+     typeScriptInterface,
+     inputNumericValues
+    })
+   )
   }
 abstractChartNode
  inScope rowDisplayLimitNode
@@ -30778,75 +31104,76 @@ abstractChartNode
     .getRows()
     .slice(0, this._getRowDisplayLimit())
   }
-abstractBodyOnlyTileNode
+abstractHeaderlessChartTileNode
  abstract
  extends abstractChartNode
  int headerHeight 0
- int footerHeight 0
- javascript
-  toStumpCode() {
-   // todo: just use super and modify?
-   return \`div
-   class \${this.getCssClassNames().join(" ")}
-   id \${this.getTreeComponentId()}
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
    stumpOnContextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
     stumpOnDblClickCommand toggleTileMaximizeCommand
    div
-    class TileBody BodyOnly\${this._getBodyStumpCodeCache()}
+    class TileBody HeaderLess
+    {body}
    div
-    class TileFooter TileFooterLess\${jtree.TreeNode.nest(this.getTileToolbarButtonStumpCode(), 2)}
+    class TileFooter
+    {footer}
    div
-    class TileGrabber\`
+    class TileGrabber
+ javascript
+  toStumpCode() {
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileToolbarButtonStumpCode() })
   }
+  get _tileWidth() {
+   return this.getTileDimensionIfAny().width - 10
+  }
+  get _tileHeight() {
+   return this.getTileDimensionIfAny().height - 60 // 10 for padding. 10 for top grabber. 30 for footer. 10 fot bottom grabber.
+  }
+abstractEmptyFooterTileNode
+ abstract
+ extends abstractHeaderlessChartTileNode
+ int footerHeight 0
 abstractSnippetGalleryNode
  string tileSize 600 240
- extends abstractBodyOnlyTileNode
+ extends abstractEmptyFooterTileNode
  abstract
+ string bodyStumpTemplate
+  h4 {title}
+   ol
+    class TileSelectable
+    {options}
+ string optionStumpTemplate
+  li
+   a {title}
+    value {value}
+    class appendSnippetButton
+    stumpOnClickCommand appendSnippetTemplateCommand
  javascript
   getGalleryNodes() {}
   getTileBodyStumpCode() {
-   const constants = this.getDefinition().getConstantsObject()
-   const itemFormat = constants.itemFormat
-   const options = this.getGalleryNodes()
-    .map(
-     node => \`li
-   a \${node.evalTemplateString(itemFormat)}
-    value \${node.get("id")}
-    class appendSnippetButton
-    stumpOnClickCommand appendSnippetTemplateCommand\`
-    )
-    .join("\\n")
-   const code = \`h4 \${constants.title}
-  ol
-   class TileSelectable
-  \${new jtree.TreeNode(options).toString(1)}\`
-   return code
+   return this.qFormat(this.bodyStumpTemplate, {
+    title: this.title,
+    options: new jtree.TreeNode(
+     this.getGalleryNodes()
+      .map(node => this.qFormat(this.optionStumpTemplate, { title: node.evalTemplateString(this.itemFormat), value: node.get("id") }))
+      .join("\\n")
+    ).toString()
+   })
   }
 abstractTemplateGalleryNode
  extends abstractSnippetGalleryNode
  abstract
- javascript
-  getGalleryNodes() {}
-  getTileBodyStumpCode() {
-   const constants = this.getDefinition().getConstantsObject()
-   const itemFormat = constants.itemFormat
-   const options = this.getGalleryNodes()
-    .map(
-     node => \` li
-    a \${node.evalTemplateString(itemFormat)}
-     value \${node.get("id")}
-     class createProgramButton
-     stumpOnClickCommand createProgramFromTemplateCommand\`
-    )
-    .join("\\n")
-   const code = \`h4 \${constants.title}
-  ol
-   class TileSelectable
-  \${options}\`
-   return code
-  }
+ string optionStumpTemplate
+  li
+   a {title}
+    value {value}
+    class createProgramButton
+    stumpOnClickCommand createProgramFromTemplateCommand
 templatesListNode
  description View templates
  frequency .11
@@ -30984,7 +31311,7 @@ challengePlayNode
   challenge.play 2
   layout tiled
  string tileSize 640 240
- extends abstractBodyOnlyTileNode
+ extends abstractEmptyFooterTileNode
  crux challenge.play
  javascript
   getProgramTemplate(id) {
@@ -31031,21 +31358,32 @@ dtjsBasicNode
  string tileSize 1200 500
  string tileCssScript maia/packages/dtjs/datatables.min.css
  string tileScript maia/packages/dtjs/datatables.min.js
- extends abstractBodyOnlyTileNode
+ extends abstractEmptyFooterTileNode
  crux dtjs.basic
+ string bodyStumpTemplate
+  div
+  table
+   class DataTable
+   thead
+    tr
+     {headerRows}
+   tbody
+    {rows}
+ string cellStumpTemplate
+  td
+   bern
+    {box}
+ string rowStumpTemplate
+  tr
+   {cols}
  javascript
   getTileBodyStumpCode() {
    const columnDefs = this.getParentOrDummyTable()
     .getColumnsArray()
     .slice(0, 10)
-   const header = this._getHeaderRowsStumpCode(columnDefs.map(col => col.getColumnName()))
-   const rowsStumpCode = this._getTableRowsStumpCode(columnDefs)
-   return \`div
-  table
-   class DataTable
-   thead
-    tr\${jtree.TreeNode.nest(header, 4)}
-   tbody \${jtree.TreeNode.nest(rowsStumpCode, 2)}\`
+   const headerRows = this._getHeaderRowsStumpCode(columnDefs.map(col => col.getColumnName()))
+   const rows = this._getTableRowsStumpCode(columnDefs)
+   return this.qFormat(this.bodyStumpTemplate, { headerRows, rows })
   }
   _getHeaderRowsStumpCode(columns) {
    return columns.map(colName => \`th \${colName}\`).join("\\n")
@@ -31057,11 +31395,10 @@ dtjsBasicNode
      const cols = columns
       .map(column => {
        const box = row.getRowHtmlSafeValue(column.getColumnName()) // todo: cache?
-       return \`td
-  bern\${jtree.TreeNode.nest(box, 2)}\`
+       return this.qFormat(this.cellStumpTemplate, { box })
       })
       .join("\\n")
-     return \`tr\${jtree.TreeNode.nest(cols, 1)}\`
+     return this.qFormat(this.cellStumpTemplate, { cols })
     })
     .join("\\n")
   }
@@ -31101,8 +31438,14 @@ abstractHtmlNode
  frequency 0
  description An HTML element
  inScope styleNode contentNode
- extends abstractBodyOnlyTileNode
+ extends abstractEmptyFooterTileNode
  abstract
+ string bodyStumpTemplate
+  {tag}
+   {style}
+   {src}
+   bern
+    {content}
  javascript
   getTileFooterStumpCode() {
    return this.getTileToolbarButtonStumpCode()
@@ -31120,11 +31463,7 @@ abstractHtmlNode
    return this.getSettingsStruct().src
   }
   getTileBodyStumpCode() {
-   const obj = this.getDefinition().getConstantsObject()
-   return \`\${this.getTag()}
-   \${obj.style ? \`style \${obj.style}\` : "stumpNoOp"}
-   \${this.getSrc() ? \`src \${this.getSrc()}\` : "stumpNoOp"}
-   bern\${jtree.TreeNode.nest(this.getHtmlContent(), 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { tag: this.getTag(), style: this.style ? \`style \${this.style}\` : "stumpNoOp", src: this.getSrc() ? \`src \${this.getSrc()}\` : "stumpNoOp", content: this.getHtmlContent() || "" })
   }
 htmlTextNode
  description Displays fixed text in the given HTML element.
@@ -31151,7 +31490,7 @@ abstractHTMLFixedTagTileNode
    return this.getContent()
   }
   getTag() {
-   return this.getDefinition().getConstantsObject().htmlTag
+   return this.htmlTagName
   }
 htmlH1Node
  catchAllCellType htmlCell
@@ -31160,7 +31499,7 @@ htmlH1Node
   html.h1 Hello world
  frequency .002
  string tileSize 600 75
- string htmlTag h1
+ string htmlTagName h1
  string style text-align:center;
  extends abstractHTMLFixedTagTileNode
  crux html.h1
@@ -31178,14 +31517,14 @@ htmlImgNode
  description Displays an image from given url.
  cells tileKeywordCell urlCell
  frequency .002
- string htmlTag img
+ string htmlTagName img
  string style width:100%;
  extends abstractHTMLContentIsSrcTileNode
  crux html.img
 htmlIframeNode
  description Displays an iframe from given url.
  cells tileKeywordCell urlCell
- string htmlTag iframe
+ string htmlTagName iframe
  extends abstractHTMLContentIsSrcTileNode
  crux html.iframe
 htmlCustomNode
@@ -31195,16 +31534,19 @@ htmlCustomNode
    content
     <h1>Hello world</h1>
  inScope contentNode
- extends abstractBodyOnlyTileNode
+ extends abstractEmptyFooterTileNode
  crux html.custom
+ string bodyStumpTemplate
+  div
+   bern
+    {content}
  javascript
   getTileBodyStumpCode() {
    // https://meta.stackexchange.com/questions/1777/what-html-tags-are-allowed-on-stack-exchange-sites
    // todo: sanitize tags
    const contentNode = this.getNode("content")
    const content = contentNode ? contentNode.childrenToString() : "No HTML content to show"
-   return \`div
-  bern\${jtree.TreeNode.nest(content, 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { content })
   }
 abstractShowTileNode
  cells tileKeywordCell columnNameCell
@@ -31222,8 +31564,8 @@ abstractShowTileNode
    show.max Amount
   layout bin
  string tileSize 140 120
- string dummyDataSet stockPrice
- extends abstractBodyOnlyTileNode
+ string dummyDataSetName stockPrice
+ extends abstractEmptyFooterTileNode
  abstract
  string hakonTemplate
   .abstractShowTileNode
@@ -31233,6 +31575,9 @@ abstractShowTileNode
     text-align center
     height 40px
     overflow hidden
+ string bodyStumpTemplate
+  h6 {title}
+  h3 {number}
  javascript
   getTileBodyStumpCode() {
    const columnName = this.getWord(1)
@@ -31241,23 +31586,36 @@ abstractShowTileNode
    if (!col) return ""
    const reductionName = this.getWord(0).split(".")[1]
    const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
-   return \`h6 \${title}
-  h3 \${this.toDisplayString(col.getReductions()[reductionName], columnName)}\`
+   const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
+   return this.qFormat(this.bodyStumpTemplate, { title, number })
   }
 showRowCountNode
  catchAllCellType titleCell
  description Show the total number of rows
  frequency .02
  string tileSize 140 120
- string dummyDataSet stockPrice
+ string dummyDataSetName stockPrice
  cells tileKeywordCell
  extends abstractShowTileNode
  crux show.rowCount
  javascript
   getTileBodyStumpCode() {
    const title = this.getWordsFrom(1).join(" ") || "Total rows"
-   return \`h6 \${title}
-  h3 \${this.getParentOrDummyTable().getRowCount()}\`
+   const number = this.getParentOrDummyTable().getRowCount()
+   return this.qFormat(this.bodyStumpTemplate, { title, number })
+  }
+showStaticNode
+ description Show a hard coded number
+ extends abstractShowTileNode
+ example
+  show.static 20 Sales
+ cells tileKeywordCell numberCell
+ catchAllCellType titleCell
+ crux show.static
+ javascript
+  getTileBodyStumpCode() {
+   const title = this.getWordsFrom(2).join(" ")
+   return this.qFormat(this.bodyStumpTemplate, { title, number: this.getWord(1) || "" })
   }
 showMedianNode
  description Show the median value of a column
@@ -31284,15 +31642,15 @@ abstractVegaNode
  catchAllCellType titleCell
  string tileSize 800 300
  string tileScript maia/packages/vega/vega.combined.min.js
- string dummyDataSet stockPrice
- string mark bar
- extends abstractBodyOnlyTileNode
+ string dummyDataSetName stockPrice
+ string markName bar
+ extends abstractEmptyFooterTileNode
  abstract
  javascript
   // todo: I don't think vega handles . in column names.
   getTileBodyStumpCode() {
    return \`div
-  class divWhereVegaWillGo\`
+  class divForExternalLibrary\`
   }
   _getColumnToField(columnName) {
    if (!columnName) return undefined
@@ -31305,29 +31663,31 @@ abstractVegaNode
    }
    return obj
   }
-  async _createVegaEmbedded(el, spec) {
-   const embedded = await vegaEmbed(el, spec)
-   return embedded
-  }
   _adjustVegaSize() {
    const adjustSize = !this.has("width")
    if (adjustSize) {
     const shadow = this.getStumpNode()
-     .findStumpNodeByChild("class divWhereVegaWillGo")
+     .findStumpNodeByChild("class divForExternalLibrary")
      .getShadow()
     this.set("width", Math.round((30 + shadow.getShadowOuterWidth()) / 20) + "")
     this.set("height", Math.round((30 + shadow.getShadowOuterHeight()) / 20) + "")
    }
   }
+  _getElementForVega() {
+   return this.getStumpNode()
+    .findStumpNodeByChild("class divForExternalLibrary")
+    .getShadow()
+    .getShadowElement()
+  }
+  async _drawVega() {
+   // todo: don't rerun this if we dont need to.
+   await vegaEmbed(this._getElementForVega(), this._getVegaSpec())
+   // this._adjustVegaSize()
+  }
   treeComponentDidUpdate() {
    super.treeComponentDidUpdate()
    if (this.isNodeJs()) return undefined
-   const shadow = this.getStumpNode()
-    .findStumpNodeByChild("class divWhereVegaWillGo")
-    .getShadow()
-   // todo: don't rerun this if we dont need to.
-   this._createVegaEmbedded(shadow.getShadowElement(), this._getVegaSpec())
-   // this._adjustVegaSize()
+   this._drawVega()
   }
   _getTileWidth() {
    return this.getTileDimensionIfAny().width - 120
@@ -31375,7 +31735,7 @@ abstractVegaNode
    return { type: this._getVegaMark(), tooltip: { content: "data" } }
   }
   _getVegaMark() {
-   return this.getDefinition().getConstantsObject()["mark"]
+   return this.markName
   }
 vegaBarNode
  description A bar chart
@@ -31396,17 +31756,17 @@ vegaBarNode
  crux vega.bar
 vegaLineNode
  description A line chart
- string mark line
+ string markName line
  extends vegaBarNode
  crux vega.line
 vegaAreaNode
  description An area chart
- string mark area
+ string markName area
  extends vegaLineNode
  crux vega.area
 vegaScatterNode
  description A scatterplot
- string mark point
+ string markName point
  extends vegaBarNode
  crux vega.scatter
  javascript
@@ -31422,8 +31782,8 @@ vegaScatterNode
 vegaBubbleNode
  description A bubble plot
  inScope sizeColumnNode colorColumnNode
- string mark circle
- string dummyDataSet gapMinder
+ string markName circle
+ string dummyDataSetName gapMinder
  string columnPredictionHints
   sizeColumn isString=false
   xColumn isString=false
@@ -31451,7 +31811,7 @@ vegaEmojiNode
  string columnPredictionHints
   emojiColumn isString=true
   yColumn isString=false
- string dummyDataSet emojis
+ string dummyDataSetName emojis
  javascript
   _getVegaConfig() {
    return { view: { stroke: "" } }
@@ -31490,7 +31850,7 @@ vegaHistogramNode
   }
  string columnPredictionHints
   xColumn isString=false
- string dummyDataSet wordCounts
+ string dummyDataSetName wordCounts
  extends abstractVegaNode
  crux vega.histogram
 vegaExampleNode
@@ -31539,27 +31899,6 @@ vegaExampleNode
    // else if (values) return values
    return []
   }
-abstractHeaderlessChartTileNode
- abstract
- extends abstractChartNode
- int headerHeight 0
- javascript
-  toStumpCode() {
-   // todo: just use super and modify?
-   return \`div
-   class \${this.getCssClassNames().join(" ")}
-   id \${this.getTreeComponentId()}
-   stumpOnContextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
-   div
-    class TileBody HeaderLess\${this._getBodyStumpCodeCache()}
-   div
-    class TileFooter\${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
-   div
-    class TileGrabber\`
-  }
 dateHeatcalNode
  description Shows which days have higher counts.
  inScope countNode dayColumnNode
@@ -31567,9 +31906,14 @@ dateHeatcalNode
  string columnPredictionHints
   count getPrimitiveTypeName=number
   dayColumn getPrimitiveTypeName=day
- string dummyDataSet waterBill
+ string dummyDataSetName waterBill
  extends abstractHeaderlessChartTileNode
  crux date.heatcal
+ string bodyStumpTemplate
+  div
+   class heatCal
+   bern
+    {svg}
  string hakonTemplate
   .heatCal
    rect
@@ -31595,9 +31939,8 @@ dateHeatcalNode
   </g>\`
   }
   getTileBodyStumpCode() {
-   return \`div
-   class heatCal
-   bern\${jtree.TreeNode.nest(this.getSvg(), 2)}\`
+   const svg = this.getSvg()
+   return this.qFormat(this.bodyStumpTemplate, { svg })
   }
   _getDayMap(quins, rows, dayColumnName, countColumnName) {
    const getQuin = val => {
@@ -31713,6 +32056,10 @@ iconsHumanNode
  string columnPredictionHints
   headSize isString=false
   genderColumn isString=true
+ string bodyStumpTemplate
+  div
+   bern
+    {bern}
  javascript
   getTileBodyStumpCode() {
    // Now, what if there is no input table?
@@ -31741,10 +32088,9 @@ iconsHumanNode
      return \`<span title="\${title}" style="font-size:\${percent}px; color:\${gender};">\${character}</span>\`
     })
     .join(" ")
-   return \`div
-  bern\${jtree.TreeNode.nest(bern, 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { bern: bern })
   }
- string dummyDataSet patients
+ string dummyDataSetName patients
  extends iconsIconNode
  crux icons.human
 iconsCircleNode
@@ -31756,9 +32102,13 @@ iconsCircleNode
  inScope radiusNode
  string columnPredictionHints
   radius isString=false
- string dummyDataSet playerGoals
+ string dummyDataSetName playerGoals
  extends iconsIconNode
  crux icons.circle
+ string bodyStumpTemplate
+  div
+   bern
+    {bern}
  javascript
   getTileBodyStumpCode() {
    const column = this.getSettingsStruct().radius
@@ -31766,8 +32116,7 @@ iconsCircleNode
     .getRows()
     .map(row => \`<span style="font-size:\${row.rowToObjectWithOnlyNativeJavascriptTypes()[column] / 3}em;">O</span>\`)
     .join(" ")
-   return \`div
-  bern\${jtree.TreeNode.nest(bern, 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { bern: bern })
   }
 markdownToHtmlNode
  description Displays Markdown rendered as HTML.
@@ -31781,18 +32130,17 @@ markdownToHtmlNode
     Hello world
    markdown.toHtml
  inScope contentNode
+ string bodyStumpTemplate
+  div
+   class TileSelectable
+   bern
+    {md}
  javascript
   getTileBodyStumpCode() {
-   const markdown = this.getPipishInput()
-   const md = marked(markdown)
-   // todo: add formatting
-   // todo: sanitize below
-   return \`div
-  class TileSelectable
-  bern\${jtree.TreeNode.nest(md, 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { md: marked(this.getPipishInput()) })
   }
  string tileSize 400 400
- string dummyDataSet markdown
+ string dummyDataSetName markdown
  extends abstractHeaderlessChartTileNode
  crux markdown.toHtml
 treenotationOutlineNode
@@ -31800,20 +32148,21 @@ treenotationOutlineNode
  example Outer space
   samples.outerSpace
    treenotation.outline
- string dummyDataSet outerSpace
+ string dummyDataSetName outerSpace
  string tileSize 800 500
  extends abstractHeaderlessChartTileNode
  crux treenotation.outline
+ string bodyStumpTemplate
+  pre
+   style overflow: scroll; width: 100%; height: 100%; margin: 0; box-sizing: border-box; font-family: monospace; line-height: 13px;
+   bern
+    {bern}
  javascript
   _getTheBern() {
    return new jtree.TreeNode(this.getPipishInput()).toOutline()
   }
   getTileBodyStumpCode() {
-   const tree = new jtree.TreeNode(this.getPipishInput())
-   const bern = this._getTheBern()
-   return \`pre
-  style overflow: scroll; width: 100%; height: 100%; margin: 0; box-sizing: border-box; font-family: monospace; line-height: 13px;
-  bern\${jtree.TreeNode.nest(bern, 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { bern: this._getTheBern() })
   }
 treenotationDotlineNode
  description A simple pretty icon-only visualization of the structure of a Tree Notation doc.
@@ -31821,7 +32170,7 @@ treenotationDotlineNode
   samples.outerSpace
    treenotation.dotline
  boolean dots true
- string dummyDataSet outerSpace
+ string dummyDataSetName outerSpace
  javascript
   _getTheBern() {
    return new jtree.TreeNode(this.getPipishInput()).toMappedOutline(
@@ -31841,12 +32190,14 @@ abstractTextNode
  frequency 0
  description Prints a message
  inScope contentNode
+ string bodyStumpTemplate
+  div
+   class TileSelectable
+   bern
+    {content}
  javascript
   getTileBodyStumpCode() {
-   const content = this.getDefinition().getConstantsObject().content
-   return \`div
-   class TileSelectable
-   bern\${jtree.TreeNode.nest(content ? jtree.Utils.linkify(content) : "", 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { content: this.content ? jtree.Utils.linkify(this.content) : "" })
   }
  extends abstractChartNode
  abstract
@@ -31857,8 +32208,8 @@ abstractInstructionsNode
  abstract
 amazonHistoryNode
  description Instructions on how to get your Amazon order history.
- string content Step 1. Go to <a target="_blank" href="https://www.amazon.com/gp/b2b/reports">https://www.amazon.com/gp/b2b/reports</a> to download your Amazon order history.<br> Step 2. Add the data here.
- string dummyDataSet amazonPurchases
+ string content Step 1. Go to https://www.amazon.com/gp/b2b/reports to download your Amazon order history.<br> Step 2. Add the data here.
+ string dummyDataSetName amazonPurchases
  extends abstractInstructionsNode
  crux amazon.history
 fitbitAllNode
@@ -31915,6 +32266,11 @@ debugDumpNode
    debug.dump
  extends abstractChartNode
  crux debug.dump
+ string bodyStumpTemplate
+  div
+   style overflow: scroll; width: 100%; height: 100%; white-space: pre;
+   bern
+    {text}
  javascript
   _getCharacterLimit() {
    // Todo: great example of a scale test. I found it to be slow with:
@@ -31932,9 +32288,7 @@ debugDumpNode
    if (text.length > characterLimit)
     // todo: Show standardized truncation warning
     sub = \`<i>(Notice: Results truncated to \${characterLimit} characters)</i><br>\` + sub
-   return \`div
-   style overflow: scroll; width: 100%; height: 100%; white-space: pre;
-   bern\${jtree.TreeNode.nest(sub || "No data to dump", 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { text: sub || "No data to dump" })
   }
   _getTextToDump() {
    return this.getPipishInput()
@@ -31954,13 +32308,15 @@ debugCommandsNode
   debug.commands
  extends abstractChartNode
  crux debug.commands
- javascript
-  getTileBodyStumpCode() {
-   return \`a Run Speed Test on all Files in Working Directory
+ string bodyStumpTemplate
+  a Run Speed Test on all Files in Working Directory
    stumpOnClickCommand _runSpeedTestCommand
   br
   a Run Tile Quality Check
-   stumpOnClickCommand _doTileQualityCheckCommand\`
+   stumpOnClickCommand _doTileQualityCheckCommand
+ javascript
+  getTileBodyStumpCode() {
+   return this.bodyStumpTemplate
   }
 debugGrammarTreeNode
  description Show the family tree for a grammar.
@@ -31983,7 +32339,7 @@ debugSleepNode
  example Sleep for 1 second then load data
   debug.sleep 100 waterBill
    tables.basic
- string dummyDataSet waterBill
+ string dummyDataSetName waterBill
  extends abstractChartNode
  crux debug.sleep
  javascript
@@ -32027,7 +32383,7 @@ editorGalleryNode
   editor.files
    editor.gallery
  string tileSize 1080 600
- string dummyDataSet maiaPrograms
+ string dummyDataSetName maiaPrograms
  extends abstractChartNode
  crux editor.gallery
  string hakonTemplate
@@ -32063,6 +32419,24 @@ editorGalleryNode
      div
       position absolute
       background {linkColor}
+ string miniStumpTemplate
+  a
+   class miniMap
+   {onClick}
+   {value}
+   {href}
+   div
+    class miniPreview
+    {theTiles}
+   div {filename}
+    class miniFooter
+ string bodyStumpTemplate
+  div
+   class MiniMapTile
+   {minis}
+ string miniStyleTemplate
+  div
+   style {style}
  javascript
   async openFullPathInNewTabAndFocusCommand(url) {
    return this.getTab()
@@ -32075,29 +32449,19 @@ editorGalleryNode
    const theTiles = maiaProgram
     .getTiles()
     .filter(tile => tile.isVisible())
-    .map(
-     tile => \`div
-   style \${dimensions.get(tile).getScaledCss(0.1)}\`
-    )
+    .map(tile => this.qFormat(this.miniStyleTemplate, { style: dimensions.get(tile).getScaledCss(0.1) }))
     .join("\\n")
-   return \`a
-   class miniMap
-   \${permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"}
-   \${permalink ? \`value \${permalink}\` : "stumpNoOp"}
-   \${permalink ? \`href \${permalink}\` : "stumpNoOp"}
-   div
-    class miniPreview\${jtree.TreeNode.nest(theTiles, 2)}
-   div \${filename}
-    class miniFooter\`
+   const onClick = permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"
+   const value = permalink ? \`value \${permalink}\` : "stumpNoOp"
+   const href = permalink ? \`href \${permalink}\` : "stumpNoOp"
+   return this.qFormat(this.miniStumpTemplate, { filename, theTiles, onClick, value, href })
   }
   getTileBodyStumpCode() {
    // todo: cache.
    const minis = this.getRowsWithRowDisplayLimit()
     .map(row => this._getMiniStumpCode(row.getRowOriginalValue("bytes"), row.getRowOriginalValue("filename"), row.getRowOriginalValue("link")))
     .join("\\n")
-   const stump = \`div
-   class MiniMapTile\${jtree.TreeNode.nest(minis, 1)}\`
-   return stump
+   return this.qFormat(this.bodyStumpTemplate, { minis })
   }
 handsontableBasicNode
  description A spreadsheet-like table.
@@ -32173,7 +32537,7 @@ listBasicNode
   .join("\\n")}\`
   }
  string tileSize 400 400
- string dummyDataSet telescopes
+ string dummyDataSetName telescopes
  string columnPredictionHints
   label getTitlePotential
  extends abstractChartNode
@@ -32185,7 +32549,7 @@ listLinksNode
   samples.telescopes
    list.links
  inScope labelNode linkNode
- string dummyDataSet telescopes
+ string dummyDataSetName telescopes
  javascript
   _getUrlColumnName() {
    // todo: more automatic! Need to fix our columns/keywords issues
@@ -32256,6 +32620,22 @@ tablesBasicNode
     box-sizing border-box
     padding 0
     font-family {fonts}
+ string cellStumpTemplate
+  td
+   bern
+    {content}
+ string cellLinkStumpTemplate
+  td
+   a
+    href {content}
+    bern
+     {content}
+ string rowStumpTemplate
+  tr
+   class tableRow
+   value {value}
+   td {number}
+   {cols}
  javascript
   getTileHeaderBern() {
    return this.getContent() || super.getTileHeaderBern()
@@ -32265,41 +32645,22 @@ tablesBasicNode
     .map((row, index) => {
      const cols = columns
       .map(column => {
-       const box = row.getRowHtmlSafeValue(column.getColumnName()) // todo: cache?
-       if (column.isLink())
-        return \`td
-   a
-    href \${box}
-    bern\${jtree.TreeNode.nest(box, 3)}\`
-       return \`td
-   bern\${jtree.TreeNode.nest(box, 2)}\`
+       return this.qFormat(column.isLink() ? this.cellLinkStumpTemplate : this.cellStumpTemplate, { content: row.getRowHtmlSafeValue(column.getColumnName()) })
       })
       .join("\\n")
-     return \`tr
-   class tableRow
-   value \${row.getPuid()}
-   td \${index + 1}\${jtree.TreeNode.nest(cols, 1)}\`
+     return this.qFormat(this.rowStumpTemplate, { number: index + 1, value: row.getPuid(), cols })
     })
     .join("\\n")
   }
   getContextMenuStumpCode() {
-   return \`a Delete all rows
-   stumpOnClickCommand deleteAllRowsInTargetTileCommand\`
+   return this.contextMenuStumpTemplate
   }
   _getHeaderRowsStumpCode(columns) {
    // todo: can we get a copy column command?
-   return (
-    "th #\\n" +
-    columns
-     .map(
-      colName =>
-       \`th
-   value \${colName}
-   span \${colName}
-    value \${colName}\`
-     )
-     .join("\\n")
-   )
+   return ["Row"]
+    .concat(columns)
+    .map(colName => this.qFormat(this.headerRowStumpTemplate, { colName }))
+    .join("\\n")
   }
   getTileBodyStumpCode() {
    const tileStruct = this.getSettingsStruct()
@@ -32310,16 +32671,26 @@ tablesBasicNode
    const columnNames = columnDefs.map(col => col.getColumnName())
    // todo: if the types for a column are all equal, add a total row to the bottom.
    // todo: if the types for a row are all equal, add a total column to the right.
-   const header = this._getHeaderRowsStumpCode(columnNames)
-   const rowsStumpCode = this._getTableRowsStumpCode(columnDefs)
-   return \`div
+   const headerRows = this._getHeaderRowsStumpCode(columnNames)
+   const bodyRows = this._getTableRowsStumpCode(columnDefs)
+   return this.qFormat(this.bodyStumpTemplate, { headerRows, bodyRows })
+  }
+ string contextMenuStumpTemplate
+  a Delete all rows
+   stumpOnClickCommand deleteAllRowsInTargetTileCommand
+ string headerRowStumpTemplate
+  th
+   value {colName}
+   span {colName}
+   value {colName}
+ string bodyStumpTemplate
+  div
    class tablesBasicNode
    table
     thead
-     tr
-      title Click to sort.\${jtree.TreeNode.nest(header, 4)}
-    tbody \${jtree.TreeNode.nest(rowsStumpCode, 2)}\`
-  }
+     {headerRows}
+    tbody
+     {bodyRows}
  extends abstractChartNode
  crux tables.basic
 tablesInterestingNode
@@ -32382,7 +32753,7 @@ textWordcloudNode
    WordCloud(element, options)
   }
  string tileScript maia/packages/text/wordcloud2.min.js
- string dummyDataSet wordCounts
+ string dummyDataSetName wordCounts
  string columnPredictionHints
   name isString=true
   count isString=false
@@ -32396,7 +32767,7 @@ treenotation3dNode
  inScope contentNode sizeNode cameraPositionNode
  string tileSize 800 500
  string tileScript maia/packages/treenotation/vis.min.js
- string dummyDataSet treeProgram
+ string dummyDataSetName treeProgram
  extends abstractChartNode
  crux treenotation.3d
  javascript
@@ -32501,14 +32872,13 @@ treenotation3dNode
    }
    const points = []
    const nodeToPoint = (node, index) => {
-    const point = node.getPoint(program)
     const nodePath = node.getPathVector(program)
     const tagNode = tagTree.nodeAt(nodePath)
     node.getWords().forEach((word, wordIndex) => {
      const wordType = tagNode.getWord(wordIndex)
      const colorNumber = makeColor(wordType)
-     const xcc = point.x + wordIndex
-     const ycc = -point.y
+     const xcc = node.getIndentLevel(program) + wordIndex
+     const ycc = -node.getLineNumber()
      const zcc = 0
      points.push({
       x: xcc,
@@ -32526,6 +32896,22 @@ abstractProviderNode
  string tileSize 140 60
  extends abstractMaiaTileNode
  abstract
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div
+    class TileBody HeaderLess
+    {body}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
  javascript
   getTileFooterStumpCode() {
    const table = this.getOutputOrInputTable()
@@ -32542,20 +32928,7 @@ abstractProviderNode
    return "div " + (description ? jtree.Utils.linkify(description) : "")
   }
   toStumpCode() {
-   // todo: just use super and modify?
-   return \`div
-   class \${this.getCssClassNames().join(" ")}
-   id \${this.getTreeComponentId()}
-   stumpOnContextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
-   div
-    class TileBody HeaderLess\${this._getBodyStumpCodeCache()}
-   div
-    class TileFooter\${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
-   div
-    class TileGrabber\`
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileFooterStumpCode() })
   }
   getParserId() {
    return this.getSettingsStruct().parser
@@ -32810,15 +33183,17 @@ webPostNode
  frequency .02
  description Post data to a URL and parse the returned data.
  inScope postNode
- javascript
-  getTileBodyStumpCode() {
-   return \`\${super.getTileBodyStumpCode()}
+ string webPostBodyStumpTemplate
   textarea
-   bern\${jtree.TreeNode.nest(jtree.Utils.stripHtml(this.getSettingsStruct().post || ""), 2)}
+   bern
+    {post}
    placeholder This data will be sent as the value of the 'q' param
    name post
    stumpOnChangeCommand changeTileSettingMultilineCommand
-   class TileTextArea\`
+   class TileTextArea
+ javascript
+  getTileBodyStumpCode() {
+   return super.getTileBodyStumpCode() + this.qFormat(this.webPostBodyStumpTemplate, { post: jtree.Utils.stripHtml(this.getSettingsStruct().post || "") })
   }
   async _getData(url) {
    const settings = this.getSettingsStruct()
@@ -32924,6 +33299,12 @@ samplesDeclarationNode
  string url maia/packages/samples/declaration-of-independence.text
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.declaration
+samplesLettersNode
+ description Letter usage frequency in English from mobostock.
+ frequency .03
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ string url maia/packages/samples/letters.tsv
+ crux samples.letters
 samplesPresidentsNode
  description CSV of president's of United States.
  frequency .03
@@ -33005,34 +33386,34 @@ abstractDummyNode
  abstract
 samplesPatientsNode
  description A row for each patient in a sample clinical dataset.
- string dummyDataSet patients
+ string dummyDataSetName patients
  extends abstractDummyNode
  crux samples.patients
 samplesPoemNode
  description The Road Not Taken by Robert Frost
- string dummyDataSet poem
+ string dummyDataSetName poem
  extends abstractDummyNode
  crux samples.poem
 samplesOuterSpaceNode
  description A simple text document of major structures in the universe.
- string dummyDataSet outerSpace
+ string dummyDataSetName outerSpace
  extends abstractDummyNode
  crux samples.outerSpace
 samplesTreeProgramNode
  description A simple program in a Tree Language.
- string dummyDataSet treeProgram
+ string dummyDataSetName treeProgram
  extends abstractDummyNode
  crux samples.treeProgram
 samplesWaterBillNode
  description A family's water bill.
  frequency .15
- string dummyDataSet waterBill
+ string dummyDataSetName waterBill
  extends abstractDummyNode
  crux samples.waterBill
 samplesGapMinderNode
  description Health and income data from gapMinder
  frequency .15
- string dummyDataSet gapMinder
+ string dummyDataSetName gapMinder
  extends abstractDummyNode
  crux samples.gapMinder
 abstractTransformerNode
@@ -33180,7 +33561,7 @@ textSplitNode
   vega.data descriptions.json
    text.split filename . name extension
     tables.basic
- string dummyDataSet poem
+ string dummyDataSetName poem
  javascript
   // note: delimiter can probably be ""
   // todo: how would we split on a space???
@@ -33215,7 +33596,7 @@ textToLowerCaseNode
     tables.basic
    text.toLowerCase text
     tables.basic
- string dummyDataSet poem
+ string dummyDataSetName poem
  javascript
   getNewColumns() {
    const sourceColumnName = this.getWord(1) || "text"
@@ -33236,7 +33617,7 @@ textSubstringNode
   samples.presidents
    text.substring name firstLetter 0 1
     tables.basic
- string dummyDataSet poem
+ string dummyDataSetName poem
  extends abstractColumnAdderTileNode
  crux text.substring
  javascript
@@ -33385,7 +33766,7 @@ matchColumnsFuzzyNode
   }
 textWordCountNode
  description Splits a string into words and counts the number of uses of each word.
- string dummyDataSet poem
+ string dummyDataSetName poem
  extends abstractNewRowsTransformerTileNode
  crux text.wordCount
  javascript
@@ -33416,7 +33797,7 @@ textWordCountNode
   }
 textLineCountNode
  description Counts the number of lines in the input data.
- string dummyDataSet poem
+ string dummyDataSetName poem
  javascript
   makeNewRows() {
    return [{ lines: this.getPipishInput().split(/\\n/g).length }]
@@ -33430,7 +33811,7 @@ treenotationWordTypesNode
    treenotation.outline
    text.wordCount
     tables.basic
- string dummyDataSet treeProgram
+ string dummyDataSetName treeProgram
  extends abstractNewRowsTransformerTileNode
  crux treenotation.wordTypes
  javascript
@@ -33720,6 +34101,14 @@ dataInlineNode
     4.9,1.8,virginica
     4.9,2,virginica
     1.5,0.2,setosa
+ string bodyStumpTemplate
+  textarea
+   name content
+   stumpOnChangeCommand changeTileSettingMultilineCommand
+   placeholder Enter data in any format here. It will be saved directly in your document.
+   class TileTextArea savable
+   bern
+    {text}
  javascript
   getDataContent() {
    const node = this.getNode("content")
@@ -33727,12 +34116,7 @@ dataInlineNode
   }
   getTileBodyStumpCode() {
    const text = lodash.escape(this.getDataContent())
-   return \`textarea
-   name content
-   stumpOnChangeCommand changeTileSettingMultilineCommand
-   placeholder Enter data in any format here. It will be saved directly in your document.
-   class TileTextArea savable
-   bern\${jtree.TreeNode.nest(text, 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { text })
   }
   getRowClass() {
    class InlineDataTileRow extends Row {}
@@ -33750,6 +34134,14 @@ dataInlineNode
 dataLocalStorageNode
  cells tileKeywordCell localStorageKeyCell
  description Use your browser's localStorage for storing data.
+ string bodyStumpTemplate
+  textarea
+   stumpOnChangeCommand triggerTileMethodCommand
+   placeholder Enter data in any format here. It will be saved in your browser's localStorage.
+   name storeValueCommand
+   class TileTextArea savable
+   bern
+    {text}
  example
   data.localStorage a-dropped-file.csv
  javascript
@@ -33768,12 +34160,7 @@ dataLocalStorageNode
   }
   getTileBodyStumpCode() {
    const text = encodeURIComponent(this.getDataContent())
-   return \`textarea
-   stumpOnChangeCommand triggerTileMethodCommand
-   placeholder Enter data in any format here. It will be saved in your browser's localStorage.
-   name storeValueCommand
-   class TileTextArea savable
-   bern\${jtree.TreeNode.nest(text, 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { text })
   }
  extends dataInlineNode
  crux data.localStorage
@@ -33836,9 +34223,9 @@ editorCommandHistoryNode
    tables.basic
  javascript
   async fetchTableInputs() {
-   return { rows: this.getWebApp()[this.getDefinition().getConstantsObject().method]() }
+   return { rows: this.getWebApp()[this.methodName]() }
   }
- string method getCommandsBuffer
+ string methodName getCommandsBuffer
  extends abstractProviderNode
  crux editor.commandHistory
 randomFloatNode
@@ -33877,17 +34264,18 @@ samplesTinyIrisNode
   1.5,0.2,setosa
  extends abstractProviderNode
  crux samples.tinyIris
+ string bodyStumpTemplate
+  pre
+   class TileSelectable
+   style overflow: scroll; max-height: 100%;
+   bern
+    {text}
  javascript
   getDataContent() {
-   const data = this.getDefinition().getConstantsObject().data
-   return data
+   return this.data
   }
   getTileBodyStumpCode() {
-   const text = this.getDataContent()
-   return \`pre
-  class TileSelectable
-  style overflow: scroll; max-height: 100%;
-  bern\${jtree.TreeNode.nest(text, 2)}\`
+   return this.qFormat(this.bodyStumpTemplate, { text: this.getDataContent() })
   }
   getParserId() {
    return super.getParserId() || new TableParser().guessTableParserId(this.getDataContent())
@@ -34261,7 +34649,8 @@ abstractRandomTileNode
         PickerTileNode: PickerTileNode,
         abstractMaiaTileNode: abstractMaiaTileNode,
         abstractChartNode: abstractChartNode,
-        abstractBodyOnlyTileNode: abstractBodyOnlyTileNode,
+        abstractHeaderlessChartTileNode: abstractHeaderlessChartTileNode,
+        abstractEmptyFooterTileNode: abstractEmptyFooterTileNode,
         abstractSnippetGalleryNode: abstractSnippetGalleryNode,
         abstractTemplateGalleryNode: abstractTemplateGalleryNode,
         templatesListNode: templatesListNode,
@@ -34282,6 +34671,7 @@ abstractRandomTileNode
         htmlCustomNode: htmlCustomNode,
         abstractShowTileNode: abstractShowTileNode,
         showRowCountNode: showRowCountNode,
+        showStaticNode: showStaticNode,
         showMedianNode: showMedianNode,
         showSumNode: showSumNode,
         showMeanNode: showMeanNode,
@@ -34296,7 +34686,6 @@ abstractRandomTileNode
         vegaEmojiNode: vegaEmojiNode,
         vegaHistogramNode: vegaHistogramNode,
         vegaExampleNode: vegaExampleNode,
-        abstractHeaderlessChartTileNode: abstractHeaderlessChartTileNode,
         dateHeatcalNode: dateHeatcalNode,
         iconsIconNode: iconsIconNode,
         iconsHumanNode: iconsHumanNode,
@@ -34355,6 +34744,7 @@ abstractRandomTileNode
         samplesPopulationsNode: samplesPopulationsNode,
         samplesBabyNamesNode: samplesBabyNamesNode,
         samplesDeclarationNode: samplesDeclarationNode,
+        samplesLettersNode: samplesLettersNode,
         samplesPresidentsNode: samplesPresidentsNode,
         ucimlrDatasetsNode: ucimlrDatasetsNode,
         vegaDataNode: vegaDataNode,
@@ -35312,10 +35702,11 @@ window.DemoTemplates
 
 
 
-const MaiaCodeEditorTemplate = (source, fileName, treeLanguage) => `html.h1 Source code visualization of ${fileName}
+const MaiaCodeEditorTemplate = (source, fileName, treeLanguage) =>
+  new jtree.TreeNode(`html.h1 Source code visualization of {fileName}
 data.inline
  parser text
- treeLanguage ${treeLanguage}
+ treeLanguage {treeLanguage}
  text.lineCount
   show.median lines Total lines
  text.wordCount
@@ -35327,8 +35718,9 @@ data.inline
    text.wordCount
     tables.basic
     text.wordcloud
- content${jtree.TreeNode.nest(source, 2)}
-layout column`
+ content
+  {source}
+layout column`).templateToString({ source, fileName, treeLanguage })
 
 window.MaiaCodeEditorTemplate
  = MaiaCodeEditorTemplate
@@ -36608,6 +37000,64 @@ BlobNode
     get tileNameCell() {
       return this.getWord(0)
     }
+    get tileStumpTemplate() {
+      return `div
+ class {classes}
+ id {id}
+ stumpOnContextMenuCommand openTileContextMenuCommand
+ div
+  class TileGrabber
+  stumpOnDblClickCommand toggleTileMaximizeCommand
+ div {header}
+  class TileHeader
+ div
+  style {bodyStyle}
+  class TileBody
+  {body}
+ div
+  class TileFooter
+  {footer}
+ div
+  class TileGrabber`
+    }
+    get errorStateStumpTemplate() {
+      return `div
+ class {classes}
+ id {id}
+ stumpOnContextMenuCommand openTileContextMenuCommand
+ div
+  class TileGrabber
+  stumpOnDblClickCommand toggleTileMaximizeCommand
+ div ERROR
+  class TileHeader
+ div
+  class TileBody
+  {content}
+ div
+  class TileFooter
+  {footer}
+ div
+  class TileGrabber`
+    }
+    get inspectionStumpTemplate() {
+      return `div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
+div Messages:
+ol
+ {messages}
+div Tree:
+pre
+ bern
+  {sourceCode}
+div All Tile Settings:
+pre
+ bern
+  {settings}`
+    }
+    get pencilStumpTemplate() {
+      return `span {icon}
+ class TilePencilButton
+ stumpOnClickCommand toggleToolbarCommand`
+    }
     get hiddenKey() {
       return `hidden`
     }
@@ -36631,6 +37081,9 @@ BlobNode
     }
     getTheme() {
       return this.getTab().getTheme()
+    }
+    qFormat(str, obj) {
+      return new jtree.TreeNode(str).templateToString(obj)
     }
     scrollIntoView() {
       const el = this.getStumpNode()
@@ -36671,9 +37124,7 @@ BlobNode
         )
     }
     _hasRequirements() {
-      const def = this.getDefinition()
-      const constants = def.getConstantsObject()
-      return constants[TilesConstants.tileScript]
+      return this.tileScript
     }
     _areRequirementsLoaded() {
       const loadingMap = this.getTab()
@@ -36689,22 +37140,12 @@ BlobNode
       return errors.length ? ` <span style="color: ${this.getTheme().errorColor};">${errors.join(" ")}</span>` : "" //todo: cleanup
     }
     toStumpErrorStateCode(err) {
-      const errorMessage = `Error on tile '${this.getFirstWord()}'. ${err}`
-      return `div
- class ${this.getCssClassNames().join(" ")}
- id ${this.getTreeComponentId()}
- stumpOnContextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
- div ERROR
-  class TileHeader
- div
-  class TileBody${jtree.TreeNode.nest(`div ` + errorMessage, 2)}
- div
-  class TileFooter${jtree.TreeNode.nest(this.getTileToolbarButtonStumpCode(), 2)}
- div
-  class TileGrabber`
+      return this.qFormat(this.errorStateStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        id: this.getTreeComponentId(),
+        content: `div ` + err,
+        footer: this.getTileToolbarButtonStumpCode()
+      })
     }
     // todo: delete this
     makeDirty() {
@@ -36746,25 +37187,17 @@ BlobNode
       return classNames
     }
     toStumpCode() {
-      return `div
- class ${this.getCssClassNames().join(" ")}
- id ${this.getTreeComponentId()}
- stumpOnContextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
- div ${this.getTileHeaderBern()}
-  class TileHeader
- div
-  style ${this.customBodyStyle || ""}
-  class TileBody${this._getBodyStumpCodeCache()}
- div
-  class TileFooter${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
- div
-  class TileGrabber`
+      return this.qFormat(this.tileStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        id: this.getTreeComponentId(),
+        header: this.getTileHeaderBern(),
+        bodyStyle: this.customBodyStyle || "",
+        body: this._getBodyStumpCodeCache() || "",
+        footer: this.getTileFooterStumpCode()
+      })
     }
     _getBodyStumpCodeCache() {
-      if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = jtree.TreeNode.nest(this.getTileBodyStumpCode(), 2)
+      if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
       return this._bodyStumpCodeCache
     }
     getTileHeaderBern() {
@@ -36833,9 +37266,7 @@ BlobNode
       return this.getTileToolbarButtonStumpCode()
     }
     getTileToolbarButtonStumpCode() {
-      return `span ${Icons("pencil", 16)}
- class TilePencilButton
- stumpOnClickCommand toggleToolbarCommand`
+      return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
     }
     getDefinedOrSuggestedSize() {
       const size = this.getSuggestedSize()
@@ -36901,22 +37332,22 @@ BlobNode
     _treeComponentDidMount() {
       if (this.isLoaded()) this.treeComponentDidMount()
     }
-    toInspection() {
+    toInspectionStumpCode() {
       const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
       const settingsDefinitions = this.getAllTileSettingsDefinitions()
         .map(setting => `${setting.getFirstWord()} ${setting.getDescription()}`)
         .join("\n")
-      const parentTile = this.getParent().getFirstWord()
-      return `div TileConstructor: ${this.constructor.name} Parent: ${parentTile}
-div Messages:
-ol
- ${messages}
-div Tree:
-pre
- bern${jtree.TreeNode.nest(this.toString(), 2)}
-div All Tile Settings:
-pre
- bern${jtree.TreeNode.nest(settingsDefinitions, 2)}`
+      const parentConstructorName = this.getParent().constructor.name
+      const constructorName = this.constructor.name
+      const sourceCode = this.toString()
+      const settings = settingsDefinitions
+      return this.qFormat(this.inspectionStumpTemplate, {
+        constructorName,
+        parentConstructorName,
+        sourceCode,
+        messages,
+        settings
+      })
     }
     isVisible() {
       return !this.has(this.hiddenKey)
@@ -36948,10 +37379,6 @@ pre
     cloneTileCommand() {
       this.cloneAndOffset()
       return this.getTab().autosaveAndRender()
-    }
-    async updateContentFromHtmlCommand(val) {
-      const clean = jtree.Utils.stripHtml(val.replace(/\<br\>/g, "\n").replace(/\<div\>/g, "\n"))
-      return this.changeTileContentAndRenderCommand(clean)
     }
     async toggleTileMaximizeCommand() {
       if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
@@ -37066,8 +37493,7 @@ pre
         window.tile = this
         console.log(this)
       }
-      const output = this.toInspection()
-      this.getTab().addStumpCodeMessageToLog(output)
+      this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
       this.getTab()
         .getRootNode()
         .renderApp()
@@ -37410,6 +37836,60 @@ abstractTileTreeComponentNode
  int headerHeight 30
  int footerHeight 30
  string hiddenKey hidden
+ string pencilStumpTemplate
+  span {icon}
+   class TilePencilButton
+   stumpOnClickCommand toggleToolbarCommand
+ string inspectionStumpTemplate
+  div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
+  div Messages:
+  ol
+   {messages}
+  div Tree:
+  pre
+   bern
+    {sourceCode}
+  div All Tile Settings:
+  pre
+   bern
+    {settings}
+ string errorStateStumpTemplate
+  div
+   class {classes}
+   id {id}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div ERROR
+    class TileHeader
+   div
+    class TileBody
+    {content}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div {header}
+    class TileHeader
+   div
+    style {bodyStyle}
+    class TileBody
+    {body}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
  javascript
   getProgramTemplate(id) {}
   getSnippetTemplate(id) {}
@@ -37425,6 +37905,9 @@ abstractTileTreeComponentNode
   }
   getTheme() {
    return this.getTab().getTheme()
+  }
+  qFormat(str, obj) {
+   return new jtree.TreeNode(str).templateToString(obj)
   }
   scrollIntoView() {
    const el = this.getStumpNode()
@@ -37465,9 +37948,7 @@ abstractTileTreeComponentNode
     )
   }
   _hasRequirements() {
-   const def = this.getDefinition()
-   const constants = def.getConstantsObject()
-   return constants[TilesConstants.tileScript]
+   return this.tileScript
   }
   _areRequirementsLoaded() {
    const loadingMap = this.getTab()
@@ -37483,22 +37964,7 @@ abstractTileTreeComponentNode
    return errors.length ? \` <span style="color: \${this.getTheme().errorColor};">\${errors.join(" ")}</span>\` : "" //todo: cleanup
   }
   toStumpErrorStateCode(err) {
-   const errorMessage = \`Error on tile '\${this.getFirstWord()}'. \${err}\`
-   return \`div
-   class \${this.getCssClassNames().join(" ")}
-   id \${this.getTreeComponentId()}
-   stumpOnContextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
-   div ERROR
-    class TileHeader
-   div
-    class TileBody\${jtree.TreeNode.nest(\`div \` + errorMessage, 2)}
-   div
-    class TileFooter\${jtree.TreeNode.nest(this.getTileToolbarButtonStumpCode(), 2)}
-   div
-    class TileGrabber\`
+   return this.qFormat(this.errorStateStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), content: \`div \` + err, footer: this.getTileToolbarButtonStumpCode() })
   }
   // todo: delete this
   makeDirty() {
@@ -37537,25 +38003,17 @@ abstractTileTreeComponentNode
    return classNames
   }
   toStumpCode() {
-   return \`div
-   class \${this.getCssClassNames().join(" ")}
-   id \${this.getTreeComponentId()}
-   stumpOnContextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
-   div \${this.getTileHeaderBern()}
-    class TileHeader
-   div
-    style \${this.customBodyStyle || ""}
-    class TileBody\${this._getBodyStumpCodeCache()}
-   div
-    class TileFooter\${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
-   div
-    class TileGrabber\`
+   return this.qFormat(this.tileStumpTemplate, {
+    classes: this.getCssClassNames().join(" "),
+    id: this.getTreeComponentId(),
+    header: this.getTileHeaderBern(),
+    bodyStyle: this.customBodyStyle || "",
+    body: this._getBodyStumpCodeCache() || "",
+    footer: this.getTileFooterStumpCode()
+   })
   }
   _getBodyStumpCodeCache() {
-   if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = jtree.TreeNode.nest(this.getTileBodyStumpCode(), 2)
+   if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
    return this._bodyStumpCodeCache
   }
   getTileHeaderBern() {
@@ -37624,9 +38082,7 @@ abstractTileTreeComponentNode
    return this.getTileToolbarButtonStumpCode()
   }
   getTileToolbarButtonStumpCode() {
-   return \`span \${Icons("pencil", 16)}
-   class TilePencilButton
-   stumpOnClickCommand toggleToolbarCommand\`
+   return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
   }
   getDefinedOrSuggestedSize() {
    const size = this.getSuggestedSize()
@@ -37692,22 +38148,22 @@ abstractTileTreeComponentNode
   _treeComponentDidMount() {
    if (this.isLoaded()) this.treeComponentDidMount()
   }
-  toInspection() {
+  toInspectionStumpCode() {
    const messages = this.getMessageBuffer().map(message => \`li \${moment(message.getLineModifiedTime()).fromNow()} - \${message.childrenToString()}\`)
    const settingsDefinitions = this.getAllTileSettingsDefinitions()
     .map(setting => \`\${setting.getFirstWord()} \${setting.getDescription()}\`)
     .join("\\n")
-   const parentTile = this.getParent().getFirstWord()
-   return \`div TileConstructor: \${this.constructor.name} Parent: \${parentTile}
-  div Messages:
-  ol
-   \${messages}
-  div Tree:
-  pre
-   bern\${jtree.TreeNode.nest(this.toString(), 2)}
-  div All Tile Settings:
-  pre
-   bern\${jtree.TreeNode.nest(settingsDefinitions, 2)}\`
+   const parentConstructorName = this.getParent().constructor.name
+   const constructorName = this.constructor.name
+   const sourceCode = this.toString()
+   const settings = settingsDefinitions
+   return this.qFormat(this.inspectionStumpTemplate, {
+    constructorName,
+    parentConstructorName,
+    sourceCode,
+    messages,
+    settings
+   })
   }
   isVisible() {
    return !this.has(this.hiddenKey)
@@ -37739,10 +38195,6 @@ abstractTileTreeComponentNode
   cloneTileCommand() {
    this.cloneAndOffset()
    return this.getTab().autosaveAndRender()
-  }
-  async updateContentFromHtmlCommand(val) {
-   const clean = jtree.Utils.stripHtml(val.replace(/\\<br\\>/g, "\\n").replace(/\\<div\\>/g, "\\n"))
-   return this.changeTileContentAndRenderCommand(clean)
   }
   async toggleTileMaximizeCommand() {
    if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
@@ -37857,8 +38309,7 @@ abstractTileTreeComponentNode
     window.tile = this
     console.log(this)
    }
-   const output = this.toInspection()
-   this.getTab().addStumpCodeMessageToLog(output)
+   this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
    this.getTab()
     .getRootNode()
     .renderApp()
@@ -38318,8 +38769,9 @@ class AbstractContextMenuTreeComponent extends AbstractTreeComponent {
   }
 
   toStumpCode() {
-    return `div
- class AbstractContextMenuTreeComponent ${this.constructor.name}${jtree.TreeNode.nest(this.getContextMenuBodyStumpCode(), 1)}`
+    return new jtree.TreeNode(`div
+ class AbstractContextMenuTreeComponent {constructorName}
+ {body}`).templateToString({ constructorName: this.constructor.name, body: this.getContextMenuBodyStumpCode() })
   }
 
   treeComponentDidMount() {
@@ -38416,9 +38868,11 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
       .getStumpNode()
       .findStumpNodeByChild("id " + anchorId)
     const buttonStumpNodeShadow = buttonStumpNode.getShadow()
-    return `div
- style top: 30px; left: ${buttonStumpNodeShadow.getShadowPosition().left}px;
- class dropdownMenu${jtree.TreeNode.nest(this.getDropDownStumpCode(), 1)}`
+
+    return new jtree.TreeNode(`div
+ style top: 30px; left: {left}px;
+ class dropdownMenu
+ {dropDownStump}`).templateToString({ left: buttonStumpNodeShadow.getShadowPosition().left, dropDownStump: this.getDropDownStumpCode() })
   }
 }
 
@@ -38475,7 +38929,7 @@ ${theme.enableTextSelect2}
   }
 
   toStumpCode() {
-    return `section
+    return new jtree.TreeNode(`section
  stumpOnClickCommand unmountAndDestroyCommand
  class modalBackground
  section
@@ -38484,7 +38938,8 @@ ${theme.enableTextSelect2}
   a X
    id closeModalX
    stumpOnClickCommand unmountAndDestroyCommand
-   class modalClose${jtree.TreeNode.nest(this.getModalStumpCode(), 2)}`
+   class modalClose
+  {modelStumpCode}`).templateToString({ modelStumpCode: this.getModalStumpCode() })
   }
 }
 
@@ -38560,8 +39015,7 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
   }
 
   toStumpCode() {
-    const lines = this._getProgramSource() || ""
-    return `div
+    return new jtree.TreeNode(`div
  style font-size: 16px;
  class TerminalDiv
  textarea
@@ -38569,7 +39023,8 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
   stumpOnBlurCommand saveChangesCommand
   stumpOnLineClick executeFirstLineCommand
   stumpOnLineShiftClick compileFirstLineCommand
-  bern${jtree.TreeNode.nest(lines, 3)}`
+  bern
+   {lines}`).templateToString({ lines: this._getProgramSource() })
   }
 
   _getTextareaShadow() {
@@ -38869,9 +39324,9 @@ class ConsoleTreeComponent extends AbstractTreeComponent {
   }
 
   toStumpCode() {
-    const messageBuffer = this._getConsoleOutput()
-    return `div
- class consoleOutput${jtree.TreeNode.nest(messageBuffer, 1)}`
+    return new jtree.TreeNode(`div
+ class consoleOutput
+ {messageBuffer}`).templateToString({ messageBuffer: this._getConsoleOutput() })
   }
 }
 
@@ -39606,13 +40061,11 @@ ${theme.enableTextSelect2}
  .TileBody
   padding 5px
   width 100%
-  height calc(100% - 80px)
+  height calc(100% - 50px)
   box-sizing border-box
   overflow scroll
-  &.BodyOnly
-   height calc(100% - 20px)
   &.HeaderLess
-   height calc(100% - 50px)
+   height calc(100% - 20px)
  .TileGrabber
   width 100%
   height 10px
@@ -39628,7 +40081,13 @@ ${theme.enableTextSelect2}
   font-size 12px
   white-space nowrap
   color ${theme.midGray}
+  background ${theme.tileBackgroundColor}
   overflow hidden
+  position absolute
+  max-width 100%
+  box-sizing border-box
+  bottom 0
+  left 0
  iframe
   width 100%
   height 100%
@@ -39747,6 +40206,8 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
   stumpOnClickCommand createProgramFromTileExampleCommand`
     }
     const hints = tile.getDefinition().getLineHints()
+
+    // todo: cleanup
 
     return (
       `div
@@ -39878,7 +40339,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "15.2.0"
+const Version = "15.3.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 

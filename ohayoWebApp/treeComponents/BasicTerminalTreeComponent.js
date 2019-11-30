@@ -66,8 +66,7 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
   }
 
   toStumpCode() {
-    const lines = this._getProgramSource() || ""
-    return `div
+    return new jtree.TreeNode(`div
  style font-size: 16px;
  class TerminalDiv
  textarea
@@ -75,7 +74,8 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
   stumpOnBlurCommand saveChangesCommand
   stumpOnLineClick executeFirstLineCommand
   stumpOnLineShiftClick compileFirstLineCommand
-  bern${jtree.TreeNode.nest(lines, 3)}`
+  bern
+   {lines}`).templateToString({ lines: this._getProgramSource() })
   }
 
   _getTextareaShadow() {

@@ -10,6 +10,60 @@ abstractTileTreeComponentNode
  int headerHeight 30
  int footerHeight 30
  string hiddenKey hidden
+ string pencilStumpTemplate
+  span {icon}
+   class TilePencilButton
+   stumpOnClickCommand toggleToolbarCommand
+ string inspectionStumpTemplate
+  div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
+  div Messages:
+  ol
+   {messages}
+  div Tree:
+  pre
+   bern
+    {sourceCode}
+  div All Tile Settings:
+  pre
+   bern
+    {settings}
+ string errorStateStumpTemplate
+  div
+   class {classes}
+   id {id}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div ERROR
+    class TileHeader
+   div
+    class TileBody
+    {content}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
+   stumpOnContextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    stumpOnDblClickCommand toggleTileMaximizeCommand
+   div {header}
+    class TileHeader
+   div
+    style {bodyStyle}
+    class TileBody
+    {body}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
  javascript
   getProgramTemplate(id) {}
   getSnippetTemplate(id) {}
@@ -25,6 +79,9 @@ abstractTileTreeComponentNode
   }
   getTheme() {
    return this.getTab().getTheme()
+  }
+  qFormat(str, obj) {
+    return new jtree.TreeNode(str).templateToString(obj)
   }
   scrollIntoView() {
    const el = this.getStumpNode()
@@ -65,9 +122,7 @@ abstractTileTreeComponentNode
     )
   }
   _hasRequirements() {
-   const def = this.getDefinition()
-   const constants = def.getConstantsObject()
-   return constants[TilesConstants.tileScript]
+   return this.tileScript
   }
   _areRequirementsLoaded() {
    const loadingMap = this.getTab()
@@ -83,22 +138,7 @@ abstractTileTreeComponentNode
    return errors.length ? ` <span style="color: ${this.getTheme().errorColor};">${errors.join(" ")}</span>` : "" //todo: cleanup
   }
   toStumpErrorStateCode(err) {
-   const errorMessage = `Error on tile '${this.getFirstWord()}'. ${err}`
-   return `div
-   class ${this.getCssClassNames().join(" ")}
-   id ${this.getTreeComponentId()}
-   stumpOnContextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
-   div ERROR
-    class TileHeader
-   div
-    class TileBody${jtree.TreeNode.nest(`div ` + errorMessage, 2)}
-   div
-    class TileFooter${jtree.TreeNode.nest(this.getTileToolbarButtonStumpCode(), 2)}
-   div
-    class TileGrabber`
+   return this.qFormat(this.errorStateStumpTemplate, {classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), content: `div ` +  err, footer: this.getTileToolbarButtonStumpCode()})
   }
   // todo: delete this
   makeDirty() {
@@ -137,25 +177,10 @@ abstractTileTreeComponentNode
    return classNames
   }
   toStumpCode() {
-   return `div
-   class ${this.getCssClassNames().join(" ")}
-   id ${this.getTreeComponentId()}
-   stumpOnContextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
-   div ${this.getTileHeaderBern()}
-    class TileHeader
-   div
-    style ${this.customBodyStyle || ""}
-    class TileBody${this._getBodyStumpCodeCache()}
-   div
-    class TileFooter${jtree.TreeNode.nest(this.getTileFooterStumpCode(), 2)}
-   div
-    class TileGrabber`
+   return this.qFormat(this.tileStumpTemplate, {classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), header: this.getTileHeaderBern(), bodyStyle: this.customBodyStyle || "", body: this._getBodyStumpCodeCache() || "", footer: this.getTileFooterStumpCode()})
   }
   _getBodyStumpCodeCache() {
-   if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = jtree.TreeNode.nest(this.getTileBodyStumpCode(), 2)
+   if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
    return this._bodyStumpCodeCache
   }
   getTileHeaderBern() {
@@ -224,9 +249,7 @@ abstractTileTreeComponentNode
    return this.getTileToolbarButtonStumpCode()
   }
   getTileToolbarButtonStumpCode() {
-   return `span ${Icons("pencil", 16)}
-   class TilePencilButton
-   stumpOnClickCommand toggleToolbarCommand`
+   return this.qFormat(this.pencilStumpTemplate, {icon: Icons("pencil", 16)})
   }
   getDefinedOrSuggestedSize() {
    const size = this.getSuggestedSize()
@@ -292,22 +315,22 @@ abstractTileTreeComponentNode
   _treeComponentDidMount() {
    if (this.isLoaded()) this.treeComponentDidMount()
   }
-  toInspection() {
+  toInspectionStumpCode() {
    const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
    const settingsDefinitions = this.getAllTileSettingsDefinitions()
     .map(setting => `${setting.getFirstWord()} ${setting.getDescription()}`)
     .join("\n")
-   const parentTile = this.getParent().getFirstWord()
-   return `div TileConstructor: ${this.constructor.name} Parent: ${parentTile}
-  div Messages:
-  ol
-   ${messages}
-  div Tree:
-  pre
-   bern${jtree.TreeNode.nest(this.toString(), 2)}
-  div All Tile Settings:
-  pre
-   bern${jtree.TreeNode.nest(settingsDefinitions, 2)}`
+   const parentConstructorName = this.getParent().constructor.name
+   const constructorName = this.constructor.name
+   const sourceCode = this.toString()
+   const settings = settingsDefinitions
+   return this.qFormat(this.inspectionStumpTemplate, {
+    constructorName,
+    parentConstructorName,
+    sourceCode,
+    messages,
+    settings
+    })
   }
   isVisible() {
    return !this.has(this.hiddenKey)
@@ -339,10 +362,6 @@ abstractTileTreeComponentNode
   cloneTileCommand() {
     this.cloneAndOffset()
     return this.getTab().autosaveAndRender()
-  }
-  async updateContentFromHtmlCommand(val) {
-    const clean = jtree.Utils.stripHtml(val.replace(/\<br\>/g, "\n").replace(/\<div\>/g, "\n"))
-    return this.changeTileContentAndRenderCommand(clean)
   }
   async toggleTileMaximizeCommand() {
     if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
@@ -460,8 +479,7 @@ abstractTileTreeComponentNode
       window.tile = this
       console.log(this)
     }
-    const output = this.toInspection()
-    this.getTab().addStumpCodeMessageToLog(output)
+    this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
     this
       .getTab()
       .getRootNode()

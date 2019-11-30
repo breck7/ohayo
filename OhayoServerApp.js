@@ -30,10 +30,7 @@ class OhayoServerApp {
   }
 
   _addCurrentWorkingDirectory(content, cwd) {
-    return content.replace(
-      `const DefaultServerCurrentWorkingDirectory = "/"`,
-      `const isConnectedToOhayoServerApp = true;\nconst DefaultServerCurrentWorkingDirectory = "${cwd}"`
-    )
+    return content.replace(`const DefaultServerCurrentWorkingDirectory = "/"`, `const isConnectedToOhayoServerApp = true;\nconst DefaultServerCurrentWorkingDirectory = "${cwd}"`)
   }
 
   _getPackageDirectories() {
@@ -140,6 +137,7 @@ class FabServer extends OhayoServerApp {
     const treeLangExtensions = "grammar drums tree stamp".split(" ")
     const isTreeFile = filename => treeLangExtensions.indexOf(jtree.Utils.getFileExtension(filename)) > -1
 
+    // todo: cleanup
     const serveDevFile = (req, res, next) => {
       const filename = __dirname + req.path
       fs.readFile(filename, "utf8", (err, file) => {
@@ -147,7 +145,7 @@ class FabServer extends OhayoServerApp {
           console.log(err)
           return res.status(400).send(err)
         } else if (isTreeFile(filename)) res.send(TypeScriptRewriter.treeToJs(filename, file))
-        else if (filename.endsWith(".js")) {
+        else if (filename.endsWith(".js") && !filename.endsWith("min.js")) {
           res.send(
             new TypeScriptRewriter(file)
               .removeRequires()

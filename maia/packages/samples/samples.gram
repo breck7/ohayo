@@ -82,36 +82,42 @@ samplesDeclarationNode
  crux samples.declaration
 samplesPatientsNode
  description A row for each patient in a sample clinical dataset.
- string dummyDataSet patients
+ string dummyDataSetName patients
  extends abstractDummyNode
  crux samples.patients
 samplesPoemNode
  description The Road Not Taken by Robert Frost
- string dummyDataSet poem
+ string dummyDataSetName poem
  extends abstractDummyNode
  crux samples.poem
 samplesOuterSpaceNode
  description A simple text document of major structures in the universe.
- string dummyDataSet outerSpace
+ string dummyDataSetName outerSpace
  extends abstractDummyNode
  crux samples.outerSpace
 samplesTreeProgramNode
  description A simple program in a Tree Language.
- string dummyDataSet treeProgram
+ string dummyDataSetName treeProgram
  extends abstractDummyNode
  crux samples.treeProgram
 samplesWaterBillNode
  description A family's water bill.
  frequency .15
- string dummyDataSet waterBill
+ string dummyDataSetName waterBill
  extends abstractDummyNode
  crux samples.waterBill
 samplesGapMinderNode
  description Health and income data from gapMinder
  frequency .15
- string dummyDataSet gapMinder
+ string dummyDataSetName gapMinder
  extends abstractDummyNode
  crux samples.gapMinder
+samplesLettersNode
+ description Letter usage frequency in English from mobostock.
+ frequency .03
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ string url maia/packages/samples/letters.tsv
+ crux samples.letters
 samplesPresidentsNode
  description CSV of president's of United States.
  frequency .03
@@ -128,17 +134,18 @@ samplesTinyIrisNode
   1.5,0.2,setosa
  extends abstractProviderNode
  crux samples.tinyIris
+ string bodyStumpTemplate
+  pre
+   class TileSelectable
+   style overflow: scroll; max-height: 100%;
+   bern
+    {text}
  javascript
   getDataContent() {
-   const data = this.getDefinition().getConstantsObject().data
-   return data
+   return this.data
   }
   getTileBodyStumpCode() {
-   const text = this.getDataContent()
-   return `pre
-  class TileSelectable
-  style overflow: scroll; max-height: 100%;
-  bern${jtree.TreeNode.nest(text, 2)}`
+   return this.qFormat(this.bodyStumpTemplate, {text: this.getDataContent()})
   }
   getParserId() {
    return super.getParserId() || new TableParser().guessTableParserId(this.getDataContent())

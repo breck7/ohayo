@@ -50,9 +50,11 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
       .getStumpNode()
       .findStumpNodeByChild("id " + anchorId)
     const buttonStumpNodeShadow = buttonStumpNode.getShadow()
-    return `div
- style top: 30px; left: ${buttonStumpNodeShadow.getShadowPosition().left}px;
- class dropdownMenu${jtree.TreeNode.nest(this.getDropDownStumpCode(), 1)}`
+
+    return new jtree.TreeNode(`div
+ style top: 30px; left: {left}px;
+ class dropdownMenu
+ {dropDownStump}`).templateToString({ left: buttonStumpNodeShadow.getShadowPosition().left, dropDownStump: this.getDropDownStumpCode() })
   }
 }
 

@@ -73,6 +73,8 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
     }
     const hints = tile.getDefinition().getLineHints()
 
+    // todo: cleanup
+
     return (
       `div
  class TileToolbarTreeComponent

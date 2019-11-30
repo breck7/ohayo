@@ -21,7 +21,7 @@ treenotation3dNode
  inScope contentNode sizeNode cameraPositionNode
  string tileSize 800 500
  string tileScript maia/packages/treenotation/vis.min.js
- string dummyDataSet treeProgram
+ string dummyDataSetName treeProgram
  extends abstractChartNode
  crux treenotation.3d
  javascript
@@ -126,14 +126,13 @@ treenotation3dNode
    }
    const points = []
    const nodeToPoint = (node, index) => {
-    const point = node.getPoint(program)
     const nodePath = node.getPathVector(program)
     const tagNode = tagTree.nodeAt(nodePath)
     node.getWords().forEach((word, wordIndex) => {
      const wordType = tagNode.getWord(wordIndex)
      const colorNumber = makeColor(wordType)
-     const xcc = point.x + wordIndex
-     const ycc = -point.y
+     const xcc = node.getIndentLevel(program) + wordIndex
+     const ycc = -node.getLineNumber()
      const zcc = 0
      points.push({
       x: xcc,
@@ -154,7 +153,7 @@ treenotationWordTypesNode
    treenotation.outline
    text.wordCount
     tables.basic
- string dummyDataSet treeProgram
+ string dummyDataSetName treeProgram
  extends abstractNewRowsTransformerTileNode
  crux treenotation.wordTypes
  javascript
@@ -170,20 +169,21 @@ treenotationOutlineNode
  example Outer space
   samples.outerSpace
    treenotation.outline
- string dummyDataSet outerSpace
+ string dummyDataSetName outerSpace
  string tileSize 800 500
  extends abstractHeaderlessChartTileNode
  crux treenotation.outline
+ string bodyStumpTemplate
+  pre
+   style overflow: scroll; width: 100%; height: 100%; margin: 0; box-sizing: border-box; font-family: monospace; line-height: 13px;
+   bern
+    {bern}
  javascript
   _getTheBern() {
    return new jtree.TreeNode(this.getPipishInput()).toOutline()
   }
   getTileBodyStumpCode() {
-   const tree = new jtree.TreeNode(this.getPipishInput())
-   const bern = this._getTheBern()
-   return `pre
-  style overflow: scroll; width: 100%; height: 100%; margin: 0; box-sizing: border-box; font-family: monospace; line-height: 13px;
-  bern${jtree.TreeNode.nest(bern, 2)}`
+   return this.qFormat(this.bodyStumpTemplate, {bern: this._getTheBern()})
   }
 treenotationDotlineNode
  description A simple pretty icon-only visualization of the structure of a Tree Notation doc.
@@ -191,7 +191,7 @@ treenotationDotlineNode
   samples.outerSpace
    treenotation.dotline
  boolean dots true
- string dummyDataSet outerSpace
+ string dummyDataSetName outerSpace
  javascript
   _getTheBern() {
    return new jtree.TreeNode(this.getPipishInput()).toMappedOutline(

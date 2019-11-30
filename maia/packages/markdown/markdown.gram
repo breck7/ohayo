@@ -11,17 +11,16 @@ markdownToHtmlNode
     Hello world
    markdown.toHtml
  inScope contentNode
+ string bodyStumpTemplate
+  div
+   class TileSelectable
+   bern
+    {md}
  javascript
   getTileBodyStumpCode() {
-   const markdown = this.getPipishInput()
-   const md = marked(markdown)
-   // todo: add formatting
-   // todo: sanitize below
-   return `div
-  class TileSelectable
-  bern${jtree.TreeNode.nest(md, 2)}`
+   return this.qFormat(this.bodyStumpTemplate, {md: marked(this.getPipishInput())})
   }
  string tileSize 400 400
- string dummyDataSet markdown
+ string dummyDataSetName markdown
  extends abstractHeaderlessChartTileNode
  crux markdown.toHtml

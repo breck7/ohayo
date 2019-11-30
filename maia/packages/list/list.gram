@@ -23,7 +23,7 @@ listBasicNode
   .join("\n")}`
   }
  string tileSize 400 400
- string dummyDataSet telescopes
+ string dummyDataSetName telescopes
  string columnPredictionHints
   label getTitlePotential
  extends abstractChartNode
@@ -35,7 +35,7 @@ listLinksNode
   samples.telescopes
    list.links
  inScope labelNode linkNode
- string dummyDataSet telescopes
+ string dummyDataSetName telescopes
  javascript
   _getUrlColumnName() {
    // todo: more automatic! Need to fix our columns/keywords issues

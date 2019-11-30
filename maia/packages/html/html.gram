@@ -8,8 +8,14 @@ abstractHtmlNode
  frequency 0
  description An HTML element
  inScope styleNode contentNode
- extends abstractBodyOnlyTileNode
+ extends abstractEmptyFooterTileNode
  abstract
+ string bodyStumpTemplate
+  {tag}
+   {style}
+   {src}
+   bern
+    {content}
  javascript
   getTileFooterStumpCode() {
    return this.getTileToolbarButtonStumpCode()
@@ -27,11 +33,7 @@ abstractHtmlNode
    return this.getSettingsStruct().src
   }
   getTileBodyStumpCode() {
-   const obj = this.getDefinition().getConstantsObject()
-   return `${this.getTag()}
-   ${obj.style ? `style ${obj.style}` : "stumpNoOp"}
-   ${this.getSrc() ? `src ${this.getSrc()}` : "stumpNoOp"}
-   bern${jtree.TreeNode.nest(this.getHtmlContent(), 2)}`
+   return this.qFormat(this.bodyStumpTemplate, { tag: this.getTag(), style: this.style ? `style ${this.style}` : "stumpNoOp", src: this.getSrc() ? `src ${this.getSrc()}` : "stumpNoOp", content: this.getHtmlContent() || "" })
   }
 htmlTextNode
  description Displays fixed text in the given HTML element.
@@ -58,7 +60,7 @@ abstractHTMLFixedTagTileNode
    return this.getContent()
   }
   getTag() {
-   return this.getDefinition().getConstantsObject().htmlTag
+   return this.htmlTagName
   }
 htmlH1Node
  catchAllCellType htmlCell
@@ -67,7 +69,7 @@ htmlH1Node
   html.h1 Hello world
  frequency .002
  string tileSize 600 75
- string htmlTag h1
+ string htmlTagName h1
  string style text-align:center;
  extends abstractHTMLFixedTagTileNode
  crux html.h1
@@ -85,14 +87,14 @@ htmlImgNode
  description Displays an image from given url.
  cells tileKeywordCell urlCell
  frequency .002
- string htmlTag img
+ string htmlTagName img
  string style width:100%;
  extends abstractHTMLContentIsSrcTileNode
  crux html.img
 htmlIframeNode
  description Displays an iframe from given url.
  cells tileKeywordCell urlCell
- string htmlTag iframe
+ string htmlTagName iframe
  extends abstractHTMLContentIsSrcTileNode
  crux html.iframe
 htmlCustomNode
@@ -102,14 +104,17 @@ htmlCustomNode
    content
     <h1>Hello world</h1>
  inScope contentNode
- extends abstractBodyOnlyTileNode
+ extends abstractEmptyFooterTileNode
  crux html.custom
+ string bodyStumpTemplate
+  div
+   bern
+    {content}
  javascript
   getTileBodyStumpCode() {
    // https://meta.stackexchange.com/questions/1777/what-html-tags-are-allowed-on-stack-exchange-sites
    // todo: sanitize tags
    const contentNode = this.getNode("content")
    const content = contentNode ? contentNode.childrenToString() : "No HTML content to show"
-   return `div
-  bern${jtree.TreeNode.nest(content, 2)}`
+   return this.qFormat(this.bodyStumpTemplate, { content })
   }

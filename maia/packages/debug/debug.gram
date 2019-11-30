@@ -34,6 +34,11 @@ debugDumpNode
    debug.dump
  extends abstractChartNode
  crux debug.dump
+ string bodyStumpTemplate
+  div
+   style overflow: scroll; width: 100%; height: 100%; white-space: pre;
+   bern
+    {text}
  javascript
   _getCharacterLimit() {
    // Todo: great example of a scale test. I found it to be slow with:
@@ -51,9 +56,7 @@ debugDumpNode
    if (text.length > characterLimit)
     // todo: Show standardized truncation warning
     sub = `<i>(Notice: Results truncated to ${characterLimit} characters)</i><br>` + sub
-   return `div
-   style overflow: scroll; width: 100%; height: 100%; white-space: pre;
-   bern${jtree.TreeNode.nest(sub || "No data to dump", 2)}`
+   return this.qFormat(this.bodyStumpTemplate, {text: sub || "No data to dump"})
   }
   _getTextToDump() {
    return this.getPipishInput()
@@ -64,13 +67,15 @@ debugCommandsNode
   debug.commands
  extends abstractChartNode
  crux debug.commands
- javascript
-  getTileBodyStumpCode() {
-   return `a Run Speed Test on all Files in Working Directory
+ string bodyStumpTemplate
+  a Run Speed Test on all Files in Working Directory
    stumpOnClickCommand _runSpeedTestCommand
   br
   a Run Tile Quality Check
-   stumpOnClickCommand _doTileQualityCheckCommand`
+   stumpOnClickCommand _doTileQualityCheckCommand
+ javascript
+  getTileBodyStumpCode() {
+   return this.bodyStumpTemplate
   }
 debugGrammarTreeNode
  description Show the family tree for a grammar.
@@ -93,7 +98,7 @@ debugSleepNode
  example Sleep for 1 second then load data
   debug.sleep 100 waterBill
    tables.basic
- string dummyDataSet waterBill
+ string dummyDataSetName waterBill
  extends abstractChartNode
  crux debug.sleep
  javascript

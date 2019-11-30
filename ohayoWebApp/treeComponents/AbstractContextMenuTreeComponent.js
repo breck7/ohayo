@@ -26,8 +26,9 @@ class AbstractContextMenuTreeComponent extends AbstractTreeComponent {
   }
 
   toStumpCode() {
-    return `div
- class AbstractContextMenuTreeComponent ${this.constructor.name}${jtree.TreeNode.nest(this.getContextMenuBodyStumpCode(), 1)}`
+    return new jtree.TreeNode(`div
+ class AbstractContextMenuTreeComponent {constructorName}
+ {body}`).templateToString({ constructorName: this.constructor.name, body: this.getContextMenuBodyStumpCode() })
   }
 
   treeComponentDidMount() {

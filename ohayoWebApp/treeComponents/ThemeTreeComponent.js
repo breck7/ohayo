@@ -236,13 +236,11 @@ ${theme.enableTextSelect2}
  .TileBody
   padding 5px
   width 100%
-  height calc(100% - 80px)
+  height calc(100% - 50px)
   box-sizing border-box
   overflow scroll
-  &.BodyOnly
-   height calc(100% - 20px)
   &.HeaderLess
-   height calc(100% - 50px)
+   height calc(100% - 20px)
  .TileGrabber
   width 100%
   height 10px
@@ -258,7 +256,13 @@ ${theme.enableTextSelect2}
   font-size 12px
   white-space nowrap
   color ${theme.midGray}
+  background ${theme.tileBackgroundColor}
   overflow hidden
+  position absolute
+  max-width 100%
+  box-sizing border-box
+  bottom 0
+  left 0
  iframe
   width 100%
   height 100%

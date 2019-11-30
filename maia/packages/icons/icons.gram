@@ -11,6 +11,10 @@ iconsHumanNode
  string columnPredictionHints
   headSize isString=false
   genderColumn isString=true
+ string bodyStumpTemplate
+  div
+   bern
+    {bern}
  javascript
   getTileBodyStumpCode() {
    // Now, what if there is no input table?
@@ -39,10 +43,9 @@ iconsHumanNode
      return `<span title="${title}" style="font-size:${percent}px; color:${gender};">${character}</span>`
     })
     .join(" ")
-   return `div
-  bern${jtree.TreeNode.nest(bern, 2)}`
+   return this.qFormat(this.bodyStumpTemplate, {bern: bern})
   }
- string dummyDataSet patients
+ string dummyDataSetName patients
  extends iconsIconNode
  crux icons.human
 iconsCircleNode
@@ -54,9 +57,13 @@ iconsCircleNode
  inScope radiusNode
  string columnPredictionHints
   radius isString=false
- string dummyDataSet playerGoals
+ string dummyDataSetName playerGoals
  extends iconsIconNode
  crux icons.circle
+ string bodyStumpTemplate
+  div
+   bern
+    {bern}
  javascript
   getTileBodyStumpCode() {
    const column = this.getSettingsStruct().radius
@@ -64,6 +71,5 @@ iconsCircleNode
     .getRows()
     .map(row => `<span style="font-size:${row.rowToObjectWithOnlyNativeJavascriptTypes()[column] / 3}em;">O</span>`)
     .join(" ")
-   return `div
-  bern${jtree.TreeNode.nest(bern, 2)}`
+   return this.qFormat(this.bodyStumpTemplate, {bern: bern})
   }
