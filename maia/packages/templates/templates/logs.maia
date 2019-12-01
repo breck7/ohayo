@@ -1,0 +1,20 @@
+html.h1 Exponents
+ visible
+math.gen exp 0 1 .01
+ vega.line 2.718^x from 0 to 1
+  visible
+  xColumn input
+  yColumn output
+math.gen exp 1 10 .1
+ vega.line 2.718^x from 1 to 10
+  visible
+  xColumn input
+  yColumn output
+math.gen exp 10 20 .1
+ vega.line 2.718^x from 10 to 20
+  visible
+  xColumn input
+  yColumn output
+layout column
+categories math
+defaultHidden

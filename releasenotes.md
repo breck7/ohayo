@@ -1,3 +1,12 @@
+15.4.0 2019-11-30
+-----------------
+- New: more templates
+- New: template tile now has categories
+- New: math.gen tile
+- New: categories, zoom and defaultHidden doc level properties in Maia
+- Fix: random tiles fix
+- Infra: removed meyer css reset
+
 15.3.0 2019-11-29
 -----------------
 - New: show.static tiles for issue #42.

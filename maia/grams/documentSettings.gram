@@ -1,0 +1,21 @@
+tooling onsave jtree build produceMaiaGrammar
+documentCategoryCell
+ enum shopping chemistry programming socialMedia math parenting writing machineLearning
+zoomCell
+ extends numberCell
+zoomNode
+ crux zoom
+ description Enlarge or shrink all tiles
+ cells documentSettingNameCell zoomCell
+ extends abstractDocumentSettingNode
+defaultHiddenNode
+ crux defaultHidden
+ description Show only tiles with "visible" specified
+ cells documentSettingNameCell
+ extends abstractDocumentSettingNode
+documentCategoriesNode
+ description Add some categories to the document for organization.
+ cells documentSettingNameCell
+ catchAllCellType documentCategoryCell
+ extends abstractDocumentSettingNode
+ crux categories

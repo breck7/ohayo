@@ -1,0 +1,13 @@
+html.h1 Random Numbers
+random.int 1000 0 1000
+ hidden
+ vega.scatter 1000 Random numbers between 0 and 100
+  xColumn index
+  yColumn number
+ rows.first 100
+  hidden
+  vega.scatter 100 of those
+   xColumn index
+   yColumn number
+categories math
+layout column

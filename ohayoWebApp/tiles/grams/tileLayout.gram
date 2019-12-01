@@ -1,15 +1,21 @@
 tooling onsave jtree build produceTilesGrammar
 intCell
+abstractCoreTileSettingTerminalNode
+ abstract
+ extends abstractTileSettingTerminalNode
 hiddenNode
- extends abstractTileSettingTerminalNode
+ extends abstractCoreTileSettingTerminalNode
  crux hidden
+visibleNode
+ extends abstractCoreTileSettingTerminalNode
+ crux visible
 maximizedNode
- extends abstractTileSettingTerminalNode
+ extends abstractCoreTileSettingTerminalNode
  crux maximized
 abstractPagePositionNode
  frequency .2
  cells tileSettingKeywordCell intCell
- extends abstractTileSettingTerminalNode
+ extends abstractCoreTileSettingTerminalNode
  abstract
 leftNode
  extends abstractPagePositionNode

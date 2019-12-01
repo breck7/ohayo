@@ -1,6 +1,8 @@
 tooling onsave jtree build produceTilesGrammar
-PickerTileNode
- description Displays list of available tiles.
+abstractPickerTileNode
+ extends abstractTileTreeComponentNode
+ string tileSize 480 420
+ abstract
  string hakonTemplate
   .PickerTileNode
    .PickerCategory
@@ -25,44 +27,53 @@ PickerTileNode
      width 120px
      span
       font-size 70%
+ string itemStumpTemplate
+  {categoryBreak}
+  a {name}
+   br
+    span {description}
+   title {description}
+   tabindex -1
+   value {value}
+   stumpOnClickCommand {command}
+ string categoryBreakStumpTemplate
+  div {category}
+   class PickerCategory
+ string tileHeader Gallery
  javascript
   async fetchTableInputs() {
-   return { rows: this.getPredictionsForThisTile().map(obj => obj.toObject()) }
-  }
-  getPredictionsForThisTile() {
-   const allChoices = this.getRootNode()
-    .getGrammarProgram()
-    .getTopNodeTypeDefinitions()
-   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
-   return filteredChoices.length ? filteredChoices : allChoices
+   return { rows: this.getChoices().map(obj => obj.toObject()) }
   }
   getTileBodyStumpCode() {
-   const choices = this.getPredictionsForThisTile()
    let lastCat = ""
-   return choices
-    .map(nodeDefinition => {
-     const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition() // todo: cleanup. need to get first word.
-     const nodeName = nodeId.split(".")[1]
-     const name = nodeName
-     const category = lodash.upperFirst(nodeId.split(".")[0])
-     let breaker = ""
-     if (lastCat !== category)
-      breaker = `div ${category}
-   class PickerCategory\n`
-     lastCat = category
-     return `${breaker}a ${name}
-   br
-    span ${nodeDefinition.getDescription()}
-   title ${nodeDefinition.getDescription()}
-   tabindex -1
-   value ${nodeId}
-   stumpOnClickCommand changeTileTypeCommand`
+   return this.getChoices()
+    .map(choice => {
+     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+     lastCat = choice.category
+     return this.qFormat(this.itemStumpTemplate, choice)
     })
     .join("\n")
   }
   getTileHeaderBern() {
-   return "Tile Gallery"
+   return this.tileHeader
   }
- string tileSize 480 420
- extends abstractTileTreeComponentNode
+PickerTileNode
+ extends abstractPickerTileNode
+ description Displays list of available tiles.
  crux tiles.picker
+ string tileHeader Tile Gallery
+ javascript
+  getChoices() {
+   const allChoices = this.getRootNode()
+    .getGrammarProgram()
+    .getTopNodeTypeDefinitions()
+   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
+   const theChoices = filteredChoices.length ? filteredChoices : allChoices
+   return theChoices.map(nodeDefinition => {
+    const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
+    const name = nodeId.split(".")[1] || ""
+    const category = lodash.upperFirst(nodeId.split(".")[0])
+    const description = nodeDefinition.getDescription()
+    return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
+   })
+  }

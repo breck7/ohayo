@@ -34,9 +34,11 @@ Ohayo is still beta, and we are still iterating quickly. We encourage you to pos
 |Grid Studio|https://github.com/ricklamers/gridstudio|2019||
 |Observable|https://observablehq.com/|2017||
 |Google Data Studio|https://datastudio.google.com/overview|2016|https://de.wikipedia.org/wiki/Google_Data_Studio|
+|Tidyverse|https://www.tidyverse.org/|2016|https://en.wikipedia.org/wiki/Tidyverse|
 |Vega Editor|https://vega.github.io/editor/|2015||
 |Amazon QuickSight|https://aws.amazon.com/quicksight/|2015||
 |xsv|https://github.com/BurntSushi/xsv|2014||
+|dplyr|https://dplyr.tidyverse.org/|2014||
 |JupyterLab|https://github.com/jupyterlab/jupyterlab|2014|https://en.wikipedia.org/wiki/Project_Jupyter|
 |OmniSci|https://www.omnisci.com/|2013|https://en.wikipedia.org/wiki/OmniSci|
 |xlwings|https://www.xlwings.org/|2013||

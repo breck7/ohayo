@@ -59,7 +59,7 @@ challengePlayNode
 challengeListNode
  description View all challenges
  string title Try a challenge:
- string itemFormat {id}. {question}
+ string itemFormat {question}
  extends abstractSnippetGalleryNode
  crux challenge.list
  javascript

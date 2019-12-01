@@ -5,11 +5,12 @@ abstractTileTreeComponentNode
  abstract
  cells tileNameCell
  _extendsJsClass AbstractTreeComponent
- inScope hashBangNode abstractTileTreeComponentNode hiddenNode maximizedNode abstractPagePositionNode commentNode
+ inScope hashBangNode abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode commentNode
  catchAllNodeType catchAllErrorNode
  int headerHeight 30
  int footerHeight 30
  string hiddenKey hidden
+ string visibleKey visible
  string pencilStumpTemplate
   span {icon}
    class TilePencilButton
@@ -333,7 +334,7 @@ abstractTileTreeComponentNode
     })
   }
   isVisible() {
-   return !this.has(this.hiddenKey)
+   return this.has(this.visibleKey) || this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey)
   }
   _isMaximized() {
    return this.has(TilesConstants.maximized)

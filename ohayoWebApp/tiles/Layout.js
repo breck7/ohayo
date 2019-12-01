@@ -113,6 +113,11 @@ class AbstractLayoutStrategy {
     this._wallViewPortHeight = wallViewPortHeight
   }
 
+  _getZoomLevel() {
+    const zoomLevel = this._tilesProgram.get("zoom")
+    return zoomLevel ? parseFloat(zoomLevel) : 1.0
+  }
+
   _getVisibleTiles() {
     return this._getTilesProgram()
       .getTiles()
@@ -143,25 +148,26 @@ class CustomLayout extends AbstractLayoutStrategy {
     const tiles = this._getVisibleTiles()
     const needLocations = []
     const dimensionMap = new Map()
+    const zoomLevel = this._getZoomLevel()
     tiles.forEach((tile, index) => {
       if (!tile.getLeft()) return needLocations.push(tile)
 
-      dimensionMap.set(tile, CustomLayout.getTileDimension(tile, tile.getLeft(), tile.getTop()))
+      dimensionMap.set(tile, CustomLayout._getTileDimension(tile, zoomLevel, tile.getLeft(), tile.getTop()))
     })
 
     let _top = 0
     needLocations.forEach((tile, index) => {
-      const dimension = CustomLayout.getTileDimension(tile, 0, _top)
+      const dimension = CustomLayout._getTileDimension(tile, zoomLevel, 0, _top)
       dimensionMap.set(tile, dimension)
       _top += dimension.height / 20
     })
 
     return dimensionMap
   }
-  static getTileDimension(tile, left, _top) {
+  static _getTileDimension(tile, zoomLevel, left, _top) {
     const gridSize = 20
-    const width = tile.getWidth()
-    const height = tile.getHeight()
+    const width = Math.floor(zoomLevel * tile.getWidth())
+    const height = Math.floor(zoomLevel * tile.getHeight())
     const dimension = {}
     if (left) dimension.left = parseInt(left) * gridSize
     if (_top) dimension.top = parseInt(_top) * gridSize
@@ -223,20 +229,22 @@ class ColumnLayout extends AbstractLayoutStrategy {
     let _top = 0
     const width = 800
     const padding = 10
+    const zoomLevel = this._getZoomLevel()
     const boxWidth = Math.max(800, this._getWallViewPortWidth())
     const left = Math.floor((boxWidth - 800) / 2)
 
     const dimensionMap = new Map()
     this._getVisibleTiles().forEach(tile => {
       const size = tile.getDefinedOrSuggestedSize()
+      const height = Math.floor(size.height * zoomLevel)
       const dimension = new TileDimension(tile, {
-        width: width,
-        height: size.height,
-        left: left,
+        width,
+        height,
+        left,
         top: _top
       })
       dimensionMap.set(tile, dimension)
-      _top += size.height + padding
+      _top += height + padding
     })
 
     return dimensionMap
@@ -248,13 +256,14 @@ class TiledLayout extends AbstractLayoutStrategy {
     let _top = 10
     let left = 10
     const increment = 30
+    const zoomLevel = this._getZoomLevel()
 
     const dimensionMap = new Map()
     this._getVisibleTiles().forEach(tile => {
       const size = tile.getDefinedOrSuggestedSize()
       const dimension = new TileDimension(tile, {
-        width: size.width,
-        height: size.height,
+        width: Math.floor(size.width * zoomLevel),
+        height: Math.floor(size.height * zoomLevel),
         left: left,
         top: _top
       })
@@ -270,11 +279,12 @@ class TiledLayout extends AbstractLayoutStrategy {
 class BinLayout extends AbstractLayoutStrategy {
   makeTileDimensionMap() {
     const dimensionMap = new Map()
+    const zoomLevel = this._getZoomLevel()
     const unsortedTiles = this._getVisibleTiles().map(tile => {
       const size = tile.getDefinedOrSuggestedSize()
       return {
-        width: size.width,
-        height: size.height,
+        width: Math.floor(size.width * zoomLevel),
+        height: Math.floor(size.height * zoomLevel),
         tile: tile
       }
     })

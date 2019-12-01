@@ -1,4 +1,4 @@
-html.h1 Cancer in the U.S.
+html.h1 Cancer Rates in the U.S.
 cancer.cases
  tables.basic
  show.sum Female Total female cases
@@ -11,3 +11,4 @@ cancer.cases
    xColumn CancerType
    yColumn Male
 layout column
+categories medicine

@@ -4,6 +4,15 @@ DidYouMeanTileNode
  description Provides suggestions for misspelled tiles.
  extends abstractTileTreeComponentNode
  crux tiles.didyoumean
+ string bodyStumpTemplate
+  div
+   span No tile '{input}' found. Line {lineNo}. Did you mean
+   a {closestTile}
+    stumpCollapse
+    tabindex -1
+    value {closestTile}
+    stumpOnClickCommand changeTileTypeCommand
+   span ?
  javascript
   getTileBodyStumpCode() {
    const input = this.getFirstWord()
@@ -22,14 +31,7 @@ DidYouMeanTileNode
     if (!input) return `div Your program has a blank line on line ${lineNo}.`
     return `div No tile '${input}' found.`
    }
-   return `div
-  span No tile '${input}' found. Line ${lineNo}. Did you mean
-  a ${closestTile}
-   stumpCollapse
-   tabindex -1
-   value ${closestTile}
-   stumpOnClickCommand changeTileTypeCommand
-  span ?`
+   return this.qFormat(this.bodyStumpTemplate, {input, lineNo, closestTile})
   }
   getErrors() {
    return [new jtree.UnknownNodeTypeError(this)]

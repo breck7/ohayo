@@ -1,30 +1,87 @@
 tooling onsave jtree build produceMaiaGrammar
-templatesListNode
- description View templates
- frequency .11
- string title All templates:
- string itemFormat {description}
- extends abstractTemplateGalleryNode
- crux templates.list
+abstractTemplatePickerTileNode
+ extends abstractMaiaTileNode
+ todo This is duplicate code from picker. Add mixins to Grammar?
+ string tileSize 480 420
+ abstract
+ string hakonTemplate
+  .abstractTemplatePickerTileNode
+   .PickerCategory
+    width 100%
+    margin-top 20px
+    text-align center
+   .TileBody
+    display flex
+    flex-flow row wrap
+    a
+     &:hover
+      background-color {borderColor}
+     padding 10px
+     margin 5px
+     height 30px
+     background-color {backgroundColor}
+     border 1px solid {borderColor}
+     overflow hidden
+     text-align center
+     text-overflow ellipsis
+     font-size 14px
+     width 120px
+     span
+      font-size 70%
+ string itemStumpTemplate
+  {categoryBreak}
+  a {name}
+   br
+    span {description}
+   title {description}
+   tabindex -1
+   value {value}
+   class pickerItemButton
+   stumpOnClickCommand {command}
+ string categoryBreakStumpTemplate
+  div {category}
+   class PickerCategory
+ string tileHeader Gallery
  javascript
-  getGalleryNodes() {
+  async fetchTableInputs() {
+   return { rows: this.getChoices().map(obj => obj.toObject()) }
+  }
+  getTileBodyStumpCode() {
+   let lastCat = ""
+   return this.getChoices()
+    .map(choice => {
+     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+     lastCat = choice.category
+     return this.qFormat(this.itemStumpTemplate, choice)
+    })
+    .join("\n")
+  }
+  getTileHeaderBern() {
+   return this.tileHeader
+  }
+templatesListNode
+ extends abstractTemplatePickerTileNode
+ description Displays list of available templates.
+ frequency .11
+ crux templates.list
+ string tileHeader Template Gallery
+ javascript
+  getChoices() {
    // todo: cleanup.
-   return new jtree.TreeNode(
-    this._getTheTemplates().map(node => {
+   const choices = this._getTheTemplates().map(node => {
      const id = node
       .getWord(1)
       .replace("templates/", "")
       .replace(this.maiaFileExtensionKey, "")
      return {
-      id: id,
-      description: node
-       .getNode("data")
-       .getChildren()[0]
-       .getWordsFrom(1)
-       .join(" ")
+      command: "createProgramFromTemplateCommand",
+      name: node.get("data html.h1"),
+      value: id,
+      category: lodash.upperFirst(node.get("data categories")),
+      description: ""
      }
     })
-   )
+    return lodash.sortBy(choices, "category")
   }
   _getTheTemplates() {
    // todo: trim?

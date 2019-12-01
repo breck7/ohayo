@@ -8,65 +8,30 @@ class ThemeTreeComponent extends AbstractTreeComponent {
     return `styleTag ${CodeMirrorCss} .CodeMirror{color: ${theme.mediumBlack};} .CodeMirror .CodeMirror-gutters,.cm-s-oceanic-next .CodeMirror-gutters {background: ${theme.solidBackgroundColorOrTransparent}}`
   }
   toHakonCode() {
-    const meyerReset = `html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,audio,video
+    const theme = this.getTheme()
+    return `html,body,h1,h2,h3,h4,h5,h6,table,tr,td
  margin 0
  padding 0
- border 0
- font-size 100%
- font inherit
- vertical-align baseline
-article,aside,figcaption,figure,footer,header,hgroup,menu,nav,section
- display block
-body
- line-height 1.3
- overscroll-behavior-x none
-ol,ul
- list-style none
-table
- border-collapse collapse
- border-spacing 0`
-
-    const theme = this.getTheme()
-    return `${meyerReset}
 
 html,body
  width 100%
  height 100%
- margin 0
- padding 0
  font-family ${theme.fonts}
  color ${theme.mediumBlack}
+
+body
+ overscroll-behavior-x none
 
 html
  background ${theme.bodyBackground}
 
 table
- padding 0
- margin 0
  border-collapse collapse
  border-spacing 0
  table-layout fixed
- tr,td
-  padding 0
-  margin 0
 
 .ThemeTreeComponent
  display none
-
-h1
- font-size 200%
-
-h2
- font-size 166%
-
-h3
- font-size 133%
-
-h4
- font-size 120%
-
-p
- margin 1em 0
 
 a
  cursor pointer

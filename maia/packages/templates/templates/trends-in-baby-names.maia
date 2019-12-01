@@ -8,3 +8,4 @@ samples.babyNames
     xColumn year
     yColumn percent
 layout column
+categories parenting

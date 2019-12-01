@@ -4,7 +4,7 @@ tileKeywordCell
 abstractMaiaTileNode
  abstract
  extends abstractTileTreeComponentNode
- inScope abstractMaiaTileNode hiddenNode maximizedNode abstractPagePositionNode commentNode
+ inScope abstractMaiaTileNode abstractCoreTileSettingTerminalNode commentNode
  cells tileKeywordCell
  string settingKey setting
  string rowDisplayLimitKey rowDisplayLimit

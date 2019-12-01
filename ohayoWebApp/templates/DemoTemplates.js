@@ -8,8 +8,8 @@ ohayo.maia
   parser text
   hidden
   markdown.toHtml
- challenge.list
  templates.list
+ challenge.list
  layout column`
 
 module.exports = DemoTemplates

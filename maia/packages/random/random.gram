@@ -1,15 +1,15 @@
 tooling onsave jtree build produceMaiaGrammar
 abstractRandomTileNode
  abstract
+ extends abstractProviderNode
  javascript
   async fetchTableInputs() {
    let howMany = this.quantityCell || 30
    const rows = []
-   while (howMany) {
-    rows.push(this._genRow())
-    howMany--
+   for (let index = 1; index <= howMany; index++) {
+    rows.push(this._genRow(index))
    }
-   return { rows: rows }
+   return { rows }
   }
 randomFloatNode
  description Generates uniform random floats between min and max.
@@ -19,10 +19,10 @@ randomFloatNode
  float min 0
  float max 1
  javascript
-  _genRow() {
-   return { number: jtree.Utils.randomUniformFloat(parseFloat(this.min), parseFloat(this.max)) }
+  _genRow(index) {
+   return { index, number: jtree.Utils.randomUniformFloat(this.minCell, this.maxCell, Math.random()) }
   }
- extends abstractProviderNode
+ extends abstractRandomTileNode
  crux random.float
 randomIntNode
  description Generates uniform random ints between min and max.
@@ -32,8 +32,8 @@ randomIntNode
  int min 0
  int max 100
  javascript
-  _genRow() {
-   return { number: jtree.Utils.randomUniformInt(parseInt(this.min), parseInt(this.max)) }
+  _genRow(index) {
+   return { index, number: jtree.Utils.randomUniformInt(this.minCell, this.maxCell, Math.random()) }
   }
- extends abstractProviderNode
  crux random.int
+ extends abstractRandomTileNode

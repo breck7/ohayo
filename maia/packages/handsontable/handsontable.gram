@@ -7,10 +7,12 @@ handsontableBasicNode
  string hakonTemplate
   .hot
    color black
+ string bodyStumpTemplate
+  div
+   class hot
  javascript
   getTileBodyStumpCode() {
-   return `div
-  class hot`
+   return this.bodyStumpTemplate
   }
   // todo: allow editing
   treeComponentWillUnmount() {
@@ -25,11 +27,11 @@ handsontableBasicNode
    const rows = this.getRowsWithRowDisplayLimit()
    const data = this.getRowsAsDataTableArrayWithHeader(rows, colNames)
    const tileDimension = this.getTileDimensionIfAny()
-   const width = tileDimension.width - 20 // remove 10 for boddy padding?
-   const height = tileDimension.height - 60
    const container = this.getStumpNode().findStumpNodeByChild("class hot")
    const app = this.getWebApp()
    if (this.isNodeJs()) return undefined
+   const width = tileDimension.width - 20 // remove 10 for boddy padding?
+   const height = tileDimension.height - 60
    this._hot = new Handsontable(container.getShadow().getShadowElement(), {
     data: data,
     rowHeaders: true,

@@ -11,3 +11,4 @@ reddit.all
   vega.bar Top Stories on Reddit Right Now
    yColumn score
 layout column
+categories socialMedia

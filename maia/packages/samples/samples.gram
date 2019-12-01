@@ -112,6 +112,12 @@ samplesGapMinderNode
  string dummyDataSetName gapMinder
  extends abstractDummyNode
  crux samples.gapMinder
+samplesPeriodicTableNode
+ description Periodic table from https://gist.github.com/GoodmanSciences
+ frequency .15
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ string url maia/packages/samples/periodic-table.csv
+ crux samples.periodicTable
 samplesLettersNode
  description Letter usage frequency in English from mobostock.
  frequency .03

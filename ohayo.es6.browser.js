@@ -25177,7 +25177,6 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           "tiles.didyoumean": DidYouMeanTileNode,
           "tiles.picker": PickerTileNode,
-          "templates.list": templatesListNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -25253,6 +25252,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "samples.populations": samplesPopulationsNode,
           "samples.babyNames": samplesBabyNamesNode,
           "samples.declaration": samplesDeclarationNode,
+          "samples.periodicTable": samplesPeriodicTableNode,
           "samples.letters": samplesLettersNode,
           "samples.presidents": samplesPresidentsNode,
           "ucimlr.datasets": ucimlrDatasetsNode,
@@ -25303,12 +25303,15 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "debug.parserTest": debugParserTestNode,
           "editor.files": editorFilesNode,
           "editor.commandHistory": editorCommandHistoryNode,
+          "math.gen": mathGenNode,
           "random.float": randomFloatNode,
           "random.int": randomIntNode,
           "samples.tinyIris": samplesTinyIrisNode,
           "shell.csv": toCsvNode,
+          "templates.list": templatesListNode,
           "#!": hashBangNode,
           hidden: hiddenNode,
+          visible: visibleNode,
           maximized: maximizedNode,
           left: leftNode,
           top: topNode,
@@ -25379,6 +25382,9 @@ pre
       return `span {icon}
  class TilePencilButton
  stumpOnClickCommand toggleToolbarCommand`
+    }
+    get visibleKey() {
+      return `visible`
     }
     get hiddenKey() {
       return `hidden`
@@ -25672,7 +25678,7 @@ pre
       })
     }
     isVisible() {
-      return !this.has(this.hiddenKey)
+      return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
     }
     _isMaximized() {
       return this.has(TilesConstants.maximized)
@@ -25921,6 +25927,16 @@ ${cellInputs.join("\n")}`
   }
 
   class DidYouMeanTileNode extends abstractTileTreeComponentNode {
+    get bodyStumpTemplate() {
+      return `div
+ span No tile '{input}' found. Line {lineNo}. Did you mean
+ a {closestTile}
+  stumpCollapse
+  tabindex -1
+  value {closestTile}
+  stumpOnClickCommand changeTileTypeCommand
+ span ?`
+    }
     getTileBodyStumpCode() {
       const input = this.getFirstWord()
       const lineNo =
@@ -25938,14 +25954,7 @@ ${cellInputs.join("\n")}`
         if (!input) return `div Your program has a blank line on line ${lineNo}.`
         return `div No tile '${input}' found.`
       }
-      return `div
-span No tile '${input}' found. Line ${lineNo}. Did you mean
-a ${closestTile}
- stumpCollapse
- tabindex -1
- value ${closestTile}
- stumpOnClickCommand changeTileTypeCommand
-span ?`
+      return this.qFormat(this.bodyStumpTemplate, { input, lineNo, closestTile })
     }
     getErrors() {
       return [new jtree.UnknownNodeTypeError(this)]
@@ -25955,9 +25964,23 @@ span ?`
     }
   }
 
-  class PickerTileNode extends abstractTileTreeComponentNode {
-    get tileSize() {
-      return `480 420`
+  class abstractPickerTileNode extends abstractTileTreeComponentNode {
+    get tileHeader() {
+      return `Gallery`
+    }
+    get categoryBreakStumpTemplate() {
+      return `div {category}
+ class PickerCategory`
+    }
+    get itemStumpTemplate() {
+      return `{categoryBreak}
+a {name}
+ br
+  span {description}
+ title {description}
+ tabindex -1
+ value {value}
+ stumpOnClickCommand {command}`
     }
     get hakonTemplate() {
       return `.PickerTileNode
@@ -25984,42 +26007,44 @@ span ?`
    span
     font-size 70%`
     }
-    async fetchTableInputs() {
-      return { rows: this.getPredictionsForThisTile().map(obj => obj.toObject()) }
+    get tileSize() {
+      return `480 420`
     }
-    getPredictionsForThisTile() {
-      const allChoices = this.getRootNode()
-        .getGrammarProgram()
-        .getTopNodeTypeDefinitions()
-      const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
-      return filteredChoices.length ? filteredChoices : allChoices
+    async fetchTableInputs() {
+      return { rows: this.getChoices().map(obj => obj.toObject()) }
     }
     getTileBodyStumpCode() {
-      const choices = this.getPredictionsForThisTile()
       let lastCat = ""
-      return choices
-        .map(nodeDefinition => {
-          const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition() // todo: cleanup. need to get first word.
-          const nodeName = nodeId.split(".")[1]
-          const name = nodeName
-          const category = lodash.upperFirst(nodeId.split(".")[0])
-          let breaker = ""
-          if (lastCat !== category)
-            breaker = `div ${category}
- class PickerCategory\n`
-          lastCat = category
-          return `${breaker}a ${name}
- br
-  span ${nodeDefinition.getDescription()}
- title ${nodeDefinition.getDescription()}
- tabindex -1
- value ${nodeId}
- stumpOnClickCommand changeTileTypeCommand`
+      return this.getChoices()
+        .map(choice => {
+          choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+          lastCat = choice.category
+          return this.qFormat(this.itemStumpTemplate, choice)
         })
         .join("\n")
     }
     getTileHeaderBern() {
-      return "Tile Gallery"
+      return this.tileHeader
+    }
+  }
+
+  class PickerTileNode extends abstractPickerTileNode {
+    get tileHeader() {
+      return `Tile Gallery`
+    }
+    getChoices() {
+      const allChoices = this.getRootNode()
+        .getGrammarProgram()
+        .getTopNodeTypeDefinitions()
+      const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
+      const theChoices = filteredChoices.length ? filteredChoices : allChoices
+      return theChoices.map(nodeDefinition => {
+        const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
+        const name = nodeId.split(".")[1] || ""
+        const category = lodash.upperFirst(nodeId.split(".")[0])
+        const description = nodeDefinition.getDescription()
+        return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
+      })
     }
   }
 
@@ -26028,7 +26053,6 @@ span ?`
       return new jtree.TreeNode.Parser(
         undefined,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          "templates.list": templatesListNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -26104,6 +26128,7 @@ span ?`
           "samples.populations": samplesPopulationsNode,
           "samples.babyNames": samplesBabyNamesNode,
           "samples.declaration": samplesDeclarationNode,
+          "samples.periodicTable": samplesPeriodicTableNode,
           "samples.letters": samplesLettersNode,
           "samples.presidents": samplesPresidentsNode,
           "ucimlr.datasets": ucimlrDatasetsNode,
@@ -26154,11 +26179,14 @@ span ?`
           "debug.parserTest": debugParserTestNode,
           "editor.files": editorFilesNode,
           "editor.commandHistory": editorCommandHistoryNode,
+          "math.gen": mathGenNode,
           "random.float": randomFloatNode,
           "random.int": randomIntNode,
           "samples.tinyIris": samplesTinyIrisNode,
           "shell.csv": toCsvNode,
+          "templates.list": templatesListNode,
           hidden: hiddenNode,
+          visible: visibleNode,
           maximized: maximizedNode,
           left: leftNode,
           top: topNode,
@@ -26494,50 +26522,9 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
     }
   }
 
-  class templatesListNode extends abstractTemplateGalleryNode {
-    get itemFormat() {
-      return `{description}`
-    }
-    get title() {
-      return `All templates:`
-    }
-    getGalleryNodes() {
-      // todo: cleanup.
-      return new jtree.TreeNode(
-        this._getTheTemplates().map(node => {
-          const id = node
-            .getWord(1)
-            .replace("templates/", "")
-            .replace(this.maiaFileExtensionKey, "")
-          return {
-            id: id,
-            description: node
-              .getNode("data")
-              .getChildren()[0]
-              .getWordsFrom(1)
-              .join(" ")
-          }
-        })
-      )
-    }
-    _getTheTemplates() {
-      // todo: trim?
-      return typeof TemplatesStamp === "undefined"
-        ? jtree.TreeNode.fromDisk("maia/packages/templates/Templates.stamp").trim()
-        : new jtree.TreeNode(TemplatesStamp).trim()
-    }
-    getProgramTemplate(id) {
-      const node = this._getTheTemplates().filter(node => node.getContent() === `templates/${id}${this.maiaFileExtensionKey}`)[0]
-      return {
-        template: node.getNode("data").childrenToString(),
-        name: id + this.maiaFileExtensionKey
-      }
-    }
-  }
-
   class challengeListNode extends abstractSnippetGalleryNode {
     get itemFormat() {
-      return `{id}. {question}`
+      return `{question}`
     }
     get title() {
       return `Try a challenge:`
@@ -27011,6 +26998,10 @@ h3 {number}`
     get titleCell() {
       return this.getWordsFrom(0)
     }
+    get bodyStumpTemplate() {
+      return `div
+ class divForExternalLibrary`
+    }
     get markName() {
       return `bar`
     }
@@ -27025,8 +27016,7 @@ h3 {number}`
     }
     // todo: I don't think vega handles . in column names.
     getTileBodyStumpCode() {
-      return `div
-class divForExternalLibrary`
+      return this.bodyStumpTemplate
     }
     _getColumnToField(columnName) {
       if (!columnName) return undefined
@@ -27069,7 +27059,7 @@ class divForExternalLibrary`
       return this.getTileDimensionIfAny().width - 120
     }
     _getTileHeight() {
-      return this.getTileDimensionIfAny().height - 120
+      return this.getTileDimensionIfAny().height - 90
     }
     treeComponentDidMount() {
       this.treeComponentDidUpdate()
@@ -27921,6 +27911,10 @@ a Run Tile Quality Check
   }
 
   class handsontableBasicNode extends abstractChartNode {
+    get bodyStumpTemplate() {
+      return `div
+ class hot`
+    }
     get hakonTemplate() {
       return `.hot
  color black`
@@ -27935,8 +27929,7 @@ a Run Tile Quality Check
       return `1200 500`
     }
     getTileBodyStumpCode() {
-      return `div
-class hot`
+      return this.bodyStumpTemplate
     }
     // todo: allow editing
     treeComponentWillUnmount() {
@@ -27951,11 +27944,11 @@ class hot`
       const rows = this.getRowsWithRowDisplayLimit()
       const data = this.getRowsAsDataTableArrayWithHeader(rows, colNames)
       const tileDimension = this.getTileDimensionIfAny()
-      const width = tileDimension.width - 20 // remove 10 for boddy padding?
-      const height = tileDimension.height - 60
       const container = this.getStumpNode().findStumpNodeByChild("class hot")
       const app = this.getWebApp()
       if (this.isNodeJs()) return undefined
+      const width = tileDimension.width - 20 // remove 10 for boddy padding?
+      const height = tileDimension.height - 60
       this._hot = new Handsontable(container.getShadow().getShadowElement(), {
         data: data,
         rowHeaders: true,
@@ -27995,9 +27988,16 @@ class hot`
     get tileSize() {
       return `400 400`
     }
-    _getListItem(label, row) {
-      return ` li
-  span ${label}`
+    get listItemStumpTemplate() {
+      return `li
+ span {label}`
+    }
+    get bodyStumpTemplate() {
+      return `ol
+ {items}`
+    }
+    _getListItem(label) {
+      return this.qFormat(this.listItemStumpTemplate, { label })
     }
     _getLabelColumnName() {
       // todo: more automatic! Need to fix our columns/keywords issues
@@ -28005,10 +28005,10 @@ class hot`
     }
     getTileBodyStumpCode() {
       const labelColumnName = this._getLabelColumnName()
-      return `ol
-${this.getRowsWithRowDisplayLimit()
-  .map(row => this._getListItem(jtree.Utils.stripHtml(row.getRowOriginalValue(labelColumnName)), row))
-  .join("\n")}`
+      const items = this.getRowsWithRowDisplayLimit()
+        .map(row => this._getListItem(jtree.Utils.stripHtml(row.getRowOriginalValue(labelColumnName)), row))
+        .join("\n")
+      return this.qFormat(this.bodyStumpTemplate, { items })
     }
   }
 
@@ -28027,6 +28027,11 @@ ${this.getRowsWithRowDisplayLimit()
       return `label getTitlePotential
 link isLink`
     }
+    get listItemHakonTemplate() {
+      return `li
+ a {label}
+  href {link}`
+    }
     get dummyDataSetName() {
       return `telescopes`
     }
@@ -28037,9 +28042,7 @@ link isLink`
     _getListItem(label, row) {
       const urlColumnName = this._getUrlColumnName()
       if (!urlColumnName) return super._getListItem(label, row)
-      return ` li
-a ${label}
- href ${jtree.Utils.stripHtml(row.getRowOriginalValue(urlColumnName))}`
+      return this.qFormat(this.listItemHakonTemplate, { label, link: jtree.Utils.stripHtml(row.getRowOriginalValue(urlColumnName)) })
     }
   }
 
@@ -28813,6 +28816,12 @@ input
   class samplesDeclarationNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/declaration-of-independence.text`
+    }
+  }
+
+  class samplesPeriodicTableNode extends abstractFixedDatasetFromMaiaCollectionNode {
+    get url() {
+      return `maia/packages/samples/periodic-table.csv`
     }
   }
 
@@ -29735,7 +29744,46 @@ class LargeLabel`
     }
   }
 
-  class randomFloatNode extends abstractProviderNode {
+  class mathGenNode extends abstractProviderNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get mathFunctionNameCell() {
+      return this.getWord(1)
+    }
+    get fromCell() {
+      return parseFloat(this.getWord(2))
+    }
+    get toCell() {
+      return parseFloat(this.getWord(3))
+    }
+    get incrementCell() {
+      return parseFloat(this.getWord(4))
+    }
+    async fetchTableInputs() {
+      const rows = []
+      const fn = Math[this.getWord(1)]
+      for (let input = parseFloat(this.fromCell); input < parseFloat(this.toCell); input += parseFloat(this.incrementCell)) {
+        rows.push({ input, output: fn(input) })
+      }
+      return {
+        rows
+      }
+    }
+  }
+
+  class abstractRandomTileNode extends abstractProviderNode {
+    async fetchTableInputs() {
+      let howMany = this.quantityCell || 30
+      const rows = []
+      for (let index = 1; index <= howMany; index++) {
+        rows.push(this._genRow(index))
+      }
+      return { rows }
+    }
+  }
+
+  class randomFloatNode extends abstractRandomTileNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
@@ -29754,12 +29802,12 @@ class LargeLabel`
     get min() {
       return 0
     }
-    _genRow() {
-      return { number: jtree.Utils.randomUniformFloat(parseFloat(this.min), parseFloat(this.max)) }
+    _genRow(index) {
+      return { index, number: jtree.Utils.randomUniformFloat(this.minCell, this.maxCell, Math.random()) }
     }
   }
 
-  class randomIntNode extends abstractProviderNode {
+  class randomIntNode extends abstractRandomTileNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
@@ -29778,8 +29826,8 @@ class LargeLabel`
     get min() {
       return 0
     }
-    _genRow() {
-      return { number: jtree.Utils.randomUniformInt(parseInt(this.min), parseInt(this.max)) }
+    _genRow(index) {
+      return { index, number: jtree.Utils.randomUniformInt(this.minCell, this.maxCell, Math.random()) }
     }
   }
 
@@ -29818,6 +29866,107 @@ class LargeLabel`
     }
   }
 
+  class abstractTemplatePickerTileNode extends abstractMaiaTileNode {
+    get tileHeader() {
+      return `Gallery`
+    }
+    get categoryBreakStumpTemplate() {
+      return `div {category}
+ class PickerCategory`
+    }
+    get itemStumpTemplate() {
+      return `{categoryBreak}
+a {name}
+ br
+  span {description}
+ title {description}
+ tabindex -1
+ value {value}
+ class pickerItemButton
+ stumpOnClickCommand {command}`
+    }
+    get hakonTemplate() {
+      return `.abstractTemplatePickerTileNode
+ .PickerCategory
+  width 100%
+  margin-top 20px
+  text-align center
+ .TileBody
+  display flex
+  flex-flow row wrap
+  a
+   &:hover
+    background-color {borderColor}
+   padding 10px
+   margin 5px
+   height 30px
+   background-color {backgroundColor}
+   border 1px solid {borderColor}
+   overflow hidden
+   text-align center
+   text-overflow ellipsis
+   font-size 14px
+   width 120px
+   span
+    font-size 70%`
+    }
+    get tileSize() {
+      return `480 420`
+    }
+    async fetchTableInputs() {
+      return { rows: this.getChoices().map(obj => obj.toObject()) }
+    }
+    getTileBodyStumpCode() {
+      let lastCat = ""
+      return this.getChoices()
+        .map(choice => {
+          choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+          lastCat = choice.category
+          return this.qFormat(this.itemStumpTemplate, choice)
+        })
+        .join("\n")
+    }
+    getTileHeaderBern() {
+      return this.tileHeader
+    }
+  }
+
+  class templatesListNode extends abstractTemplatePickerTileNode {
+    get tileHeader() {
+      return `Template Gallery`
+    }
+    getChoices() {
+      // todo: cleanup.
+      const choices = this._getTheTemplates().map(node => {
+        const id = node
+          .getWord(1)
+          .replace("templates/", "")
+          .replace(this.maiaFileExtensionKey, "")
+        return {
+          command: "createProgramFromTemplateCommand",
+          name: node.get("data html.h1"),
+          value: id,
+          category: lodash.upperFirst(node.get("data categories")),
+          description: ""
+        }
+      })
+      return lodash.sortBy(choices, "category")
+    }
+    _getTheTemplates() {
+      // todo: trim?
+      return typeof TemplatesStamp === "undefined"
+        ? jtree.TreeNode.fromDisk("maia/packages/templates/Templates.stamp").trim()
+        : new jtree.TreeNode(TemplatesStamp).trim()
+    }
+    getProgramTemplate(id) {
+      const node = this._getTheTemplates().filter(node => node.getContent() === `templates/${id}${this.maiaFileExtensionKey}`)[0]
+      return {
+        template: node.getNode("data").childrenToString(),
+        name: id + this.maiaFileExtensionKey
+      }
+    }
+  }
+
   class abstractDocumentSettingNode extends jtree.GrammarBackedNode {}
 
   class layoutNode extends abstractDocumentSettingNode {
@@ -29826,6 +29975,30 @@ class LargeLabel`
     }
     get layoutOptionCell() {
       return this.getWord(1)
+    }
+  }
+
+  class zoomNode extends abstractDocumentSettingNode {
+    get documentSettingNameCell() {
+      return this.getWord(0)
+    }
+    get zoomCell() {
+      return parseFloat(this.getWord(1))
+    }
+  }
+
+  class defaultHiddenNode extends abstractDocumentSettingNode {
+    get documentSettingNameCell() {
+      return this.getWord(0)
+    }
+  }
+
+  class documentCategoriesNode extends abstractDocumentSettingNode {
+    get documentSettingNameCell() {
+      return this.getWord(0)
+    }
+    get documentCategoryCell() {
+      return this.getWordsFrom(1)
     }
   }
 
@@ -29868,6 +30041,9 @@ class LargeLabel`
     }
     getTab() {
       return this._tab
+    }
+    tilesAreVisible() {
+      return !this.has("defaultHidden")
     }
     canUseCustomLayout() {
       const definedLayout = this.get(TilesConstants.layout)
@@ -29936,7 +30112,6 @@ class LargeLabel`
         DidYouMeanTileNode,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           "tiles.picker": PickerTileNode,
-          "templates.list": templatesListNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -30012,6 +30187,7 @@ class LargeLabel`
           "samples.populations": samplesPopulationsNode,
           "samples.babyNames": samplesBabyNamesNode,
           "samples.declaration": samplesDeclarationNode,
+          "samples.periodicTable": samplesPeriodicTableNode,
           "samples.letters": samplesLettersNode,
           "samples.presidents": samplesPresidentsNode,
           "ucimlr.datasets": ucimlrDatasetsNode,
@@ -30062,11 +30238,16 @@ class LargeLabel`
           "debug.parserTest": debugParserTestNode,
           "editor.files": editorFilesNode,
           "editor.commandHistory": editorCommandHistoryNode,
+          "math.gen": mathGenNode,
           "random.float": randomFloatNode,
           "random.int": randomIntNode,
           "samples.tinyIris": samplesTinyIrisNode,
           "shell.csv": toCsvNode,
+          "templates.list": templatesListNode,
           layout: layoutNode,
+          zoom: zoomNode,
+          defaultHidden: defaultHiddenNode,
+          categories: documentCategoriesNode,
           "#!": hashBangNode,
           comment: commentNode
         }),
@@ -30135,6 +30316,10 @@ commentCell
  highlightScope comment
 commentKeywordCell
  highlightScope comment
+documentCategoryCell
+ enum shopping chemistry programming socialMedia math parenting writing machineLearning
+zoomCell
+ extends numberCell
 tileKeywordCell
  highlightScope keyword
 parserIdsCell
@@ -30192,6 +30377,14 @@ needleColumnNameCell
  extends columnNameCell
 haystackColumnNameCell
  extends columnNameCell
+mathFunctionNameCell
+ enum sin cos tan log exp
+fromCell
+ extends numberCell
+toCell
+ extends numberCell
+incrementCell
+ extends numberCell
 subredditNameCell
 delimiterCell
 startIndexCell
@@ -30214,11 +30407,12 @@ abstractTileTreeComponentNode
  abstract
  cells tileNameCell
  _extendsJsClass AbstractTreeComponent
- inScope hashBangNode abstractTileTreeComponentNode hiddenNode maximizedNode abstractPagePositionNode commentNode
+ inScope hashBangNode abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode commentNode
  catchAllNodeType catchAllErrorNode
  int headerHeight 30
  int footerHeight 30
  string hiddenKey hidden
+ string visibleKey visible
  string pencilStumpTemplate
   span {icon}
    class TilePencilButton
@@ -30549,7 +30743,7 @@ abstractTileTreeComponentNode
    })
   }
   isVisible() {
-   return !this.has(this.hiddenKey)
+   return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
   }
   _isMaximized() {
    return this.has(TilesConstants.maximized)
@@ -30799,6 +30993,15 @@ DidYouMeanTileNode
  description Provides suggestions for misspelled tiles.
  extends abstractTileTreeComponentNode
  crux tiles.didyoumean
+ string bodyStumpTemplate
+  div
+   span No tile '{input}' found. Line {lineNo}. Did you mean
+   a {closestTile}
+    stumpCollapse
+    tabindex -1
+    value {closestTile}
+    stumpOnClickCommand changeTileTypeCommand
+   span ?
  javascript
   getTileBodyStumpCode() {
    const input = this.getFirstWord()
@@ -30817,14 +31020,7 @@ DidYouMeanTileNode
     if (!input) return \`div Your program has a blank line on line \${lineNo}.\`
     return \`div No tile '\${input}' found.\`
    }
-   return \`div
-  span No tile '\${input}' found. Line \${lineNo}. Did you mean
-  a \${closestTile}
-   stumpCollapse
-   tabindex -1
-   value \${closestTile}
-   stumpOnClickCommand changeTileTypeCommand
-  span ?\`
+   return this.qFormat(this.bodyStumpTemplate, { input, lineNo, closestTile })
   }
   getErrors() {
    return [new jtree.UnknownNodeTypeError(this)]
@@ -30832,8 +31028,10 @@ DidYouMeanTileNode
   getTileHeaderBern() {
    return ""
   }
-PickerTileNode
- description Displays list of available tiles.
+abstractPickerTileNode
+ extends abstractTileTreeComponentNode
+ string tileSize 480 420
+ abstract
  string hakonTemplate
   .PickerTileNode
    .PickerCategory
@@ -30858,51 +31056,60 @@ PickerTileNode
      width 120px
      span
       font-size 70%
+ string itemStumpTemplate
+  {categoryBreak}
+  a {name}
+   br
+    span {description}
+   title {description}
+   tabindex -1
+   value {value}
+   stumpOnClickCommand {command}
+ string categoryBreakStumpTemplate
+  div {category}
+   class PickerCategory
+ string tileHeader Gallery
  javascript
   async fetchTableInputs() {
-   return { rows: this.getPredictionsForThisTile().map(obj => obj.toObject()) }
-  }
-  getPredictionsForThisTile() {
-   const allChoices = this.getRootNode()
-    .getGrammarProgram()
-    .getTopNodeTypeDefinitions()
-   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
-   return filteredChoices.length ? filteredChoices : allChoices
+   return { rows: this.getChoices().map(obj => obj.toObject()) }
   }
   getTileBodyStumpCode() {
-   const choices = this.getPredictionsForThisTile()
    let lastCat = ""
-   return choices
-    .map(nodeDefinition => {
-     const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition() // todo: cleanup. need to get first word.
-     const nodeName = nodeId.split(".")[1]
-     const name = nodeName
-     const category = lodash.upperFirst(nodeId.split(".")[0])
-     let breaker = ""
-     if (lastCat !== category)
-      breaker = \`div \${category}
-   class PickerCategory\\n\`
-     lastCat = category
-     return \`\${breaker}a \${name}
-   br
-    span \${nodeDefinition.getDescription()}
-   title \${nodeDefinition.getDescription()}
-   tabindex -1
-   value \${nodeId}
-   stumpOnClickCommand changeTileTypeCommand\`
+   return this.getChoices()
+    .map(choice => {
+     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+     lastCat = choice.category
+     return this.qFormat(this.itemStumpTemplate, choice)
     })
     .join("\\n")
   }
   getTileHeaderBern() {
-   return "Tile Gallery"
+   return this.tileHeader
   }
- string tileSize 480 420
- extends abstractTileTreeComponentNode
+PickerTileNode
+ extends abstractPickerTileNode
+ description Displays list of available tiles.
  crux tiles.picker
+ string tileHeader Tile Gallery
+ javascript
+  getChoices() {
+   const allChoices = this.getRootNode()
+    .getGrammarProgram()
+    .getTopNodeTypeDefinitions()
+   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
+   const theChoices = filteredChoices.length ? filteredChoices : allChoices
+   return theChoices.map(nodeDefinition => {
+    const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
+    const name = nodeId.split(".")[1] || ""
+    const category = lodash.upperFirst(nodeId.split(".")[0])
+    const description = nodeDefinition.getDescription()
+    return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
+   })
+  }
 abstractMaiaTileNode
  abstract
  extends abstractTileTreeComponentNode
- inScope abstractMaiaTileNode hiddenNode maximizedNode abstractPagePositionNode commentNode
+ inScope abstractMaiaTileNode abstractCoreTileSettingTerminalNode commentNode
  cells tileKeywordCell
  string settingKey setting
  string rowDisplayLimitKey rowDisplayLimit
@@ -31174,48 +31381,10 @@ abstractTemplateGalleryNode
     value {value}
     class createProgramButton
     stumpOnClickCommand createProgramFromTemplateCommand
-templatesListNode
- description View templates
- frequency .11
- string title All templates:
- string itemFormat {description}
- extends abstractTemplateGalleryNode
- crux templates.list
- javascript
-  getGalleryNodes() {
-   // todo: cleanup.
-   return new jtree.TreeNode(
-    this._getTheTemplates().map(node => {
-     const id = node
-      .getWord(1)
-      .replace("templates/", "")
-      .replace(this.maiaFileExtensionKey, "")
-     return {
-      id: id,
-      description: node
-       .getNode("data")
-       .getChildren()[0]
-       .getWordsFrom(1)
-       .join(" ")
-     }
-    })
-   )
-  }
-  _getTheTemplates() {
-   // todo: trim?
-   return typeof TemplatesStamp === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/templates/Templates.stamp").trim() : new jtree.TreeNode(TemplatesStamp).trim()
-  }
-  getProgramTemplate(id) {
-   const node = this._getTheTemplates().filter(node => node.getContent() === \`templates/\${id}\${this.maiaFileExtensionKey}\`)[0]
-   return {
-    template: node.getNode("data").childrenToString(),
-    name: id + this.maiaFileExtensionKey
-   }
-  }
 challengeListNode
  description View all challenges
  string title Try a challenge:
- string itemFormat {id}. {question}
+ string itemFormat {question}
  extends abstractSnippetGalleryNode
  crux challenge.list
  javascript
@@ -31646,11 +31815,13 @@ abstractVegaNode
  string markName bar
  extends abstractEmptyFooterTileNode
  abstract
+ string bodyStumpTemplate
+  div
+   class divForExternalLibrary
  javascript
   // todo: I don't think vega handles . in column names.
   getTileBodyStumpCode() {
-   return \`div
-  class divForExternalLibrary\`
+   return this.bodyStumpTemplate
   }
   _getColumnToField(columnName) {
    if (!columnName) return undefined
@@ -31693,7 +31864,7 @@ abstractVegaNode
    return this.getTileDimensionIfAny().width - 120
   }
   _getTileHeight() {
-   return this.getTileDimensionIfAny().height - 120
+   return this.getTileDimensionIfAny().height - 90
   }
   treeComponentDidMount() {
    this.treeComponentDidUpdate()
@@ -32471,10 +32642,12 @@ handsontableBasicNode
  string hakonTemplate
   .hot
    color black
+ string bodyStumpTemplate
+  div
+   class hot
  javascript
   getTileBodyStumpCode() {
-   return \`div
-  class hot\`
+   return this.bodyStumpTemplate
   }
   // todo: allow editing
   treeComponentWillUnmount() {
@@ -32489,11 +32662,11 @@ handsontableBasicNode
    const rows = this.getRowsWithRowDisplayLimit()
    const data = this.getRowsAsDataTableArrayWithHeader(rows, colNames)
    const tileDimension = this.getTileDimensionIfAny()
-   const width = tileDimension.width - 20 // remove 10 for boddy padding?
-   const height = tileDimension.height - 60
    const container = this.getStumpNode().findStumpNodeByChild("class hot")
    const app = this.getWebApp()
    if (this.isNodeJs()) return undefined
+   const width = tileDimension.width - 20 // remove 10 for boddy padding?
+   const height = tileDimension.height - 60
    this._hot = new Handsontable(container.getShadow().getShadowElement(), {
     data: data,
     rowHeaders: true,
@@ -32520,10 +32693,15 @@ listBasicNode
   samples.telescopes
    list.basic
  inScope labelNode
+ string bodyStumpTemplate
+  ol
+   {items}
+ string listItemStumpTemplate
+  li
+   span {label}
  javascript
-  _getListItem(label, row) {
-   return \` li
-    span \${label}\`
+  _getListItem(label) {
+   return this.qFormat(this.listItemStumpTemplate, { label })
   }
   _getLabelColumnName() {
    // todo: more automatic! Need to fix our columns/keywords issues
@@ -32531,10 +32709,10 @@ listBasicNode
   }
   getTileBodyStumpCode() {
    const labelColumnName = this._getLabelColumnName()
-   return \`ol
-  \${this.getRowsWithRowDisplayLimit()
-  .map(row => this._getListItem(jtree.Utils.stripHtml(row.getRowOriginalValue(labelColumnName)), row))
-  .join("\\n")}\`
+   const items = this.getRowsWithRowDisplayLimit()
+    .map(row => this._getListItem(jtree.Utils.stripHtml(row.getRowOriginalValue(labelColumnName)), row))
+    .join("\\n")
+   return this.qFormat(this.bodyStumpTemplate, { items })
   }
  string tileSize 400 400
  string dummyDataSetName telescopes
@@ -32550,6 +32728,10 @@ listLinksNode
    list.links
  inScope labelNode linkNode
  string dummyDataSetName telescopes
+ string listItemHakonTemplate
+  li
+   a {label}
+    href {link}
  javascript
   _getUrlColumnName() {
    // todo: more automatic! Need to fix our columns/keywords issues
@@ -32558,9 +32740,7 @@ listLinksNode
   _getListItem(label, row) {
    const urlColumnName = this._getUrlColumnName()
    if (!urlColumnName) return super._getListItem(label, row)
-   return \` li
-  a \${label}
-   href \${jtree.Utils.stripHtml(row.getRowOriginalValue(urlColumnName))}\`
+   return this.qFormat(this.listItemHakonTemplate, { label, link: jtree.Utils.stripHtml(row.getRowOriginalValue(urlColumnName)) })
   }
  string columnPredictionHints
   label getTitlePotential
@@ -33299,6 +33479,12 @@ samplesDeclarationNode
  string url maia/packages/samples/declaration-of-independence.text
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.declaration
+samplesPeriodicTableNode
+ description Periodic table from https://gist.github.com/GoodmanSciences
+ frequency .15
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ string url maia/packages/samples/periodic-table.csv
+ crux samples.periodicTable
 samplesLettersNode
  description Letter usage frequency in English from mobostock.
  frequency .03
@@ -34228,6 +34414,39 @@ editorCommandHistoryNode
  string methodName getCommandsBuffer
  extends abstractProviderNode
  crux editor.commandHistory
+mathGenNode
+ description Generate a stream of numbers from common mathematical functions
+ cells tileKeywordCell mathFunctionNameCell fromCell toCell incrementCell
+ extends abstractProviderNode
+ example
+  math.gen sin 0 10 .1
+   vega.scatter
+    xColumn input
+    yColumn output
+ crux math.gen
+ javascript
+  async fetchTableInputs() {
+   const rows = []
+   const fn = Math[this.getWord(1)]
+   for (let input = parseFloat(this.fromCell); input < parseFloat(this.toCell); input += parseFloat(this.incrementCell)) {
+    rows.push({ input, output: fn(input) })
+   }
+   return {
+    rows
+   }
+  }
+abstractRandomTileNode
+ abstract
+ extends abstractProviderNode
+ javascript
+  async fetchTableInputs() {
+   let howMany = this.quantityCell || 30
+   const rows = []
+   for (let index = 1; index <= howMany; index++) {
+    rows.push(this._genRow(index))
+   }
+   return { rows }
+  }
 randomFloatNode
  description Generates uniform random floats between min and max.
  cells tileKeywordCell quantityCell minCell maxCell
@@ -34236,10 +34455,10 @@ randomFloatNode
  float min 0
  float max 1
  javascript
-  _genRow() {
-   return { number: jtree.Utils.randomUniformFloat(parseFloat(this.min), parseFloat(this.max)) }
+  _genRow(index) {
+   return { index, number: jtree.Utils.randomUniformFloat(this.minCell, this.maxCell, Math.random()) }
   }
- extends abstractProviderNode
+ extends abstractRandomTileNode
  crux random.float
 randomIntNode
  description Generates uniform random ints between min and max.
@@ -34249,11 +34468,11 @@ randomIntNode
  int min 0
  int max 100
  javascript
-  _genRow() {
-   return { number: jtree.Utils.randomUniformInt(parseInt(this.min), parseInt(this.max)) }
+  _genRow(index) {
+   return { index, number: jtree.Utils.randomUniformInt(this.minCell, this.maxCell, Math.random()) }
   }
- extends abstractProviderNode
  crux random.int
+ extends abstractRandomTileNode
 samplesTinyIrisNode
  description A snippet of the Iris dataset.
  string data
@@ -34291,12 +34510,123 @@ toCsvNode
   execute() {
    console.log(this.getParentOrDummyTable().toDelimited(","))
   }
+abstractTemplatePickerTileNode
+ extends abstractMaiaTileNode
+ todo This is duplicate code from picker. Add mixins to Grammar?
+ string tileSize 480 420
+ abstract
+ string hakonTemplate
+  .abstractTemplatePickerTileNode
+   .PickerCategory
+    width 100%
+    margin-top 20px
+    text-align center
+   .TileBody
+    display flex
+    flex-flow row wrap
+    a
+     &:hover
+      background-color {borderColor}
+     padding 10px
+     margin 5px
+     height 30px
+     background-color {backgroundColor}
+     border 1px solid {borderColor}
+     overflow hidden
+     text-align center
+     text-overflow ellipsis
+     font-size 14px
+     width 120px
+     span
+      font-size 70%
+ string itemStumpTemplate
+  {categoryBreak}
+  a {name}
+   br
+    span {description}
+   title {description}
+   tabindex -1
+   value {value}
+   class pickerItemButton
+   stumpOnClickCommand {command}
+ string categoryBreakStumpTemplate
+  div {category}
+   class PickerCategory
+ string tileHeader Gallery
+ javascript
+  async fetchTableInputs() {
+   return { rows: this.getChoices().map(obj => obj.toObject()) }
+  }
+  getTileBodyStumpCode() {
+   let lastCat = ""
+   return this.getChoices()
+    .map(choice => {
+     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+     lastCat = choice.category
+     return this.qFormat(this.itemStumpTemplate, choice)
+    })
+    .join("\\n")
+  }
+  getTileHeaderBern() {
+   return this.tileHeader
+  }
+templatesListNode
+ extends abstractTemplatePickerTileNode
+ description Displays list of available templates.
+ frequency .11
+ crux templates.list
+ string tileHeader Template Gallery
+ javascript
+  getChoices() {
+   // todo: cleanup.
+   const choices = this._getTheTemplates().map(node => {
+    const id = node
+     .getWord(1)
+     .replace("templates/", "")
+     .replace(this.maiaFileExtensionKey, "")
+    return {
+     command: "createProgramFromTemplateCommand",
+     name: node.get("data html.h1"),
+     value: id,
+     category: lodash.upperFirst(node.get("data categories")),
+     description: ""
+    }
+   })
+   return lodash.sortBy(choices, "category")
+  }
+  _getTheTemplates() {
+   // todo: trim?
+   return typeof TemplatesStamp === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/templates/Templates.stamp").trim() : new jtree.TreeNode(TemplatesStamp).trim()
+  }
+  getProgramTemplate(id) {
+   const node = this._getTheTemplates().filter(node => node.getContent() === \`templates/\${id}\${this.maiaFileExtensionKey}\`)[0]
+   return {
+    template: node.getNode("data").childrenToString(),
+    name: id + this.maiaFileExtensionKey
+   }
+  }
 abstractDocumentSettingNode
  abstract
 layoutNode
  cells documentSettingNameCell layoutOptionCell
  extends abstractDocumentSettingNode
  crux layout
+zoomNode
+ crux zoom
+ description Enlarge or shrink all tiles
+ cells documentSettingNameCell zoomCell
+ extends abstractDocumentSettingNode
+defaultHiddenNode
+ crux defaultHidden
+ description Show only tiles with "visible" specified
+ cells documentSettingNameCell
+ extends abstractDocumentSettingNode
+documentCategoriesNode
+ description Add some categories to the document for organization.
+ cells documentSettingNameCell
+ catchAllCellType documentCategoryCell
+ extends abstractDocumentSettingNode
+ crux categories
 catchAllErrorNode
  catchAllCellType errorCell
  baseNodeType errorNode
@@ -34336,6 +34666,9 @@ tilesNode
   }
   getTab() {
    return this._tab
+  }
+  tilesAreVisible() {
+   return !this.has("defaultHidden")
   }
   canUseCustomLayout() {
    const definedLayout = this.get(TilesConstants.layout)
@@ -34435,16 +34768,22 @@ abstractTileSettingTerminalNode
   }
  extends abstractTileSettingNode
  abstract
+abstractCoreTileSettingTerminalNode
+ abstract
+ extends abstractTileSettingTerminalNode
 hiddenNode
- extends abstractTileSettingTerminalNode
+ extends abstractCoreTileSettingTerminalNode
  crux hidden
+visibleNode
+ extends abstractCoreTileSettingTerminalNode
+ crux visible
 maximizedNode
- extends abstractTileSettingTerminalNode
+ extends abstractCoreTileSettingTerminalNode
  crux maximized
 abstractPagePositionNode
  frequency .2
  cells tileSettingKeywordCell intCell
- extends abstractTileSettingTerminalNode
+ extends abstractCoreTileSettingTerminalNode
  abstract
 leftNode
  extends abstractPagePositionNode
@@ -34625,19 +34964,7 @@ commentNode
  crux comment
 lineOfContentNode
  catchAllNodeType lineOfContentNode
- catchAllCellType stringCell
-abstractRandomTileNode
- abstract
- javascript
-  async fetchTableInputs() {
-   let howMany = this.quantityCell || 30
-   const rows = []
-   while (howMany) {
-    rows.push(this._genRow())
-    howMany--
-   }
-   return { rows: rows }
-  }`)
+ catchAllCellType stringCell`)
       return this._cachedGrammarProgramRoot
     }
     static getNodeTypeMap() {
@@ -34646,6 +34973,7 @@ abstractRandomTileNode
         basicRecursiveTileNode: basicRecursiveTileNode,
         BlankLineNode: BlankLineNode,
         DidYouMeanTileNode: DidYouMeanTileNode,
+        abstractPickerTileNode: abstractPickerTileNode,
         PickerTileNode: PickerTileNode,
         abstractMaiaTileNode: abstractMaiaTileNode,
         abstractChartNode: abstractChartNode,
@@ -34653,7 +34981,6 @@ abstractRandomTileNode
         abstractEmptyFooterTileNode: abstractEmptyFooterTileNode,
         abstractSnippetGalleryNode: abstractSnippetGalleryNode,
         abstractTemplateGalleryNode: abstractTemplateGalleryNode,
-        templatesListNode: templatesListNode,
         challengeListNode: challengeListNode,
         samplesListNode: samplesListNode,
         vegaDataListNode: vegaDataListNode,
@@ -34744,6 +35071,7 @@ abstractRandomTileNode
         samplesPopulationsNode: samplesPopulationsNode,
         samplesBabyNamesNode: samplesBabyNamesNode,
         samplesDeclarationNode: samplesDeclarationNode,
+        samplesPeriodicTableNode: samplesPeriodicTableNode,
         samplesLettersNode: samplesLettersNode,
         samplesPresidentsNode: samplesPresidentsNode,
         ucimlrDatasetsNode: ucimlrDatasetsNode,
@@ -34801,19 +35129,28 @@ abstractRandomTileNode
         debugParserTestNode: debugParserTestNode,
         editorFilesNode: editorFilesNode,
         editorCommandHistoryNode: editorCommandHistoryNode,
+        mathGenNode: mathGenNode,
+        abstractRandomTileNode: abstractRandomTileNode,
         randomFloatNode: randomFloatNode,
         randomIntNode: randomIntNode,
         samplesTinyIrisNode: samplesTinyIrisNode,
         toCsvNode: toCsvNode,
+        abstractTemplatePickerTileNode: abstractTemplatePickerTileNode,
+        templatesListNode: templatesListNode,
         abstractDocumentSettingNode: abstractDocumentSettingNode,
         layoutNode: layoutNode,
+        zoomNode: zoomNode,
+        defaultHiddenNode: defaultHiddenNode,
+        documentCategoriesNode: documentCategoriesNode,
         catchAllErrorNode: catchAllErrorNode,
         hashBangNode: hashBangNode,
         tilesNode: tilesNode,
         maiaNode: maiaNode,
         abstractTileSettingNode: abstractTileSettingNode,
         abstractTileSettingTerminalNode: abstractTileSettingTerminalNode,
+        abstractCoreTileSettingTerminalNode: abstractCoreTileSettingTerminalNode,
         hiddenNode: hiddenNode,
+        visibleNode: visibleNode,
         maximizedNode: maximizedNode,
         abstractPagePositionNode: abstractPagePositionNode,
         leftNode: leftNode,
@@ -34856,8 +35193,7 @@ abstractRandomTileNode
         tileSettingNonTerminalContentNode: tileSettingNonTerminalContentNode,
         commentLineNode: commentLineNode,
         commentNode: commentNode,
-        lineOfContentNode: lineOfContentNode,
-        abstractRandomTileNode: abstractRandomTileNode
+        lineOfContentNode: lineOfContentNode
       }
     }
   }
@@ -34874,11 +35210,15 @@ abstractRandomTileNode
     }
   }
 
-  class hiddenNode extends abstractTileSettingTerminalNode {}
+  class abstractCoreTileSettingTerminalNode extends abstractTileSettingTerminalNode {}
 
-  class maximizedNode extends abstractTileSettingTerminalNode {}
+  class hiddenNode extends abstractCoreTileSettingTerminalNode {}
 
-  class abstractPagePositionNode extends abstractTileSettingTerminalNode {
+  class visibleNode extends abstractCoreTileSettingTerminalNode {}
+
+  class maximizedNode extends abstractCoreTileSettingTerminalNode {}
+
+  class abstractPagePositionNode extends abstractCoreTileSettingTerminalNode {
     get tileSettingKeywordCell() {
       return this.getWord(0)
     }
@@ -35127,18 +35467,6 @@ abstractRandomTileNode
     }
   }
 
-  class abstractRandomTileNode extends jtree.GrammarBackedNode {
-    async fetchTableInputs() {
-      let howMany = this.quantityCell || 30
-      const rows = []
-      while (howMany) {
-        rows.push(this._genRow())
-        howMany--
-      }
-      return { rows: rows }
-    }
-  }
-
   window.maiaNode = maiaNode
 }
 
@@ -35218,9 +35546,10 @@ window.TemplatesStamp = `file templates/amazon-purchase-history.maia
        yColumn count
        xColumn year
   layout column
-file templates/cancer-in-the-us.maia
+  categories shopping
+file templates/cancer-rates-in-the-us.maia
  data
-  html.h1 Cancer in the U.S.
+  html.h1 Cancer Rates in the U.S.
   cancer.cases
    tables.basic
    show.sum Female Total female cases
@@ -35233,6 +35562,7 @@ file templates/cancer-in-the-us.maia
      xColumn CancerType
      yColumn Male
   layout column
+  categories medicine
 file templates/git-repo-dashboard.maia
  data
   html.h1 Desktop Only: Statistics for Local Git Repo
@@ -35254,6 +35584,7 @@ file templates/git-repo-dashboard.maia
    show.max time Most Recent Commit
    show.min time First Commit
   layout column
+  categories programming
 file templates/loc-with-bars.maia
  data
   html.h1 Desktop Only: Analyze lines of code in a folder
@@ -35273,6 +35604,56 @@ file templates/loc-with-bars.maia
       yColumn words
      tables.basic Top Extensions
   layout column
+  categories programming
+file templates/logs.maia
+ data
+  html.h1 Exponents
+   visible
+  math.gen exp 0 1 .01
+   vega.line 2.718^x from 0 to 1
+    visible
+    xColumn input
+    yColumn output
+  math.gen exp 1 10 .1
+   vega.line 2.718^x from 1 to 10
+    visible
+    xColumn input
+    yColumn output
+  math.gen exp 10 20 .1
+   vega.line 2.718^x from 10 to 20
+    visible
+    xColumn input
+    yColumn output
+  layout column
+  categories math
+  defaultHidden
+file templates/periodic-table.maia
+ data
+  html.h1 The Periodic Table
+  samples.periodicTable
+   vega.scatter Boiling Point by Atomic Number
+    xColumn AtomicNumber
+    yColumn BoilingPoint
+   vega.scatter Year of Discovery by Atomic Number
+    xColumn Year
+    yColumn AtomicNumber
+  layout column
+  categories chemistry
+file templates/random.maia
+ data
+  html.h1 Random Numbers
+  random.int 1000 0 1000
+   hidden
+   vega.scatter 1000 Random numbers between 0 and 100
+    xColumn index
+    yColumn number
+   rows.first 100
+    hidden
+    vega.scatter 100 of those
+     xColumn index
+     yColumn number
+  categories math
+  layout column
 file templates/reddit.maia
  data
   html.h1 Top Stories on Reddit
@@ -35288,6 +35669,18 @@ file templates/reddit.maia
     vega.bar Top Stories on Reddit Right Now
      yColumn score
   layout column
+  categories socialMedia
+file templates/subreddit.maia
+ data
+  html.h1 Top stories in a subreddit
+  reddit.sub Astronomy
+   columns.keep title created_utc score subreddit url
+    vega.scatter
+     yColumn score
+     xColumn created_utc
+    list.links
+  layout column
+  categories socialMedia
 file templates/trends-in-baby-names.maia
  data
   html.h1 Trends in Baby Names
@@ -35300,9 +35693,32 @@ file templates/trends-in-baby-names.maia
       xColumn year
       yColumn percent
   layout column
+  categories parenting
+file templates/trigonometry.maia
+ data
+  html.h1 Trigonometric Functions
+   visible
+  math.gen sin 0 10 .1
+   vega.line Sin Wave
+    visible
+    xColumn input
+    yColumn output
+  math.gen cos 0 10 .1
+   vega.line Cos Wave
+    visible
+    xColumn input
+    yColumn output
+  math.gen tan 0 10 .1
+   vega.line Tan Wave
+    visible
+    xColumn input
+    yColumn output
+  layout column
+  categories math
+  defaultHidden
 file templates/ucimlr-overview.maia
  data
-  html.h1 UCIMLR Dataset Overview
+  html.h1 The Datasets in UCIMLR
   layout column
   ucimlr.datasets
    show.rowCount Total Datasets
@@ -35315,6 +35731,7 @@ file templates/ucimlr-overview.maia
       vega.bar
        xColumn Year
        yColumn count
+  categories machineLearning
 file templates/word-cloud.maia
  data
   html.h1 Word Cloud
@@ -35327,6 +35744,7 @@ file templates/word-cloud.maia
    parser text
    content
     If you put some text here, you will make yourself a word cloud. The more text you add, the better it will be. So keep writing, writing, writing, and you will get something that looks good.
+  categories writing
 `
 "use strict";
 window.OhayoDrums = `panel new createNewBlankProgramCommand ctrl+n New file
@@ -35692,8 +36110,8 @@ ohayo.maia
   parser text
   hidden
   markdown.toHtml
- challenge.list
  templates.list
+ challenge.list
  layout column`
 
 window.DemoTemplates
@@ -36702,6 +37120,11 @@ class AbstractLayoutStrategy {
     this._wallViewPortHeight = wallViewPortHeight
   }
 
+  _getZoomLevel() {
+    const zoomLevel = this._tilesProgram.get("zoom")
+    return zoomLevel ? parseFloat(zoomLevel) : 1.0
+  }
+
   _getVisibleTiles() {
     return this._getTilesProgram()
       .getTiles()
@@ -36732,25 +37155,26 @@ class CustomLayout extends AbstractLayoutStrategy {
     const tiles = this._getVisibleTiles()
     const needLocations = []
     const dimensionMap = new Map()
+    const zoomLevel = this._getZoomLevel()
     tiles.forEach((tile, index) => {
       if (!tile.getLeft()) return needLocations.push(tile)
 
-      dimensionMap.set(tile, CustomLayout.getTileDimension(tile, tile.getLeft(), tile.getTop()))
+      dimensionMap.set(tile, CustomLayout._getTileDimension(tile, zoomLevel, tile.getLeft(), tile.getTop()))
     })
 
     let _top = 0
     needLocations.forEach((tile, index) => {
-      const dimension = CustomLayout.getTileDimension(tile, 0, _top)
+      const dimension = CustomLayout._getTileDimension(tile, zoomLevel, 0, _top)
       dimensionMap.set(tile, dimension)
       _top += dimension.height / 20
     })
 
     return dimensionMap
   }
-  static getTileDimension(tile, left, _top) {
+  static _getTileDimension(tile, zoomLevel, left, _top) {
     const gridSize = 20
-    const width = tile.getWidth()
-    const height = tile.getHeight()
+    const width = Math.floor(zoomLevel * tile.getWidth())
+    const height = Math.floor(zoomLevel * tile.getHeight())
     const dimension = {}
     if (left) dimension.left = parseInt(left) * gridSize
     if (_top) dimension.top = parseInt(_top) * gridSize
@@ -36812,20 +37236,22 @@ class ColumnLayout extends AbstractLayoutStrategy {
     let _top = 0
     const width = 800
     const padding = 10
+    const zoomLevel = this._getZoomLevel()
     const boxWidth = Math.max(800, this._getWallViewPortWidth())
     const left = Math.floor((boxWidth - 800) / 2)
 
     const dimensionMap = new Map()
     this._getVisibleTiles().forEach(tile => {
       const size = tile.getDefinedOrSuggestedSize()
+      const height = Math.floor(size.height * zoomLevel)
       const dimension = new TileDimension(tile, {
-        width: width,
-        height: size.height,
-        left: left,
+        width,
+        height,
+        left,
         top: _top
       })
       dimensionMap.set(tile, dimension)
-      _top += size.height + padding
+      _top += height + padding
     })
 
     return dimensionMap
@@ -36837,13 +37263,14 @@ class TiledLayout extends AbstractLayoutStrategy {
     let _top = 10
     let left = 10
     const increment = 30
+    const zoomLevel = this._getZoomLevel()
 
     const dimensionMap = new Map()
     this._getVisibleTiles().forEach(tile => {
       const size = tile.getDefinedOrSuggestedSize()
       const dimension = new TileDimension(tile, {
-        width: size.width,
-        height: size.height,
+        width: Math.floor(size.width * zoomLevel),
+        height: Math.floor(size.height * zoomLevel),
         left: left,
         top: _top
       })
@@ -36859,11 +37286,12 @@ class TiledLayout extends AbstractLayoutStrategy {
 class BinLayout extends AbstractLayoutStrategy {
   makeTileDimensionMap() {
     const dimensionMap = new Map()
+    const zoomLevel = this._getZoomLevel()
     const unsortedTiles = this._getVisibleTiles().map(tile => {
       const size = tile.getDefinedOrSuggestedSize()
       return {
-        width: size.width,
-        height: size.height,
+        width: Math.floor(size.width * zoomLevel),
+        height: Math.floor(size.height * zoomLevel),
         tile: tile
       }
     })
@@ -36988,6 +37416,7 @@ BlobNode
           "tiles.picker": PickerTileNode,
           "#!": hashBangNode,
           hidden: hiddenNode,
+          visible: visibleNode,
           maximized: maximizedNode,
           left: leftNode,
           top: topNode,
@@ -37057,6 +37486,9 @@ pre
       return `span {icon}
  class TilePencilButton
  stumpOnClickCommand toggleToolbarCommand`
+    }
+    get visibleKey() {
+      return `visible`
     }
     get hiddenKey() {
       return `hidden`
@@ -37350,7 +37782,7 @@ pre
       })
     }
     isVisible() {
-      return !this.has(this.hiddenKey)
+      return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
     }
     _isMaximized() {
       return this.has(TilesConstants.maximized)
@@ -37599,6 +38031,16 @@ ${cellInputs.join("\n")}`
   }
 
   class DidYouMeanTileNode extends abstractTileTreeComponentNode {
+    get bodyStumpTemplate() {
+      return `div
+ span No tile '{input}' found. Line {lineNo}. Did you mean
+ a {closestTile}
+  stumpCollapse
+  tabindex -1
+  value {closestTile}
+  stumpOnClickCommand changeTileTypeCommand
+ span ?`
+    }
     getTileBodyStumpCode() {
       const input = this.getFirstWord()
       const lineNo =
@@ -37616,14 +38058,7 @@ ${cellInputs.join("\n")}`
         if (!input) return `div Your program has a blank line on line ${lineNo}.`
         return `div No tile '${input}' found.`
       }
-      return `div
-span No tile '${input}' found. Line ${lineNo}. Did you mean
-a ${closestTile}
- stumpCollapse
- tabindex -1
- value ${closestTile}
- stumpOnClickCommand changeTileTypeCommand
-span ?`
+      return this.qFormat(this.bodyStumpTemplate, { input, lineNo, closestTile })
     }
     getErrors() {
       return [new jtree.UnknownNodeTypeError(this)]
@@ -37633,9 +38068,23 @@ span ?`
     }
   }
 
-  class PickerTileNode extends abstractTileTreeComponentNode {
-    get tileSize() {
-      return `480 420`
+  class abstractPickerTileNode extends abstractTileTreeComponentNode {
+    get tileHeader() {
+      return `Gallery`
+    }
+    get categoryBreakStumpTemplate() {
+      return `div {category}
+ class PickerCategory`
+    }
+    get itemStumpTemplate() {
+      return `{categoryBreak}
+a {name}
+ br
+  span {description}
+ title {description}
+ tabindex -1
+ value {value}
+ stumpOnClickCommand {command}`
     }
     get hakonTemplate() {
       return `.PickerTileNode
@@ -37662,42 +38111,44 @@ span ?`
    span
     font-size 70%`
     }
-    async fetchTableInputs() {
-      return { rows: this.getPredictionsForThisTile().map(obj => obj.toObject()) }
+    get tileSize() {
+      return `480 420`
     }
-    getPredictionsForThisTile() {
-      const allChoices = this.getRootNode()
-        .getGrammarProgram()
-        .getTopNodeTypeDefinitions()
-      const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
-      return filteredChoices.length ? filteredChoices : allChoices
+    async fetchTableInputs() {
+      return { rows: this.getChoices().map(obj => obj.toObject()) }
     }
     getTileBodyStumpCode() {
-      const choices = this.getPredictionsForThisTile()
       let lastCat = ""
-      return choices
-        .map(nodeDefinition => {
-          const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition() // todo: cleanup. need to get first word.
-          const nodeName = nodeId.split(".")[1]
-          const name = nodeName
-          const category = lodash.upperFirst(nodeId.split(".")[0])
-          let breaker = ""
-          if (lastCat !== category)
-            breaker = `div ${category}
- class PickerCategory\n`
-          lastCat = category
-          return `${breaker}a ${name}
- br
-  span ${nodeDefinition.getDescription()}
- title ${nodeDefinition.getDescription()}
- tabindex -1
- value ${nodeId}
- stumpOnClickCommand changeTileTypeCommand`
+      return this.getChoices()
+        .map(choice => {
+          choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+          lastCat = choice.category
+          return this.qFormat(this.itemStumpTemplate, choice)
         })
         .join("\n")
     }
     getTileHeaderBern() {
-      return "Tile Gallery"
+      return this.tileHeader
+    }
+  }
+
+  class PickerTileNode extends abstractPickerTileNode {
+    get tileHeader() {
+      return `Tile Gallery`
+    }
+    getChoices() {
+      const allChoices = this.getRootNode()
+        .getGrammarProgram()
+        .getTopNodeTypeDefinitions()
+      const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
+      const theChoices = filteredChoices.length ? filteredChoices : allChoices
+      return theChoices.map(nodeDefinition => {
+        const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
+        const name = nodeId.split(".")[1] || ""
+        const category = lodash.upperFirst(nodeId.split(".")[0])
+        const description = nodeDefinition.getDescription()
+        return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
+      })
     }
   }
 
@@ -37751,6 +38202,9 @@ span ?`
     }
     getTab() {
       return this._tab
+    }
+    tilesAreVisible() {
+      return !this.has("defaultHidden")
     }
     canUseCustomLayout() {
       const definedLayout = this.get(TilesConstants.layout)
@@ -37831,11 +38285,12 @@ abstractTileTreeComponentNode
  abstract
  cells tileNameCell
  _extendsJsClass AbstractTreeComponent
- inScope hashBangNode abstractTileTreeComponentNode hiddenNode maximizedNode abstractPagePositionNode commentNode
+ inScope hashBangNode abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode commentNode
  catchAllNodeType catchAllErrorNode
  int headerHeight 30
  int footerHeight 30
  string hiddenKey hidden
+ string visibleKey visible
  string pencilStumpTemplate
   span {icon}
    class TilePencilButton
@@ -38166,7 +38621,7 @@ abstractTileTreeComponentNode
    })
   }
   isVisible() {
-   return !this.has(this.hiddenKey)
+   return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
   }
   _isMaximized() {
    return this.has(TilesConstants.maximized)
@@ -38416,6 +38871,15 @@ DidYouMeanTileNode
  description Provides suggestions for misspelled tiles.
  extends abstractTileTreeComponentNode
  crux tiles.didyoumean
+ string bodyStumpTemplate
+  div
+   span No tile '{input}' found. Line {lineNo}. Did you mean
+   a {closestTile}
+    stumpCollapse
+    tabindex -1
+    value {closestTile}
+    stumpOnClickCommand changeTileTypeCommand
+   span ?
  javascript
   getTileBodyStumpCode() {
    const input = this.getFirstWord()
@@ -38434,14 +38898,7 @@ DidYouMeanTileNode
     if (!input) return \`div Your program has a blank line on line \${lineNo}.\`
     return \`div No tile '\${input}' found.\`
    }
-   return \`div
-  span No tile '\${input}' found. Line \${lineNo}. Did you mean
-  a \${closestTile}
-   stumpCollapse
-   tabindex -1
-   value \${closestTile}
-   stumpOnClickCommand changeTileTypeCommand
-  span ?\`
+   return this.qFormat(this.bodyStumpTemplate, { input, lineNo, closestTile })
   }
   getErrors() {
    return [new jtree.UnknownNodeTypeError(this)]
@@ -38449,8 +38906,10 @@ DidYouMeanTileNode
   getTileHeaderBern() {
    return ""
   }
-PickerTileNode
- description Displays list of available tiles.
+abstractPickerTileNode
+ extends abstractTileTreeComponentNode
+ string tileSize 480 420
+ abstract
  string hakonTemplate
   .PickerTileNode
    .PickerCategory
@@ -38475,47 +38934,56 @@ PickerTileNode
      width 120px
      span
       font-size 70%
+ string itemStumpTemplate
+  {categoryBreak}
+  a {name}
+   br
+    span {description}
+   title {description}
+   tabindex -1
+   value {value}
+   stumpOnClickCommand {command}
+ string categoryBreakStumpTemplate
+  div {category}
+   class PickerCategory
+ string tileHeader Gallery
  javascript
   async fetchTableInputs() {
-   return { rows: this.getPredictionsForThisTile().map(obj => obj.toObject()) }
-  }
-  getPredictionsForThisTile() {
-   const allChoices = this.getRootNode()
-    .getGrammarProgram()
-    .getTopNodeTypeDefinitions()
-   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
-   return filteredChoices.length ? filteredChoices : allChoices
+   return { rows: this.getChoices().map(obj => obj.toObject()) }
   }
   getTileBodyStumpCode() {
-   const choices = this.getPredictionsForThisTile()
    let lastCat = ""
-   return choices
-    .map(nodeDefinition => {
-     const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition() // todo: cleanup. need to get first word.
-     const nodeName = nodeId.split(".")[1]
-     const name = nodeName
-     const category = lodash.upperFirst(nodeId.split(".")[0])
-     let breaker = ""
-     if (lastCat !== category)
-      breaker = \`div \${category}
-   class PickerCategory\\n\`
-     lastCat = category
-     return \`\${breaker}a \${name}
-   br
-    span \${nodeDefinition.getDescription()}
-   title \${nodeDefinition.getDescription()}
-   tabindex -1
-   value \${nodeId}
-   stumpOnClickCommand changeTileTypeCommand\`
+   return this.getChoices()
+    .map(choice => {
+     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+     lastCat = choice.category
+     return this.qFormat(this.itemStumpTemplate, choice)
     })
     .join("\\n")
   }
   getTileHeaderBern() {
-   return "Tile Gallery"
+   return this.tileHeader
   }
- string tileSize 480 420
- extends abstractTileTreeComponentNode
+PickerTileNode
+ extends abstractPickerTileNode
+ description Displays list of available tiles.
  crux tiles.picker
+ string tileHeader Tile Gallery
+ javascript
+  getChoices() {
+   const allChoices = this.getRootNode()
+    .getGrammarProgram()
+    .getTopNodeTypeDefinitions()
+   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
+   const theChoices = filteredChoices.length ? filteredChoices : allChoices
+   return theChoices.map(nodeDefinition => {
+    const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
+    const name = nodeId.split(".")[1] || ""
+    const category = lodash.upperFirst(nodeId.split(".")[0])
+    const description = nodeDefinition.getDescription()
+    return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
+   })
+  }
 abstractDocumentSettingNode
  abstract
 layoutNode
@@ -38561,6 +39029,9 @@ tilesNode
   }
   getTab() {
    return this._tab
+  }
+  tilesAreVisible() {
+   return !this.has("defaultHidden")
   }
   canUseCustomLayout() {
    const definedLayout = this.get(TilesConstants.layout)
@@ -38624,16 +39095,22 @@ abstractTileSettingTerminalNode
   }
  extends abstractTileSettingNode
  abstract
+abstractCoreTileSettingTerminalNode
+ abstract
+ extends abstractTileSettingTerminalNode
 hiddenNode
- extends abstractTileSettingTerminalNode
+ extends abstractCoreTileSettingTerminalNode
  crux hidden
+visibleNode
+ extends abstractCoreTileSettingTerminalNode
+ crux visible
 maximizedNode
- extends abstractTileSettingTerminalNode
+ extends abstractCoreTileSettingTerminalNode
  crux maximized
 abstractPagePositionNode
  frequency .2
  cells tileSettingKeywordCell intCell
- extends abstractTileSettingTerminalNode
+ extends abstractCoreTileSettingTerminalNode
  abstract
 leftNode
  extends abstractPagePositionNode
@@ -38665,6 +39142,7 @@ tileSettingNonTerminalContentNode
         basicRecursiveTileNode: basicRecursiveTileNode,
         BlankLineNode: BlankLineNode,
         DidYouMeanTileNode: DidYouMeanTileNode,
+        abstractPickerTileNode: abstractPickerTileNode,
         PickerTileNode: PickerTileNode,
         abstractDocumentSettingNode: abstractDocumentSettingNode,
         layoutNode: layoutNode,
@@ -38673,7 +39151,9 @@ tileSettingNonTerminalContentNode
         tilesNode: tilesNode,
         abstractTileSettingNode: abstractTileSettingNode,
         abstractTileSettingTerminalNode: abstractTileSettingTerminalNode,
+        abstractCoreTileSettingTerminalNode: abstractCoreTileSettingTerminalNode,
         hiddenNode: hiddenNode,
+        visibleNode: visibleNode,
         maximizedNode: maximizedNode,
         abstractPagePositionNode: abstractPagePositionNode,
         leftNode: leftNode,
@@ -38698,11 +39178,15 @@ tileSettingNonTerminalContentNode
     }
   }
 
-  class hiddenNode extends abstractTileSettingTerminalNode {}
+  class abstractCoreTileSettingTerminalNode extends abstractTileSettingTerminalNode {}
 
-  class maximizedNode extends abstractTileSettingTerminalNode {}
+  class hiddenNode extends abstractCoreTileSettingTerminalNode {}
 
-  class abstractPagePositionNode extends abstractTileSettingTerminalNode {
+  class visibleNode extends abstractCoreTileSettingTerminalNode {}
+
+  class maximizedNode extends abstractCoreTileSettingTerminalNode {}
+
+  class abstractPagePositionNode extends abstractCoreTileSettingTerminalNode {
     get tileSettingKeywordCell() {
       return this.getWord(0)
     }
@@ -39833,65 +40317,30 @@ class ThemeTreeComponent extends AbstractTreeComponent {
     return `styleTag ${CodeMirrorCss} .CodeMirror{color: ${theme.mediumBlack};} .CodeMirror .CodeMirror-gutters,.cm-s-oceanic-next .CodeMirror-gutters {background: ${theme.solidBackgroundColorOrTransparent}}`
   }
   toHakonCode() {
-    const meyerReset = `html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,audio,video
+    const theme = this.getTheme()
+    return `html,body,h1,h2,h3,h4,h5,h6,table,tr,td
  margin 0
  padding 0
- border 0
- font-size 100%
- font inherit
- vertical-align baseline
-article,aside,figcaption,figure,footer,header,hgroup,menu,nav,section
- display block
-body
- line-height 1.3
- overscroll-behavior-x none
-ol,ul
- list-style none
-table
- border-collapse collapse
- border-spacing 0`
-
-    const theme = this.getTheme()
-    return `${meyerReset}
 
 html,body
  width 100%
  height 100%
- margin 0
- padding 0
  font-family ${theme.fonts}
  color ${theme.mediumBlack}
+
+body
+ overscroll-behavior-x none
 
 html
  background ${theme.bodyBackground}
 
 table
- padding 0
- margin 0
  border-collapse collapse
  border-spacing 0
  table-layout fixed
- tr,td
-  padding 0
-  margin 0
 
 .ThemeTreeComponent
  display none
-
-h1
- font-size 200%
-
-h2
- font-size 166%
-
-h3
- font-size 133%
-
-h4
- font-size 120%
-
-p
- margin 1em 0
 
 a
  cursor pointer

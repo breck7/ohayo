@@ -1,4 +1,4 @@
-html.h1 UCIMLR Dataset Overview
+html.h1 The Datasets in UCIMLR
 layout column
 ucimlr.datasets
  show.rowCount Total Datasets
@@ -11,3 +11,4 @@ ucimlr.datasets
     vega.bar
      xColumn Year
      yColumn count
+categories machineLearning

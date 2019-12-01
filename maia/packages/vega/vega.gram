@@ -14,11 +14,13 @@ abstractVegaNode
  string markName bar
  extends abstractEmptyFooterTileNode
  abstract
+ string bodyStumpTemplate
+  div
+   class divForExternalLibrary
  javascript
   // todo: I don't think vega handles . in column names.
   getTileBodyStumpCode() {
-   return `div
-  class divForExternalLibrary`
+   return this.bodyStumpTemplate
   }
   _getColumnToField(columnName) {
    if (!columnName) return undefined
@@ -61,7 +63,7 @@ abstractVegaNode
    return this.getTileDimensionIfAny().width - 120
   }
   _getTileHeight() {
-   return this.getTileDimensionIfAny().height - 120
+   return this.getTileDimensionIfAny().height - 90
   }
   treeComponentDidMount() {
    this.treeComponentDidUpdate()

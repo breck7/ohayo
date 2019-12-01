@@ -15,3 +15,4 @@ web.get /disk?path=/ohayo/ohayoWebApp&lineStats=true&recursive=true
     yColumn words
    tables.basic Top Extensions
 layout column
+categories programming

@@ -1,0 +1,9 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test basicList
+ createNewBlankProgramCommand
+  assertStringIncludes getTextContent untitled.maia
+  pasteCommand
+   withParagraph
+    samples.iris
+     handsontable.basic
+   assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 150
