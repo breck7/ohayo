@@ -4,5 +4,5 @@ test templates
   assertStringExcludes getStumpNodeString Baby Names
   appendTileCommand templates.list
    assertStringIncludes getStumpNodeString Baby Names
-   executeStumpNodeCommandByStumpNodeClassCommand stumpOnClickCommand pickerItemButton
+   executeCommandOnStumpWithClassCommand clickCommand pickerItemButton
     assertStringIs getMountedTab.getFileName periodic-table.maia

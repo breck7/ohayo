@@ -113,9 +113,9 @@ editorGalleryNode
      tile => this.qFormat(this.miniStyleTemplate, {style: dimensions.get(tile).getScaledCss(0.1)})
     )
     .join("\n")
-   const onClick = permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"
-   const value = permalink ? `value ${permalink}` : "stumpNoOp"
-   const href = permalink ? `href ${permalink}` : "stumpNoOp"
+   const onClick = permalink ? "clickCommand openFullPathInNewTabAndFocusCommand" : ""
+   const value = permalink ? `value ${permalink}` : ""
+   const href = permalink ? `href ${permalink}` : ""
    return this.qFormat(this.miniStumpTemplate, {filename, theTiles, onClick, value, href})
   }
   getTileBodyStumpCode() {

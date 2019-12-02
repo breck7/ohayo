@@ -8,7 +8,7 @@ class ServerStorageFile extends AbstractFile {}
 
 class ServerStorageDisk extends AbstractDisk {
   _getWillow() {
-    return this.getRootTreeComponent().getWillowProgram()
+    return this.getRootTreeComponent().getWillowBrowser()
   }
 
   async _httpPostUrl(method, options) {

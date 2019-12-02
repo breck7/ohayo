@@ -1,7 +1,7 @@
 #! /usr/bin/env node /usr/local/bin/jtree
 test compileStump
  createNewBlankProgramCommand hello-world.stump
-  assertStringIncludes getWillowProgram.getPageHtml hello-world
+  assertStringIncludes getWillowBrowser.getPageHtml hello-world
   assertStringExcludes getStumpNodeString BasicRecursiveTile
   pasteCommand
    withParagraph

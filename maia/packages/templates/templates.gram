@@ -37,7 +37,7 @@ abstractTemplatePickerTileNode
    tabindex -1
    value {value}
    class pickerItemButton
-   stumpOnClickCommand {command}
+   clickCommand {command}
  string categoryBreakStumpTemplate
   div {category}
    class PickerCategory

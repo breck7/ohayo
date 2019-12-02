@@ -1,6 +1,6 @@
 #! /usr/bin/env node /usr/local/bin/jtree
 test wallContextMenu
  createNewBlankProgramCommand
-  executeStumpNodeCommandByStumpNodeClassCommand stumpOnContextMenuCommand WallTreeComponent
+  executeCommandOnStumpWithClassCommand contextMenuCommand WallTreeComponent
    assertStringIncludes getStumpNodeString Save File
    moveTilesFromShadowsCommand

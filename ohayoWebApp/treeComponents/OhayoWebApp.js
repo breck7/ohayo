@@ -1,7 +1,7 @@
 const lodash = require("lodash")
 const { jtree } = require("jtree")
 const moment = require("moment")
-const { AbstractTreeComponent, TreeComponentFrameworkDebuggerComponent, WillowConstants } = require("jtree/products/TreeComponentFramework.node.js")
+const { AbstractTreeComponent, TreeComponentFrameworkDebuggerComponent } = require("jtree/products/TreeComponentFramework.node.js")
 
 const { FullFilePath, FullFolderPath, FullDiskPath, FileHandle } = require("../storage/FilePaths.js")
 const LocalStorageDisk = require("../storage/LocalStorageDisk.js")
@@ -33,14 +33,6 @@ const TabContextMenuTreeComponent = require("./TabContextMenuTreeComponent.js")
 const TileContextMenuTreeComponent = require("./TileContextMenuTreeComponent.js")
 
 const TilesConstants = require("../tiles/TilesConstants.js")
-
-const DataShadowEvents = {}
-
-DataShadowEvents.onClickCommand = "stumpOnClickCommand"
-DataShadowEvents.onBlurCommand = "stumpOnBlurCommand"
-DataShadowEvents.onContextMenuCommand = "stumpOnContextMenuCommand"
-DataShadowEvents.onChangeCommand = "stumpOnChangeCommand"
-DataShadowEvents.onDblClickCommand = "stumpOnDblClickCommand"
 
 const MaiaCodeEditorTemplate = require("../templates/MaiaCodeEditorTemplate.js")
 const MiniTemplate = require("../templates/MiniTemplate.js")
@@ -91,13 +83,11 @@ class DrumsProgram extends jtree.TreeNode {
   }
 }
 
-// abstract
 class OhayoWebApp extends AbstractTreeComponent {
   treeComponentWillMount() {
     this._startVisitCounter()
-
-    const defaultState = this.getFromStore(StorageKeys.appState) || OhayoWebApp.getDefaultStartState()
-    this.setChildren(defaultState)
+    const state = this.getFromStore(StorageKeys.appState)
+    if (state) this.setChildren(state)
 
     this._restoreTabs()
 
@@ -105,7 +95,7 @@ class OhayoWebApp extends AbstractTreeComponent {
     this._makeDocumentCopyableAndCuttable()
     this._bindKeyboardShortcuts()
 
-    const willowDoc = this.getWillowProgram()
+    const willowDoc = this.getWillowBrowser()
 
     willowDoc.setResizeEndHandler(event => this._onResizeEndEvent(event))
     willowDoc.setPasteHandler(event => this._onPasteEvent(event))
@@ -128,7 +118,7 @@ class OhayoWebApp extends AbstractTreeComponent {
 
   async _onPasteEvent(event) {
     // Return true if worker is editing an input
-    if (this.terminalHasFocus() || this.getWillowProgram().someInputHasFocus()) return true
+    if (this.terminalHasFocus() || this.getWillowBrowser().someInputHasFocus()) return true
     if (event.clipboardData && event.clipboardData.getData) await this.pasteCommand(event.clipboardData.getData("text/plain"))
   }
 
@@ -181,7 +171,7 @@ class OhayoWebApp extends AbstractTreeComponent {
   _getBodyShadowDimensions() {
     // depends on window.resize and whether gutter is open
 
-    const bodyStumpNode = this.getWillowProgram().getBodyStumpNode()
+    const bodyStumpNode = this.getWillowBrowser().getBodyStumpNode()
     const bodyShadow = bodyStumpNode.getShadow()
 
     return {
@@ -339,7 +329,7 @@ ${OhayoConstants.panel} 400
 
   _setErrorHandlers() {
     const that = this
-    this.getWillowProgram().setErrorHandler((message, file, line) => {
+    this.getWillowBrowser().setErrorHandler((message, file, line) => {
       that.goRed(message)
       console.error(message)
     })
@@ -367,7 +357,7 @@ ${OhayoConstants.panel} 400
   }
 
   renderApp() {
-    const report = this.renderAndGetRenderReport(this.getWillowProgram().getBodyStumpNode())
+    const report = this.renderAndGetRenderReport(this.getWillowBrowser().getBodyStumpNode())
     // console.log(report.toString())
     // console.log(this.toString())
   }
@@ -492,9 +482,9 @@ ${OhayoConstants.panel} 400
     let newFullDiskFilePath
 
     if (isRenameOp) {
-      const newNameOnly = await this.getWillowProgram().promptThen("Enter new name for file", suggestedNewFilename || path.getFilename())
+      const newNameOnly = await this.getWillowBrowser().promptThen("Enter new name for file", suggestedNewFilename || path.getFilename())
       newFullDiskFilePath = newNameOnly ? path.getWithoutFilename() + newNameOnly : newNameOnly
-    } else newFullDiskFilePath = await this.getWillowProgram().promptThen("Enter new name for file", suggestedFullDiskFilePath || existingFullDiskFilePath)
+    } else newFullDiskFilePath = await this.getWillowBrowser().promptThen("Enter new name for file", suggestedFullDiskFilePath || existingFullDiskFilePath)
 
     if (!newFullDiskFilePath || newFullDiskFilePath === existingFullDiskFilePath) return undefined
 
@@ -517,18 +507,18 @@ ${OhayoConstants.panel} 400
   }
 
   _getMousetrap() {
-    return this.getWillowProgram().getMousetrap()
+    return this.getWillowBrowser().getMousetrap()
   }
 
   _bindKeyboardShortcuts() {
     const mouseTrap = this._getMousetrap()
-    const willowBrowser = this.getWillowProgram()
+    const willowBrowser = this.getWillowBrowser()
 
     mouseTrap._originalStopCallback = mouseTrap.prototype.stopCallback
     mouseTrap.prototype.stopCallback = function(evt, element, shortcut) {
       const stumpNode = willowBrowser.getStumpNodeFromElement(element)
       if (stumpNode && shortcut === "command+s" && stumpNode.stumpNodeHasClass("savable")) {
-        stumpNode.getShadow().triggerShadowEvent(WillowConstants.ShadowEvents.change)
+        stumpNode.getShadow().triggerShadowEvent("change")
         evt.preventDefault()
         return true
       }
@@ -559,7 +549,7 @@ ${OhayoConstants.panel} 400
   }
 
   getStore() {
-    return this.getWillowProgram().getStore()
+    return this.getWillowBrowser().getStore()
   }
 
   getUnusedStoreKey(key) {
@@ -607,7 +597,7 @@ ${OhayoConstants.panel} 400
 
   _makeDocumentCopyableAndCuttable() {
     const app = this
-    this.getWillowProgram()
+    this.getWillowBrowser()
       .setCopyHandler(evt => app.copySelectionCommand(evt))
       .setCutHandler(evt => app.cutSelectionCommand(evt))
   }
@@ -617,14 +607,14 @@ ${OhayoConstants.panel} 400
     const link = stumpNode.getStumpNodeAttr("href")
     if (!link || stumpNode.getStumpNodeAttr("target")) return undefined
     evt.preventDefault()
-    if (this.getWillowProgram().isExternalLink(link)) {
+    if (this.getWillowBrowser().isExternalLink(link)) {
       this.openExternalLink(link)
       return false
     }
   }
 
   openExternalLink(link) {
-    this.getWillowProgram().openUrl(link)
+    this.getWillowBrowser().openUrl(link)
   }
 
   getAppWall() {
@@ -734,11 +724,11 @@ ${OhayoConstants.panel} 400
   // todo: remove this crap?
   _makeProgramLinksOpenImmediately() {
     const app = this
-    const willowBrowser = this.getWillowProgram()
+    const willowBrowser = this.getWillowBrowser()
     willowBrowser
       .getBodyStumpNode()
       .getShadow()
-      .onShadowEvent(WillowConstants.ShadowEvents.click, "a", function(evt) {
+      .onShadowEvent("click", "a", function(evt) {
         app._handleLinkClick(willowBrowser.getStumpNodeFromElement(this), evt)
       })
   }
@@ -748,16 +738,16 @@ ${OhayoConstants.panel} 400
     this.closeAllDropDownMenusCommand()
   }
 
-  async _executeStumpNodeCommandByStumpNodeChild(commandName, stumpNodeChild) {
-    const willowBrowser = this.getWillowProgram()
+  async _executeCommandByStumpNodeChild(commandName, stumpNodeChild) {
+    const willowBrowser = this.getWillowBrowser()
     const stumpNode = willowBrowser.getBodyStumpNode().findStumpNodeByChild(stumpNodeChild)
-    await this._executeStumpNodeCommand(stumpNode, stumpNode.getStumpNodeAttr(commandName))
+    await this._executeCommandOnStumpNode(stumpNode, stumpNode.getStumpNodeAttr(commandName))
   }
 
-  async _executeStumpNodeCommandByStumpNodeString(commandName, str) {
-    const willowBrowser = this.getWillowProgram()
+  async _executeCommandByStumpNodeString(commandName, str) {
+    const willowBrowser = this.getWillowBrowser()
     const stumpNode = willowBrowser.getBodyStumpNode().findStumpNodeByChildString(str)
-    await this._executeStumpNodeCommand(stumpNode, stumpNode.getStumpNodeAttr(commandName))
+    await this._executeCommandOnStumpNode(stumpNode, stumpNode.getStumpNodeAttr(commandName))
   }
 
   async playFirstVisitCommand() {
@@ -835,7 +825,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async toggleShadowByIdCommand(id) {
-    this.willowProgram
+    this.willowBrowser
       .getBodyStumpNode()
       .findStumpNodeByChild("id " + id)
       .getShadow()
@@ -843,7 +833,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async fillShadowInputOrTextAreaByClassNameCommand(className, value) {
-    this.willowProgram
+    this.willowBrowser
       .getBodyStumpNode()
       .findStumpNodesWithClass(className)
       .forEach(stumpNode => {
@@ -854,7 +844,7 @@ div - ${errors.join("\ndiv - ")}`
   async openDeleteAllTabsPromptCommand() {
     const tabs = this.focusedPanel.getTabs()
 
-    const shouldProceed = await this.willowProgram.confirmThen(`Are you sure you want to delete ${tabs.length} open files?`)
+    const shouldProceed = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${tabs.length} open files?`)
 
     return shouldProceed ? Promise.all(tabs.map(tab => tab.unlinkTab())) : false
   }
@@ -916,7 +906,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async copyDeepLinkCommand() {
-    this.getWillowProgram().copyTextToClipboard(this.mountedTab.getDeepLink())
+    this.getWillowBrowser().copyTextToClipboard(this.mountedTab.getDeepLink())
   }
 
   async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
@@ -935,24 +925,24 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async openCreateNewProgramFromUrlDialogCommand() {
-    const url = await this.willowProgram.promptThen(`Enter the url to clone and edit`, "")
+    const url = await this.willowBrowser.promptThen(`Enter the url to clone and edit`, "")
 
     if (!url) return undefined
 
-    const res = await this.willowProgram.httpGetUrl(url)
+    const res = await this.willowBrowser.httpGetUrl(url)
 
     const tab = await this._createAndOpen(res.text, "untitled" + OhayoConstants.fileExtensions.maia)
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
   async openFolderPromptCommand() {
-    const folder = await this.willowProgram.promptThen(`Enter a folder path to open multiple files`, this.getDefaultDisk().getPathBase())
+    const folder = await this.willowBrowser.promptThen(`Enter a folder path to open multiple files`, this.getDefaultDisk().getPathBase())
     return folder ? this.openFolderCommand(folder) : undefined
   }
 
   async changeWorkingFolderPromptCommand() {
     const current = this.getDefaultDisk().getPathBase()
-    const newWorkingFolder = await this.willowProgram.promptThen(`Enter a folder path`, current)
+    const newWorkingFolder = await this.willowBrowser.promptThen(`Enter a folder path`, current)
     if (!newWorkingFolder || current === newWorkingFolder) return undefined
     return this.changeWorkingFolderCommand(newWorkingFolder)
   }
@@ -963,7 +953,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async openFullDiskFilePathPromptCommand(suggestion) {
-    const fullPath = await this.willowProgram.promptThen(`Enter a full path to open`, suggestion || this.getDefaultDisk().getPathBase())
+    const fullPath = await this.willowBrowser.promptThen(`Enter a full path to open`, suggestion || this.getDefaultDisk().getPathBase())
 
     if (!fullPath) return undefined
     new FullDiskPath(fullPath)
@@ -979,10 +969,10 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async confirmAndResetAppStateCommand() {
-    const result = await this.willowProgram.confirmThen(`Are you sure you want to reset the Ohayo UI? Your files will not be lost.`)
+    const result = await this.willowBrowser.confirmThen(`Are you sure you want to reset the Ohayo UI? Your files will not be lost.`)
     if (!result) return undefined
     this.resetAppState()
-    this.willowProgram.reload()
+    this.willowBrowser.reload()
   }
 
   openUrlInNewTabCommand(url) {
@@ -1009,7 +999,7 @@ div - ${errors.join("\ndiv - ")}`
     const grammarProgram = this.mountedProgram.getGrammarProgram()
     const outputExtension = grammarProgram.getTargetExtension()
     const filename = jtree.Utils.stringToPermalink(jtree.Utils.removeFileExtension(this.mountedTab.getFileName())) + "." + outputExtension
-    this.willowProgram.downloadFile(this.mountedProgram.compile(), filename, "text/" + outputExtension)
+    this.willowBrowser.downloadFile(this.mountedProgram.compile(), filename, "text/" + outputExtension)
   }
 
   async executeProgramCommand() {
@@ -1024,8 +1014,8 @@ div - ${errors.join("\ndiv - ")}`
     return this.getFocusedPanel()
   }
 
-  get willowProgram() {
-    return this.getWillowProgram()
+  get willowBrowser() {
+    return this.getWillowBrowser()
   }
 
   get mountedProgram() {
@@ -1049,22 +1039,21 @@ div - ${errors.join("\ndiv - ")}`
 
     const newName = await this.promptToMoveFile(mountedTab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
     if (!newName) return false
+    await this.focusedPanel.closeTab(mountedTab)
     const tab = await this.openFullPathInNewTabAndFocus(newName)
-    this.focusedPanel.closeTab(mountedTab)
     this.renderApp()
-    return tab
   }
 
   async showTabMoveFilePromptCommand(suggestedNewFilename) {
-    return this._showTabMoveFilePromptCommand(suggestedNewFilename)
+    await this._showTabMoveFilePromptCommand(suggestedNewFilename)
   }
 
   async showTabRenameFilePromptCommand(suggestedNewFilename) {
-    return this._showTabMoveFilePromptCommand(suggestedNewFilename, true)
+    await this._showTabMoveFilePromptCommand(suggestedNewFilename, true)
   }
 
   async toggleOfflineModeCommand() {
-    this.willowProgram.toggleOfflineMode()
+    this.willowBrowser.toggleOfflineMode()
   }
 
   async sleepCommand(ms = 1000) {
@@ -1132,7 +1121,7 @@ div - ${errors.join("\ndiv - ")}`
   async showDeleteFileConfirmDialogCommand() {
     const filename = this.mountedTab.getFileName()
     // todo: make this an undo operation. on web should be easyish. on desktop via move to trash.
-    const result = await this.willowProgram.confirmThen(`Are you sure you want to delete ${filename}?`)
+    const result = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${filename}?`)
     return result ? this.deleteFocusedTabCommand() : undefined
   }
 
@@ -1163,7 +1152,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async toggleFullScreenCommand() {
-    this.willowProgram.toggleFullScreen()
+    this.willowBrowser.toggleFullScreen()
   }
 
   toggleFocusedModeCommand() {
@@ -1268,7 +1257,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   _copySelection(evt) {
-    const willowBrowser = this.getWillowProgram()
+    const willowBrowser = this.getWillowBrowser()
     if (this.terminalHasFocus() || willowBrowser.someInputHasFocus()) return ""
     // copy selected tiles
     const str = this.mountedProgram.selectionToString()
@@ -1298,16 +1287,16 @@ div - ${errors.join("\ndiv - ")}`
     else await this._createProgramFromPaste(pastedText)
   }
 
-  async executeStumpNodeCommandByStumpNodeIdCommand(commandName, stumpNodeId) {
-    await this._executeStumpNodeCommandByStumpNodeChild(commandName, "id " + stumpNodeId)
+  async executeCommandOnStumpWithIdCommand(commandName, stumpNodeId) {
+    await this._executeCommandByStumpNodeChild(commandName, "id " + stumpNodeId)
   }
 
-  async executeStumpNodeCommandByStumpNodeClassCommand(commandName, stumpNodeClass) {
-    await this._executeStumpNodeCommandByStumpNodeChild(commandName, "class " + stumpNodeClass)
+  async executeCommandOnStumpWithClassCommand(commandName, stumpNodeClass) {
+    await this._executeCommandByStumpNodeChild(commandName, "class " + stumpNodeClass)
   }
 
-  async executeStumpNodeCommandByStumpNodeStringCommand(commandName, str) {
-    await this._executeStumpNodeCommandByStumpNodeString(commandName, str)
+  async executeCommandByStumpNodeStringCommand(commandName, str) {
+    await this._executeCommandByStumpNodeString(commandName, str)
   }
 
   async executeCommandOnFirstSelectedTileCommand(command, valueParam, nameParam) {

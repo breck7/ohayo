@@ -2,9 +2,9 @@
 test tileContextMenu
  createNewBlankProgramCommand
   appendTileCommand data.inline
-   executeStumpNodeCommandByStumpNodeStringCommand
+   executeCommandByStumpNodeStringCommand
     withParagraph
-     stumpOnContextMenuCommand
+     contextMenuCommand
     withParagraph
      dataInlineNode
     assertStringIncludes getStumpNodeString Export data to csv file

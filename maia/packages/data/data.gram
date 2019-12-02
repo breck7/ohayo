@@ -15,7 +15,7 @@ dataInlineNode
  string bodyStumpTemplate
   textarea
    name content
-   stumpOnChangeCommand changeTileSettingMultilineCommand
+   changeCommand changeTileSettingMultilineCommand
    placeholder Enter data in any format here. It will be saved directly in your document.
    class TileTextArea savable
    bern
@@ -47,7 +47,7 @@ dataLocalStorageNode
  description Use your browser's localStorage for storing data.
  string bodyStumpTemplate
   textarea
-   stumpOnChangeCommand triggerTileMethodCommand
+   changeCommand triggerTileMethodCommand
    placeholder Enter data in any format here. It will be saved in your browser's localStorage.
    name storeValueCommand
    class TileTextArea savable

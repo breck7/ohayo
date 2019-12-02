@@ -1,5 +1,4 @@
 const { jtree } = require("jtree")
-const { WillowConstants } = require("jtree/products/TreeComponentFramework.node.js")
 
 const TilesConstants = require("../tiles/TilesConstants.js")
 
@@ -24,7 +23,7 @@ class WallFlexTreeComponent extends WallTreeComponent {
     // todo: remove this. ditch jqery ui.
     const app = this.getRootNode()
     app
-      .getWillowProgram()
+      .getWillowBrowser()
       .getBodyStumpNode()
       .findStumpNodesWithClass(TilesConstants.abstractTileTreeComponentNode)
       .filter(stumpNode => stumpNode.getStumpNodeTreeComponent().isVisible())
@@ -97,7 +96,7 @@ ${TilesConstants.top} ${_top}`
     const gridSize = this.getGridSize()
     const app = this.getRootNode()
     const that = this
-    const willowBrowser = app.getWillowProgram()
+    const willowBrowser = app.getWillowBrowser()
     shadow.makeResizable({
       handles: "se",
       grid: gridSize,
@@ -116,8 +115,8 @@ ${TilesConstants.top} ${_top}`
     const that = this
     this.getStumpNode()
       .getShadow()
-      .onShadowEvent(WillowConstants.ShadowEvents.mouseover, "." + TilesConstants.abstractTileTreeComponentNode, function() {
-        const tileStumpNode = app.getWillowProgram().getStumpNodeFromElement(this)
+      .onShadowEvent("mouseover", "." + TilesConstants.abstractTileTreeComponentNode, function() {
+        const tileStumpNode = app.getWillowBrowser().getStumpNodeFromElement(this)
         that._tileMouseOverHandler(tileStumpNode)
       })
   }

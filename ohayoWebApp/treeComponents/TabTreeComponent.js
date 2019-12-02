@@ -15,14 +15,14 @@ class TabTreeComponent extends AbstractTreeComponent {
         .getParent()
         .getMountedTabName() === fullPath
     return `a ${filename}
- stumpOnClickCommand mountTabByIndexCommand
- stumpCollapse
+ clickCommand mountTabByIndexCommand
+ collapse
  value ${index}
  title ${fullPath}
  class TabStub ${isMounted ? "mountedTab" : ""}
  span x
-  stumpCollapse
-  stumpOnClickCommand closeTabByIndexCommand
+  collapse
+  clickCommand closeTabByIndexCommand
   value ${index}
   class closeTabButton`
   }
@@ -35,7 +35,7 @@ class TabTreeComponent extends AbstractTreeComponent {
     const obj = {}
     obj[OhayoConstants.deepLinks.filename] = this.getFileName()
     return this.getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .toPrettyDeepLink(this.getTabProgram().childrenToString(), obj)
   }
 
@@ -43,24 +43,24 @@ class TabTreeComponent extends AbstractTreeComponent {
     const grammarProgram = this.getTabProgram().getGrammarProgram()
 
     return `a Save File
- stumpOnClickCommand saveTabAndNotifyCommand
+ clickCommand saveTabAndNotifyCommand
 a Rename File
- stumpOnClickCommand showTabRenameFilePromptCommand
+ clickCommand showTabRenameFilePromptCommand
 a Move File
- stumpOnClickCommand showTabMoveFilePromptCommand
+ clickCommand showTabMoveFilePromptCommand
 a Clone File
- stumpOnClickCommand cloneTabCommand
+ clickCommand cloneTabCommand
 a Delete File
- stumpOnClickCommand showDeleteFileConfirmDialogCommand
+ clickCommand showDeleteFileConfirmDialogCommand
 a Copy program as link
- stumpOnClickCommand copyDeepLinkCommand
+ clickCommand copyDeepLinkCommand
 a Log program stats
- stumpOnClickCommand printProgramStatsCommand
+ clickCommand printProgramStatsCommand
 a Close all other files
- stumpOnClickCommand closeAllTabsExceptFocusedTabCommand
+ clickCommand closeAllTabsExceptFocusedTabCommand
 a Save compiled '${grammarProgram.getTargetExtension()}' file
  tabindex -1
- stumpOnClickCommand saveCompiledCommand`
+ clickCommand saveCompiledCommand`
   }
 
   autosaveAndRender() {

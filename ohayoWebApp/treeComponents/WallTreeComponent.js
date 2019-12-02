@@ -1,4 +1,4 @@
-const { AbstractTreeComponent, WillowConstants } = require("jtree/products/TreeComponentFramework.node.js")
+const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework.node.js")
 
 const TilesConstants = require("../tiles/TilesConstants.js")
 
@@ -72,7 +72,7 @@ class WallTreeComponent extends AbstractTreeComponent {
 
   selectTilesByShadowClass(className = TilesConstants.selectedClass) {
     this.getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .findStumpNodesByShadowClass(className)
       .forEach(stumpNode => stumpNode.getStumpNodeTreeComponent().selectTile())
   }
@@ -104,13 +104,13 @@ class WallTreeComponent extends AbstractTreeComponent {
   toStumpCode() {
     return `div
  class WallTreeComponent
- stumpOnContextMenuCommand openWallContextMenuCommand
- stumpOnDblClickCommand insertPickerTileCommand`
+ contextMenuCommand openWallContextMenuCommand
+ doubleClickCommand insertPickerTileCommand`
   }
 
   _getSelectedTileStumpNodes() {
     return this.getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .getBodyStumpNode()
       .findStumpNodesWithClass(TilesConstants.selectedClass) // todo: also filter by .abstractTileTreeComponentNode?
   }
@@ -118,12 +118,12 @@ class WallTreeComponent extends AbstractTreeComponent {
   _makeSelectable() {
     const app = this.getRootNode()
     const stumpNode = this.getStumpNode()
-    const willowBrowser = app.getWillowProgram()
+    const willowBrowser = app.getWillowBrowser()
     const selector = "." + TilesConstants.abstractTileTreeComponentNode
     const shadow = stumpNode.getShadow()
 
     // I think we need this because jquery selectable breaks click behavior otherwise?
-    shadow.onShadowEvent(WillowConstants.ShadowEvents.click, function(evt) {
+    shadow.onShadowEvent("click", function(evt) {
       // Only if this is the direct target
       if (evt.target === shadow.getShadowElement()) willowBrowser.blurFocusedInput()
     })
@@ -138,7 +138,7 @@ class WallTreeComponent extends AbstractTreeComponent {
 
       // NOTE: SHADOW AND STUMP GET OUT OF SYNC HERE....NEED TESTS. NEED TO MVOE SHADOW AND STUMP
       // TO THEIR OWN TESTED REPO.
-      shadow.onShadowEvent(WillowConstants.ShadowEvents.mouseover, function(evt) {
+      shadow.onShadowEvent("mouseover", function(evt) {
         if (wasAdded) return true
         wasAdded = true
         shadow.makeSelectable({

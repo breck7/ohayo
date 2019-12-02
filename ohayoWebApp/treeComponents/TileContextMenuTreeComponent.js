@@ -4,24 +4,24 @@ class TileContextMenuTreeComponent extends AbstractContextMenuTreeComponent {
   getContextMenuBodyStumpCode() {
     const targetTile = this.getRootNode().getTargetNode()
     return `a Reload
- stumpOnClickCommand fetchAndReloadFocusedTabCommand
+ clickCommand fetchAndReloadFocusedTabCommand
 a Copy tile with inputs
  tabindex -1
- stumpOnClickCommand copyTargetTileCommand
+ clickCommand copyTargetTileCommand
 a Copy data as tree
- stumpOnClickCommand copyTargetTileDataAsTreeCommand
+ clickCommand copyTargetTileDataAsTreeCommand
 a Copy data as javascript
- stumpOnClickCommand copyTargetTileDataAsJavascriptCommand
+ clickCommand copyTargetTileDataAsJavascriptCommand
 a Copy data as tsv
- stumpOnClickCommand copyTargetTileDataCommand
+ clickCommand copyTargetTileDataCommand
  value \t
 a Copy data as csv
- stumpOnClickCommand copyTargetTileDataCommand
+ clickCommand copyTargetTileDataCommand
  value ,
 a Export data to csv file
- stumpOnClickCommand exportTargetTileDataCommand
+ clickCommand exportTargetTileDataCommand
 a Export data to tree file
- stumpOnClickCommand exportTargetTileDataCommand
+ clickCommand exportTargetTileDataCommand
  value tree
 ${targetTile.getContextMenuStumpCode()}`
   }

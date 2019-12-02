@@ -36,16 +36,16 @@ test open
     assertStringIs getMountedTab.getFileName some.maia
 test moveFilePrompt
  createNewBlankProgramCommand
-  showTabMoveFilePromptCommand
+  showTabRenameFilePromptCommand
    assertStringIs getMountedTab.getFileName untitled.maia
-   showTabMoveFilePromptCommand renamed.maia
+   showTabRenameFilePromptCommand renamed.maia
     assertStringIs getMountedTab.getFileName renamed.maia
 test deleteFileCommand
  createNewBlankProgramCommand
   assertLengthIs getCommandsBuffer 0
   assertLengthIs getDefaultDisk.readFilesSync 1
-  assertTypeIs getWillowProgram.getPageHtml string
-  assertStringIncludes getWillowProgram.getPageHtml untitled
+  assertTypeIs getWillowBrowser.getPageHtml string
+  assertStringIncludes getWillowBrowser.getPageHtml untitled
   deleteFileCommand localStorage/untitled.maia
    assertLengthIs getDefaultDisk.readFilesSync 0
 test delete

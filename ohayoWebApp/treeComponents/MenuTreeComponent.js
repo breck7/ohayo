@@ -42,10 +42,10 @@ class MenuTreeComponent extends AbstractTreeComponent {
     return `div
  class MenuTreeComponent ${this.constructor.name}
  a ${OhayoConstants.productName}
-  stumpOnClickCommand toggleHelpCommand
+  clickCommand toggleHelpCommand
  a New ▾
   id newToggle
-  stumpOnClickCommand toggleAndRenderNewDropDownCommand`
+  clickCommand toggleAndRenderNewDropDownCommand`
   }
 }
 

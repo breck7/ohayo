@@ -19,11 +19,11 @@ test changeFilterViaTileUI
       tables.basic
    assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 6
    fillShadowInputOrTextAreaByClassNameCommand LargeTileInput set
-    executeStumpNodeCommandByStumpNodeClassCommand stumpOnChangeCommand LargeTileInput
+    executeCommandOnStumpWithClassCommand changeCommand LargeTileInput
      assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 5
      assertStringIncludes getStumpNodeStringWithoutCssAndSvg class tableRow
      fillShadowInputOrTextAreaByClassNameCommand LargeTileInput nothingWillMatchThis
-      executeStumpNodeCommandByStumpNodeClassCommand stumpOnChangeCommand LargeTileInput
+      executeCommandOnStumpWithClassCommand changeCommand LargeTileInput
        assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 4
        assertStringExcludes getStumpNodeStringWithoutCssAndSvg class tableRow
 test clearingAFilterInUI
@@ -37,7 +37,7 @@ test clearingAFilterInUI
       tables.basic
    assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 6
    fillShadowInputOrTextAreaByClassNameCommand LargeTileInput 
-    executeStumpNodeCommandByStumpNodeClassCommand stumpOnChangeCommand LargeTileInput
+    executeCommandOnStumpWithClassCommand changeCommand LargeTileInput
      assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 8
 test filteringDates
  createNewBlankProgramCommand

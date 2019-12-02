@@ -7,10 +7,10 @@ abstractProviderNode
   div
    class {classes}
    id {id}
-   stumpOnContextMenuCommand openTileContextMenuCommand
+   contextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
+    doubleClickCommand toggleTileMaximizeCommand
    div
     class TileBody HeaderLess
     {body}
@@ -95,10 +95,10 @@ abstractUrlNoCellsNode
   // todo: remove this cache. use higher level.
   async _getData(url) {
    const useCache = this.getSettingsStruct().useCache !== "false" || this.useCache
-   const willowProgram = this.getWebApp().getWillowProgram()
+   const willowBrowser = this.getWebApp().getWillowBrowser()
    let response
-   if (useCache) response = await willowProgram.httpGetUrlFromCache(url)
-   else response = await willowProgram.httpGetUrl(url)
+   if (useCache) response = await willowBrowser.httpGetUrlFromCache(url)
+   else response = await willowBrowser.httpGetUrl(url)
    if (response.fromCache)
     this.emitLogMessage(`div
   bern

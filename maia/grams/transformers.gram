@@ -24,7 +24,7 @@ abstractTransformerNode
   input
    value ${this.getContent() || ""}
    placeholder ${this._getPlaceHolderMessage()}
-   stumpOnChangeCommand changeTileContentAndRenderCommand
+   changeCommand changeTileContentAndRenderCommand
    class LargeTileInput`
   }
 abstractColumnAdderTileNode

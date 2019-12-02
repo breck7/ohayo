@@ -3,10 +3,10 @@ const AbstractDropDownMenuTreeComponent = require("./AbstractDropDownMenuTreeCom
 class NewDropDownMenuTreeComponent extends AbstractDropDownMenuTreeComponent {
   getDropDownStumpCode() {
     const newProgram = `a New File
- stumpOnClickCommand createNewBlankProgramCommand
+ clickCommand createNewBlankProgramCommand
  value untitled.maia
 a New From Url
- stumpOnClickCommand openCreateNewProgramFromUrlDialogCommand`
+ clickCommand openCreateNewProgramFromUrlDialogCommand`
     const program = this.getRootNode().getMountedTab()
     if (!program) return newProgram
 
@@ -14,7 +14,7 @@ a New From Url
 div
  class divider
 a Clone File
- stumpOnClickCommand cloneTabCommand`
+ clickCommand cloneTabCommand`
   }
 
   getAnchorId() {

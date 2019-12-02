@@ -13465,6 +13465,13 @@ class TreeUtils {
     }
     return filename
   }
+  static getNextOrPrevious(arr) {
+    const length = arr.length
+    const index = arr.indexOf(this)
+    if (length === 1) return undefined
+    if (index === length - 1) return arr[index - 1]
+    return arr[index + 1]
+  }
   static toggle(currentValue, values) {
     const index = values.indexOf(currentValue)
     return index === -1 || index + 1 === values.length ? values[0] : values[index + 1]
@@ -16423,7 +16430,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "47.1.0"
+TreeNode.getVersion = () => "48.0.0"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -21758,7 +21765,7 @@ htmlTagNode
     return this._getOneLiner()
   }
   shouldCollapse() {
-   return this.has("stumpCollapse")
+   return this.has("collapse")
   }
   _toHtml(indentCount, withSuid) {
    const tag = this.getTag()
@@ -21911,7 +21918,7 @@ htmlAttributeNode
  cells htmlAttributeNameCell
 stumpExtendedAttributeNameCell
  extends htmlAttributeNameCell
- enum stumpCollapse stumpNoOp stumpOnBlurCommand stumpOnChangeCommand stumpOnClickCommand stumpOnContextMenuCommand stumpOnDblClickCommand stumpOnLineClick stumpOnLineShiftClick stumpOnShiftClickCommand stumpStyleFor
+ enum collapse blurCommand changeCommand clickCommand contextMenuCommand doubleClickCommand lineClickCommand lineShiftClickCommand shiftClickCommand
 stumpExtendedAttributeNode
  description Node types not present in HTML but included in stump.
  extends htmlAttributeNode
@@ -22238,17 +22245,15 @@ bernNode
           rel: htmlAttributeNode,
           src: htmlAttributeNode,
           id: htmlAttributeNode,
-          stumpOnContextMenuCommand: stumpExtendedAttributeNode,
-          stumpOnShiftClickCommand: stumpExtendedAttributeNode,
-          stumpOnDblClickCommand: stumpExtendedAttributeNode,
-          stumpOnLineShiftClick: stumpExtendedAttributeNode,
-          stumpOnChangeCommand: stumpExtendedAttributeNode,
-          stumpOnClickCommand: stumpExtendedAttributeNode,
-          stumpOnBlurCommand: stumpExtendedAttributeNode,
-          stumpOnLineClick: stumpExtendedAttributeNode,
-          stumpCollapse: stumpExtendedAttributeNode,
-          stumpStyleFor: stumpExtendedAttributeNode,
-          stumpNoOp: stumpExtendedAttributeNode,
+          lineShiftClickCommand: stumpExtendedAttributeNode,
+          contextMenuCommand: stumpExtendedAttributeNode,
+          doubleClickCommand: stumpExtendedAttributeNode,
+          shiftClickCommand: stumpExtendedAttributeNode,
+          lineClickCommand: stumpExtendedAttributeNode,
+          changeCommand: stumpExtendedAttributeNode,
+          clickCommand: stumpExtendedAttributeNode,
+          blurCommand: stumpExtendedAttributeNode,
+          collapse: stumpExtendedAttributeNode,
           bern: bernNode
         }),
         [{ regex: /^$/, nodeConstructor: blankLineNode }]
@@ -22283,7 +22288,7 @@ bernNode
       return this._getOneLiner()
     }
     shouldCollapse() {
-      return this.has("stumpCollapse")
+      return this.has("collapse")
     }
     _toHtml(indentCount, withSuid) {
       const tag = this.getTag()
@@ -23732,38 +23737,37 @@ ${propertyNodes.map(child => child.compile(spaces)).join("\n")}
 }
 ;
 
+const BrowserEvents = {}
+BrowserEvents.click = "click"
+BrowserEvents.change = "change"
+BrowserEvents.mouseover = "mouseover"
+BrowserEvents.mouseout = "mouseout"
+BrowserEvents.mousedown = "mousedown"
+BrowserEvents.contextmenu = "contextmenu"
+BrowserEvents.keypress = "keypress"
+BrowserEvents.keyup = "keyup"
+BrowserEvents.focus = "focus"
+BrowserEvents.mousemove = "mousemove"
+BrowserEvents.dblclick = "dblclick"
+BrowserEvents.submit = "submit"
+BrowserEvents.blur = "blur"
+BrowserEvents.paste = "paste"
+BrowserEvents.copy = "copy"
+BrowserEvents.resize = "resize"
+BrowserEvents.cut = "cut"
+BrowserEvents.drop = "drop"
+BrowserEvents.dragover = "dragover"
+BrowserEvents.dragenter = "dragenter"
+BrowserEvents.dragleave = "dragleave"
+BrowserEvents.ready = "ready"
 const WillowConstants = {}
-WillowConstants.ShadowEvents = {}
-WillowConstants.ShadowEvents.click = "click"
-WillowConstants.ShadowEvents.change = "change"
-WillowConstants.ShadowEvents.mouseover = "mouseover"
-WillowConstants.ShadowEvents.mouseout = "mouseout"
-WillowConstants.ShadowEvents.mousedown = "mousedown"
-WillowConstants.ShadowEvents.contextmenu = "contextmenu"
-WillowConstants.ShadowEvents.keypress = "keypress"
-WillowConstants.ShadowEvents.keyup = "keyup"
-WillowConstants.ShadowEvents.focus = "focus"
-WillowConstants.ShadowEvents.mousemove = "mousemove"
-WillowConstants.ShadowEvents.dblclick = "dblclick"
-WillowConstants.ShadowEvents.submit = "submit"
-WillowConstants.ShadowEvents.blur = "blur"
-WillowConstants.ShadowEvents.paste = "paste"
-WillowConstants.ShadowEvents.copy = "copy"
-WillowConstants.ShadowEvents.resize = "resize"
-WillowConstants.ShadowEvents.cut = "cut"
-WillowConstants.ShadowEvents.drop = "drop"
-WillowConstants.ShadowEvents.dragover = "dragover"
-WillowConstants.ShadowEvents.dragenter = "dragenter"
-WillowConstants.ShadowEvents.dragleave = "dragleave"
-WillowConstants.ShadowEvents.ready = "ready"
 // todo: cleanup
-WillowConstants.DataShadowEvents = {}
-WillowConstants.DataShadowEvents.onClickCommand = "stumpOnClickCommand"
-WillowConstants.DataShadowEvents.onShiftClickCommand = "stumpOnShiftClickCommand"
-WillowConstants.DataShadowEvents.onBlurCommand = "stumpOnBlurCommand"
-WillowConstants.DataShadowEvents.onContextMenuCommand = "stumpOnContextMenuCommand"
-WillowConstants.DataShadowEvents.onChangeCommand = "stumpOnChangeCommand"
-WillowConstants.DataShadowEvents.onDblClickCommand = "stumpOnDblClickCommand"
+WillowConstants.clickCommand = "clickCommand"
+WillowConstants.shiftClickCommand = "shiftClickCommand"
+WillowConstants.blurCommand = "blurCommand"
+WillowConstants.contextMenuCommand = "contextMenuCommand"
+WillowConstants.changeCommand = "changeCommand"
+WillowConstants.doubleClickCommand = "doubleClickCommand"
 // todo: cleanup
 WillowConstants.titleTag = "titleTag"
 WillowConstants.styleTag = "styleTag"
@@ -23774,7 +23778,7 @@ WillowConstants.tags = {}
 WillowConstants.tags.html = "html"
 WillowConstants.tags.head = "head"
 WillowConstants.tags.body = "body"
-WillowConstants.stumpCollapse = "stumpCollapse"
+WillowConstants.collapse = "collapse"
 WillowConstants.uidAttribute = "stumpUid"
 WillowConstants.class = "class"
 WillowConstants.type = "type"
@@ -23973,7 +23977,7 @@ class WillowMousetrap {
   bind() {}
 }
 // this one should have no document, window, $, et cetera.
-class AbstractWillowProgram extends stumpNode {
+class AbstractWillowBrowser extends stumpNode {
   constructor(fullHtmlPageUrlIncludingProtocolAndFileName) {
     super(`${WillowConstants.tags.html}
  ${WillowConstants.tags.head}
@@ -24192,13 +24196,13 @@ class AbstractWillowProgram extends stumpNode {
   forceRepaint() {}
   blurFocusedInput() {}
 }
-class WillowProgram extends AbstractWillowProgram {
+class WillowBrowser extends AbstractWillowBrowser {
   constructor(fullHtmlPageUrlIncludingProtocolAndFileName) {
     super(fullHtmlPageUrlIncludingProtocolAndFileName)
     this._offlineMode = true
   }
 }
-WillowProgram._stumpsOnPage = 0
+WillowBrowser._stumpsOnPage = 0
 class WillowBrowserShadow extends AbstractWillowShadow {
   _getJQElement() {
     // todo: speedup?
@@ -24274,7 +24278,7 @@ class WillowBrowserShadow extends AbstractWillowShadow {
     if (index === undefined) jqEl.append(newChildJqElement)
     else if (index === 0) jqEl.prepend(newChildJqElement)
     else jQuery(jqEl.children().get(index - 1)).after(newChildJqElement)
-    WillowProgram._stumpsOnPage++
+    WillowBrowser._stumpsOnPage++
     this._logMessage("insert")
   }
   addClassToShadow(className) {
@@ -24309,7 +24313,7 @@ class WillowBrowserShadow extends AbstractWillowShadow {
   }
   removeShadow() {
     this._getJQElement().remove()
-    WillowProgram._stumpsOnPage--
+    WillowBrowser._stumpsOnPage--
     this._logMessage("remove")
     return this
   }
@@ -24341,7 +24345,7 @@ class WillowBrowserShadow extends AbstractWillowShadow {
 }
 WillowBrowserShadow._shadowUpdateNumber = 0 // todo: what is this for, debugging perf?
 // same thing, except with side effects.
-class WillowBrowserProgram extends AbstractWillowProgram {
+class RealWillowBrowser extends AbstractWillowBrowser {
   findStumpNodesByShadowClass(className) {
     const stumpNodes = []
     const that = this
@@ -24359,15 +24363,15 @@ class WillowBrowserProgram extends AbstractWillowProgram {
     return WillowBrowserShadow
   }
   setCopyHandler(fn) {
-    jQuery(document).on(WillowConstants.ShadowEvents.copy, fn)
+    jQuery(document).on(BrowserEvents.copy, fn)
     return this
   }
   setCutHandler(fn) {
-    jQuery(document).on(WillowConstants.ShadowEvents.cut, fn)
+    jQuery(document).on(BrowserEvents.cut, fn)
     return this
   }
   setPasteHandler(fn) {
-    window.addEventListener(WillowConstants.ShadowEvents.paste, fn, false)
+    window.addEventListener(BrowserEvents.paste, fn, false)
     return this
   }
   setErrorHandler(fn) {
@@ -24472,7 +24476,7 @@ class WillowBrowserProgram extends AbstractWillowProgram {
   }
   setResizeEndHandler(fn) {
     let resizeTimer
-    jQuery(window).on(WillowConstants.ShadowEvents.resize, evt => {
+    jQuery(window).on(BrowserEvents.resize, evt => {
       const target = jQuery(evt.target)
       if (target.is("div")) return // dont resize on div resizes
       clearTimeout(resizeTimer)
@@ -24539,7 +24543,7 @@ class WillowBrowserProgram extends AbstractWillowProgram {
         // 50ms later, add the dragleave handler, and from now on drag leave will only happen on the help
         // div
         setTimeout(function() {
-          bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.dragleave, dragleaveHandler)
+          bodyShadow.onShadowEvent(BrowserEvents.dragleave, dragleaveHandler)
         }, 50)
       }
     }
@@ -24548,7 +24552,7 @@ class WillowBrowserProgram extends AbstractWillowProgram {
       event.stopPropagation()
       bodyStumpNode.removeClassFromStumpNode("dragOver")
       bodyStumpNode.findStumpNodeByChild("id dragOverHelp").removeStumpNode()
-      bodyShadow.offShadowEvent(WillowConstants.ShadowEvents.dragleave, dragleaveHandler)
+      bodyShadow.offShadowEvent(BrowserEvents.dragleave, dragleaveHandler)
     }
     const dropHandler = async event => {
       event.preventDefault()
@@ -24567,10 +24571,10 @@ class WillowBrowserProgram extends AbstractWillowProgram {
       const results = await Promise.all(items)
       callback(results)
     }
-    bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.dragover, dragoverHandler)
-    bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.drop, dropHandler)
+    bodyShadow.onShadowEvent(BrowserEvents.dragover, dragoverHandler)
+    bodyShadow.onShadowEvent(BrowserEvents.drop, dropHandler)
     // todo: why do we do this?
-    bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.dragenter, function(event) {
+    bodyShadow.onShadowEvent(BrowserEvents.dragenter, function(event) {
       event.preventDefault()
       event.stopPropagation()
     })
@@ -24620,20 +24624,30 @@ class AbstractTheme {
 }
 class DefaultTheme extends AbstractTheme {}
 class AbstractTreeComponent extends jtree.GrammarBackedNode {
-  getWillowProgram() {
-    if (!this._willowProgram) {
+  async startWhenReady() {
+    if (this.isNodeJs()) return this.start()
+    document.addEventListener(
+      "DOMContentLoaded",
+      async () => {
+        this.start()
+      },
+      false
+    )
+  }
+  start() {
+    this._bindTreeComponentFrameworkCommandListenersOnBody()
+    this.renderAndGetRenderReport(this.getWillowBrowser().getBodyStumpNode())
+  }
+  getWillowBrowser() {
+    if (!this._willowBrowser) {
       if (this.isNodeJs()) {
-        this._willowProgram = new WillowProgram("http://localhost:8000/index.html")
+        this._willowBrowser = new WillowBrowser("http://localhost:8000/index.html")
       } else {
-        this._willowProgram = new WillowBrowserProgram(window.location.href)
+        this._willowBrowser = new RealWillowBrowser(window.location.href)
       }
     }
-    return this._willowProgram
+    return this._willowBrowser
   }
-  // todo: remove?
-  async appWillFirstRender() {}
-  // todo: remove?
-  async appDidFirstRender() {}
   onCommandError(err) {
     throw err
   }
@@ -24642,12 +24656,12 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
     return this
   }
   getMouseEvent() {
-    return this._mouseEvent || this.getWillowProgram().getMockMouseEvent()
+    return this._mouseEvent || this.getWillowBrowser().getMockMouseEvent()
   }
   _onCommandWillRun() {
     // todo: remove. currently used by ohayo
   }
-  _getCommandArguments(stumpNode, commandMethod) {
+  _getCommandArgumentsFromStumpNode(stumpNode, commandMethod) {
     if (commandMethod.includes(" ")) {
       // todo: cleanup and document
       // It seems the command arguments can from the method string or from form values.
@@ -24670,13 +24684,13 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
     }
   }
   getStumpNodeString() {
-    return this.getWillowProgram()
+    return this.getWillowBrowser()
       .getHtmlStumpNode()
       .toString()
   }
   _getHtmlOnlyNodes() {
     const nodes = []
-    this.getWillowProgram()
+    this.getWillowBrowser()
       .getHtmlStumpNode()
       .deepVisit(node => {
         if (node.getFirstWord() === "styleTag" || (node.getContent() || "").startsWith("<svg ")) return false
@@ -24687,7 +24701,7 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
   getStumpNodeStringWithoutCssAndSvg() {
     // todo: cleanup. feels hacky.
     const clone = new jtree.TreeNode(
-      this.getWillowProgram()
+      this.getWillowBrowser()
         .getHtmlStumpNode()
         .toString()
     )
@@ -24705,8 +24719,8 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
   getCommandNames() {
     return Object.getOwnPropertyNames(Object.getPrototypeOf(this)).filter(word => word.endsWith("Command"))
   }
-  async _executeStumpNodeCommand(stumpNode, commandMethod) {
-    const params = this._getCommandArguments(stumpNode, commandMethod)
+  async _executeCommandOnStumpNode(stumpNode, commandMethod) {
+    const params = this._getCommandArgumentsFromStumpNode(stumpNode, commandMethod)
     if (commandMethod.includes(" "))
       // todo: cleanup
       commandMethod = commandMethod.split(" ")[0]
@@ -24725,62 +24739,37 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
       this.onCommandError(err)
     }
   }
-  _setTreeComponentFrameworkEventListeners() {
-    const willowBrowser = this.getWillowProgram()
+  _bindTreeComponentFrameworkCommandListenersOnBody() {
+    const willowBrowser = this.getWillowBrowser()
     const bodyShadow = willowBrowser.getBodyStumpNode().getShadow()
     const app = this
     const checkAndExecute = (el, attr, evt) => {
       const stumpNode = willowBrowser.getStumpNodeFromElement(el)
       evt.preventDefault()
       evt.stopImmediatePropagation()
-      this._executeStumpNodeCommand(stumpNode, stumpNode.getStumpNodeAttr(attr))
+      this._executeCommandOnStumpNode(stumpNode, stumpNode.getStumpNodeAttr(attr))
       return false
     }
-    const DataShadowEvents = WillowConstants.DataShadowEvents
-    bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.contextmenu, `[${DataShadowEvents.onContextMenuCommand}]`, function(evt) {
+    bodyShadow.onShadowEvent(BrowserEvents.contextmenu, `[${WillowConstants.contextMenuCommand}]`, function(evt) {
       if (evt.ctrlKey) return true
       app._setMouseEvent(evt) // todo: remove?
-      return checkAndExecute(this, DataShadowEvents.onContextMenuCommand, evt)
+      return checkAndExecute(this, WillowConstants.contextMenuCommand, evt)
     })
-    bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.click, `[${DataShadowEvents.onClickCommand}]`, function(evt) {
-      if (evt.shiftKey) return checkAndExecute(this, DataShadowEvents.onShiftClickCommand, evt)
-      return checkAndExecute(this, DataShadowEvents.onClickCommand, evt)
+    bodyShadow.onShadowEvent(BrowserEvents.click, `[${WillowConstants.clickCommand}]`, function(evt) {
+      if (evt.shiftKey) return checkAndExecute(this, WillowConstants.shiftClickCommand, evt)
+      return checkAndExecute(this, WillowConstants.clickCommand, evt)
     })
-    bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.dblclick, `[${DataShadowEvents.onDblClickCommand}]`, function(evt) {
+    bodyShadow.onShadowEvent(BrowserEvents.dblclick, `[${WillowConstants.doubleClickCommand}]`, function(evt) {
       if (evt.target !== evt.currentTarget) return true // direct dblclicks only
       app._setMouseEvent(evt) // todo: remove?
-      return checkAndExecute(this, DataShadowEvents.onDblClickCommand, evt)
+      return checkAndExecute(this, WillowConstants.doubleClickCommand, evt)
     })
-    bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.blur, `[${DataShadowEvents.onBlurCommand}]`, function(evt) {
-      return checkAndExecute(this, DataShadowEvents.onBlurCommand, evt)
+    bodyShadow.onShadowEvent(BrowserEvents.blur, `[${WillowConstants.blurCommand}]`, function(evt) {
+      return checkAndExecute(this, WillowConstants.blurCommand, evt)
     })
-    bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.change, `[${DataShadowEvents.onChangeCommand}]`, function(evt) {
-      return checkAndExecute(this, DataShadowEvents.onChangeCommand, evt)
+    bodyShadow.onShadowEvent(BrowserEvents.change, `[${WillowConstants.changeCommand}]`, function(evt) {
+      return checkAndExecute(this, WillowConstants.changeCommand, evt)
     })
-  }
-  getDefaultStartState() {
-    return ""
-  }
-  async start() {
-    this._setTreeComponentFrameworkEventListeners()
-    await this.appWillFirstRender()
-    this.renderAndGetRenderReport(this.getWillowProgram().getBodyStumpNode())
-    this.appDidFirstRender()
-  }
-  static async startApp(appClass) {
-    document.addEventListener(
-      "DOMContentLoaded",
-      async () => {
-        const win = window
-        if (!win.app) {
-          const startState = appClass.getDefaultStartState()
-          const anyAppClass = appClass // todo: cleanup
-          win.app = new anyAppClass(startState)
-          await win.app.start()
-        }
-      },
-      false
-    )
   }
   stopPropagationCommand() {
     // todo: remove?
@@ -24872,14 +24861,13 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
     return this._getJavascriptPrototypeChainUpTo("AbstractTreeComponent")
   }
   treeComponentWillMount() {}
-  treeComponentDidMount() {
+  async treeComponentDidMount() {
     AbstractTreeComponent._mountedTreeComponents++
   }
   treeComponentDidUnmount() {
     AbstractTreeComponent._mountedTreeComponents--
   }
   treeComponentWillUnmount() {}
-  forceUpdate() {}
   getNewestTimeToRender() {
     return this._lastTimeToRender
   }
@@ -24887,8 +24875,7 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
     this._lastRenderedTime = time
     return this
   }
-  // todo: can this be async?
-  treeComponentDidUpdate() {}
+  async treeComponentDidUpdate() {}
   _getChildTreeComponents() {
     return this.getChildrenByNodeConstructor(AbstractTreeComponent)
   }
@@ -24913,7 +24900,7 @@ ${new stumpNode(this.toStumpCode()).compile()}
   }
   _getCssStumpCode() {
     return `styleTag
- stumpStyleFor ${this.constructor.name}
+ for ${this.constructor.name}
  bern${jtree.TreeNode.nest(this._getCss(), 2)}`
   }
   _updateAndGetUpdateReport() {
@@ -24953,14 +24940,6 @@ ${new stumpNode(this.toStumpCode()).compile()}
   }
   isMounted() {
     return !!this._htmlStumpNode
-  }
-  // todo: move to base TreeNode?
-  getNextOrPrevious(arr) {
-    const length = arr.length
-    const index = arr.indexOf(this)
-    if (length === 1) return undefined
-    if (index === length - 1) return arr[index - 1]
-    return arr[index + 1]
   }
   toggleAndRender(firstWord, contentOptions) {
     this.toggle(firstWord, contentOptions)
@@ -25002,11 +24981,6 @@ ${new stumpNode(this.toStumpCode()).compile()}
   }
   getDependencies() {
     return []
-  }
-  getChildrenThatNeedRendering() {
-    const all = []
-    this._getTreeComponentsThatNeedRendering(all)
-    return all
   }
   _getTreeComponentsThatNeedRendering(arr) {
     this._getChildTreeComponents().forEach(child => {
@@ -25055,7 +25029,7 @@ ${new stumpNode(this.toStumpCode()).compile()}
   }
   _getPageHeadStump() {
     return this.getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .getHeadStumpNode()
   }
   _removeCss() {
@@ -25065,12 +25039,6 @@ ${new stumpNode(this.toStumpCode()).compile()}
   _mountHtml(stumpNodeToMountOn, htmlCode, index) {
     this._htmlStumpNode = stumpNodeToMountOn.insertChildNode(htmlCode, index)
     this._htmlStumpNode.setStumpNodeTreeComponent(this)
-  }
-  _treeComponentDidUpdate() {
-    this.treeComponentDidUpdate()
-  }
-  _treeComponentDidMount() {
-    this.treeComponentDidMount()
   }
   renderAndGetRenderReport(stumpNode, index) {
     const isUpdateOp = this.isMounted()
@@ -25086,14 +25054,14 @@ ${new stumpNode(this.toStumpCode()).compile()}
     if (isUpdateOp) {
       if (treeComponentUpdateReport.shouldUpdate) {
         try {
-          this._treeComponentDidUpdate()
+          if (this.isLoaded()) this.treeComponentDidUpdate()
         } catch (err) {
           console.error(err)
         }
       }
     } else {
       try {
-        this._treeComponentDidMount()
+        if (this.isLoaded()) this.treeComponentDidMount()
       } catch (err) {
         console.error(err)
       }
@@ -25131,12 +25099,12 @@ class TreeComponentFrameworkDebuggerComponent extends AbstractTreeComponent {
  class TreeComponentFrameworkDebuggerComponent
  div x
   class TreeComponentFrameworkDebuggerComponentCloseButton
-  stumpOnClickCommand toggleTreeComponentFrameworkDebuggerCommand
+  clickCommand toggleTreeComponentFrameworkDebuggerCommand
  div
   span This app is powered by the
   a Tree Component Framework
    href https://github.com/treenotation/jtree/tree/master/treeComponentFramework
- p ${app.getNumberOfLines()} components loaded. ${WillowProgram._stumpsOnPage} stumps on page.
+ p ${app.getNumberOfLines()} components loaded. ${WillowBrowser._stumpsOnPage} stumps on page.
  pre
   bern
 ${app.toString(3)}`
@@ -25164,8 +25132,7 @@ class AbstractGithubTriangleComponent extends AbstractTreeComponent {
 }
 window.AbstractGithubTriangleComponent = AbstractGithubTriangleComponent
 window.AbstractTreeComponent = AbstractTreeComponent
-window.WillowConstants = WillowConstants
-window.WillowProgram = WillowProgram
+window.WillowBrowser = WillowBrowser
 window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerComponent
 ;
 
@@ -25329,10 +25296,10 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
       return `div
  class {classes}
  id {id}
- stumpOnContextMenuCommand openTileContextMenuCommand
+ contextMenuCommand openTileContextMenuCommand
  div
   class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
+  doubleClickCommand toggleTileMaximizeCommand
  div {header}
   class TileHeader
  div
@@ -25349,10 +25316,10 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
       return `div
  class {classes}
  id {id}
- stumpOnContextMenuCommand openTileContextMenuCommand
+ contextMenuCommand openTileContextMenuCommand
  div
   class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
+  doubleClickCommand toggleTileMaximizeCommand
  div ERROR
   class TileHeader
  div
@@ -25381,7 +25348,7 @@ pre
     get pencilStumpTemplate() {
       return `span {icon}
  class TilePencilButton
- stumpOnClickCommand toggleToolbarCommand`
+ clickCommand toggleToolbarCommand`
     }
     get visibleKey() {
       return `visible`
@@ -25431,13 +25398,13 @@ pre
       const cssScript = this[TilesConstants.tileCssScript]
       if (cssScript) this._loadTileCss(cssScript)
       const scriptPath = this[TilesConstants.tileScript]
-      if (scriptPath) await app.getWillowProgram().appendScript(scriptPath)
+      if (scriptPath) await app.getWillowBrowser().appendScript(scriptPath)
       loadingMap.set(this.constructor, true)
     }
     _loadTileCss(css) {
       const app = this.getWebApp()
       app
-        .getWillowProgram()
+        .getWillowBrowser()
         .getBodyStumpNode()
         .insertChildNode(
           css
@@ -25650,15 +25617,9 @@ pre
       // We render all Tiles on the Wall.
       return this.getStumpNode().getParent()
     }
-    treeComponentDidMount() {
+    async treeComponentDidMount() {
       super.treeComponentDidMount()
       if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
-    }
-    _treeComponentDidUpdate() {
-      if (this.isLoaded()) this.treeComponentDidUpdate()
-    }
-    _treeComponentDidMount() {
-      if (this.isLoaded()) this.treeComponentDidMount()
     }
     toInspectionStumpCode() {
       const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
@@ -25803,7 +25764,7 @@ pre
     async copyTileCommand() {
       // todo: remove cousin tiles?
       this.getRootNode()
-        .getWillowProgram()
+        .getWillowBrowser()
         .copyTextToClipboard(this.getFirstAncestor().toString())
     }
     async createProgramFromTileExampleCommand(index) {
@@ -25853,13 +25814,13 @@ pre
     }
     async copyDataCommand(delimiter) {
       this.getRootNode()
-        .getWillowProgram()
+        .getWillowBrowser()
         .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
     }
     async copyDataAsJavascriptCommand() {
       const table = this.getOutputOrInputTable()
       this.getRootNode()
-        .getWillowProgram()
+        .getWillowBrowser()
         .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
     }
     async copyDataAsTreeCommand() {
@@ -25867,7 +25828,7 @@ pre
         .toTree()
         .toString()
       this.getRootNode()
-        .getWillowProgram()
+        .getWillowBrowser()
         .copyTextToClipboard(text)
     }
     async exportTileDataCommand(format = "csv") {
@@ -25883,7 +25844,7 @@ pre
           .toString()
       }
       this.getRootNode()
-        .getWillowProgram()
+        .getWillowBrowser()
         .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
     }
   }
@@ -25912,7 +25873,7 @@ pre
   placeholder ${cellTypeId}
   value ${value}
   name ${index + 1}
-  stumpOnChangeCommand ${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}`
+  changeCommand ${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}`
       })
       return `div ${definition.getDescription()}
 div
@@ -25931,10 +25892,10 @@ ${cellInputs.join("\n")}`
       return `div
  span No tile '{input}' found. Line {lineNo}. Did you mean
  a {closestTile}
-  stumpCollapse
+  collapse
   tabindex -1
   value {closestTile}
-  stumpOnClickCommand changeTileTypeCommand
+  clickCommand changeTileTypeCommand
  span ?`
     }
     getTileBodyStumpCode() {
@@ -25980,7 +25941,7 @@ a {name}
  title {description}
  tabindex -1
  value {value}
- stumpOnClickCommand {command}`
+ clickCommand {command}`
     }
     get hakonTemplate() {
       return `.PickerTileNode
@@ -26444,10 +26405,10 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
       return `div
  class {classes}
  id {id}
- stumpOnContextMenuCommand openTileContextMenuCommand
+ contextMenuCommand openTileContextMenuCommand
  div
   class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
+  doubleClickCommand toggleTileMaximizeCommand
  div
   class TileBody HeaderLess
   {body}
@@ -26488,7 +26449,7 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
  a {title}
   value {value}
   class appendSnippetButton
-  stumpOnClickCommand appendSnippetTemplateCommand`
+  clickCommand appendSnippetTemplateCommand`
     }
     get bodyStumpTemplate() {
       return `h4 {title}
@@ -26518,7 +26479,7 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
  a {title}
   value {value}
   class createProgramButton
-  stumpOnClickCommand createProgramFromTemplateCommand`
+  clickCommand createProgramFromTemplateCommand`
     }
   }
 
@@ -26660,13 +26621,13 @@ input
  value ${answer !== undefined ? answer : ""}
  style width: 300px;
  name 2
- stumpOnChangeCommand changeWordAndRenderCommand
+ changeCommand changeWordAndRenderCommand
 span ${answerMessage}
  style color: ${color};
 br
 div
  a See a solution
-  stumpOnClickCommand createProgramFromTemplateCommand
+  clickCommand createProgramFromTemplateCommand
   value ${challengeId}`
     }
   }
@@ -26794,8 +26755,8 @@ table
     getTileBodyStumpCode() {
       return this.qFormat(this.bodyStumpTemplate, {
         tag: this.getTag(),
-        style: this.style ? `style ${this.style}` : "stumpNoOp",
-        src: this.getSrc() ? `src ${this.getSrc()}` : "stumpNoOp",
+        style: this.style ? `style ${this.style}` : "",
+        src: this.getSrc() ? `src ${this.getSrc()}` : "",
         content: this.getHtmlContent() || ""
       })
     }
@@ -27271,7 +27232,7 @@ yColumn isString=false`
       const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
       const url = `maia/packages/vega/ignore/vega-lite/examples/compiled/${exampleName}.vg.json`
       const res = await this.getWebApp()
-        .getWillowProgram()
+        .getWillowBrowser()
         .httpGetUrl(url)
       const spec = JSON.parse(res.text)
       // rewrite data urls
@@ -27747,10 +27708,10 @@ So some tiles will have characterLimit, rowDisplayLimit, et cetera. And have "sp
   class debugCommandsNode extends abstractChartNode {
     get bodyStumpTemplate() {
       return `a Run Speed Test on all Files in Working Directory
- stumpOnClickCommand _runSpeedTestCommand
+ clickCommand _runSpeedTestCommand
 br
 a Run Tile Quality Check
- stumpOnClickCommand _doTileQualityCheckCommand`
+ clickCommand _doTileQualityCheckCommand`
     }
     getTileBodyStumpCode() {
       return this.bodyStumpTemplate
@@ -27896,9 +27857,9 @@ a Run Tile Quality Check
         .filter(tile => tile.isVisible())
         .map(tile => this.qFormat(this.miniStyleTemplate, { style: dimensions.get(tile).getScaledCss(0.1) }))
         .join("\n")
-      const onClick = permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"
-      const value = permalink ? `value ${permalink}` : "stumpNoOp"
-      const href = permalink ? `href ${permalink}` : "stumpNoOp"
+      const onClick = permalink ? "clickCommand openFullPathInNewTabAndFocusCommand" : ""
+      const value = permalink ? `value ${permalink}` : ""
+      const href = permalink ? `href ${permalink}` : ""
       return this.qFormat(this.miniStumpTemplate, { filename, theTiles, onClick, value, href })
     }
     getTileBodyStumpCode() {
@@ -28074,7 +28035,7 @@ link isLink`
     }
     get contextMenuStumpTemplate() {
       return `a Delete all rows
- stumpOnClickCommand deleteAllRowsInTargetTileCommand`
+ clickCommand deleteAllRowsInTargetTileCommand`
     }
     get rowStumpTemplate() {
       return `tr
@@ -28410,10 +28371,10 @@ class visjs`
       return `div
  class {classes}
  id {id}
- stumpOnContextMenuCommand openTileContextMenuCommand
+ contextMenuCommand openTileContextMenuCommand
  div
   class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
+  doubleClickCommand toggleTileMaximizeCommand
  div
   class TileBody HeaderLess
   {body}
@@ -28511,10 +28472,10 @@ span Rows Out: ${table.getRowCount()} Columns Out: ${table.getColumnCount()} Tim
     // todo: remove this cache. use higher level.
     async _getData(url) {
       const useCache = this.getSettingsStruct().useCache !== "false" || this.useCache
-      const willowProgram = this.getWebApp().getWillowProgram()
+      const willowBrowser = this.getWebApp().getWillowBrowser()
       let response
-      if (useCache) response = await willowProgram.httpGetUrlFromCache(url)
-      else response = await willowProgram.httpGetUrl(url)
+      if (useCache) response = await willowBrowser.httpGetUrlFromCache(url)
+      else response = await willowBrowser.httpGetUrl(url)
       if (response.fromCache)
         this.emitLogMessage(`div
 bern
@@ -28587,13 +28548,13 @@ bern
       return `input
  placeholder Filepath
  value ${path}
- stumpOnChangeCommand changeTileContentAndRenderCommand
+ changeCommand changeTileContentAndRenderCommand
  class LargeTileInput
 table
  tr
   td
    a ..
-    stumpOnClickCommand changeTileContentAndRenderCommand
+    clickCommand changeTileContentAndRenderCommand
     value ${parentPath}
 ${rows
   .map(row => {
@@ -28609,7 +28570,7 @@ ${rows
     return ` tr
   td
    a ${label}
-    stumpOnClickCommand changeTileContentAndRenderCommand
+    clickCommand changeTileContentAndRenderCommand
     value ${path.replace(/\/$/, "") + "/" + label}`
   })
   .join("\n")}`
@@ -28633,12 +28594,12 @@ ${rows
     }
     async fetchTableInputs() {
       // todo: allow cache breaking.
-      const willowProgram = this.getWebApp().getWillowProgram()
+      const willowBrowser = this.getWebApp().getWillowBrowser()
       const firstUrls = this._getFirstUrls()
       if (!firstUrls.length || this.isNodeJs()) return []
       let allResults = []
       const fetchMethod = async url =>
-        this.getWebApp().isUrlGetProxyAvailable() ? willowProgram.httpGetUrlFromProxyCache(url) : willowProgram.httpGetUrlFromCache(url)
+        this.getWebApp().isUrlGetProxyAvailable() ? willowBrowser.httpGetUrlFromProxyCache(url) : willowBrowser.httpGetUrlFromCache(url)
       for (let mainUrl of firstUrls) {
         const response = await fetchMethod(mainUrl)
         const nextUrls = this._parseNextUrls(response)
@@ -28692,7 +28653,7 @@ ${rows
 input
  value ${this.getContent() || ""}
  placeholder ${this._getPlaceHolderMessage()}
- stumpOnChangeCommand changeTileContentAndRenderCommand
+ changeCommand changeTileContentAndRenderCommand
  class LargeTileInput`
     }
   }
@@ -28714,7 +28675,7 @@ input
   {post}
  placeholder This data will be sent as the value of the 'q' param
  name post
- stumpOnChangeCommand changeTileSettingMultilineCommand
+ changeCommand changeTileSettingMultilineCommand
  class TileTextArea`
     }
     getTileBodyStumpCode() {
@@ -28729,7 +28690,7 @@ input
       // }
       const postData = settings.post || ""
       const res = await this.getWebApp()
-        .getWillowProgram()
+        .getWillowBrowser()
         .httpPostUrl(url, { q: postData.trim() })
       this._setWillowHttpResponse(res)
       return res.getParsedDataOrText()
@@ -28963,7 +28924,7 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
 input
  value ${this.getContent() || ""}
  placeholder ${this._getPlaceHolderMessage()}
- stumpOnChangeCommand changeTileContentAndRenderCommand
+ changeCommand changeTileContentAndRenderCommand
  class LargeTileInput`
     }
   }
@@ -29631,7 +29592,7 @@ class LargeLabel`
     get bodyStumpTemplate() {
       return `textarea
  name content
- stumpOnChangeCommand changeTileSettingMultilineCommand
+ changeCommand changeTileSettingMultilineCommand
  placeholder Enter data in any format here. It will be saved directly in your document.
  class TileTextArea savable
  bern
@@ -29666,7 +29627,7 @@ class LargeLabel`
     }
     get bodyStumpTemplate() {
       return `textarea
- stumpOnChangeCommand triggerTileMethodCommand
+ changeCommand triggerTileMethodCommand
  placeholder Enter data in any format here. It will be saved in your browser's localStorage.
  name storeValueCommand
  class TileTextArea savable
@@ -29883,7 +29844,7 @@ a {name}
  tabindex -1
  value {value}
  class pickerItemButton
- stumpOnClickCommand {command}`
+ clickCommand {command}`
     }
     get hakonTemplate() {
       return `.abstractTemplatePickerTileNode
@@ -30416,7 +30377,7 @@ abstractTileTreeComponentNode
  string pencilStumpTemplate
   span {icon}
    class TilePencilButton
-   stumpOnClickCommand toggleToolbarCommand
+   clickCommand toggleToolbarCommand
  string inspectionStumpTemplate
   div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
   div Messages:
@@ -30434,10 +30395,10 @@ abstractTileTreeComponentNode
   div
    class {classes}
    id {id}
-   stumpOnContextMenuCommand openTileContextMenuCommand
+   contextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
+    doubleClickCommand toggleTileMaximizeCommand
    div ERROR
     class TileHeader
    div
@@ -30452,10 +30413,10 @@ abstractTileTreeComponentNode
   div
    class {classes}
    id {id}
-   stumpOnContextMenuCommand openTileContextMenuCommand
+   contextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
+    doubleClickCommand toggleTileMaximizeCommand
    div {header}
     class TileHeader
    div
@@ -30504,13 +30465,13 @@ abstractTileTreeComponentNode
    const cssScript = this[TilesConstants.tileCssScript]
    if (cssScript) this._loadTileCss(cssScript)
    const scriptPath = this[TilesConstants.tileScript]
-   if (scriptPath) await app.getWillowProgram().appendScript(scriptPath)
+   if (scriptPath) await app.getWillowBrowser().appendScript(scriptPath)
    loadingMap.set(this.constructor, true)
   }
   _loadTileCss(css) {
    const app = this.getWebApp()
    app
-    .getWillowProgram()
+    .getWillowBrowser()
     .getBodyStumpNode()
     .insertChildNode(
      css
@@ -30715,15 +30676,9 @@ abstractTileTreeComponentNode
    // We render all Tiles on the Wall.
    return this.getStumpNode().getParent()
   }
-  treeComponentDidMount() {
+  async treeComponentDidMount() {
    super.treeComponentDidMount()
    if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
-  }
-  _treeComponentDidUpdate() {
-   if (this.isLoaded()) this.treeComponentDidUpdate()
-  }
-  _treeComponentDidMount() {
-   if (this.isLoaded()) this.treeComponentDidMount()
   }
   toInspectionStumpCode() {
    const messages = this.getMessageBuffer().map(message => \`li \${moment(message.getLineModifiedTime()).fromNow()} - \${message.childrenToString()}\`)
@@ -30868,7 +30823,7 @@ abstractTileTreeComponentNode
   async copyTileCommand() {
    // todo: remove cousin tiles?
    this.getRootNode()
-    .getWillowProgram()
+    .getWillowBrowser()
     .copyTextToClipboard(this.getFirstAncestor().toString())
   }
   async createProgramFromTileExampleCommand(index) {
@@ -30918,13 +30873,13 @@ abstractTileTreeComponentNode
   }
   async copyDataCommand(delimiter) {
    this.getRootNode()
-    .getWillowProgram()
+    .getWillowBrowser()
     .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
   }
   async copyDataAsJavascriptCommand() {
    const table = this.getOutputOrInputTable()
    this.getRootNode()
-    .getWillowProgram()
+    .getWillowBrowser()
     .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
   }
   async copyDataAsTreeCommand() {
@@ -30932,7 +30887,7 @@ abstractTileTreeComponentNode
     .toTree()
     .toString()
    this.getRootNode()
-    .getWillowProgram()
+    .getWillowBrowser()
     .copyTextToClipboard(text)
   }
   async exportTileDataCommand(format = "csv") {
@@ -30948,7 +30903,7 @@ abstractTileTreeComponentNode
      .toString()
    }
    this.getRootNode()
-    .getWillowProgram()
+    .getWillowBrowser()
     .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
   }
 basicRecursiveTileNode
@@ -30976,7 +30931,7 @@ basicRecursiveTileNode
     placeholder \${cellTypeId}
     value \${value}
     name \${index + 1}
-    stumpOnChangeCommand \${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}\`
+    changeCommand \${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}\`
    })
    return \`div \${definition.getDescription()}
   div
@@ -30997,10 +30952,10 @@ DidYouMeanTileNode
   div
    span No tile '{input}' found. Line {lineNo}. Did you mean
    a {closestTile}
-    stumpCollapse
+    collapse
     tabindex -1
     value {closestTile}
-    stumpOnClickCommand changeTileTypeCommand
+    clickCommand changeTileTypeCommand
    span ?
  javascript
   getTileBodyStumpCode() {
@@ -31064,7 +31019,7 @@ abstractPickerTileNode
    title {description}
    tabindex -1
    value {value}
-   stumpOnClickCommand {command}
+   clickCommand {command}
  string categoryBreakStumpTemplate
   div {category}
    class PickerCategory
@@ -31319,10 +31274,10 @@ abstractHeaderlessChartTileNode
   div
    class {classes}
    id {id}
-   stumpOnContextMenuCommand openTileContextMenuCommand
+   contextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
+    doubleClickCommand toggleTileMaximizeCommand
    div
     class TileBody HeaderLess
     {body}
@@ -31359,7 +31314,7 @@ abstractSnippetGalleryNode
    a {title}
     value {value}
     class appendSnippetButton
-    stumpOnClickCommand appendSnippetTemplateCommand
+    clickCommand appendSnippetTemplateCommand
  javascript
   getGalleryNodes() {}
   getTileBodyStumpCode() {
@@ -31380,7 +31335,7 @@ abstractTemplateGalleryNode
    a {title}
     value {value}
     class createProgramButton
-    stumpOnClickCommand createProgramFromTemplateCommand
+    clickCommand createProgramFromTemplateCommand
 challengeListNode
  description View all challenges
  string title Try a challenge:
@@ -31513,13 +31468,13 @@ challengePlayNode
    value \${answer !== undefined ? answer : ""}
    style width: 300px;
    name 2
-   stumpOnChangeCommand changeWordAndRenderCommand
+   changeCommand changeWordAndRenderCommand
   span \${answerMessage}
    style color: \${color};
   br
   div
    a See a solution
-    stumpOnClickCommand createProgramFromTemplateCommand
+    clickCommand createProgramFromTemplateCommand
     value \${challengeId}\`
   }
 dtjsBasicNode
@@ -31632,7 +31587,7 @@ abstractHtmlNode
    return this.getSettingsStruct().src
   }
   getTileBodyStumpCode() {
-   return this.qFormat(this.bodyStumpTemplate, { tag: this.getTag(), style: this.style ? \`style \${this.style}\` : "stumpNoOp", src: this.getSrc() ? \`src \${this.getSrc()}\` : "stumpNoOp", content: this.getHtmlContent() || "" })
+   return this.qFormat(this.bodyStumpTemplate, { tag: this.getTag(), style: this.style ? \`style \${this.style}\` : "", src: this.getSrc() ? \`src \${this.getSrc()}\` : "", content: this.getHtmlContent() || "" })
   }
 htmlTextNode
  description Displays fixed text in the given HTML element.
@@ -32042,7 +31997,7 @@ vegaExampleNode
    const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
    const url = \`maia/packages/vega/ignore/vega-lite/examples/compiled/\${exampleName}.vg.json\`
    const res = await this.getWebApp()
-    .getWillowProgram()
+    .getWillowBrowser()
     .httpGetUrl(url)
    const spec = JSON.parse(res.text)
    // rewrite data urls
@@ -32481,10 +32436,10 @@ debugCommandsNode
  crux debug.commands
  string bodyStumpTemplate
   a Run Speed Test on all Files in Working Directory
-   stumpOnClickCommand _runSpeedTestCommand
+   clickCommand _runSpeedTestCommand
   br
   a Run Tile Quality Check
-   stumpOnClickCommand _doTileQualityCheckCommand
+   clickCommand _doTileQualityCheckCommand
  javascript
   getTileBodyStumpCode() {
    return this.bodyStumpTemplate
@@ -32622,9 +32577,9 @@ editorGalleryNode
     .filter(tile => tile.isVisible())
     .map(tile => this.qFormat(this.miniStyleTemplate, { style: dimensions.get(tile).getScaledCss(0.1) }))
     .join("\\n")
-   const onClick = permalink ? "stumpOnClickCommand openFullPathInNewTabAndFocusCommand" : "stumpNoOp"
-   const value = permalink ? \`value \${permalink}\` : "stumpNoOp"
-   const href = permalink ? \`href \${permalink}\` : "stumpNoOp"
+   const onClick = permalink ? "clickCommand openFullPathInNewTabAndFocusCommand" : ""
+   const value = permalink ? \`value \${permalink}\` : ""
+   const href = permalink ? \`href \${permalink}\` : ""
    return this.qFormat(this.miniStumpTemplate, { filename, theTiles, onClick, value, href })
   }
   getTileBodyStumpCode() {
@@ -32857,7 +32812,7 @@ tablesBasicNode
   }
  string contextMenuStumpTemplate
   a Delete all rows
-   stumpOnClickCommand deleteAllRowsInTargetTileCommand
+   clickCommand deleteAllRowsInTargetTileCommand
  string headerRowStumpTemplate
   th
    value {colName}
@@ -33080,10 +33035,10 @@ abstractProviderNode
   div
    class {classes}
    id {id}
-   stumpOnContextMenuCommand openTileContextMenuCommand
+   contextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
+    doubleClickCommand toggleTileMaximizeCommand
    div
     class TileBody HeaderLess
     {body}
@@ -33164,10 +33119,10 @@ abstractUrlNoCellsNode
   // todo: remove this cache. use higher level.
   async _getData(url) {
    const useCache = this.getSettingsStruct().useCache !== "false" || this.useCache
-   const willowProgram = this.getWebApp().getWillowProgram()
+   const willowBrowser = this.getWebApp().getWillowBrowser()
    let response
-   if (useCache) response = await willowProgram.httpGetUrlFromCache(url)
-   else response = await willowProgram.httpGetUrl(url)
+   if (useCache) response = await willowBrowser.httpGetUrlFromCache(url)
+   else response = await willowBrowser.httpGetUrl(url)
    if (response.fromCache)
     this.emitLogMessage(\`div
   bern
@@ -33229,13 +33184,13 @@ diskBrowseNode
    return \`input
    placeholder Filepath
    value \${path}
-   stumpOnChangeCommand changeTileContentAndRenderCommand
+   changeCommand changeTileContentAndRenderCommand
    class LargeTileInput
   table
    tr
     td
      a ..
-      stumpOnClickCommand changeTileContentAndRenderCommand
+      clickCommand changeTileContentAndRenderCommand
       value \${parentPath}
   \${rows
   .map(row => {
@@ -33251,7 +33206,7 @@ diskBrowseNode
    return \` tr
     td
      a \${label}
-      stumpOnClickCommand changeTileContentAndRenderCommand
+      clickCommand changeTileContentAndRenderCommand
       value \${path.replace(/\\/$/, "") + "/" + label}\`
   })
   .join("\\n")}\`
@@ -33285,11 +33240,11 @@ hackernewsTopNode
  javascript
   async fetchTableInputs() {
    // todo: allow cache breaking.
-   const willowProgram = this.getWebApp().getWillowProgram()
+   const willowBrowser = this.getWebApp().getWillowBrowser()
    const firstUrls = this._getFirstUrls()
    if (!firstUrls.length || this.isNodeJs()) return []
    let allResults = []
-   const fetchMethod = async url => (this.getWebApp().isUrlGetProxyAvailable() ? willowProgram.httpGetUrlFromProxyCache(url) : willowProgram.httpGetUrlFromCache(url))
+   const fetchMethod = async url => (this.getWebApp().isUrlGetProxyAvailable() ? willowBrowser.httpGetUrlFromProxyCache(url) : willowBrowser.httpGetUrlFromCache(url))
    for (let mainUrl of firstUrls) {
     const response = await fetchMethod(mainUrl)
     const nextUrls = this._parseNextUrls(response)
@@ -33353,7 +33308,7 @@ webGetNode
   input
    value \${this.getContent() || ""}
    placeholder \${this._getPlaceHolderMessage()}
-   stumpOnChangeCommand changeTileContentAndRenderCommand
+   changeCommand changeTileContentAndRenderCommand
    class LargeTileInput\`
   }
  string tileSize 400 100
@@ -33369,7 +33324,7 @@ webPostNode
     {post}
    placeholder This data will be sent as the value of the 'q' param
    name post
-   stumpOnChangeCommand changeTileSettingMultilineCommand
+   changeCommand changeTileSettingMultilineCommand
    class TileTextArea
  javascript
   getTileBodyStumpCode() {
@@ -33384,7 +33339,7 @@ webPostNode
    // }
    const postData = settings.post || ""
    const res = await this.getWebApp()
-    .getWillowProgram()
+    .getWillowBrowser()
     .httpPostUrl(url, { q: postData.trim() })
    this._setWillowHttpResponse(res)
    return res.getParsedDataOrText()
@@ -33627,7 +33582,7 @@ abstractTransformerNode
   input
    value \${this.getContent() || ""}
    placeholder \${this._getPlaceHolderMessage()}
-   stumpOnChangeCommand changeTileContentAndRenderCommand
+   changeCommand changeTileContentAndRenderCommand
    class LargeTileInput\`
   }
 abstractColumnAdderTileNode
@@ -34290,7 +34245,7 @@ dataInlineNode
  string bodyStumpTemplate
   textarea
    name content
-   stumpOnChangeCommand changeTileSettingMultilineCommand
+   changeCommand changeTileSettingMultilineCommand
    placeholder Enter data in any format here. It will be saved directly in your document.
    class TileTextArea savable
    bern
@@ -34322,7 +34277,7 @@ dataLocalStorageNode
  description Use your browser's localStorage for storing data.
  string bodyStumpTemplate
   textarea
-   stumpOnChangeCommand triggerTileMethodCommand
+   changeCommand triggerTileMethodCommand
    placeholder Enter data in any format here. It will be saved in your browser's localStorage.
    name storeValueCommand
    class TileTextArea savable
@@ -34548,7 +34503,7 @@ abstractTemplatePickerTileNode
    tabindex -1
    value {value}
    class pickerItemButton
-   stumpOnClickCommand {command}
+   clickCommand {command}
  string categoryBreakStumpTemplate
   div {category}
    class PickerCategory
@@ -35972,7 +35927,7 @@ class ServerStorageFile extends AbstractFile {}
 
 class ServerStorageDisk extends AbstractDisk {
   _getWillow() {
-    return this.getRootTreeComponent().getWillowProgram()
+    return this.getRootTreeComponent().getWillowBrowser()
   }
 
   async _httpPostUrl(method, options) {
@@ -37433,10 +37388,10 @@ BlobNode
       return `div
  class {classes}
  id {id}
- stumpOnContextMenuCommand openTileContextMenuCommand
+ contextMenuCommand openTileContextMenuCommand
  div
   class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
+  doubleClickCommand toggleTileMaximizeCommand
  div {header}
   class TileHeader
  div
@@ -37453,10 +37408,10 @@ BlobNode
       return `div
  class {classes}
  id {id}
- stumpOnContextMenuCommand openTileContextMenuCommand
+ contextMenuCommand openTileContextMenuCommand
  div
   class TileGrabber
-  stumpOnDblClickCommand toggleTileMaximizeCommand
+  doubleClickCommand toggleTileMaximizeCommand
  div ERROR
   class TileHeader
  div
@@ -37485,7 +37440,7 @@ pre
     get pencilStumpTemplate() {
       return `span {icon}
  class TilePencilButton
- stumpOnClickCommand toggleToolbarCommand`
+ clickCommand toggleToolbarCommand`
     }
     get visibleKey() {
       return `visible`
@@ -37535,13 +37490,13 @@ pre
       const cssScript = this[TilesConstants.tileCssScript]
       if (cssScript) this._loadTileCss(cssScript)
       const scriptPath = this[TilesConstants.tileScript]
-      if (scriptPath) await app.getWillowProgram().appendScript(scriptPath)
+      if (scriptPath) await app.getWillowBrowser().appendScript(scriptPath)
       loadingMap.set(this.constructor, true)
     }
     _loadTileCss(css) {
       const app = this.getWebApp()
       app
-        .getWillowProgram()
+        .getWillowBrowser()
         .getBodyStumpNode()
         .insertChildNode(
           css
@@ -37754,15 +37709,9 @@ pre
       // We render all Tiles on the Wall.
       return this.getStumpNode().getParent()
     }
-    treeComponentDidMount() {
+    async treeComponentDidMount() {
       super.treeComponentDidMount()
       if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
-    }
-    _treeComponentDidUpdate() {
-      if (this.isLoaded()) this.treeComponentDidUpdate()
-    }
-    _treeComponentDidMount() {
-      if (this.isLoaded()) this.treeComponentDidMount()
     }
     toInspectionStumpCode() {
       const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
@@ -37907,7 +37856,7 @@ pre
     async copyTileCommand() {
       // todo: remove cousin tiles?
       this.getRootNode()
-        .getWillowProgram()
+        .getWillowBrowser()
         .copyTextToClipboard(this.getFirstAncestor().toString())
     }
     async createProgramFromTileExampleCommand(index) {
@@ -37957,13 +37906,13 @@ pre
     }
     async copyDataCommand(delimiter) {
       this.getRootNode()
-        .getWillowProgram()
+        .getWillowBrowser()
         .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
     }
     async copyDataAsJavascriptCommand() {
       const table = this.getOutputOrInputTable()
       this.getRootNode()
-        .getWillowProgram()
+        .getWillowBrowser()
         .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
     }
     async copyDataAsTreeCommand() {
@@ -37971,7 +37920,7 @@ pre
         .toTree()
         .toString()
       this.getRootNode()
-        .getWillowProgram()
+        .getWillowBrowser()
         .copyTextToClipboard(text)
     }
     async exportTileDataCommand(format = "csv") {
@@ -37987,7 +37936,7 @@ pre
           .toString()
       }
       this.getRootNode()
-        .getWillowProgram()
+        .getWillowBrowser()
         .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
     }
   }
@@ -38016,7 +37965,7 @@ pre
   placeholder ${cellTypeId}
   value ${value}
   name ${index + 1}
-  stumpOnChangeCommand ${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}`
+  changeCommand ${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}`
       })
       return `div ${definition.getDescription()}
 div
@@ -38035,10 +37984,10 @@ ${cellInputs.join("\n")}`
       return `div
  span No tile '{input}' found. Line {lineNo}. Did you mean
  a {closestTile}
-  stumpCollapse
+  collapse
   tabindex -1
   value {closestTile}
-  stumpOnClickCommand changeTileTypeCommand
+  clickCommand changeTileTypeCommand
  span ?`
     }
     getTileBodyStumpCode() {
@@ -38084,7 +38033,7 @@ a {name}
  title {description}
  tabindex -1
  value {value}
- stumpOnClickCommand {command}`
+ clickCommand {command}`
     }
     get hakonTemplate() {
       return `.PickerTileNode
@@ -38294,7 +38243,7 @@ abstractTileTreeComponentNode
  string pencilStumpTemplate
   span {icon}
    class TilePencilButton
-   stumpOnClickCommand toggleToolbarCommand
+   clickCommand toggleToolbarCommand
  string inspectionStumpTemplate
   div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
   div Messages:
@@ -38312,10 +38261,10 @@ abstractTileTreeComponentNode
   div
    class {classes}
    id {id}
-   stumpOnContextMenuCommand openTileContextMenuCommand
+   contextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
+    doubleClickCommand toggleTileMaximizeCommand
    div ERROR
     class TileHeader
    div
@@ -38330,10 +38279,10 @@ abstractTileTreeComponentNode
   div
    class {classes}
    id {id}
-   stumpOnContextMenuCommand openTileContextMenuCommand
+   contextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
+    doubleClickCommand toggleTileMaximizeCommand
    div {header}
     class TileHeader
    div
@@ -38382,13 +38331,13 @@ abstractTileTreeComponentNode
    const cssScript = this[TilesConstants.tileCssScript]
    if (cssScript) this._loadTileCss(cssScript)
    const scriptPath = this[TilesConstants.tileScript]
-   if (scriptPath) await app.getWillowProgram().appendScript(scriptPath)
+   if (scriptPath) await app.getWillowBrowser().appendScript(scriptPath)
    loadingMap.set(this.constructor, true)
   }
   _loadTileCss(css) {
    const app = this.getWebApp()
    app
-    .getWillowProgram()
+    .getWillowBrowser()
     .getBodyStumpNode()
     .insertChildNode(
      css
@@ -38593,15 +38542,9 @@ abstractTileTreeComponentNode
    // We render all Tiles on the Wall.
    return this.getStumpNode().getParent()
   }
-  treeComponentDidMount() {
+  async treeComponentDidMount() {
    super.treeComponentDidMount()
    if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
-  }
-  _treeComponentDidUpdate() {
-   if (this.isLoaded()) this.treeComponentDidUpdate()
-  }
-  _treeComponentDidMount() {
-   if (this.isLoaded()) this.treeComponentDidMount()
   }
   toInspectionStumpCode() {
    const messages = this.getMessageBuffer().map(message => \`li \${moment(message.getLineModifiedTime()).fromNow()} - \${message.childrenToString()}\`)
@@ -38746,7 +38689,7 @@ abstractTileTreeComponentNode
   async copyTileCommand() {
    // todo: remove cousin tiles?
    this.getRootNode()
-    .getWillowProgram()
+    .getWillowBrowser()
     .copyTextToClipboard(this.getFirstAncestor().toString())
   }
   async createProgramFromTileExampleCommand(index) {
@@ -38796,13 +38739,13 @@ abstractTileTreeComponentNode
   }
   async copyDataCommand(delimiter) {
    this.getRootNode()
-    .getWillowProgram()
+    .getWillowBrowser()
     .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
   }
   async copyDataAsJavascriptCommand() {
    const table = this.getOutputOrInputTable()
    this.getRootNode()
-    .getWillowProgram()
+    .getWillowBrowser()
     .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
   }
   async copyDataAsTreeCommand() {
@@ -38810,7 +38753,7 @@ abstractTileTreeComponentNode
     .toTree()
     .toString()
    this.getRootNode()
-    .getWillowProgram()
+    .getWillowBrowser()
     .copyTextToClipboard(text)
   }
   async exportTileDataCommand(format = "csv") {
@@ -38826,7 +38769,7 @@ abstractTileTreeComponentNode
      .toString()
    }
    this.getRootNode()
-    .getWillowProgram()
+    .getWillowBrowser()
     .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
   }
 basicRecursiveTileNode
@@ -38854,7 +38797,7 @@ basicRecursiveTileNode
     placeholder \${cellTypeId}
     value \${value}
     name \${index + 1}
-    stumpOnChangeCommand \${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}\`
+    changeCommand \${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}\`
    })
    return \`div \${definition.getDescription()}
   div
@@ -38875,10 +38818,10 @@ DidYouMeanTileNode
   div
    span No tile '{input}' found. Line {lineNo}. Did you mean
    a {closestTile}
-    stumpCollapse
+    collapse
     tabindex -1
     value {closestTile}
-    stumpOnClickCommand changeTileTypeCommand
+    clickCommand changeTileTypeCommand
    span ?
  javascript
   getTileBodyStumpCode() {
@@ -38942,7 +38885,7 @@ abstractPickerTileNode
    title {description}
    tabindex -1
    value {value}
-   stumpOnClickCommand {command}
+   clickCommand {command}
  string categoryBreakStumpTemplate
   div {category}
    class PickerCategory
@@ -39262,13 +39205,13 @@ class AbstractContextMenuTreeComponent extends AbstractTreeComponent {
     const container = this.getStumpNode()
     const that = this
     const app = this.getRootNode()
-    const willowBrowser = app.getWillowProgram()
+    const willowBrowser = app.getWillowBrowser()
     const bodyShadow = willowBrowser.getBodyStumpNode().getShadow()
     const unmountOnClick = function() {
-      bodyShadow.offShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick) // todo: should we move this to before unmount?
+      bodyShadow.offShadowEvent("click", unmountOnClick) // todo: should we move this to before unmount?
       app.closeAllContextMenus()
     }
-    setTimeout(() => bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick), 100) // todo: fix this.
+    setTimeout(() => bodyShadow.onShadowEvent("click", unmountOnClick), 100) // todo: fix this.
     const event = app.getMouseEvent()
     const windowSize = willowBrowser.getWindowSize()
     container.setStumpNodeCss(this._getContextMenuPosition(windowSize.width, windowSize.height, event.clientX, event.clientY, container.getShadow()))
@@ -39336,14 +39279,14 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
 
   treeComponentDidMount() {
     const app = this.getRootNode()
-    const willowBrowser = app.getWillowProgram()
+    const willowBrowser = app.getWillowBrowser()
     const bodyStumpNode = willowBrowser.getBodyStumpNode()
     const bodyShadow = bodyStumpNode.getShadow()
     const unmountOnClick = function() {
-      bodyShadow.offShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick)
+      bodyShadow.offShadowEvent("click", unmountOnClick)
       app.closeAllDropDownMenusCommand()
     }
-    setTimeout(() => bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick), 100) // todo: fix this.
+    setTimeout(() => bodyShadow.onShadowEvent("click", unmountOnClick), 100) // todo: fix this.
   }
 
   toStumpCode() {
@@ -39414,14 +39357,14 @@ ${theme.enableTextSelect2}
 
   toStumpCode() {
     return new jtree.TreeNode(`section
- stumpOnClickCommand unmountAndDestroyCommand
+ clickCommand unmountAndDestroyCommand
  class modalBackground
  section
-  stumpOnClickCommand stopPropagationCommand
+  clickCommand stopPropagationCommand
   class modalContent
   a X
    id closeModalX
-   stumpOnClickCommand unmountAndDestroyCommand
+   clickCommand unmountAndDestroyCommand
    class modalClose
   {modelStumpCode}`).templateToString({ modelStumpCode: this.getModalStumpCode() })
   }
@@ -39504,9 +39447,9 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
  class TerminalDiv
  textarea
   class sourceTextarea
-  stumpOnBlurCommand saveChangesCommand
-  stumpOnLineClick executeFirstLineCommand
-  stumpOnLineShiftClick compileFirstLineCommand
+  blurCommand saveChangesCommand
+  lineClickCommand executeFirstLineCommand
+  lineShiftClickCommand compileFirstLineCommand
   bern
    {lines}`).templateToString({ lines: this._getProgramSource() })
   }
@@ -39823,10 +39766,10 @@ window.ConsoleTreeComponent
 class NewDropDownMenuTreeComponent extends AbstractDropDownMenuTreeComponent {
   getDropDownStumpCode() {
     const newProgram = `a New File
- stumpOnClickCommand createNewBlankProgramCommand
+ clickCommand createNewBlankProgramCommand
  value untitled.maia
 a New From Url
- stumpOnClickCommand openCreateNewProgramFromUrlDialogCommand`
+ clickCommand openCreateNewProgramFromUrlDialogCommand`
     const program = this.getRootNode().getMountedTab()
     if (!program) return newProgram
 
@@ -39834,7 +39777,7 @@ a New From Url
 div
  class divider
 a Clone File
- stumpOnClickCommand cloneTabCommand`
+ clickCommand cloneTabCommand`
   }
 
   getAnchorId() {
@@ -39939,7 +39882,7 @@ class GutterTreeComponent extends AbstractTreeComponent {
  class Gutter
  span <>
   class closeGutter
-  stumpOnClickCommand toggleGutterWidthCommand`
+  clickCommand toggleGutterWidthCommand`
   }
 }
 
@@ -40021,7 +39964,7 @@ p
   td ${shortcut.getKeyCombo() || "-"}
   td &nbsp;&nbsp;
    ${shortcut.isEnabled(app) ? "a" : "span"} ${description}
-    stumpOnClickCommand ${shortcut.getFn()}`
+    clickCommand ${shortcut.getFn()}`
       })
       .join("\n")
     return `table
@@ -40046,11 +39989,11 @@ p Version ${app.getVersion()} ${app.constructor.name}
 p
  a Welcome Page
   id welcomePageButton
-  stumpOnClickCommand openOhayoProgramCommand
+  clickCommand openOhayoProgramCommand
   value ohayo.maia
 a Keyboard Shortcuts
  class helpToggle
- stumpOnClickCommand toggleShadowByIdCommand
+ clickCommand toggleShadowByIdCommand
  value shortcutsHelp
 ${this._getShortcutsHelpStumpCode()}`
   }
@@ -40104,10 +40047,10 @@ class MenuTreeComponent extends AbstractTreeComponent {
     return `div
  class MenuTreeComponent ${this.constructor.name}
  a ${OhayoConstants.productName}
-  stumpOnClickCommand toggleHelpCommand
+  clickCommand toggleHelpCommand
  a New ▾
   id newToggle
-  stumpOnClickCommand toggleAndRenderNewDropDownCommand`
+  clickCommand toggleAndRenderNewDropDownCommand`
   }
 }
 
@@ -40159,14 +40102,14 @@ class TabTreeComponent extends AbstractTreeComponent {
         .getParent()
         .getMountedTabName() === fullPath
     return `a ${filename}
- stumpOnClickCommand mountTabByIndexCommand
- stumpCollapse
+ clickCommand mountTabByIndexCommand
+ collapse
  value ${index}
  title ${fullPath}
  class TabStub ${isMounted ? "mountedTab" : ""}
  span x
-  stumpCollapse
-  stumpOnClickCommand closeTabByIndexCommand
+  collapse
+  clickCommand closeTabByIndexCommand
   value ${index}
   class closeTabButton`
   }
@@ -40179,7 +40122,7 @@ class TabTreeComponent extends AbstractTreeComponent {
     const obj = {}
     obj[OhayoConstants.deepLinks.filename] = this.getFileName()
     return this.getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .toPrettyDeepLink(this.getTabProgram().childrenToString(), obj)
   }
 
@@ -40187,24 +40130,24 @@ class TabTreeComponent extends AbstractTreeComponent {
     const grammarProgram = this.getTabProgram().getGrammarProgram()
 
     return `a Save File
- stumpOnClickCommand saveTabAndNotifyCommand
+ clickCommand saveTabAndNotifyCommand
 a Rename File
- stumpOnClickCommand showTabRenameFilePromptCommand
+ clickCommand showTabRenameFilePromptCommand
 a Move File
- stumpOnClickCommand showTabMoveFilePromptCommand
+ clickCommand showTabMoveFilePromptCommand
 a Clone File
- stumpOnClickCommand cloneTabCommand
+ clickCommand cloneTabCommand
 a Delete File
- stumpOnClickCommand showDeleteFileConfirmDialogCommand
+ clickCommand showDeleteFileConfirmDialogCommand
 a Copy program as link
- stumpOnClickCommand copyDeepLinkCommand
+ clickCommand copyDeepLinkCommand
 a Log program stats
- stumpOnClickCommand printProgramStatsCommand
+ clickCommand printProgramStatsCommand
 a Close all other files
- stumpOnClickCommand closeAllTabsExceptFocusedTabCommand
+ clickCommand closeAllTabsExceptFocusedTabCommand
 a Save compiled '${grammarProgram.getTargetExtension()}' file
  tabindex -1
- stumpOnClickCommand saveCompiledCommand`
+ clickCommand saveCompiledCommand`
   }
 
   autosaveAndRender() {
@@ -40554,24 +40497,24 @@ class TileContextMenuTreeComponent extends AbstractContextMenuTreeComponent {
   getContextMenuBodyStumpCode() {
     const targetTile = this.getRootNode().getTargetNode()
     return `a Reload
- stumpOnClickCommand fetchAndReloadFocusedTabCommand
+ clickCommand fetchAndReloadFocusedTabCommand
 a Copy tile with inputs
  tabindex -1
- stumpOnClickCommand copyTargetTileCommand
+ clickCommand copyTargetTileCommand
 a Copy data as tree
- stumpOnClickCommand copyTargetTileDataAsTreeCommand
+ clickCommand copyTargetTileDataAsTreeCommand
 a Copy data as javascript
- stumpOnClickCommand copyTargetTileDataAsJavascriptCommand
+ clickCommand copyTargetTileDataAsJavascriptCommand
 a Copy data as tsv
- stumpOnClickCommand copyTargetTileDataCommand
+ clickCommand copyTargetTileDataCommand
  value \t
 a Copy data as csv
- stumpOnClickCommand copyTargetTileDataCommand
+ clickCommand copyTargetTileDataCommand
  value ,
 a Export data to csv file
- stumpOnClickCommand exportTargetTileDataCommand
+ clickCommand exportTargetTileDataCommand
 a Export data to tree file
- stumpOnClickCommand exportTargetTileDataCommand
+ clickCommand exportTargetTileDataCommand
  value tree
 ${targetTile.getContextMenuStumpCode()}`
   }
@@ -40652,7 +40595,7 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
       tileHelp = `
  span ${Icons("function", 20)}
   title See an example program with '${tile.getFirstWord()}'
-  stumpOnClickCommand createProgramFromTileExampleCommand`
+  clickCommand createProgramFromTileExampleCommand`
     }
     const hints = tile.getDefinition().getLineHints()
 
@@ -40663,13 +40606,13 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
  class TileToolbarTreeComponent
  span ${Icons("copy", 20)}
   title Duplicate Tile
-  stumpOnClickCommand cloneTileCommand
+  clickCommand cloneTileCommand
  span ${Icons("trash", 20)}
   title Delete Tile
-  stumpOnClickCommand destroyTileCommand
+  clickCommand destroyTileCommand
  span ${Icons("inspector", 20)}
   title Debug Tile
-  stumpOnClickCommand inspectTileCommand` +
+  clickCommand inspectTileCommand` +
       tileHelp +
       `
  div ${hints}` +
@@ -40691,11 +40634,11 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
         option =>
           ` option ${option}
   value ${option}
-  ${selectedValue === option ? "selected" : "stumpNoOp"}`
+  ${selectedValue === option ? "selected" : ""}`
       )
       .join("\n")
     return `select
- stumpOnChangeCommand changeTileTypeCommand
+ changeCommand changeTileTypeCommand
 ${options}`
   }
 
@@ -40718,15 +40661,15 @@ ${options}`
         option =>
           ` option ${option.name}
   value ${option.value}
-  ${option.isParent ? "selected" : "stumpNoOp"}`
+  ${option.isParent ? "selected" : ""}`
       )
       .join("\n")
 
     return `select
- stumpOnChangeCommand changeParentCommand
+ changeCommand changeParentCommand
  option (top)
   value 
-  ${tilesParent.isRoot() ? "selected" : "stumpNoOp"}${options ? "\n" + options : ""}`
+  ${tilesParent.isRoot() ? "selected" : ""}${options ? "\n" + options : ""}`
   }
 
   _getSuggestionsStumpCode() {
@@ -40743,7 +40686,7 @@ ${options}`
     formFields.unshift([
       "content",
       `input
- stumpOnChangeCommand changeTileContentAndRenderCommand
+ changeCommand changeTileContentAndRenderCommand
  value ${tile.getContent() || ""}`
     ])
 
@@ -40788,7 +40731,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "15.3.0"
+const Version = "15.5.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
@@ -40866,7 +40809,7 @@ class WallTreeComponent extends AbstractTreeComponent {
 
   selectTilesByShadowClass(className = TilesConstants.selectedClass) {
     this.getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .findStumpNodesByShadowClass(className)
       .forEach(stumpNode => stumpNode.getStumpNodeTreeComponent().selectTile())
   }
@@ -40898,13 +40841,13 @@ class WallTreeComponent extends AbstractTreeComponent {
   toStumpCode() {
     return `div
  class WallTreeComponent
- stumpOnContextMenuCommand openWallContextMenuCommand
- stumpOnDblClickCommand insertPickerTileCommand`
+ contextMenuCommand openWallContextMenuCommand
+ doubleClickCommand insertPickerTileCommand`
   }
 
   _getSelectedTileStumpNodes() {
     return this.getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .getBodyStumpNode()
       .findStumpNodesWithClass(TilesConstants.selectedClass) // todo: also filter by .abstractTileTreeComponentNode?
   }
@@ -40912,12 +40855,12 @@ class WallTreeComponent extends AbstractTreeComponent {
   _makeSelectable() {
     const app = this.getRootNode()
     const stumpNode = this.getStumpNode()
-    const willowBrowser = app.getWillowProgram()
+    const willowBrowser = app.getWillowBrowser()
     const selector = "." + TilesConstants.abstractTileTreeComponentNode
     const shadow = stumpNode.getShadow()
 
     // I think we need this because jquery selectable breaks click behavior otherwise?
-    shadow.onShadowEvent(WillowConstants.ShadowEvents.click, function(evt) {
+    shadow.onShadowEvent("click", function(evt) {
       // Only if this is the direct target
       if (evt.target === shadow.getShadowElement()) willowBrowser.blurFocusedInput()
     })
@@ -40932,7 +40875,7 @@ class WallTreeComponent extends AbstractTreeComponent {
 
       // NOTE: SHADOW AND STUMP GET OUT OF SYNC HERE....NEED TESTS. NEED TO MVOE SHADOW AND STUMP
       // TO THEIR OWN TESTED REPO.
-      shadow.onShadowEvent(WillowConstants.ShadowEvents.mouseover, function(evt) {
+      shadow.onShadowEvent("mouseover", function(evt) {
         if (wasAdded) return true
         wasAdded = true
         shadow.makeSelectable({
@@ -40975,7 +40918,6 @@ window.WallTreeComponent = WallTreeComponent
 
 
 
-
 class WallFlexTreeComponent extends WallTreeComponent {
   _resizeTiles(stumpNode) {
     const selected = this._getSelectedTileStumpNodes()
@@ -40995,7 +40937,7 @@ class WallFlexTreeComponent extends WallTreeComponent {
     // todo: remove this. ditch jqery ui.
     const app = this.getRootNode()
     app
-      .getWillowProgram()
+      .getWillowBrowser()
       .getBodyStumpNode()
       .findStumpNodesWithClass(TilesConstants.abstractTileTreeComponentNode)
       .filter(stumpNode => stumpNode.getStumpNodeTreeComponent().isVisible())
@@ -41068,7 +41010,7 @@ ${TilesConstants.top} ${_top}`
     const gridSize = this.getGridSize()
     const app = this.getRootNode()
     const that = this
-    const willowBrowser = app.getWillowProgram()
+    const willowBrowser = app.getWillowBrowser()
     shadow.makeResizable({
       handles: "se",
       grid: gridSize,
@@ -41087,8 +41029,8 @@ ${TilesConstants.top} ${_top}`
     const that = this
     this.getStumpNode()
       .getShadow()
-      .onShadowEvent(WillowConstants.ShadowEvents.mouseover, "." + TilesConstants.abstractTileTreeComponentNode, function() {
-        const tileStumpNode = app.getWillowProgram().getStumpNodeFromElement(this)
+      .onShadowEvent("mouseover", "." + TilesConstants.abstractTileTreeComponentNode, function() {
+        const tileStumpNode = app.getWillowBrowser().getStumpNodeFromElement(this)
         that._tileMouseOverHandler(tileStumpNode)
       })
   }
@@ -41396,7 +41338,7 @@ class PanelTreeComponent extends AbstractTreeComponent {
 
   closeTab(tab) {
     if (tab.isMounted()) {
-      const tabToMountNext = tab.getNextOrPrevious(this.getTabs())
+      const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs())
       this._getTabsNode().removeWall()
       tab.unmountAndDestroy()
       delete this._focusedTab
@@ -41488,14 +41430,6 @@ window.PanelTreeComponent
 
 
 
-const DataShadowEvents = {}
-
-DataShadowEvents.onClickCommand = "stumpOnClickCommand"
-DataShadowEvents.onBlurCommand = "stumpOnBlurCommand"
-DataShadowEvents.onContextMenuCommand = "stumpOnContextMenuCommand"
-DataShadowEvents.onChangeCommand = "stumpOnChangeCommand"
-DataShadowEvents.onDblClickCommand = "stumpOnDblClickCommand"
-
 
 
 
@@ -41545,13 +41479,11 @@ class DrumsProgram extends jtree.TreeNode {
   }
 }
 
-// abstract
 class OhayoWebApp extends AbstractTreeComponent {
   treeComponentWillMount() {
     this._startVisitCounter()
-
-    const defaultState = this.getFromStore(StorageKeys.appState) || OhayoWebApp.getDefaultStartState()
-    this.setChildren(defaultState)
+    const state = this.getFromStore(StorageKeys.appState)
+    if (state) this.setChildren(state)
 
     this._restoreTabs()
 
@@ -41559,7 +41491,7 @@ class OhayoWebApp extends AbstractTreeComponent {
     this._makeDocumentCopyableAndCuttable()
     this._bindKeyboardShortcuts()
 
-    const willowDoc = this.getWillowProgram()
+    const willowDoc = this.getWillowBrowser()
 
     willowDoc.setResizeEndHandler(event => this._onResizeEndEvent(event))
     willowDoc.setPasteHandler(event => this._onPasteEvent(event))
@@ -41582,7 +41514,7 @@ class OhayoWebApp extends AbstractTreeComponent {
 
   async _onPasteEvent(event) {
     // Return true if worker is editing an input
-    if (this.terminalHasFocus() || this.getWillowProgram().someInputHasFocus()) return true
+    if (this.terminalHasFocus() || this.getWillowBrowser().someInputHasFocus()) return true
     if (event.clipboardData && event.clipboardData.getData) await this.pasteCommand(event.clipboardData.getData("text/plain"))
   }
 
@@ -41635,7 +41567,7 @@ class OhayoWebApp extends AbstractTreeComponent {
   _getBodyShadowDimensions() {
     // depends on window.resize and whether gutter is open
 
-    const bodyStumpNode = this.getWillowProgram().getBodyStumpNode()
+    const bodyStumpNode = this.getWillowBrowser().getBodyStumpNode()
     const bodyShadow = bodyStumpNode.getShadow()
 
     return {
@@ -41793,7 +41725,7 @@ ${OhayoConstants.panel} 400
 
   _setErrorHandlers() {
     const that = this
-    this.getWillowProgram().setErrorHandler((message, file, line) => {
+    this.getWillowBrowser().setErrorHandler((message, file, line) => {
       that.goRed(message)
       console.error(message)
     })
@@ -41821,7 +41753,7 @@ ${OhayoConstants.panel} 400
   }
 
   renderApp() {
-    const report = this.renderAndGetRenderReport(this.getWillowProgram().getBodyStumpNode())
+    const report = this.renderAndGetRenderReport(this.getWillowBrowser().getBodyStumpNode())
     // console.log(report.toString())
     // console.log(this.toString())
   }
@@ -41946,9 +41878,9 @@ ${OhayoConstants.panel} 400
     let newFullDiskFilePath
 
     if (isRenameOp) {
-      const newNameOnly = await this.getWillowProgram().promptThen("Enter new name for file", suggestedNewFilename || path.getFilename())
+      const newNameOnly = await this.getWillowBrowser().promptThen("Enter new name for file", suggestedNewFilename || path.getFilename())
       newFullDiskFilePath = newNameOnly ? path.getWithoutFilename() + newNameOnly : newNameOnly
-    } else newFullDiskFilePath = await this.getWillowProgram().promptThen("Enter new name for file", suggestedFullDiskFilePath || existingFullDiskFilePath)
+    } else newFullDiskFilePath = await this.getWillowBrowser().promptThen("Enter new name for file", suggestedFullDiskFilePath || existingFullDiskFilePath)
 
     if (!newFullDiskFilePath || newFullDiskFilePath === existingFullDiskFilePath) return undefined
 
@@ -41971,18 +41903,18 @@ ${OhayoConstants.panel} 400
   }
 
   _getMousetrap() {
-    return this.getWillowProgram().getMousetrap()
+    return this.getWillowBrowser().getMousetrap()
   }
 
   _bindKeyboardShortcuts() {
     const mouseTrap = this._getMousetrap()
-    const willowBrowser = this.getWillowProgram()
+    const willowBrowser = this.getWillowBrowser()
 
     mouseTrap._originalStopCallback = mouseTrap.prototype.stopCallback
     mouseTrap.prototype.stopCallback = function(evt, element, shortcut) {
       const stumpNode = willowBrowser.getStumpNodeFromElement(element)
       if (stumpNode && shortcut === "command+s" && stumpNode.stumpNodeHasClass("savable")) {
-        stumpNode.getShadow().triggerShadowEvent(WillowConstants.ShadowEvents.change)
+        stumpNode.getShadow().triggerShadowEvent("change")
         evt.preventDefault()
         return true
       }
@@ -42013,7 +41945,7 @@ ${OhayoConstants.panel} 400
   }
 
   getStore() {
-    return this.getWillowProgram().getStore()
+    return this.getWillowBrowser().getStore()
   }
 
   getUnusedStoreKey(key) {
@@ -42061,7 +41993,7 @@ ${OhayoConstants.panel} 400
 
   _makeDocumentCopyableAndCuttable() {
     const app = this
-    this.getWillowProgram()
+    this.getWillowBrowser()
       .setCopyHandler(evt => app.copySelectionCommand(evt))
       .setCutHandler(evt => app.cutSelectionCommand(evt))
   }
@@ -42071,14 +42003,14 @@ ${OhayoConstants.panel} 400
     const link = stumpNode.getStumpNodeAttr("href")
     if (!link || stumpNode.getStumpNodeAttr("target")) return undefined
     evt.preventDefault()
-    if (this.getWillowProgram().isExternalLink(link)) {
+    if (this.getWillowBrowser().isExternalLink(link)) {
       this.openExternalLink(link)
       return false
     }
   }
 
   openExternalLink(link) {
-    this.getWillowProgram().openUrl(link)
+    this.getWillowBrowser().openUrl(link)
   }
 
   getAppWall() {
@@ -42188,11 +42120,11 @@ ${OhayoConstants.panel} 400
   // todo: remove this crap?
   _makeProgramLinksOpenImmediately() {
     const app = this
-    const willowBrowser = this.getWillowProgram()
+    const willowBrowser = this.getWillowBrowser()
     willowBrowser
       .getBodyStumpNode()
       .getShadow()
-      .onShadowEvent(WillowConstants.ShadowEvents.click, "a", function(evt) {
+      .onShadowEvent("click", "a", function(evt) {
         app._handleLinkClick(willowBrowser.getStumpNodeFromElement(this), evt)
       })
   }
@@ -42202,16 +42134,16 @@ ${OhayoConstants.panel} 400
     this.closeAllDropDownMenusCommand()
   }
 
-  async _executeStumpNodeCommandByStumpNodeChild(commandName, stumpNodeChild) {
-    const willowBrowser = this.getWillowProgram()
+  async _executeCommandByStumpNodeChild(commandName, stumpNodeChild) {
+    const willowBrowser = this.getWillowBrowser()
     const stumpNode = willowBrowser.getBodyStumpNode().findStumpNodeByChild(stumpNodeChild)
-    await this._executeStumpNodeCommand(stumpNode, stumpNode.getStumpNodeAttr(commandName))
+    await this._executeCommandOnStumpNode(stumpNode, stumpNode.getStumpNodeAttr(commandName))
   }
 
-  async _executeStumpNodeCommandByStumpNodeString(commandName, str) {
-    const willowBrowser = this.getWillowProgram()
+  async _executeCommandByStumpNodeString(commandName, str) {
+    const willowBrowser = this.getWillowBrowser()
     const stumpNode = willowBrowser.getBodyStumpNode().findStumpNodeByChildString(str)
-    await this._executeStumpNodeCommand(stumpNode, stumpNode.getStumpNodeAttr(commandName))
+    await this._executeCommandOnStumpNode(stumpNode, stumpNode.getStumpNodeAttr(commandName))
   }
 
   async playFirstVisitCommand() {
@@ -42289,7 +42221,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async toggleShadowByIdCommand(id) {
-    this.willowProgram
+    this.willowBrowser
       .getBodyStumpNode()
       .findStumpNodeByChild("id " + id)
       .getShadow()
@@ -42297,7 +42229,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async fillShadowInputOrTextAreaByClassNameCommand(className, value) {
-    this.willowProgram
+    this.willowBrowser
       .getBodyStumpNode()
       .findStumpNodesWithClass(className)
       .forEach(stumpNode => {
@@ -42308,7 +42240,7 @@ div - ${errors.join("\ndiv - ")}`
   async openDeleteAllTabsPromptCommand() {
     const tabs = this.focusedPanel.getTabs()
 
-    const shouldProceed = await this.willowProgram.confirmThen(`Are you sure you want to delete ${tabs.length} open files?`)
+    const shouldProceed = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${tabs.length} open files?`)
 
     return shouldProceed ? Promise.all(tabs.map(tab => tab.unlinkTab())) : false
   }
@@ -42370,7 +42302,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async copyDeepLinkCommand() {
-    this.getWillowProgram().copyTextToClipboard(this.mountedTab.getDeepLink())
+    this.getWillowBrowser().copyTextToClipboard(this.mountedTab.getDeepLink())
   }
 
   async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
@@ -42389,24 +42321,24 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async openCreateNewProgramFromUrlDialogCommand() {
-    const url = await this.willowProgram.promptThen(`Enter the url to clone and edit`, "")
+    const url = await this.willowBrowser.promptThen(`Enter the url to clone and edit`, "")
 
     if (!url) return undefined
 
-    const res = await this.willowProgram.httpGetUrl(url)
+    const res = await this.willowBrowser.httpGetUrl(url)
 
     const tab = await this._createAndOpen(res.text, "untitled" + OhayoConstants.fileExtensions.maia)
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
   async openFolderPromptCommand() {
-    const folder = await this.willowProgram.promptThen(`Enter a folder path to open multiple files`, this.getDefaultDisk().getPathBase())
+    const folder = await this.willowBrowser.promptThen(`Enter a folder path to open multiple files`, this.getDefaultDisk().getPathBase())
     return folder ? this.openFolderCommand(folder) : undefined
   }
 
   async changeWorkingFolderPromptCommand() {
     const current = this.getDefaultDisk().getPathBase()
-    const newWorkingFolder = await this.willowProgram.promptThen(`Enter a folder path`, current)
+    const newWorkingFolder = await this.willowBrowser.promptThen(`Enter a folder path`, current)
     if (!newWorkingFolder || current === newWorkingFolder) return undefined
     return this.changeWorkingFolderCommand(newWorkingFolder)
   }
@@ -42417,7 +42349,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async openFullDiskFilePathPromptCommand(suggestion) {
-    const fullPath = await this.willowProgram.promptThen(`Enter a full path to open`, suggestion || this.getDefaultDisk().getPathBase())
+    const fullPath = await this.willowBrowser.promptThen(`Enter a full path to open`, suggestion || this.getDefaultDisk().getPathBase())
 
     if (!fullPath) return undefined
     new FullDiskPath(fullPath)
@@ -42433,10 +42365,10 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async confirmAndResetAppStateCommand() {
-    const result = await this.willowProgram.confirmThen(`Are you sure you want to reset the Ohayo UI? Your files will not be lost.`)
+    const result = await this.willowBrowser.confirmThen(`Are you sure you want to reset the Ohayo UI? Your files will not be lost.`)
     if (!result) return undefined
     this.resetAppState()
-    this.willowProgram.reload()
+    this.willowBrowser.reload()
   }
 
   openUrlInNewTabCommand(url) {
@@ -42463,7 +42395,7 @@ div - ${errors.join("\ndiv - ")}`
     const grammarProgram = this.mountedProgram.getGrammarProgram()
     const outputExtension = grammarProgram.getTargetExtension()
     const filename = jtree.Utils.stringToPermalink(jtree.Utils.removeFileExtension(this.mountedTab.getFileName())) + "." + outputExtension
-    this.willowProgram.downloadFile(this.mountedProgram.compile(), filename, "text/" + outputExtension)
+    this.willowBrowser.downloadFile(this.mountedProgram.compile(), filename, "text/" + outputExtension)
   }
 
   async executeProgramCommand() {
@@ -42478,8 +42410,8 @@ div - ${errors.join("\ndiv - ")}`
     return this.getFocusedPanel()
   }
 
-  get willowProgram() {
-    return this.getWillowProgram()
+  get willowBrowser() {
+    return this.getWillowBrowser()
   }
 
   get mountedProgram() {
@@ -42503,22 +42435,21 @@ div - ${errors.join("\ndiv - ")}`
 
     const newName = await this.promptToMoveFile(mountedTab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
     if (!newName) return false
+    await this.focusedPanel.closeTab(mountedTab)
     const tab = await this.openFullPathInNewTabAndFocus(newName)
-    this.focusedPanel.closeTab(mountedTab)
     this.renderApp()
-    return tab
   }
 
   async showTabMoveFilePromptCommand(suggestedNewFilename) {
-    return this._showTabMoveFilePromptCommand(suggestedNewFilename)
+    await this._showTabMoveFilePromptCommand(suggestedNewFilename)
   }
 
   async showTabRenameFilePromptCommand(suggestedNewFilename) {
-    return this._showTabMoveFilePromptCommand(suggestedNewFilename, true)
+    await this._showTabMoveFilePromptCommand(suggestedNewFilename, true)
   }
 
   async toggleOfflineModeCommand() {
-    this.willowProgram.toggleOfflineMode()
+    this.willowBrowser.toggleOfflineMode()
   }
 
   async sleepCommand(ms = 1000) {
@@ -42586,7 +42517,7 @@ div - ${errors.join("\ndiv - ")}`
   async showDeleteFileConfirmDialogCommand() {
     const filename = this.mountedTab.getFileName()
     // todo: make this an undo operation. on web should be easyish. on desktop via move to trash.
-    const result = await this.willowProgram.confirmThen(`Are you sure you want to delete ${filename}?`)
+    const result = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${filename}?`)
     return result ? this.deleteFocusedTabCommand() : undefined
   }
 
@@ -42617,7 +42548,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async toggleFullScreenCommand() {
-    this.willowProgram.toggleFullScreen()
+    this.willowBrowser.toggleFullScreen()
   }
 
   toggleFocusedModeCommand() {
@@ -42722,7 +42653,7 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   _copySelection(evt) {
-    const willowBrowser = this.getWillowProgram()
+    const willowBrowser = this.getWillowBrowser()
     if (this.terminalHasFocus() || willowBrowser.someInputHasFocus()) return ""
     // copy selected tiles
     const str = this.mountedProgram.selectionToString()
@@ -42752,16 +42683,16 @@ div - ${errors.join("\ndiv - ")}`
     else await this._createProgramFromPaste(pastedText)
   }
 
-  async executeStumpNodeCommandByStumpNodeIdCommand(commandName, stumpNodeId) {
-    await this._executeStumpNodeCommandByStumpNodeChild(commandName, "id " + stumpNodeId)
+  async executeCommandOnStumpWithIdCommand(commandName, stumpNodeId) {
+    await this._executeCommandByStumpNodeChild(commandName, "id " + stumpNodeId)
   }
 
-  async executeStumpNodeCommandByStumpNodeClassCommand(commandName, stumpNodeClass) {
-    await this._executeStumpNodeCommandByStumpNodeChild(commandName, "class " + stumpNodeClass)
+  async executeCommandOnStumpWithClassCommand(commandName, stumpNodeClass) {
+    await this._executeCommandByStumpNodeChild(commandName, "class " + stumpNodeClass)
   }
 
-  async executeStumpNodeCommandByStumpNodeStringCommand(commandName, str) {
-    await this._executeStumpNodeCommandByStumpNodeString(commandName, str)
+  async executeCommandByStumpNodeStringCommand(commandName, str) {
+    await this._executeCommandByStumpNodeString(commandName, str)
   }
 
   async executeCommandOnFirstSelectedTileCommand(command, valueParam, nameParam) {

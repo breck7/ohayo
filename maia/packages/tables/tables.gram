@@ -109,7 +109,7 @@ tablesBasicNode
   }
  string contextMenuStumpTemplate
   a Delete all rows
-   stumpOnClickCommand deleteAllRowsInTargetTileCommand
+   clickCommand deleteAllRowsInTargetTileCommand
  string headerRowStumpTemplate
   th
    value {colName}

@@ -69,10 +69,10 @@ debugCommandsNode
  crux debug.commands
  string bodyStumpTemplate
   a Run Speed Test on all Files in Working Directory
-   stumpOnClickCommand _runSpeedTestCommand
+   clickCommand _runSpeedTestCommand
   br
   a Run Tile Quality Check
-   stumpOnClickCommand _doTileQualityCheckCommand
+   clickCommand _doTileQualityCheckCommand
  javascript
   getTileBodyStumpCode() {
    return this.bodyStumpTemplate

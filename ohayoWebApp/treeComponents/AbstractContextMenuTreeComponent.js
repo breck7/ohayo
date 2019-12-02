@@ -1,6 +1,6 @@
 const { jtree } = require("jtree")
 
-const { AbstractTreeComponent, WillowConstants } = require("jtree/products/TreeComponentFramework.node.js")
+const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework.node.js")
 
 class AbstractContextMenuTreeComponent extends AbstractTreeComponent {
   toHakonCode() {
@@ -35,13 +35,13 @@ class AbstractContextMenuTreeComponent extends AbstractTreeComponent {
     const container = this.getStumpNode()
     const that = this
     const app = this.getRootNode()
-    const willowBrowser = app.getWillowProgram()
+    const willowBrowser = app.getWillowBrowser()
     const bodyShadow = willowBrowser.getBodyStumpNode().getShadow()
     const unmountOnClick = function() {
-      bodyShadow.offShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick) // todo: should we move this to before unmount?
+      bodyShadow.offShadowEvent("click", unmountOnClick) // todo: should we move this to before unmount?
       app.closeAllContextMenus()
     }
-    setTimeout(() => bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick), 100) // todo: fix this.
+    setTimeout(() => bodyShadow.onShadowEvent("click", unmountOnClick), 100) // todo: fix this.
     const event = app.getMouseEvent()
     const windowSize = willowBrowser.getWindowSize()
     container.setStumpNodeCss(this._getContextMenuPosition(windowSize.width, windowSize.height, event.clientX, event.clientY, container.getShadow()))

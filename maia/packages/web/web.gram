@@ -15,7 +15,7 @@ webGetNode
   input
    value ${this.getContent() || ""}
    placeholder ${this._getPlaceHolderMessage()}
-   stumpOnChangeCommand changeTileContentAndRenderCommand
+   changeCommand changeTileContentAndRenderCommand
    class LargeTileInput`
   }
  string tileSize 400 100
@@ -39,7 +39,7 @@ webPostNode
     {post}
    placeholder This data will be sent as the value of the 'q' param
    name post
-   stumpOnChangeCommand changeTileSettingMultilineCommand
+   changeCommand changeTileSettingMultilineCommand
    class TileTextArea
  javascript
   getTileBodyStumpCode() {
@@ -54,7 +54,7 @@ webPostNode
    // }
    const postData = settings.post || ""
    const res = await this.getWebApp()
-    .getWillowProgram()
+    .getWillowBrowser()
     .httpPostUrl(url, { q: postData.trim() })
    this._setWillowHttpResponse(res)
    return res.getParsedDataOrText()

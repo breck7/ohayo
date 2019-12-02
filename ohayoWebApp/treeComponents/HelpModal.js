@@ -72,7 +72,7 @@ p
   td ${shortcut.getKeyCombo() || "-"}
   td &nbsp;&nbsp;
    ${shortcut.isEnabled(app) ? "a" : "span"} ${description}
-    stumpOnClickCommand ${shortcut.getFn()}`
+    clickCommand ${shortcut.getFn()}`
       })
       .join("\n")
     return `table
@@ -97,11 +97,11 @@ p Version ${app.getVersion()} ${app.constructor.name}
 p
  a Welcome Page
   id welcomePageButton
-  stumpOnClickCommand openOhayoProgramCommand
+  clickCommand openOhayoProgramCommand
   value ohayo.maia
 a Keyboard Shortcuts
  class helpToggle
- stumpOnClickCommand toggleShadowByIdCommand
+ clickCommand toggleShadowByIdCommand
  value shortcutsHelp
 ${this._getShortcutsHelpStumpCode()}`
   }

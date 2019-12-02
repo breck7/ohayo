@@ -226,7 +226,7 @@ vegaExampleNode
    const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
    const url = `maia/packages/vega/ignore/vega-lite/examples/compiled/${exampleName}.vg.json`
    const res = await this.getWebApp()
-    .getWillowProgram()
+    .getWillowBrowser()
     .httpGetUrl(url)
    const spec = JSON.parse(res.text)
    // rewrite data urls

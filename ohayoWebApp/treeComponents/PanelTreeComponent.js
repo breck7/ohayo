@@ -117,7 +117,7 @@ class PanelTreeComponent extends AbstractTreeComponent {
 
   closeTab(tab) {
     if (tab.isMounted()) {
-      const tabToMountNext = tab.getNextOrPrevious(this.getTabs())
+      const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs())
       this._getTabsNode().removeWall()
       tab.unmountAndDestroy()
       delete this._focusedTab

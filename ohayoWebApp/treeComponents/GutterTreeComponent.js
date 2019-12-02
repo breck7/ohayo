@@ -55,7 +55,7 @@ class GutterTreeComponent extends AbstractTreeComponent {
  class Gutter
  span <>
   class closeGutter
-  stumpOnClickCommand toggleGutterWidthCommand`
+  clickCommand toggleGutterWidthCommand`
   }
 }
 

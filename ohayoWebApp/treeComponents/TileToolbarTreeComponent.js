@@ -69,7 +69,7 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
       tileHelp = `
  span ${Icons("function", 20)}
   title See an example program with '${tile.getFirstWord()}'
-  stumpOnClickCommand createProgramFromTileExampleCommand`
+  clickCommand createProgramFromTileExampleCommand`
     }
     const hints = tile.getDefinition().getLineHints()
 
@@ -80,13 +80,13 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
  class TileToolbarTreeComponent
  span ${Icons("copy", 20)}
   title Duplicate Tile
-  stumpOnClickCommand cloneTileCommand
+  clickCommand cloneTileCommand
  span ${Icons("trash", 20)}
   title Delete Tile
-  stumpOnClickCommand destroyTileCommand
+  clickCommand destroyTileCommand
  span ${Icons("inspector", 20)}
   title Debug Tile
-  stumpOnClickCommand inspectTileCommand` +
+  clickCommand inspectTileCommand` +
       tileHelp +
       `
  div ${hints}` +
@@ -108,11 +108,11 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
         option =>
           ` option ${option}
   value ${option}
-  ${selectedValue === option ? "selected" : "stumpNoOp"}`
+  ${selectedValue === option ? "selected" : ""}`
       )
       .join("\n")
     return `select
- stumpOnChangeCommand changeTileTypeCommand
+ changeCommand changeTileTypeCommand
 ${options}`
   }
 
@@ -135,15 +135,15 @@ ${options}`
         option =>
           ` option ${option.name}
   value ${option.value}
-  ${option.isParent ? "selected" : "stumpNoOp"}`
+  ${option.isParent ? "selected" : ""}`
       )
       .join("\n")
 
     return `select
- stumpOnChangeCommand changeParentCommand
+ changeCommand changeParentCommand
  option (top)
   value 
-  ${tilesParent.isRoot() ? "selected" : "stumpNoOp"}${options ? "\n" + options : ""}`
+  ${tilesParent.isRoot() ? "selected" : ""}${options ? "\n" + options : ""}`
   }
 
   _getSuggestionsStumpCode() {
@@ -160,7 +160,7 @@ ${options}`
     formFields.unshift([
       "content",
       `input
- stumpOnChangeCommand changeTileContentAndRenderCommand
+ changeCommand changeTileContentAndRenderCommand
  value ${tile.getContent() || ""}`
     ])
 

@@ -29,13 +29,13 @@ diskBrowseNode
    return `input
    placeholder Filepath
    value ${path}
-   stumpOnChangeCommand changeTileContentAndRenderCommand
+   changeCommand changeTileContentAndRenderCommand
    class LargeTileInput
   table
    tr
     td
      a ..
-      stumpOnClickCommand changeTileContentAndRenderCommand
+      clickCommand changeTileContentAndRenderCommand
       value ${parentPath}
   ${rows
   .map(row => {
@@ -51,7 +51,7 @@ diskBrowseNode
    return ` tr
     td
      a ${label}
-      stumpOnClickCommand changeTileContentAndRenderCommand
+      clickCommand changeTileContentAndRenderCommand
       value ${path.replace(/\/$/, "") + "/" + label}`
   })
   .join("\n")}`

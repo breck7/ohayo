@@ -24,7 +24,7 @@ basicRecursiveTileNode
     placeholder ${cellTypeId}
     value ${value}
     name ${index + 1}
-    stumpOnChangeCommand ${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}`
+    changeCommand ${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}`
    })
    return `div ${definition.getDescription()}
   div

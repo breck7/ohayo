@@ -8,10 +8,10 @@ DidYouMeanTileNode
   div
    span No tile '{input}' found. Line {lineNo}. Did you mean
    a {closestTile}
-    stumpCollapse
+    collapse
     tabindex -1
     value {closestTile}
-    stumpOnClickCommand changeTileTypeCommand
+    clickCommand changeTileTypeCommand
    span ?
  javascript
   getTileBodyStumpCode() {

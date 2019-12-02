@@ -36,10 +36,10 @@ abstractHeaderlessChartTileNode
   div
    class {classes}
    id {id}
-   stumpOnContextMenuCommand openTileContextMenuCommand
+   contextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
+    doubleClickCommand toggleTileMaximizeCommand
    div
     class TileBody HeaderLess
     {body}
@@ -92,7 +92,7 @@ abstractSnippetGalleryNode
    a {title}
     value {value}
     class appendSnippetButton
-    stumpOnClickCommand appendSnippetTemplateCommand
+    clickCommand appendSnippetTemplateCommand
  javascript
   getGalleryNodes() {}
   getTileBodyStumpCode() {
@@ -113,7 +113,7 @@ abstractTemplateGalleryNode
    a {title}
     value {value}
     class createProgramButton
-    stumpOnClickCommand createProgramFromTemplateCommand
+    clickCommand createProgramFromTemplateCommand
 abstractInstructionsNode
  string tileSize 600 240
  string content Instructions go here.

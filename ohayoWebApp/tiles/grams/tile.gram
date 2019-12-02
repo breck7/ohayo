@@ -14,7 +14,7 @@ abstractTileTreeComponentNode
  string pencilStumpTemplate
   span {icon}
    class TilePencilButton
-   stumpOnClickCommand toggleToolbarCommand
+   clickCommand toggleToolbarCommand
  string inspectionStumpTemplate
   div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
   div Messages:
@@ -32,10 +32,10 @@ abstractTileTreeComponentNode
   div
    class {classes}
    id {id}
-   stumpOnContextMenuCommand openTileContextMenuCommand
+   contextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
+    doubleClickCommand toggleTileMaximizeCommand
    div ERROR
     class TileHeader
    div
@@ -50,10 +50,10 @@ abstractTileTreeComponentNode
   div
    class {classes}
    id {id}
-   stumpOnContextMenuCommand openTileContextMenuCommand
+   contextMenuCommand openTileContextMenuCommand
    div
     class TileGrabber
-    stumpOnDblClickCommand toggleTileMaximizeCommand
+    doubleClickCommand toggleTileMaximizeCommand
    div {header}
     class TileHeader
    div
@@ -102,13 +102,13 @@ abstractTileTreeComponentNode
    const cssScript = this[TilesConstants.tileCssScript]
    if (cssScript) this._loadTileCss(cssScript)
    const scriptPath = this[TilesConstants.tileScript]
-   if (scriptPath) await app.getWillowProgram().appendScript(scriptPath)
+   if (scriptPath) await app.getWillowBrowser().appendScript(scriptPath)
    loadingMap.set(this.constructor, true)
   }
   _loadTileCss(css) {
    const app = this.getWebApp()
    app
-    .getWillowProgram()
+    .getWillowBrowser()
     .getBodyStumpNode()
     .insertChildNode(
      css
@@ -306,15 +306,9 @@ abstractTileTreeComponentNode
    // We render all Tiles on the Wall.
    return this.getStumpNode().getParent()
   }
-  treeComponentDidMount() {
+  async treeComponentDidMount() {
    super.treeComponentDidMount()
    if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
-  }
-  _treeComponentDidUpdate() {
-   if (this.isLoaded()) this.treeComponentDidUpdate()
-  }
-  _treeComponentDidMount() {
-   if (this.isLoaded()) this.treeComponentDidMount()
   }
   toInspectionStumpCode() {
    const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
@@ -461,7 +455,7 @@ abstractTileTreeComponentNode
     // todo: remove cousin tiles?
     this
       .getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .copyTextToClipboard(this.getFirstAncestor().toString())
   }
   async createProgramFromTileExampleCommand(index) {
@@ -515,14 +509,14 @@ abstractTileTreeComponentNode
   async copyDataCommand(delimiter) {
     this
       .getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
   }
   async copyDataAsJavascriptCommand() {
     const table = this.getOutputOrInputTable()
     this
       .getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
   }
   async copyDataAsTreeCommand() {
@@ -532,7 +526,7 @@ abstractTileTreeComponentNode
       .toString()
     this
       .getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .copyTextToClipboard(text)
   }
   async exportTileDataCommand(format = "csv") {
@@ -550,6 +544,6 @@ abstractTileTreeComponentNode
     }
     this
       .getRootNode()
-      .getWillowProgram()
+      .getWillowBrowser()
       .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
   }

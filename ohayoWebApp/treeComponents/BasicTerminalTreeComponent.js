@@ -71,9 +71,9 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
  class TerminalDiv
  textarea
   class sourceTextarea
-  stumpOnBlurCommand saveChangesCommand
-  stumpOnLineClick executeFirstLineCommand
-  stumpOnLineShiftClick compileFirstLineCommand
+  blurCommand saveChangesCommand
+  lineClickCommand executeFirstLineCommand
+  lineShiftClickCommand compileFirstLineCommand
   bern
    {lines}`).templateToString({ lines: this._getProgramSource() })
   }

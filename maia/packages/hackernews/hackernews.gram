@@ -20,11 +20,11 @@ hackernewsTopNode
  javascript
   async fetchTableInputs() {
    // todo: allow cache breaking.
-   const willowProgram = this.getWebApp().getWillowProgram()
+   const willowBrowser = this.getWebApp().getWillowBrowser()
    const firstUrls = this._getFirstUrls()
    if (!firstUrls.length || this.isNodeJs()) return []
    let allResults = []
-   const fetchMethod = async url => this.getWebApp().isUrlGetProxyAvailable() ? willowProgram.httpGetUrlFromProxyCache(url) : willowProgram.httpGetUrlFromCache(url)
+   const fetchMethod = async url => this.getWebApp().isUrlGetProxyAvailable() ? willowBrowser.httpGetUrlFromProxyCache(url) : willowBrowser.httpGetUrlFromCache(url)
    for (let mainUrl of firstUrls) {
     const response = await fetchMethod(mainUrl)
     const nextUrls = this._parseNextUrls(response)

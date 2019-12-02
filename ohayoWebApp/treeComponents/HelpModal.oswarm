@@ -1,15 +1,15 @@
 #! /usr/bin/env node /usr/local/bin/jtree
 test help
  toggleHelpCommand
-  executeStumpNodeCommandByStumpNodeIdCommand stumpOnClickCommand welcomePageButton
+  executeCommandOnStumpWithIdCommand clickCommand welcomePageButton
    assertStringIs getMountedTab.getFileName ohayo.maia
    assertLengthIs getFocusedPanel.getTabs 1
-   executeStumpNodeCommandByStumpNodeIdCommand stumpOnClickCommand welcomePageButton
+   executeCommandOnStumpWithIdCommand clickCommand welcomePageButton
     assertLengthIs getFocusedPanel.getTabs 1
 test helpMore
  createNewBlankProgramCommand
-  assertStringExcludes getWillowProgram.getPageHtml ctrl+n
+  assertStringExcludes getWillowBrowser.getPageHtml ctrl+n
   toggleHelpCommand
-   assertStringIncludes getWillowProgram.getPageHtml ctrl+n
+   assertStringIncludes getWillowBrowser.getPageHtml ctrl+n
    toggleShadowByIdCommand shortcutsHelp
-    executeStumpNodeCommandByStumpNodeIdCommand stumpOnClickCommand closeModalX
+    executeCommandOnStumpWithIdCommand clickCommand closeModalX

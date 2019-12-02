@@ -12,7 +12,7 @@ oswarmNode
     isAsync: () => true,
     arrange: () => {
      const OhayoWebApp = require(this._getProjectRootDir() + "ohayoWebApp/treeComponents/OhayoWebApp.js")
-     const app = new OhayoWebApp()
+     const app = new OhayoWebApp(OhayoWebApp.getDefaultStartState())
      app.setVisitCount(2)
      app.renderApp()
      return app

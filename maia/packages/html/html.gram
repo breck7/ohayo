@@ -33,7 +33,7 @@ abstractHtmlNode
    return this.getSettingsStruct().src
   }
   getTileBodyStumpCode() {
-   return this.qFormat(this.bodyStumpTemplate, { tag: this.getTag(), style: this.style ? `style ${this.style}` : "stumpNoOp", src: this.getSrc() ? `src ${this.getSrc()}` : "stumpNoOp", content: this.getHtmlContent() || "" })
+   return this.qFormat(this.bodyStumpTemplate, { tag: this.getTag(), style: this.style ? `style ${this.style}` : "", src: this.getSrc() ? `src ${this.getSrc()}` : "", content: this.getHtmlContent() || "" })
   }
 htmlTextNode
  description Displays fixed text in the given HTML element.

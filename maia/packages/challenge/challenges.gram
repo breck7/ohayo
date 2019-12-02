@@ -47,13 +47,13 @@ challengePlayNode
    value ${answer !== undefined ? answer : ""}
    style width: 300px;
    name 2
-   stumpOnChangeCommand changeWordAndRenderCommand
+   changeCommand changeWordAndRenderCommand
   span ${answerMessage}
    style color: ${color};
   br
   div
    a See a solution
-    stumpOnClickCommand createProgramFromTemplateCommand
+    clickCommand createProgramFromTemplateCommand
     value ${challengeId}`
   }
 challengeListNode

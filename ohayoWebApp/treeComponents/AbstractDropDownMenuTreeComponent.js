@@ -1,6 +1,6 @@
 const { jtree } = require("jtree")
 
-const { AbstractTreeComponent, WillowConstants } = require("jtree/products/TreeComponentFramework.node.js")
+const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework.node.js")
 
 class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
   toHakonCode() {
@@ -34,14 +34,14 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
 
   treeComponentDidMount() {
     const app = this.getRootNode()
-    const willowBrowser = app.getWillowProgram()
+    const willowBrowser = app.getWillowBrowser()
     const bodyStumpNode = willowBrowser.getBodyStumpNode()
     const bodyShadow = bodyStumpNode.getShadow()
     const unmountOnClick = function() {
-      bodyShadow.offShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick)
+      bodyShadow.offShadowEvent("click", unmountOnClick)
       app.closeAllDropDownMenusCommand()
     }
-    setTimeout(() => bodyShadow.onShadowEvent(WillowConstants.ShadowEvents.click, unmountOnClick), 100) // todo: fix this.
+    setTimeout(() => bodyShadow.onShadowEvent("click", unmountOnClick), 100) // todo: fix this.
   }
 
   toStumpCode() {

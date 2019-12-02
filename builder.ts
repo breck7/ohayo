@@ -166,7 +166,8 @@ ${header}
   <meta name="apple-mobile-web-app-title" content="${OhayoConstants.productName}">
   <meta name="mobile-web-app-capable" content="yes">
   ${footer}
-  <script>AbstractTreeComponent.startApp(OhayoWebApp)</script>
+  <script>window.app = new OhayoWebApp(OhayoWebApp.getDefaultStartState())
+  window.app.startWhenReady()</script>
 </head>
 <body>
 </body>
@@ -292,10 +293,7 @@ ${common}`
   }
 
   produceProdHtml() {
-    Disk.write(
-      `${this._getOhayoFolder()}index.html`,
-      this._makeOhayoHtmlPage(``, `<script src="${this._getCombinedPath()}?v=${this._getVersion()}"></script>`, "favicon.ico")
-    )
+    Disk.write(`${this._getOhayoFolder()}index.html`, this._makeOhayoHtmlPage(``, `<script src="${this._getCombinedPath()}?v=${this._getVersion()}"></script>`, "favicon.ico"))
   }
 
   produceFabHtml() {

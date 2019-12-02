@@ -3,5 +3,5 @@ test newMenuTest
  createNewBlankProgramCommand
   assertLengthIs getCommandsBuffer 0
   assertStringExcludes getStumpNodeString Clone
-  executeStumpNodeCommandByStumpNodeIdCommand stumpOnClickCommand newToggle
+  executeCommandOnStumpWithIdCommand clickCommand newToggle
    assertStringIncludes getStumpNodeString Clone

@@ -48,14 +48,14 @@ ${theme.enableTextSelect2}
 
   toStumpCode() {
     return new jtree.TreeNode(`section
- stumpOnClickCommand unmountAndDestroyCommand
+ clickCommand unmountAndDestroyCommand
  class modalBackground
  section
-  stumpOnClickCommand stopPropagationCommand
+  clickCommand stopPropagationCommand
   class modalContent
   a X
    id closeModalX
-   stumpOnClickCommand unmountAndDestroyCommand
+   clickCommand unmountAndDestroyCommand
    class modalClose
   {modelStumpCode}`).templateToString({ modelStumpCode: this.getModalStumpCode() })
   }
