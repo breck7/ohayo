@@ -1,3 +1,7 @@
+15.5.1 2019-12-3
+----------------
+- Fix: fixed autocomplete regression
+
 15.5.0 2019-12-02
 -----------------
 - Infra: upgraded to Jtree 48

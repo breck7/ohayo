@@ -26240,7 +26240,8 @@ pre
       // todo: only works if codemirror === tab
       try {
         if (cell.getCellTypeId() === "columnNameCell") {
-          return this.getParentOrDummyTable().getColumnNames()
+          const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
+          return mirrorNode.getParentOrDummyTable().getColumnNames()
         }
       } catch (err) {
         console.log(err)
@@ -30226,9 +30227,12 @@ a {name}
       if (!this._outputTable) this._outputTable = new Table()
       return this._outputTable
     }
+    getMaiaTiles() {
+      return this.getTopDownArray().filter(node => node.doesExtend("abstractMaiaTileNode"))
+    }
     getAllRowsFromAllOutputTables() {
       return jtree.Utils.flatten(
-        this.getTiles()
+        this.getMaiaTiles()
           .map(tile => tile.getOutputTable())
           .filter(table => table)
           .map(table => table.getRows())
@@ -31119,7 +31123,8 @@ abstractMaiaTileNode
    // todo: only works if codemirror === tab
    try {
     if (cell.getCellTypeId() === "columnNameCell") {
-     return this.getParentOrDummyTable().getColumnNames()
+     const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
+     return mirrorNode.getParentOrDummyTable().getColumnNames()
     }
    } catch (err) {
     console.log(err)
@@ -34705,9 +34710,12 @@ maiaNode
    if (!this._outputTable) this._outputTable = new Table()
    return this._outputTable
   }
+  getMaiaTiles() {
+   return this.getTopDownArray().filter(node => node.doesExtend("abstractMaiaTileNode"))
+  }
   getAllRowsFromAllOutputTables() {
    return jtree.Utils.flatten(
-    this.getTiles()
+    this.getMaiaTiles()
      .map(tile => tile.getOutputTable())
      .filter(table => table)
      .map(table => table.getRows())
@@ -34761,7 +34769,9 @@ abstractColumnNode
    // todo: only works if codemirror === tab
    try {
     if (cell.getCellTypeId() === "columnNameCell") {
-     return this.getParent()
+     const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
+     return mirrorNode
+      .getParent()
       .getParentOrDummyTable()
       .getColumnNames()
     }
@@ -35201,7 +35211,9 @@ lineOfContentNode
       // todo: only works if codemirror === tab
       try {
         if (cell.getCellTypeId() === "columnNameCell") {
-          return this.getParent()
+          const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
+          return mirrorNode
+            .getParent()
             .getParentOrDummyTable()
             .getColumnNames()
         }
@@ -40731,7 +40743,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "15.5.0"
+const Version = "15.5.1"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
