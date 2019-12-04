@@ -1,0 +1,14 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test regressionWithErrorTile
+ createNewBlankProgramCommand
+  appendTileCommand
+   withParagraph
+    samples.doesNotExist
+   assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 0
+test regressionWithChildErrorTile
+ createNewBlankProgramCommand
+  appendTileCommand
+   withParagraph
+    samples.doesNotExist 
+     columns.keep Rank
+   assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 0

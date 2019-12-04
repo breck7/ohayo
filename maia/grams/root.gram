@@ -29,9 +29,12 @@ maiaNode
    if (!this._outputTable) this._outputTable = new Table()
    return this._outputTable
   }
+  getMaiaTiles() {
+    return this.getTopDownArray().filter(node => node.doesExtend("abstractMaiaTileNode"))
+  }
   getAllRowsFromAllOutputTables() {
    return jtree.Utils.flatten(
-    this.getTiles()
+    this.getMaiaTiles()
      .map(tile => tile.getOutputTable())
      .filter(table => table)
      .map(table => table.getRows())
