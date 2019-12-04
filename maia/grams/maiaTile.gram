@@ -59,7 +59,12 @@ abstractMaiaTileNode
    // todo: only works if codemirror === tab
    try {
     if (cell.getCellTypeId() === "columnNameCell") {
-     return this.getParentOrDummyTable().getColumnNames()
+     const mirrorNode = typeof app === "undefined" ? this : app
+            .mountedProgram
+            .nodeAtLine(this.getLineNumber() - 1)
+     return mirrorNode
+            .getParentOrDummyTable()
+            .getColumnNames()
     }
    } catch (err) {
     console.log(err)
