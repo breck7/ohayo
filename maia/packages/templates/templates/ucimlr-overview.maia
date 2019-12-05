@@ -11,4 +11,4 @@ ucimlr.datasets
     vega.bar
      xColumn Year
      yColumn count
-categories machineLearning
+categories dataScience

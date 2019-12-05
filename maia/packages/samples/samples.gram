@@ -56,6 +56,12 @@ samplesSiNode
  string parser text
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.si
+samplesPortalNode
+ description A list of online data portals.
+ frequency .03
+ string url maia/packages/samples/portals.ssv
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ crux samples.portals
 samplesStarWarsNode
  description All Star Wars characters. Data comes from https://swapi.co/
  frequency .03

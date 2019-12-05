@@ -1,6 +1,6 @@
 tooling onsave jtree build produceMaiaGrammar
 documentCategoryCell
- enum shopping chemistry programming socialMedia math parenting writing machineLearning
+ enum shopping chemistry programming socialMedia math parenting writing dataScience
 zoomCell
  extends numberCell
 zoomNode
