@@ -25814,7 +25814,7 @@ ${cellInputs.join("\n")}`
       return 0
     }
     _getBody() {
-      return this.qFormat(this.bodyStumpTemplate, { content: this.getContent(), tagName: this.tagName })
+      return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
     }
     toStumpCode() {
       return this.qFormat(this.tileStumpTemplate, {
@@ -25887,7 +25887,22 @@ ${cellInputs.join("\n")}`
     }
   }
 
-  class abstractPickerTileNode extends abstractDocTileNode {
+  class docCommentNode extends abstractTileTreeComponentNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
+    }
+    get commentKeywordCell() {
+      return this.getWord(0)
+    }
+    get commentCell() {
+      return this.getWordsFrom(1)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class abstractPickerTileNode extends abstractTileTreeComponentNode {
     get tileHeader() {
       return `Gallery`
     }
@@ -25971,21 +25986,6 @@ a {name}
     }
   }
 
-  class docCommentNode extends abstractTileTreeComponentNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
-    }
-    get commentKeywordCell() {
-      return this.getWord(0)
-    }
-    get commentCell() {
-      return this.getWordsFrom(1)
-    }
-    get visible() {
-      return false
-    }
-  }
-
   class abstractMaiaTileNode extends abstractTileTreeComponentNode {
     createParser() {
       return new jtree.TreeNode.Parser(
@@ -25996,8 +25996,8 @@ a {name}
           "doc.subtitle": docSubtitleNode,
           "doc.section": docSectionNode,
           "doc.ref": docReferenceNode,
-          "doc.picker": PickerTileNode,
           "doc.comment": docCommentNode,
+          "doc.picker": PickerTileNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -30232,8 +30232,8 @@ a {name}
           "doc.subtitle": docSubtitleNode,
           "doc.section": docSectionNode,
           "doc.ref": docReferenceNode,
-          "doc.picker": PickerTileNode,
           "doc.comment": docCommentNode,
+          "doc.picker": PickerTileNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -31178,7 +31178,7 @@ abstractDocTileNode
     class TileGrabber
  javascript
   _getBody() {
-   return this.qFormat(this.bodyStumpTemplate, { content: this.getContent(), tagName: this.tagName })
+   return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
   }
   toStumpCode() {
    return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
@@ -31225,8 +31225,24 @@ docReferenceNode
   url https://en.wikipedia.org/wiki/Note_(typography)
  description A reference to an external source
  extends abstractDocTileNode
+docCommentNode
+ description A comment node
+ cells commentKeywordCell
+ extends abstractTileTreeComponentNode
+ boolean visible false
+ frequency 0
+ example An example program with comments
+  doc.comment get iris data
+  samples.iris
+   doc.comment filter is
+   filter.where Species = virginica
+    doc.comment display results
+    tables.basic
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+ crux doc.comment
 abstractPickerTileNode
- extends abstractDocTileNode
+ extends abstractTileTreeComponentNode
  string tileSize 480 420
  abstract
  string hakonTemplate
@@ -31303,22 +31319,6 @@ PickerTileNode
     return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
    })
   }
-docCommentNode
- description A comment node
- cells commentKeywordCell
- extends abstractTileTreeComponentNode
- boolean visible false
- frequency 0
- example An example program with comments
-  doc.comment get iris data
-  samples.iris
-   doc.comment filter is
-   filter.where Species = virginica
-    doc.comment display results
-    tables.basic
- catchAllCellType commentCell
- catchAllNodeType commentLineNode
- crux doc.comment
 abstractMaiaTileNode
  abstract
  extends abstractTileTreeComponentNode
@@ -35300,9 +35300,9 @@ lineOfContentNode
         docSubtitleNode: docSubtitleNode,
         docSectionNode: docSectionNode,
         docReferenceNode: docReferenceNode,
+        docCommentNode: docCommentNode,
         abstractPickerTileNode: abstractPickerTileNode,
         PickerTileNode: PickerTileNode,
-        docCommentNode: docCommentNode,
         abstractMaiaTileNode: abstractMaiaTileNode,
         abstractChartNode: abstractChartNode,
         abstractHeaderlessChartTileNode: abstractHeaderlessChartTileNode,
@@ -35951,25 +35951,25 @@ file templates/logs.maia
   doc.defaultHidden
 file templates/maia-reference.maia
  data
+  doc.title Maia Reference
   doc.author Breck Yunits
   doc.date 12/05/2019
   doc.categories maia
+  doc.layout column
   
-  doc.title Maia vis Markdown
-  doc.subtitle The Doc package of tiles makes Maia similar to Markdown.
+  doc.subtitle Maia is a language for data powered documents.
   
   doc.section
    subtitle Overview
-   paragraph The doc package adds a set of tiles common in something like Markdown, R Markdown, Latex, etc.
+   paragraph Maia is a combination of a Markdown-like language coupled with a collaboratively designed dataflow language for doing data science right in the browser.
+  
   
   doc.section
-   subtitle Secondary Notation (aka Text Styling)
-   paragraph Words can be bolded[bold] or italicized[em] or monospaced[mono] or linked[link http://ohayo.computer] or footnoted[ref someRefId].
-  
-  doc.section
-   subtitle Links
-   link A whole sentence can be linked
-    url http://ohayo.computer
+   subtitle Sections
+   paragraph You can put whole sections into 1 tile.
+   paragraph Sections can have multiple paragraphs.
+   code python
+    # they can have code blocks too
   
   doc.section
    subtitle Mixing data with content
@@ -35981,7 +35981,18 @@ file templates/maia-reference.maia
     team superbowls
     Patriots 6
     Bills 0
-   vega.bar
+   vega.bar Number of Superbowl Wins
+  
+  
+  doc.section
+   subtitle Secondary Notation (aka Text Styling)
+   paragraph Words can be bolded[bold] or italicized[em] or monospaced[mono] or linked[link http://ohayo.computer] or footnoted[ref someRefId].
+  
+  doc.section
+   subtitle Links
+   link http://ohayo.computer A whole sentence can be linked
+  
+  
   
   doc.section
    subtitle Layout
@@ -35998,19 +36009,12 @@ file templates/maia-reference.maia
   
   
   doc.section
-   subtitle Sections
-   paragraph You can put whole sections into 1 tile.
-   paragraph Sections can have multiple paragraphs.
-   code python
-    # they can have code blocks too
-  
-  doc.section
    subtitle Default visibilitiy
    paragraph You can change the default visibility of a tile
    paragraph The line below will hide all tiles by default.
    code maia
     doc.tiles hidden
-   paraph When you hide all tiles, you'll need to opt-in to visible to show tiles.
+   paragraph When you hide all tiles, you'll need to opt-in to visible to show tiles.
    code
     samples.portals
      vega.bar
@@ -36530,13 +36534,13 @@ const DemoTemplates = `faq.maia
   hidden
   markdown.toHtml
 ohayo.maia
- web.get maia/packages/samples/welcome.md?22
+ web.get maia/packages/samples/welcome.md
   parser text
   hidden
   markdown.toHtml
  templates.list
  challenge.list
-doc.layout column`
+ doc.layout column`
 
 window.DemoTemplates
  = DemoTemplates
@@ -38511,7 +38515,7 @@ ${cellInputs.join("\n")}`
       return 0
     }
     _getBody() {
-      return this.qFormat(this.bodyStumpTemplate, { content: this.getContent(), tagName: this.tagName })
+      return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
     }
     toStumpCode() {
       return this.qFormat(this.tileStumpTemplate, {
@@ -38584,7 +38588,22 @@ ${cellInputs.join("\n")}`
     }
   }
 
-  class abstractPickerTileNode extends abstractDocTileNode {
+  class docCommentNode extends abstractTileTreeComponentNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
+    }
+    get commentKeywordCell() {
+      return this.getWord(0)
+    }
+    get commentCell() {
+      return this.getWordsFrom(1)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class abstractPickerTileNode extends abstractTileTreeComponentNode {
     get tileHeader() {
       return `Gallery`
     }
@@ -38665,21 +38684,6 @@ a {name}
         const description = nodeDefinition.getDescription()
         return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
       })
-    }
-  }
-
-  class docCommentNode extends abstractTileTreeComponentNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
-    }
-    get commentKeywordCell() {
-      return this.getWord(0)
-    }
-    get commentCell() {
-      return this.getWordsFrom(1)
-    }
-    get visible() {
-      return false
     }
   }
 
@@ -39634,7 +39638,7 @@ abstractDocTileNode
     class TileGrabber
  javascript
   _getBody() {
-   return this.qFormat(this.bodyStumpTemplate, { content: this.getContent(), tagName: this.tagName })
+   return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
   }
   toStumpCode() {
    return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
@@ -39681,8 +39685,24 @@ docReferenceNode
   url https://en.wikipedia.org/wiki/Note_(typography)
  description A reference to an external source
  extends abstractDocTileNode
+docCommentNode
+ description A comment node
+ cells commentKeywordCell
+ extends abstractTileTreeComponentNode
+ boolean visible false
+ frequency 0
+ example An example program with comments
+  doc.comment get iris data
+  samples.iris
+   doc.comment filter is
+   filter.where Species = virginica
+    doc.comment display results
+    tables.basic
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+ crux doc.comment
 abstractPickerTileNode
- extends abstractDocTileNode
+ extends abstractTileTreeComponentNode
  string tileSize 480 420
  abstract
  string hakonTemplate
@@ -39759,22 +39779,6 @@ PickerTileNode
     return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
    })
   }
-docCommentNode
- description A comment node
- cells commentKeywordCell
- extends abstractTileTreeComponentNode
- boolean visible false
- frequency 0
- example An example program with comments
-  doc.comment get iris data
-  samples.iris
-   doc.comment filter is
-   filter.where Species = virginica
-    doc.comment display results
-    tables.basic
- catchAllCellType commentCell
- catchAllNodeType commentLineNode
- crux doc.comment
 tileBlankLineNode
  boolean visible false
  pattern ^$
@@ -40046,9 +40050,9 @@ tileSettingNonTerminalContentNode
         docSubtitleNode: docSubtitleNode,
         docSectionNode: docSectionNode,
         docReferenceNode: docReferenceNode,
+        docCommentNode: docCommentNode,
         abstractPickerTileNode: abstractPickerTileNode,
         PickerTileNode: PickerTileNode,
-        docCommentNode: docCommentNode,
         tileBlankLineNode: tileBlankLineNode,
         abstractDocSettingNode: abstractDocSettingNode,
         docCategoriesNode: docCategoriesNode,
