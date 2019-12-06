@@ -1,6 +1,6 @@
 tooling onsave jtree build produceTilesGrammar
 abstractPickerTileNode
- extends abstractDocTileNode
+ extends abstractTileTreeComponentNode
  string tileSize 480 420
  abstract
  string hakonTemplate
