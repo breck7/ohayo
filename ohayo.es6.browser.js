@@ -25142,155 +25142,6 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
       return new jtree.TreeNode.Parser(
         catchAllErrorNode,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          "tiles.didyoumean": DidYouMeanTileNode,
-          "doc.title": docTitleNode,
-          "doc.subtitle": docSubtitleNode,
-          "doc.categories": docCategoriesNode,
-          "doc.author": docAuthorNode,
-          "doc.defaultHidden": docDefaultHiddenNode,
-          "doc.date": docDateNode,
-          "doc.zoom": docZoomNode,
-          "doc.layout": docLayoutNode,
-          "doc.comment": docCommentNode,
-          "doc.section": docSectionNode,
-          "doc.ref": docReferenceNode,
-          "doc.picker": PickerTileNode,
-          "challenge.list": challengeListNode,
-          "samples.list": samplesListNode,
-          "vega.data.list": vegaDataListNode,
-          "vega.example.list": vegaExampleListNode,
-          "challenge.play": challengePlayNode,
-          "dtjs.basic": dtjsBasicNode,
-          "html.text": htmlTextNode,
-          "html.printAs": htmlPrintAsNode,
-          "html.h1": htmlH1Node,
-          "html.img": htmlImgNode,
-          "html.iframe": htmlIframeNode,
-          "html.custom": htmlCustomNode,
-          "show.rowCount": showRowCountNode,
-          "show.static": showStaticNode,
-          "show.median": showMedianNode,
-          "show.sum": showSumNode,
-          "show.mean": showMeanNode,
-          "show.min": showMinNode,
-          "show.max": showMaxNode,
-          "vega.bar": vegaBarNode,
-          "vega.line": vegaLineNode,
-          "vega.area": vegaAreaNode,
-          "vega.scatter": vegaScatterNode,
-          "vega.bubble": vegaBubbleNode,
-          "vega.emoji": vegaEmojiNode,
-          "vega.histogram": vegaHistogramNode,
-          "vega.example": vegaExampleNode,
-          "date.heatcal": dateHeatcalNode,
-          "icons.human": iconsHumanNode,
-          "icons.circle": iconsCircleNode,
-          "markdown.toHtml": markdownToHtmlNode,
-          "treenotation.outline": treenotationOutlineNode,
-          "treenotation.dotline": treenotationDotlineNode,
-          "amazon.history": amazonHistoryNode,
-          "fitbit.all": fitbitAllNode,
-          "datawrapper.comingSoon": datawrapperComingSoonNode,
-          "dcjs.comingSoon": dcjsComingSoonNode,
-          "finos.perspective.comingSoon": finosPerspectiveComingSoonNode,
-          "fivethirtyeight.comingSoon": fivethirtyeightComingSoonNode,
-          "highcharts.comingSoon": highchartsComingSoonNode,
-          "re3data.comingSoon": re3dataComingSoonNode,
-          "zing.comingSoon": zingComingSoonNode,
-          "editor.helloWorld": editorHelloWorldNode,
-          "debug.dump": debugDumpNode,
-          "web.dump": webDumpNode,
-          "debug.commands": debugCommandsNode,
-          "debug.grammarTree": debugGrammarTreeNode,
-          "debug.sleep": debugSleepNode,
-          "debug.throw": debugThrowNode,
-          "editor.gallery": editorGalleryNode,
-          "handsontable.basic": handsontableBasicNode,
-          "list.basic": listBasicNode,
-          "list.links": listLinksNode,
-          "tables.basic": tablesBasicNode,
-          "tables.interesting": tablesInterestingNode,
-          "tables.dump": tablesDumpNode,
-          "text.wordcloud": textWordcloudNode,
-          "treenotation.3d": treenotation3dNode,
-          "disk.browse": diskBrowseNode,
-          "disk.read": diskReadNode,
-          "hackernews.top": hackernewsTopNode,
-          "hackernews.submissions": hackernewsSubmissionsNode,
-          "web.get": webGetNode,
-          "web.post": webPostNode,
-          "cancer.cases": cancerCasesNode,
-          "kaggle.datasets.heart": kaggleDatasetsHeartNode,
-          "samples.telescopes": samplesTelescopesNode,
-          "samples.mtcars": samplesMtcarsNode,
-          "samples.iris": samplesIrisNode,
-          "samples.flights14": samplesFlights14Node,
-          "samples.si": samplesSiNode,
-          "samples.portals": samplesPortalNode,
-          "samples.starWars": samplesStarWarsNode,
-          "samples.populations": samplesPopulationsNode,
-          "samples.babyNames": samplesBabyNamesNode,
-          "samples.declaration": samplesDeclarationNode,
-          "samples.periodicTable": samplesPeriodicTableNode,
-          "samples.letters": samplesLettersNode,
-          "samples.presidents": samplesPresidentsNode,
-          "ucimlr.datasets": ucimlrDatasetsNode,
-          "vega.data": vegaDataNode,
-          "reddit.all": redditAllNode,
-          "reddit.subs": redditSubsNode,
-          "reddit.sub": redditSubNode,
-          "samples.patients": samplesPatientsNode,
-          "samples.poem": samplesPoemNode,
-          "samples.outerSpace": samplesOuterSpaceNode,
-          "samples.treeProgram": samplesTreeProgramNode,
-          "samples.waterBill": samplesWaterBillNode,
-          "samples.gapMinder": samplesGapMinderNode,
-          "date.addColumns": dateAddColumnsNode,
-          "math.log": mathLogNode,
-          "rows.addIndexColumn": rowsAddIndexColumnNode,
-          "rows.runningTotal": rowsRunningTotalNode,
-          "text.length": textLengthNode,
-          "text.split": textSplitNode,
-          "text.toLowerCase": textToLowerCaseNode,
-          "text.substring": textSubstringNode,
-          "columns.describe": columnsDescribeNode,
-          "columns.list": columnsListNode,
-          "data.eval": dataEvalNode,
-          "join.by": joinByNode,
-          "match.columnsFuzzy": matchColumnsFuzzyNode,
-          "text.wordCount": textWordCountNode,
-          "text.lineCount": textLineCountNode,
-          "treenotation.wordTypes": treenotationWordTypesNode,
-          "columns.first": columnsFirstNode,
-          "columns.last": columnsLastNode,
-          "columns.drop": columnsDropNode,
-          "columns.dropConstants": columnsDropConstantsNode,
-          "columns.keep": columnsKeepNode,
-          "rows.shuffle": rowsShuffleNode,
-          "rows.reverse": rowsReverseNode,
-          "filter.where": filterWhereNode,
-          "rows.dropIfMissing": rowsDropIfMissingNode,
-          "filter.with": filterWithNode,
-          "filter.without": filterWithoutNode,
-          "rows.first": rowsFirstNode,
-          "rows.last": rowsLastNode,
-          "columns.setType": columnsSetTypeNode,
-          "group.by": groupByNode,
-          "rows.sortBy": rowsSortByNode,
-          "rows.sortByReverse": rowsSortByReverseNode,
-          "rows.addOne": rowsAddOneNode,
-          "data.inline": dataInlineNode,
-          "data.localStorage": dataLocalStorageNode,
-          "debug.parserTest": debugParserTestNode,
-          "editor.files": editorFilesNode,
-          "editor.commandHistory": editorCommandHistoryNode,
-          "math.gen": mathGenNode,
-          "random.float": randomFloatNode,
-          "random.int": randomIntNode,
-          "samples.tinyIris": samplesTinyIrisNode,
-          "shell.csv": toCsvNode,
-          "templates.list": templatesListNode,
-          "#!": hashBangNode,
           hidden: hiddenNode,
           visible: visibleNode,
           maximized: maximizedNode,
@@ -25299,7 +25150,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           width: widthNode,
           height: heightNode
         }),
-        undefined
+        [{ regex: /^$/, nodeConstructor: tileBlankLineNode }]
       )
     }
     get tileKeywordCell() {
@@ -25895,12 +25746,6 @@ ${cellInputs.join("\n")}`
     }
   }
 
-  class BlankLineNode extends abstractTileTreeComponentNode {
-    get visible() {
-      return false
-    }
-  }
-
   class DidYouMeanTileNode extends abstractTileTreeComponentNode {
     get bodyStumpTemplate() {
       return `div
@@ -25914,10 +25759,7 @@ ${cellInputs.join("\n")}`
     }
     getTileBodyStumpCode() {
       const input = this.getFirstWord()
-      const lineNo =
-        this.getParent()
-          .getTopDownArray()
-          .indexOf(this) + 1
+      const lineNo = this.getLineNumber()
       const closestTile = jtree.Utils.didYouMean(
         input,
         this.getRootNode()
@@ -25939,21 +25781,57 @@ ${cellInputs.join("\n")}`
     }
   }
 
-  class abstractDocNode extends abstractTileTreeComponentNode {
+  class abstractDocTileNode extends abstractTileTreeComponentNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
+    get tileStumpTemplate() {
+      return `div
+ class {classes}
+ id {id}
+ contextMenuCommand openTileContextMenuCommand
+ div
+  class TileGrabber
+  doubleClickCommand toggleTileMaximizeCommand
+ div
+  class TileBody HeaderLess
+  {body}
+ div
+  class TileFooter
+  {footer}
+ div
+  class TileGrabber`
+    }
+    get bodyStumpTemplate() {
+      return `{tagName}
+ bern
+  {content}`
+    }
+    get headerHeight() {
+      return 0
+    }
+    get footerHeight() {
+      return 0
+    }
+    _getBody() {
+      return this.qFormat(this.bodyStumpTemplate, { content: this.getContent(), tagName: this.tagName })
+    }
+    toStumpCode() {
+      return this.qFormat(this.tileStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        footer: this.getTileToolbarButtonStumpCode(),
+        id: this.getTreeComponentId(),
+        body: this._getBody()
+      })
+    }
   }
 
-  class docTitleNode extends abstractDocNode {
+  class docTitleNode extends abstractDocTileNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
     get stringCell() {
       return this.getWordsFrom(1)
-    }
-    get bodyStumpTemplate() {
-      return `{tagName} {content}`
     }
     get tagName() {
       return `h1`
@@ -25969,79 +25847,7 @@ ${cellInputs.join("\n")}`
     }
   }
 
-  class docCategoriesNode extends abstractDocNode {
-    get documentCategoryCell() {
-      return this.getWordsFrom(0)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docAuthorNode extends abstractDocNode {
-    get stringCell() {
-      return this.getWordsFrom(0)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docDefaultHiddenNode extends abstractDocNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docDateNode extends abstractDocNode {
-    get dateCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class docZoomNode extends abstractDocNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get zoomCell() {
-      return parseFloat(this.getWord(1))
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docLayoutNode extends abstractDocNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get docLayoutOptionCell() {
-      return this.getWord(1)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docCommentNode extends abstractDocNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
-    }
-    get commentKeywordCell() {
-      return this.getWord(0)
-    }
-    get commentCell() {
-      return this.getWordsFrom(1)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docSectionNode extends abstractDocNode {
+  class docSectionNode extends abstractDocTileNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -26054,9 +25860,15 @@ ${cellInputs.join("\n")}`
         undefined
       )
     }
+    _getBody() {
+      return this.compile()
+    }
+    _getCompiledLine() {
+      return ""
+    }
   }
 
-  class docReferenceNode extends abstractDocNode {
+  class docReferenceNode extends abstractDocTileNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -26070,9 +25882,12 @@ ${cellInputs.join("\n")}`
     get referenceIdCell() {
       return this.getWord(1)
     }
+    get tagName() {
+      return `p`
+    }
   }
 
-  class abstractPickerTileNode extends abstractDocNode {
+  class abstractPickerTileNode extends abstractDocTileNode {
     get tileHeader() {
       return `Gallery`
     }
@@ -26156,6 +25971,21 @@ a {name}
     }
   }
 
+  class docCommentNode extends abstractTileTreeComponentNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
+    }
+    get commentKeywordCell() {
+      return this.getWord(0)
+    }
+    get commentCell() {
+      return this.getWordsFrom(1)
+    }
+    get visible() {
+      return false
+    }
+  }
+
   class abstractMaiaTileNode extends abstractTileTreeComponentNode {
     createParser() {
       return new jtree.TreeNode.Parser(
@@ -26164,16 +25994,10 @@ a {name}
           "tiles.didyoumean": DidYouMeanTileNode,
           "doc.title": docTitleNode,
           "doc.subtitle": docSubtitleNode,
-          "doc.categories": docCategoriesNode,
-          "doc.author": docAuthorNode,
-          "doc.defaultHidden": docDefaultHiddenNode,
-          "doc.date": docDateNode,
-          "doc.zoom": docZoomNode,
-          "doc.layout": docLayoutNode,
-          "doc.comment": docCommentNode,
           "doc.section": docSectionNode,
           "doc.ref": docReferenceNode,
           "doc.picker": PickerTileNode,
+          "doc.comment": docCommentNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -30104,7 +29928,7 @@ a {name}
           command: "createProgramFromTemplateCommand",
           name: node.get("data doc.title"),
           value: id,
-          category: lodash.upperFirst(node.get("data categories")),
+          category: lodash.upperFirst(node.get("data doc.categories")),
           description: ""
         }
       })
@@ -30125,6 +29949,66 @@ a {name}
     }
   }
 
+  class tileBlankLineNode extends jtree.GrammarBackedNode {
+    get emptyCell() {
+      return this.getWord(0)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class abstractDocSettingNode extends jtree.GrammarBackedNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docCategoriesNode extends abstractDocSettingNode {
+    get documentCategoryCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docAuthorNode extends abstractDocSettingNode {
+    get stringCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docDefaultHiddenNode extends abstractDocSettingNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+  }
+
+  class docDateNode extends abstractDocSettingNode {
+    get dateCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docZoomNode extends abstractDocSettingNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get zoomCell() {
+      return parseFloat(this.getWord(1))
+    }
+  }
+
+  class docLayoutNode extends abstractDocSettingNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get docLayoutOptionCell() {
+      return this.getWord(1)
+    }
+  }
+
   class abstractDocSectionComponentNode extends jtree.GrammarBackedNode {}
 
   class docSectionSubtitleNode extends abstractDocSectionComponentNode {
@@ -30134,20 +30018,28 @@ a {name}
     get stringCell() {
       return this.getWordsFrom(1)
     }
-    get tagName() {
-      return `h2`
+    compile() {
+      return `h2 ${this.getContent()}`
     }
   }
 
   class docSectionParagraphNode extends abstractDocSectionComponentNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(docParagraphLineNode, undefined, undefined)
+    }
     get tileKeywordCell() {
       return this.getWord(0)
     }
     get stringCell() {
       return this.getWordsFrom(1)
     }
-    get tagName() {
-      return `p`
+    get stumpTemplate() {
+      return `p
+ bern
+  {content}`
+    }
+    compile() {
+      return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getContentWithChildren() })
     }
   }
 
@@ -30158,8 +30050,15 @@ a {name}
     get urlCell() {
       return this.getWord(1)
     }
-    get tagName() {
-      return `a`
+    get stringCell() {
+      return this.getWordsFrom(2)
+    }
+    get stumpTemplate() {
+      return `a {content}
+ href {url}`
+    }
+    compile() {
+      return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getWordsFrom(2).join(" "), url: this.getWord(1) })
     }
   }
 
@@ -30173,8 +30072,13 @@ a {name}
     get programmingLanguageNameCell() {
       return this.getWord(1)
     }
-    get tagName() {
-      return `code`
+    get stumpTemplate() {
+      return `code
+ bern
+  {content}`
+    }
+    compile() {
+      return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.childrenToString() })
     }
   }
 
@@ -30183,6 +30087,15 @@ a {name}
       return new jtree.TreeNode.Parser(docLineOfCodeNode, undefined, undefined)
     }
     get codeCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docParagraphLineNode extends jtree.GrammarBackedNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(docParagraphLineNode, undefined, undefined)
+    }
+    get stringCell() {
       return this.getWordsFrom(0)
     }
   }
@@ -30317,16 +30230,10 @@ a {name}
           "tiles.didyoumean": DidYouMeanTileNode,
           "doc.title": docTitleNode,
           "doc.subtitle": docSubtitleNode,
-          "doc.categories": docCategoriesNode,
-          "doc.author": docAuthorNode,
-          "doc.defaultHidden": docDefaultHiddenNode,
-          "doc.date": docDateNode,
-          "doc.zoom": docZoomNode,
-          "doc.layout": docLayoutNode,
-          "doc.comment": docCommentNode,
           "doc.section": docSectionNode,
           "doc.ref": docReferenceNode,
           "doc.picker": PickerTileNode,
+          "doc.comment": docCommentNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -30462,9 +30369,15 @@ a {name}
           "samples.tinyIris": samplesTinyIrisNode,
           "shell.csv": toCsvNode,
           "templates.list": templatesListNode,
+          "doc.categories": docCategoriesNode,
+          "doc.author": docAuthorNode,
+          "doc.defaultHidden": docDefaultHiddenNode,
+          "doc.date": docDateNode,
+          "doc.zoom": docZoomNode,
+          "doc.layout": docLayoutNode,
           "#!": hashBangNode
         }),
-        undefined
+        [{ regex: /^$/, nodeConstructor: tileBlankLineNode }]
       )
     }
     get wallType() {
@@ -30491,11 +30404,14 @@ a {name}
     }
     getGrammarProgram() {
       if (!this._cachedGrammarProgramRoot)
-        this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`programmingLanguageNameCell
+        this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`emptyCell
+programmingLanguageNameCell
  enum javascript latex css html ruby rust python csv tsv xml php typescript lisp swift java c cpp markdown bash
+ highlightScope constant
 codeCell
  highlightScope string
 documentCategoryCell
+ highlightScope constant
  enum shopping chemistry programming socialMedia math parenting writing dataScience
 zoomCell
  extends numberCell
@@ -30627,7 +30543,7 @@ abstractTileTreeComponentNode
  abstract
  cells tileKeywordCell
  _extendsJsClass AbstractTreeComponent
- inScope hashBangNode abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode
+ inScope tileBlankLineNode abstractCoreTileSettingTerminalNode
  catchAllNodeType catchAllErrorNode
  int headerHeight 30
  int footerHeight 30
@@ -31197,9 +31113,6 @@ basicRecursiveTileNode
   div
   \${cellInputs.join("\\n")}\`
   }
-BlankLineNode
- extends abstractTileTreeComponentNode
- boolean visible false
 DidYouMeanTileNode
  tags noPicker
  description Provides suggestions for misspelled tiles.
@@ -31217,10 +31130,7 @@ DidYouMeanTileNode
  javascript
   getTileBodyStumpCode() {
    const input = this.getFirstWord()
-   const lineNo =
-    this.getParent()
-     .getTopDownArray()
-     .indexOf(this) + 1
+   const lineNo = this.getLineNumber()
    const closestTile = jtree.Utils.didYouMean(
     input,
     this.getRootNode()
@@ -31240,88 +31150,66 @@ DidYouMeanTileNode
   getTileHeaderBern() {
    return ""
   }
-abstractDocNode
+abstractDocTileNode
+ int footerHeight 0
+ int headerHeight 0
  cells tileKeywordCell
  extends abstractTileTreeComponentNode
  abstract
+ string bodyStumpTemplate
+  {tagName}
+   bern
+    {content}
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
+   contextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    doubleClickCommand toggleTileMaximizeCommand
+   div
+    class TileBody HeaderLess
+    {body}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
+ javascript
+  _getBody() {
+   return this.qFormat(this.bodyStumpTemplate, { content: this.getContent(), tagName: this.tagName })
+  }
+  toStumpCode() {
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
+  }
 docTitleNode
  catchAllCellType stringCell
  description A title
  example A doc
   doc.title A Tale of Two Cities
  string tileSize 600 75
- extends abstractDocNode
+ extends abstractDocTileNode
  cells tileKeywordCell
  crux doc.title
  string tagName h1
- string bodyStumpTemplate
-  {tagName} {content}
 docSubtitleNode
  extends docTitleNode
  description A subheader
  string tagName h2
  crux doc.subtitle
-docCategoriesNode
- extends abstractDocNode
- crux doc.categories
- description Add some categories to the document for organization.
- catchAllCellType documentCategoryCell
- boolean visible false
-docAuthorNode
- extends abstractDocNode
- catchAllCellType stringCell
- crux doc.author
- description Add one author per line.
- boolean visible false
-docDefaultHiddenNode
- crux doc.defaultHidden
- example
-  doc.defaultHidden
-  samples.portals
-   tables.basic
-    visible
- description Change default tile visibility to hidden.
- cells tileKeywordCell
- extends abstractDocNode
- boolean visible false
-docDateNode
- description Date published.
- extends abstractDocNode
- crux doc.date
- catchAllCellType dateCell
-docZoomNode
- crux doc.zoom
- description Enlarge or shrink all tiles
- cells tileKeywordCell zoomCell
- extends abstractDocNode
- boolean visible false
-docLayoutNode
- cells tileKeywordCell docLayoutOptionCell
- extends abstractDocNode
- crux doc.layout
- boolean visible false
-docCommentNode
- description A comment node
- cells tileKeywordCell
- extends abstractDocNode
- boolean visible false
- frequency 0
- example An example program with comments
-  doc.comment get iris data
-  samples.iris
-   doc.comment filter is
-   filter.where Species = virginica
-    doc.comment display results
-    tables.basic
- catchAllCellType commentCell
- catchAllNodeType commentLineNode
- cells commentKeywordCell
- crux doc.comment
 docSectionNode
  description A section containing subtitles, paragraphs, code blocks, etc.
  crux doc.section
- extends abstractDocNode
+ extends abstractDocTileNode
  inScope abstractDocSectionComponentNode
+ javascript
+  _getBody() {
+   return this.compile()
+  }
+  _getCompiledLine() {
+   return ""
+  }
  example
   doc.section
    subtitle Subtitle
@@ -31332,12 +31220,13 @@ docReferenceNode
  crux doc.ref
  cells tileKeywordCell referenceIdCell
  inScope docReferenceUrlNode
+ string tagName p
  doc.ref someRefId
   url https://en.wikipedia.org/wiki/Note_(typography)
  description A reference to an external source
- extends abstractDocNode
+ extends abstractDocTileNode
 abstractPickerTileNode
- extends abstractDocNode
+ extends abstractDocTileNode
  string tileSize 480 420
  abstract
  string hakonTemplate
@@ -31414,6 +31303,22 @@ PickerTileNode
     return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
    })
   }
+docCommentNode
+ description A comment node
+ cells commentKeywordCell
+ extends abstractTileTreeComponentNode
+ boolean visible false
+ frequency 0
+ example An example program with comments
+  doc.comment get iris data
+  samples.iris
+   doc.comment filter is
+   filter.where Species = virginica
+    doc.comment display results
+    tables.basic
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+ crux doc.comment
 abstractMaiaTileNode
  abstract
  extends abstractTileTreeComponentNode
@@ -34925,7 +34830,7 @@ templatesListNode
      command: "createProgramFromTemplateCommand",
      name: node.get("data doc.title"),
      value: id,
-     category: lodash.upperFirst(node.get("data categories")),
+     category: lodash.upperFirst(node.get("data doc.categories")),
      description: ""
     }
    })
@@ -34942,34 +34847,102 @@ templatesListNode
     name: id + this.maiaFileExtensionKey
    }
   }
+tileBlankLineNode
+ boolean visible false
+ pattern ^$
+ tags doNotSynthesize
+ cells emptyCell
+abstractDocSettingNode
+ cells tileKeywordCell
+ abstract
+ boolean visible false
+docCategoriesNode
+ extends abstractDocSettingNode
+ crux doc.categories
+ description Add some categories to the document for organization.
+ catchAllCellType documentCategoryCell
+docAuthorNode
+ extends abstractDocSettingNode
+ catchAllCellType stringCell
+ crux doc.author
+ description Add one author per line.
+docDefaultHiddenNode
+ crux doc.defaultHidden
+ example
+  doc.defaultHidden
+  samples.portals
+   tables.basic
+    visible
+ description Change default tile visibility to hidden.
+ cells tileKeywordCell
+ extends abstractDocSettingNode
+docDateNode
+ description Date published.
+ extends abstractDocSettingNode
+ crux doc.date
+ catchAllCellType dateCell
+docZoomNode
+ crux doc.zoom
+ description Enlarge or shrink all tiles
+ cells tileKeywordCell zoomCell
+ extends abstractDocSettingNode
+docLayoutNode
+ cells tileKeywordCell docLayoutOptionCell
+ extends abstractDocSettingNode
+ crux doc.layout
 abstractDocSectionComponentNode
  abstract
 docSectionSubtitleNode
  extends abstractDocSectionComponentNode
  crux subtitle
- string tagName h2
  cells tileKeywordCell
  catchAllCellType stringCell
+ javascript
+  compile() {
+   return \`h2 \${this.getContent()}\`
+  }
 docSectionParagraphNode
  extends abstractDocSectionComponentNode
  crux paragraph
- string tagName p
  cells tileKeywordCell
  catchAllCellType stringCell
+ catchAllNodeType docParagraphLineNode
+ string stumpTemplate
+  p
+   bern
+    {content}
+ javascript
+  compile() {
+   return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getContentWithChildren() })
+  }
 docSectionLinkNode
  extends abstractDocSectionComponentNode
  crux link
- string tagName a
  cells tileKeywordCell urlCell
+ catchAllCellType stringCell
+ string stumpTemplate
+  a {content}
+   href {url}
+ javascript
+  compile() {
+   return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getWordsFrom(2).join(" "), url: this.getWord(1) })
+  }
  example
   doc.section
    link http://ohayo.computer Ohayo
 docSectionCodeNode
  extends abstractDocSectionComponentNode
  crux code
- string tagName code
  cells tileKeywordCell programmingLanguageNameCell
  catchAllNodeType docLineOfCodeNode
+ string stumpTemplate
+  code
+   bern
+    {content}
+ javascript
+  compile() {
+   return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.childrenToString() })
+  }
  example
   doc.section
    subtitle Some Code
@@ -34979,6 +34952,9 @@ docSectionCodeNode
 docLineOfCodeNode
  catchAllCellType codeCell
  catchAllNodeType docLineOfCodeNode
+docParagraphLineNode
+ catchAllCellType stringCell
+ catchAllNodeType docParagraphLineNode
 commentLineNode
  catchAllCellType commentCell
  catchAllNodeType commentLineNode
@@ -35099,7 +35075,7 @@ maiaNode
  catchAllNodeType DidYouMeanTileNode
  string wallType flex
  description Maia is a programming language for doing data science.
- inScope abstractTileTreeComponentNode hashBangNode
+ inScope abstractTileTreeComponentNode tileBlankLineNode abstractDocSettingNode hashBangNode
  javascript
   _getProgramRowCount() {
    return this.getAllRowsFromAllOutputTables().reduce((acc, curr) => acc + curr.length, 0)
@@ -35318,22 +35294,15 @@ lineOfContentNode
       return {
         abstractTileTreeComponentNode: abstractTileTreeComponentNode,
         basicRecursiveTileNode: basicRecursiveTileNode,
-        BlankLineNode: BlankLineNode,
         DidYouMeanTileNode: DidYouMeanTileNode,
-        abstractDocNode: abstractDocNode,
+        abstractDocTileNode: abstractDocTileNode,
         docTitleNode: docTitleNode,
         docSubtitleNode: docSubtitleNode,
-        docCategoriesNode: docCategoriesNode,
-        docAuthorNode: docAuthorNode,
-        docDefaultHiddenNode: docDefaultHiddenNode,
-        docDateNode: docDateNode,
-        docZoomNode: docZoomNode,
-        docLayoutNode: docLayoutNode,
-        docCommentNode: docCommentNode,
         docSectionNode: docSectionNode,
         docReferenceNode: docReferenceNode,
         abstractPickerTileNode: abstractPickerTileNode,
         PickerTileNode: PickerTileNode,
+        docCommentNode: docCommentNode,
         abstractMaiaTileNode: abstractMaiaTileNode,
         abstractChartNode: abstractChartNode,
         abstractHeaderlessChartTileNode: abstractHeaderlessChartTileNode,
@@ -35499,12 +35468,21 @@ lineOfContentNode
         toCsvNode: toCsvNode,
         abstractTemplatePickerTileNode: abstractTemplatePickerTileNode,
         templatesListNode: templatesListNode,
+        tileBlankLineNode: tileBlankLineNode,
+        abstractDocSettingNode: abstractDocSettingNode,
+        docCategoriesNode: docCategoriesNode,
+        docAuthorNode: docAuthorNode,
+        docDefaultHiddenNode: docDefaultHiddenNode,
+        docDateNode: docDateNode,
+        docZoomNode: docZoomNode,
+        docLayoutNode: docLayoutNode,
         abstractDocSectionComponentNode: abstractDocSectionComponentNode,
         docSectionSubtitleNode: docSectionSubtitleNode,
         docSectionParagraphNode: docSectionParagraphNode,
         docSectionLinkNode: docSectionLinkNode,
         docSectionCodeNode: docSectionCodeNode,
         docLineOfCodeNode: docLineOfCodeNode,
+        docParagraphLineNode: docParagraphLineNode,
         commentLineNode: commentLineNode,
         docReferenceUrlNode: docReferenceUrlNode,
         catchAllErrorNode: catchAllErrorNode,
@@ -37861,20 +37839,6 @@ BlobNode
       return new jtree.TreeNode.Parser(
         catchAllErrorNode,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          "tiles.didyoumean": DidYouMeanTileNode,
-          "doc.title": docTitleNode,
-          "doc.subtitle": docSubtitleNode,
-          "doc.categories": docCategoriesNode,
-          "doc.author": docAuthorNode,
-          "doc.defaultHidden": docDefaultHiddenNode,
-          "doc.date": docDateNode,
-          "doc.zoom": docZoomNode,
-          "doc.layout": docLayoutNode,
-          "doc.comment": docCommentNode,
-          "doc.section": docSectionNode,
-          "doc.ref": docReferenceNode,
-          "doc.picker": PickerTileNode,
-          "#!": hashBangNode,
           hidden: hiddenNode,
           visible: visibleNode,
           maximized: maximizedNode,
@@ -37883,7 +37847,7 @@ BlobNode
           width: widthNode,
           height: heightNode
         }),
-        undefined
+        [{ regex: /^$/, nodeConstructor: tileBlankLineNode }]
       )
     }
     get tileKeywordCell() {
@@ -38479,12 +38443,6 @@ ${cellInputs.join("\n")}`
     }
   }
 
-  class BlankLineNode extends abstractTileTreeComponentNode {
-    get visible() {
-      return false
-    }
-  }
-
   class DidYouMeanTileNode extends abstractTileTreeComponentNode {
     get bodyStumpTemplate() {
       return `div
@@ -38498,10 +38456,7 @@ ${cellInputs.join("\n")}`
     }
     getTileBodyStumpCode() {
       const input = this.getFirstWord()
-      const lineNo =
-        this.getParent()
-          .getTopDownArray()
-          .indexOf(this) + 1
+      const lineNo = this.getLineNumber()
       const closestTile = jtree.Utils.didYouMean(
         input,
         this.getRootNode()
@@ -38523,21 +38478,57 @@ ${cellInputs.join("\n")}`
     }
   }
 
-  class abstractDocNode extends abstractTileTreeComponentNode {
+  class abstractDocTileNode extends abstractTileTreeComponentNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
+    get tileStumpTemplate() {
+      return `div
+ class {classes}
+ id {id}
+ contextMenuCommand openTileContextMenuCommand
+ div
+  class TileGrabber
+  doubleClickCommand toggleTileMaximizeCommand
+ div
+  class TileBody HeaderLess
+  {body}
+ div
+  class TileFooter
+  {footer}
+ div
+  class TileGrabber`
+    }
+    get bodyStumpTemplate() {
+      return `{tagName}
+ bern
+  {content}`
+    }
+    get headerHeight() {
+      return 0
+    }
+    get footerHeight() {
+      return 0
+    }
+    _getBody() {
+      return this.qFormat(this.bodyStumpTemplate, { content: this.getContent(), tagName: this.tagName })
+    }
+    toStumpCode() {
+      return this.qFormat(this.tileStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        footer: this.getTileToolbarButtonStumpCode(),
+        id: this.getTreeComponentId(),
+        body: this._getBody()
+      })
+    }
   }
 
-  class docTitleNode extends abstractDocNode {
+  class docTitleNode extends abstractDocTileNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
     get stringCell() {
       return this.getWordsFrom(1)
-    }
-    get bodyStumpTemplate() {
-      return `{tagName} {content}`
     }
     get tagName() {
       return `h1`
@@ -38553,79 +38544,7 @@ ${cellInputs.join("\n")}`
     }
   }
 
-  class docCategoriesNode extends abstractDocNode {
-    get documentCategoryCell() {
-      return this.getWordsFrom(0)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docAuthorNode extends abstractDocNode {
-    get stringCell() {
-      return this.getWordsFrom(0)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docDefaultHiddenNode extends abstractDocNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docDateNode extends abstractDocNode {
-    get dateCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class docZoomNode extends abstractDocNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get zoomCell() {
-      return parseFloat(this.getWord(1))
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docLayoutNode extends abstractDocNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get docLayoutOptionCell() {
-      return this.getWord(1)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docCommentNode extends abstractDocNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
-    }
-    get commentKeywordCell() {
-      return this.getWord(0)
-    }
-    get commentCell() {
-      return this.getWordsFrom(1)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docSectionNode extends abstractDocNode {
+  class docSectionNode extends abstractDocTileNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -38638,9 +38557,15 @@ ${cellInputs.join("\n")}`
         undefined
       )
     }
+    _getBody() {
+      return this.compile()
+    }
+    _getCompiledLine() {
+      return ""
+    }
   }
 
-  class docReferenceNode extends abstractDocNode {
+  class docReferenceNode extends abstractDocTileNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -38654,9 +38579,12 @@ ${cellInputs.join("\n")}`
     get referenceIdCell() {
       return this.getWord(1)
     }
+    get tagName() {
+      return `p`
+    }
   }
 
-  class abstractPickerTileNode extends abstractDocNode {
+  class abstractPickerTileNode extends abstractDocTileNode {
     get tileHeader() {
       return `Gallery`
     }
@@ -38740,6 +38668,81 @@ a {name}
     }
   }
 
+  class docCommentNode extends abstractTileTreeComponentNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
+    }
+    get commentKeywordCell() {
+      return this.getWord(0)
+    }
+    get commentCell() {
+      return this.getWordsFrom(1)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class tileBlankLineNode extends jtree.GrammarBackedNode {
+    get emptyCell() {
+      return this.getWord(0)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class abstractDocSettingNode extends jtree.GrammarBackedNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docCategoriesNode extends abstractDocSettingNode {
+    get documentCategoryCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docAuthorNode extends abstractDocSettingNode {
+    get stringCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docDefaultHiddenNode extends abstractDocSettingNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+  }
+
+  class docDateNode extends abstractDocSettingNode {
+    get dateCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docZoomNode extends abstractDocSettingNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get zoomCell() {
+      return parseFloat(this.getWord(1))
+    }
+  }
+
+  class docLayoutNode extends abstractDocSettingNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get docLayoutOptionCell() {
+      return this.getWord(1)
+    }
+  }
+
   class abstractDocSectionComponentNode extends jtree.GrammarBackedNode {}
 
   class docSectionSubtitleNode extends abstractDocSectionComponentNode {
@@ -38749,20 +38752,28 @@ a {name}
     get stringCell() {
       return this.getWordsFrom(1)
     }
-    get tagName() {
-      return `h2`
+    compile() {
+      return `h2 ${this.getContent()}`
     }
   }
 
   class docSectionParagraphNode extends abstractDocSectionComponentNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(docParagraphLineNode, undefined, undefined)
+    }
     get tileKeywordCell() {
       return this.getWord(0)
     }
     get stringCell() {
       return this.getWordsFrom(1)
     }
-    get tagName() {
-      return `p`
+    get stumpTemplate() {
+      return `p
+ bern
+  {content}`
+    }
+    compile() {
+      return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getContentWithChildren() })
     }
   }
 
@@ -38773,8 +38784,15 @@ a {name}
     get urlCell() {
       return this.getWord(1)
     }
-    get tagName() {
-      return `a`
+    get stringCell() {
+      return this.getWordsFrom(2)
+    }
+    get stumpTemplate() {
+      return `a {content}
+ href {url}`
+    }
+    compile() {
+      return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getWordsFrom(2).join(" "), url: this.getWord(1) })
     }
   }
 
@@ -38788,8 +38806,13 @@ a {name}
     get programmingLanguageNameCell() {
       return this.getWord(1)
     }
-    get tagName() {
-      return `code`
+    get stumpTemplate() {
+      return `code
+ bern
+  {content}`
+    }
+    compile() {
+      return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.childrenToString() })
     }
   }
 
@@ -38798,6 +38821,15 @@ a {name}
       return new jtree.TreeNode.Parser(docLineOfCodeNode, undefined, undefined)
     }
     get codeCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docParagraphLineNode extends jtree.GrammarBackedNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(docParagraphLineNode, undefined, undefined)
+    }
+    get stringCell() {
       return this.getWordsFrom(0)
     }
   }
@@ -38924,11 +38956,14 @@ a {name}
     }
     getGrammarProgram() {
       if (!this._cachedGrammarProgramRoot)
-        this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`programmingLanguageNameCell
+        this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`emptyCell
+programmingLanguageNameCell
  enum javascript latex css html ruby rust python csv tsv xml php typescript lisp swift java c cpp markdown bash
+ highlightScope constant
 codeCell
  highlightScope string
 documentCategoryCell
+ highlightScope constant
  enum shopping chemistry programming socialMedia math parenting writing dataScience
 zoomCell
  extends numberCell
@@ -38964,7 +38999,7 @@ abstractTileTreeComponentNode
  abstract
  cells tileKeywordCell
  _extendsJsClass AbstractTreeComponent
- inScope hashBangNode abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode
+ inScope tileBlankLineNode abstractCoreTileSettingTerminalNode
  catchAllNodeType catchAllErrorNode
  int headerHeight 30
  int footerHeight 30
@@ -39534,9 +39569,6 @@ basicRecursiveTileNode
   div
   \${cellInputs.join("\\n")}\`
   }
-BlankLineNode
- extends abstractTileTreeComponentNode
- boolean visible false
 DidYouMeanTileNode
  tags noPicker
  description Provides suggestions for misspelled tiles.
@@ -39554,10 +39586,7 @@ DidYouMeanTileNode
  javascript
   getTileBodyStumpCode() {
    const input = this.getFirstWord()
-   const lineNo =
-    this.getParent()
-     .getTopDownArray()
-     .indexOf(this) + 1
+   const lineNo = this.getLineNumber()
    const closestTile = jtree.Utils.didYouMean(
     input,
     this.getRootNode()
@@ -39577,88 +39606,66 @@ DidYouMeanTileNode
   getTileHeaderBern() {
    return ""
   }
-abstractDocNode
+abstractDocTileNode
+ int footerHeight 0
+ int headerHeight 0
  cells tileKeywordCell
  extends abstractTileTreeComponentNode
  abstract
+ string bodyStumpTemplate
+  {tagName}
+   bern
+    {content}
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
+   contextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    doubleClickCommand toggleTileMaximizeCommand
+   div
+    class TileBody HeaderLess
+    {body}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
+ javascript
+  _getBody() {
+   return this.qFormat(this.bodyStumpTemplate, { content: this.getContent(), tagName: this.tagName })
+  }
+  toStumpCode() {
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
+  }
 docTitleNode
  catchAllCellType stringCell
  description A title
  example A doc
   doc.title A Tale of Two Cities
  string tileSize 600 75
- extends abstractDocNode
+ extends abstractDocTileNode
  cells tileKeywordCell
  crux doc.title
  string tagName h1
- string bodyStumpTemplate
-  {tagName} {content}
 docSubtitleNode
  extends docTitleNode
  description A subheader
  string tagName h2
  crux doc.subtitle
-docCategoriesNode
- extends abstractDocNode
- crux doc.categories
- description Add some categories to the document for organization.
- catchAllCellType documentCategoryCell
- boolean visible false
-docAuthorNode
- extends abstractDocNode
- catchAllCellType stringCell
- crux doc.author
- description Add one author per line.
- boolean visible false
-docDefaultHiddenNode
- crux doc.defaultHidden
- example
-  doc.defaultHidden
-  samples.portals
-   tables.basic
-    visible
- description Change default tile visibility to hidden.
- cells tileKeywordCell
- extends abstractDocNode
- boolean visible false
-docDateNode
- description Date published.
- extends abstractDocNode
- crux doc.date
- catchAllCellType dateCell
-docZoomNode
- crux doc.zoom
- description Enlarge or shrink all tiles
- cells tileKeywordCell zoomCell
- extends abstractDocNode
- boolean visible false
-docLayoutNode
- cells tileKeywordCell docLayoutOptionCell
- extends abstractDocNode
- crux doc.layout
- boolean visible false
-docCommentNode
- description A comment node
- cells tileKeywordCell
- extends abstractDocNode
- boolean visible false
- frequency 0
- example An example program with comments
-  doc.comment get iris data
-  samples.iris
-   doc.comment filter is
-   filter.where Species = virginica
-    doc.comment display results
-    tables.basic
- catchAllCellType commentCell
- catchAllNodeType commentLineNode
- cells commentKeywordCell
- crux doc.comment
 docSectionNode
  description A section containing subtitles, paragraphs, code blocks, etc.
  crux doc.section
- extends abstractDocNode
+ extends abstractDocTileNode
  inScope abstractDocSectionComponentNode
+ javascript
+  _getBody() {
+   return this.compile()
+  }
+  _getCompiledLine() {
+   return ""
+  }
  example
   doc.section
    subtitle Subtitle
@@ -39669,12 +39676,13 @@ docReferenceNode
  crux doc.ref
  cells tileKeywordCell referenceIdCell
  inScope docReferenceUrlNode
+ string tagName p
  doc.ref someRefId
   url https://en.wikipedia.org/wiki/Note_(typography)
  description A reference to an external source
- extends abstractDocNode
+ extends abstractDocTileNode
 abstractPickerTileNode
- extends abstractDocNode
+ extends abstractDocTileNode
  string tileSize 480 420
  abstract
  string hakonTemplate
@@ -39751,34 +39759,118 @@ PickerTileNode
     return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
    })
   }
+docCommentNode
+ description A comment node
+ cells commentKeywordCell
+ extends abstractTileTreeComponentNode
+ boolean visible false
+ frequency 0
+ example An example program with comments
+  doc.comment get iris data
+  samples.iris
+   doc.comment filter is
+   filter.where Species = virginica
+    doc.comment display results
+    tables.basic
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+ crux doc.comment
+tileBlankLineNode
+ boolean visible false
+ pattern ^$
+ tags doNotSynthesize
+ cells emptyCell
+abstractDocSettingNode
+ cells tileKeywordCell
+ abstract
+ boolean visible false
+docCategoriesNode
+ extends abstractDocSettingNode
+ crux doc.categories
+ description Add some categories to the document for organization.
+ catchAllCellType documentCategoryCell
+docAuthorNode
+ extends abstractDocSettingNode
+ catchAllCellType stringCell
+ crux doc.author
+ description Add one author per line.
+docDefaultHiddenNode
+ crux doc.defaultHidden
+ example
+  doc.defaultHidden
+  samples.portals
+   tables.basic
+    visible
+ description Change default tile visibility to hidden.
+ cells tileKeywordCell
+ extends abstractDocSettingNode
+docDateNode
+ description Date published.
+ extends abstractDocSettingNode
+ crux doc.date
+ catchAllCellType dateCell
+docZoomNode
+ crux doc.zoom
+ description Enlarge or shrink all tiles
+ cells tileKeywordCell zoomCell
+ extends abstractDocSettingNode
+docLayoutNode
+ cells tileKeywordCell docLayoutOptionCell
+ extends abstractDocSettingNode
+ crux doc.layout
 abstractDocSectionComponentNode
  abstract
 docSectionSubtitleNode
  extends abstractDocSectionComponentNode
  crux subtitle
- string tagName h2
  cells tileKeywordCell
  catchAllCellType stringCell
+ javascript
+  compile() {
+   return \`h2 \${this.getContent()}\`
+  }
 docSectionParagraphNode
  extends abstractDocSectionComponentNode
  crux paragraph
- string tagName p
  cells tileKeywordCell
  catchAllCellType stringCell
+ catchAllNodeType docParagraphLineNode
+ string stumpTemplate
+  p
+   bern
+    {content}
+ javascript
+  compile() {
+   return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getContentWithChildren() })
+  }
 docSectionLinkNode
  extends abstractDocSectionComponentNode
  crux link
- string tagName a
  cells tileKeywordCell urlCell
+ catchAllCellType stringCell
+ string stumpTemplate
+  a {content}
+   href {url}
+ javascript
+  compile() {
+   return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getWordsFrom(2).join(" "), url: this.getWord(1) })
+  }
  example
   doc.section
    link http://ohayo.computer Ohayo
 docSectionCodeNode
  extends abstractDocSectionComponentNode
  crux code
- string tagName code
  cells tileKeywordCell programmingLanguageNameCell
  catchAllNodeType docLineOfCodeNode
+ string stumpTemplate
+  code
+   bern
+    {content}
+ javascript
+  compile() {
+   return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.childrenToString() })
+  }
  example
   doc.section
    subtitle Some Code
@@ -39788,6 +39880,9 @@ docSectionCodeNode
 docLineOfCodeNode
  catchAllCellType codeCell
  catchAllNodeType docLineOfCodeNode
+docParagraphLineNode
+ catchAllCellType stringCell
+ catchAllNodeType docParagraphLineNode
 commentLineNode
  catchAllCellType commentCell
  catchAllNodeType commentLineNode
@@ -39945,28 +40040,30 @@ tileSettingNonTerminalContentNode
       return {
         abstractTileTreeComponentNode: abstractTileTreeComponentNode,
         basicRecursiveTileNode: basicRecursiveTileNode,
-        BlankLineNode: BlankLineNode,
         DidYouMeanTileNode: DidYouMeanTileNode,
-        abstractDocNode: abstractDocNode,
+        abstractDocTileNode: abstractDocTileNode,
         docTitleNode: docTitleNode,
         docSubtitleNode: docSubtitleNode,
+        docSectionNode: docSectionNode,
+        docReferenceNode: docReferenceNode,
+        abstractPickerTileNode: abstractPickerTileNode,
+        PickerTileNode: PickerTileNode,
+        docCommentNode: docCommentNode,
+        tileBlankLineNode: tileBlankLineNode,
+        abstractDocSettingNode: abstractDocSettingNode,
         docCategoriesNode: docCategoriesNode,
         docAuthorNode: docAuthorNode,
         docDefaultHiddenNode: docDefaultHiddenNode,
         docDateNode: docDateNode,
         docZoomNode: docZoomNode,
         docLayoutNode: docLayoutNode,
-        docCommentNode: docCommentNode,
-        docSectionNode: docSectionNode,
-        docReferenceNode: docReferenceNode,
-        abstractPickerTileNode: abstractPickerTileNode,
-        PickerTileNode: PickerTileNode,
         abstractDocSectionComponentNode: abstractDocSectionComponentNode,
         docSectionSubtitleNode: docSectionSubtitleNode,
         docSectionParagraphNode: docSectionParagraphNode,
         docSectionLinkNode: docSectionLinkNode,
         docSectionCodeNode: docSectionCodeNode,
         docLineOfCodeNode: docLineOfCodeNode,
+        docParagraphLineNode: docParagraphLineNode,
         commentLineNode: commentLineNode,
         docReferenceUrlNode: docReferenceUrlNode,
         catchAllErrorNode: catchAllErrorNode,
@@ -40566,7 +40663,6 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
       codeWidgets.length = 0
 
       errs
-        .filter(err => !err.isBlankLineError())
         .filter(err => !err.isCursorOnWord(cursor.line, cursor.ch))
         .slice(0, 1) // Only show 1 error at a time. Otherwise UX is not fun.
         .forEach(err => {
