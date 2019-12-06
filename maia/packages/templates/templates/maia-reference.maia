@@ -44,14 +44,14 @@ doc.section
 doc.section
  subtitle Layout
  paragraph Layout changes the layout strategy of the tiles
- code
+ code maia
   doc.layout column
 
 
 doc.section
  subtitle Zoom
  paragraph Zoom let's you adjust the zoom level of the doc.
- code
+ code maia
   doc.zoom .5
 
 
@@ -62,7 +62,7 @@ doc.section
  code maia
   doc.tiles hidden
  paragraph When you hide all tiles, you'll need to opt-in to visible to show tiles.
- code
+ code maia
   samples.portals
    vega.bar
     visible
