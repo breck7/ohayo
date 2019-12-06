@@ -19,7 +19,6 @@ tilesNode
    while (current) {
     if (current.doesExtend("abstractTileTreeComponentNode")) return current
     current = current.getParent()
-    if (current.doesExtend("tiles")) return undefined
    }
   }
   setTab(tab) {

@@ -1,7 +1,6 @@
 const { jtree } = require("jtree")
 
 const BasicTerminalTreeComponent = require("./BasicTerminalTreeComponent.js")
-const ThemeConstants = require("../themes/ThemeConstants.js")
 
 // TODO!!!! UNDO/REDO HISTORY IS SAVED ACROSS TAB SWITCHES.
 
@@ -102,9 +101,7 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
   }
 
   _getCMThemeToUse() {
-    const name = this.getRootNode().getThemeName()
-    if (name === ThemeConstants.glass || name === ThemeConstants.clearGlass) return CodeMirrorConstants.themes.oceanicNext
-    return CodeMirrorConstants.themes.default
+    return this.getRootNode().isGlassTheme() ? CodeMirrorConstants.themes.oceanicNext : CodeMirrorConstants.themes.default
   }
 
   _loadCodeMirror() {

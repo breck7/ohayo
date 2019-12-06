@@ -1,3 +1,10 @@
+16.0.1 2019-12-6
+----------------
+- Fix: whitespace in doc.code is now pre
+- Fix: doc.code code is escaped for html and added test
+- Fix: fixed uncaught error in code mirror editor on save
+- Infra: moved theme code to one place
+
 16.0.0 2019-12-6
 ----------------
 - New: columns.drop, columns.dropConstants and show.columnCount tiles

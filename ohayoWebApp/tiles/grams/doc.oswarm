@@ -1,0 +1,11 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test codeTest
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    doc.section
+     subtitle Hello world
+     code php
+      <?php
+       echo "Hi";
+   assertStringIncludes getTextContent &lt;?php

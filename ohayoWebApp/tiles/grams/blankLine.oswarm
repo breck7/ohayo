@@ -1,0 +1,8 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test BlankLineTest
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    
+    doc.title Hello world
+   assertLengthIs getMountedTilesProgram.getTiles 1

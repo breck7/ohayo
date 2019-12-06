@@ -8,8 +8,7 @@ const LocalStorageDisk = require("../storage/LocalStorageDisk.js")
 const ServerStorageDisk = require("../storage/ServerStorageDisk.js")
 const StorageKeys = require("../storage/StorageKeys.js")
 
-const Themes = require("../themes/Themes.js")
-const ThemeConstants = require("../themes/ThemeConstants.js")
+const ThemeTreeComponent = require("../themes/ThemeTreeComponent.js")
 const Version = require("./Version.js")
 
 /*NODE_JS_ONLY*/ const tilesNode = require("../tiles/tiles.nodejs.js")
@@ -22,7 +21,6 @@ const DemoTemplates = require("../templates/DemoTemplates.js")
 
 const PanelTreeComponent = require("./PanelTreeComponent.js")
 const MenuTreeComponent = require("./MenuTreeComponent.js")
-const ThemeTreeComponent = require("./ThemeTreeComponent.js")
 const AbstractModalTreeComponent = require("./AbstractModalTreeComponent.js")
 
 const OhayoConstants = require("./OhayoConstants.js")
@@ -186,7 +184,7 @@ class OhayoWebApp extends AbstractTreeComponent {
   }
 
   static getDefaultStartState() {
-    return `${OhayoConstants.theme} ${ThemeConstants.workshop}
+    return `${OhayoConstants.theme} ${ThemeTreeComponent.defaultTheme}
 ${OhayoConstants.menu}
 ${OhayoConstants.panel} 400
  ${OhayoConstants.tabs}
@@ -462,12 +460,17 @@ ${OhayoConstants.panel} 400
     return this.get(OhayoConstants.theme)
   }
 
+  isGlassTheme() {
+    const name = this.getThemeName()
+    return name === ThemeTreeComponent.ThemeConstants.glass || name === ThemeTreeComponent.ThemeConstants.clearGlass
+  }
+
   getTheme() {
-    return Themes[this.getThemeName()] || Themes.glass
+    return ThemeTreeComponent.Themes[this.getThemeName()] || ThemeTreeComponent.Themes.glass
   }
 
   _toggleTheme() {
-    const newThemeName = jtree.Utils.toggle(this.getThemeName(), Object.keys(Themes))
+    const newThemeName = jtree.Utils.toggle(this.getThemeName(), Object.keys(ThemeTreeComponent.Themes))
     this.addStumpCodeMessageToLog(`div Switched to ${newThemeName} theme`)
     this.set(OhayoConstants.theme, newThemeName)
     this.saveAppState()
