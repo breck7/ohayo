@@ -1,6 +1,6 @@
 tooling onsave jtree build produceMaiaGrammar
 tooling include ohayoWebApp/tiles/grams/hashBang.gram
-tooling include ohayoWebApp/tiles/grams/layout.gram
+tooling include ohayoWebApp/tiles/grams/doc.gram
 maiaNode
  compilesTo html
  root
@@ -19,7 +19,7 @@ maiaNode
  catchAllNodeType DidYouMeanTileNode
  string wallType flex
  description Maia is a programming language for doing data science.
- inScope abstractMaiaTileNode hashBangNode abstractDocumentSettingNode commentNode PickerTileNode
+ inScope abstractTileTreeComponentNode tileBlankLineNode abstractDocSettingNode hashBangNode
  javascript
   _getProgramRowCount() {
    return this.getAllRowsFromAllOutputTables().reduce((acc, curr) => acc + curr.length, 0)

@@ -16,10 +16,7 @@ DidYouMeanTileNode
  javascript
   getTileBodyStumpCode() {
    const input = this.getFirstWord()
-   const lineNo =
-    this.getParent()
-     .getTopDownArray()
-     .indexOf(this) + 1
+   const lineNo = this.getLineNumber()
    const closestTile = jtree.Utils.didYouMean(
     input,
     this.getRootNode()

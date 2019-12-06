@@ -13,7 +13,7 @@ abstractShowTileNode
    show.sum Amount
    show.min Amount
    show.max Amount
-  layout bin
+  doc.layout bin
  string tileSize 140 120
  string dummyDataSetName stockPrice
  extends abstractEmptyFooterTileNode
@@ -52,8 +52,18 @@ showRowCountNode
  javascript
   getTileBodyStumpCode() {
    const title = this.getWordsFrom(1).join(" ") || "Total rows"
-   const number = this.getParentOrDummyTable().getRowCount()
-   return this.qFormat(this.bodyStumpTemplate, {title, number})
+   return this.qFormat(this.bodyStumpTemplate, {title, number: this._getNumber()})
+  }
+  _getNumber() {
+    return this.getParentOrDummyTable().getRowCount()
+  }
+showColumnCountNode
+ extends showRowCountNode
+ description Show the total number of columns
+ crux show.columnCount
+ javascript
+  _getNumber() {
+    return this.getParentOrDummyTable().getColumnNames().length
   }
 showStaticNode
  description Show a hard coded number

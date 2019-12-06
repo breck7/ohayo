@@ -2,7 +2,16 @@ tooling onsave jtree build produceMaiaGrammar
 abstractTransformerNode
  string tileSize 160 100
  extends abstractProviderNode
+ string placeholderMessage 
  abstract
+ string bodyStumpTemplate
+  span {kind}
+   class LargeLabel
+  input
+   value {content}
+   placeholder {placeholderMessage}
+   changeCommand changeTileContentAndRenderCommand
+   class LargeTileInput
  javascript
   getTileFooterStumpCode() {
    const inputCount = this.getParentOrDummyTable().getRowCount()
@@ -15,17 +24,8 @@ abstractTransformerNode
    this.setIsDataLoaded(true)
    await this._runChildTiles()
   }
-  _getPlaceHolderMessage() {
-   return ""
-  }
   getTileBodyStumpCode() {
-   return `span ${this.getFirstWord()}
-   class LargeLabel
-  input
-   value ${this.getContent() || ""}
-   placeholder ${this._getPlaceHolderMessage()}
-   changeCommand changeTileContentAndRenderCommand
-   class LargeTileInput`
+   return this.qFormat(this.bodyStumpTemplate, {kind: this.getFirstWord(), content : this.getContent() || "", placeholderMessage: this.placeholderMessage})
   }
 abstractColumnAdderTileNode
  abstract
@@ -60,6 +60,7 @@ abstractTransformerNoParamsTileNode
 abstractRowFilterTileNode
  abstract
  extends abstractTransformerNode
+ string placeholderMessage Enter a string to filter by.
  javascript
   // todo: pass thru.
   // todo: remove this?
@@ -67,7 +68,4 @@ abstractRowFilterTileNode
    const fn = this.getRowFilterFn()
    if (!fn) return this.getParentOrDummyTable().clone()
    return this.getParentOrDummyTable().filterRowsByFn(fn)
-  }
-  _getPlaceHolderMessage() {
-   return "Enter a string to filter by."
   }

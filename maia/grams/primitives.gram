@@ -2,19 +2,11 @@ tooling onsave jtree build produceMaiaGrammar
 booleanCell
  enum false true
  highlightScope constant.numeric
-intCell
- regex \-?[0-9]+
-numberCell
- regex \-?[0-9]*\.?[0-9]*
 pathCell
  highlightScope constant
  description A filepath
 alphanumericCell
  regex [a-zA-Z0-9]+
-stringCell
- highlightScope string
 extraWordCell
  todo Remove this? It looks like its a standard cell type.
  highlightScope invalid
-urlCell
- highlightScope constant

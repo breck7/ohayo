@@ -14,7 +14,7 @@ redditAllNode
     vega.scatter
      yColumn score
      xColumn created_utc
-  layout bin
+  doc.layout bin
  frequency .05
  javascript
   async fetchTableInputs() {

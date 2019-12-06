@@ -1,0 +1,94 @@
+doc.title Maia Reference
+doc.author Breck Yunits
+doc.date 12/05/2019
+doc.categories ohayo
+doc.layout column
+
+doc.subtitle Maia is a language for data powered documents.
+
+doc.section
+ subtitle Overview
+ paragraph Maia is a combination of a Markdown-like language coupled with a collaboratively designed dataflow language for doing data science right in the browser.
+
+
+doc.section
+ subtitle Sections
+ paragraph You can put whole sections into 1 tile.
+ paragraph Sections can have multiple paragraphs.
+ code python
+  # they can have code blocks too
+
+doc.section
+ subtitle Mixing data with content
+ paragraph You can mix and match doc tiles with any other Maia tile.
+
+data.inline
+ parser ssv
+ content
+  team superbowls
+  Patriots 6
+  Bills 0
+ vega.bar Number of Superbowl Wins
+
+
+doc.section
+ subtitle Secondary Notation (aka Text Styling)
+ paragraph Words can be bolded[bold] or italicized[em] or monospaced[mono] or linked[link http://ohayo.computer] or footnoted[ref someRefId].
+
+doc.section
+ subtitle Links
+ link http://ohayo.computer A whole sentence can be linked
+
+
+
+doc.section
+ subtitle Layout
+ paragraph Layout changes the layout strategy of the tiles
+ code
+  doc.layout column
+
+
+doc.section
+ subtitle Zoom
+ paragraph Zoom let's you adjust the zoom level of the doc.
+ code
+  doc.zoom .5
+
+
+doc.section
+ subtitle Default visibilitiy
+ paragraph You can change the default visibility of a tile
+ paragraph The line below will hide all tiles by default.
+ code maia
+  doc.tiles hidden
+ paragraph When you hide all tiles, you'll need to opt-in to visible to show tiles.
+ code
+  samples.portals
+   vega.bar
+    visible
+ paragraph By default, all tiles are set to visible, which is equivalent to:
+ code
+  doc.tiles visible
+
+
+doc.section
+ subtitle Categories
+ paragraph You might want to add some tags categorizing your document.
+ code maia
+  doc.categories programming
+
+doc.section
+ subtitle Blank lines
+ paragraph
+  Blank lines are fine.
+  
+  In paragraphs.
+
+doc.section
+ subtitle Code
+ code python
+  # You can create blocks of code for printing
+  # If you provide a supported language ID, secondary notation (highlighting) can be added.
+
+doc.ref someRefId
+ url https://en.wikipedia.org/wiki/Note_(typography)

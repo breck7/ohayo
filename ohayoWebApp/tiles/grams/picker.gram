@@ -60,7 +60,7 @@ abstractPickerTileNode
 PickerTileNode
  extends abstractPickerTileNode
  description Displays list of available tiles.
- crux tiles.picker
+ crux doc.picker
  string tileHeader Tile Gallery
  javascript
   getChoices() {

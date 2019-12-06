@@ -1,5 +1,5 @@
-html.h1 Amazon Purchase History
-comment Delete the below line and replace with your data
+doc.title Amazon Purchase History
+doc.comment Delete the below line and replace with your data
 amazon.history
  columns.keep Category ItemTotal OrderDate Title
   tables.basic All Amazon Purchases
@@ -17,5 +17,5 @@ amazon.history
     vega.bar Items Purchases by Year
      yColumn count
      xColumn year
-layout column
-categories shopping
+doc.layout column
+doc.categories shopping

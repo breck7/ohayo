@@ -10,10 +10,8 @@ groupByNode
     tables.basic
  extends abstractTransformerNode
  crux group.by
+ string placeholderMessage Enter the column to groupby.
  javascript
-  _getPlaceHolderMessage() {
-   return "Enter the column to groupby."
-  }
   _createOutputTable() {
    const groupByColNames = this.getWordsFrom(1)
    if (!groupByColNames.length) return this.getParentOrDummyTable().clone()

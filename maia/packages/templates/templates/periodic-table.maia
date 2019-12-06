@@ -1,4 +1,4 @@
-html.h1 The Periodic Table
+doc.title The Periodic Table
 samples.periodicTable
  vega.scatter Boiling Point by Atomic Number
   xColumn AtomicNumber
@@ -6,5 +6,5 @@ samples.periodicTable
  vega.scatter Year of Discovery by Atomic Number
   xColumn Year
   yColumn AtomicNumber
-layout column
-categories chemistry
+doc.layout column
+doc.categories chemistry

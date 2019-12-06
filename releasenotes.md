@@ -1,3 +1,17 @@
+16.0.0 2019-12-6
+----------------
+- New: columns.drop, columns.dropConstants and show.columnCount tiles
+- New: samples.portals tile
+- New: portals and maia-reference templates
+- New: blank lines are allowed in Maia
+- New: doc.title, doc.subtitle, doc.section, doc.ref, doc.categories, doc.author, doc.date tiles
+- Breaking: comment is now doc.comment
+- Breaking: layout is now doc.layout
+- Breaking: defaultHidden is now doc.defaultHidden
+- Breaking: zoom is now doc.zoom
+- Breaking: tiles.picker is now doc.picker
+- Infra: transferred more JS to stump
+
 15.5.1 2019-12-3
 ----------------
 - Fix: fixed autocomplete regression

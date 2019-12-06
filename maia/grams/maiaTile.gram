@@ -1,10 +1,8 @@
 tooling onsave jtree build produceMaiaGrammar
-tileKeywordCell
- highlightScope keyword
 abstractMaiaTileNode
  abstract
  extends abstractTileTreeComponentNode
- inScope abstractMaiaTileNode abstractCoreTileSettingTerminalNode commentNode
+ inScope abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode
  cells tileKeywordCell
  string settingKey setting
  string rowDisplayLimitKey rowDisplayLimit

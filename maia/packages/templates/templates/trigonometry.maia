@@ -1,4 +1,4 @@
-html.h1 Trigonometric Functions
+doc.title Trigonometric Functions
  visible
 math.gen sin 0 10 .1
  vega.line Sin Wave
@@ -15,6 +15,6 @@ math.gen tan 0 10 .1
   visible
   xColumn input
   yColumn output
-layout column
-categories math
-defaultHidden
+doc.layout column
+doc.categories math
+doc.defaultHidden

@@ -33,7 +33,7 @@ tilesNode
    return this._tab
   }
   tilesAreVisible() {
-    return !this.has("defaultHidden")
+    return !this.has(TilesConstants.defaultHidden)
   }
   canUseCustomLayout() {
    const definedLayout = this.get(TilesConstants.layout)

@@ -29,17 +29,15 @@ rowsSortByNode
     rows.reverse
      rows.first 1
       tables.basic Most expensive
-  layout tiled
+  doc.layout tiled
  extends abstractTransformerNode
  crux rows.sortBy
+ string placeholderMessage Columns you want to sort by
  javascript
   _createOutputTable() {
    const table = this.getParentOrDummyTable().sortBy(this.getWordsFrom(1))
    if (this.getFirstWord().includes("Reverse")) return table.reverseRows()
    return table
-  }
-  _getPlaceHolderMessage() {
-   return "Columns you want to sort by"
   }
 rowsAddOneNode
  description Add a single row to the parent table, in space-separated value format

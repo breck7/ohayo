@@ -1,4 +1,4 @@
-html.h1 Desktop Only: Analyze lines of code in a folder
+doc.title Desktop Only: Analyze lines of code in a folder
 web.get /disk?path=/ohayo/ohayoWebApp&lineStats=true&recursive=true
  filter.without .DS_Store min.js node_modules ignore package-lock.json
   show.sum lines Total LoC
@@ -14,5 +14,5 @@ web.get /disk?path=/ohayo/ohayoWebApp&lineStats=true&recursive=true
    vega.bar Words
     yColumn words
    tables.basic Top Extensions
-layout column
-categories programming
+doc.layout column
+doc.categories programming

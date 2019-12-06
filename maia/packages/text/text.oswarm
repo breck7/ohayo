@@ -7,6 +7,6 @@ test tileHeight regression
    withParagraph
     samples.declaration
      text.toLowerCase text
-    layout column
+    doc.layout column
    assertLengthIs getRenderedTilesDiagnostic 2
    assertStringIncludes getStumpNodeString 1776

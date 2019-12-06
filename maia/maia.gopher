@@ -29,7 +29,7 @@ testProgram linecount.maia
   text.lineCount
    tables.basic
 testProgram twocolumn.maia
- layout column
+ doc.layout column
  html.h1 hello world
  html.text h2 world
 testProgram wordcount.maia

@@ -13,7 +13,7 @@ test compile2
   assertStringExcludes getTextContent Ohayo!
   pasteCommand
    withParagraph
-    tiles.picker
+    doc.picker
      pin 8 4
    assertLengthIs getRenderedTilesDiagnostic 1
    assertStringIncludes getTextContent hello-world
