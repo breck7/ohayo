@@ -25143,7 +25143,18 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
         catchAllErrorNode,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           "tiles.didyoumean": DidYouMeanTileNode,
-          "tiles.picker": PickerTileNode,
+          "doc.title": docTitleNode,
+          "doc.subtitle": docSubtitleNode,
+          "doc.categories": docCategoriesNode,
+          "doc.author": docAuthorNode,
+          "doc.defaultHidden": docDefaultHiddenNode,
+          "doc.date": docDateNode,
+          "doc.zoom": docZoomNode,
+          "doc.layout": docLayoutNode,
+          "doc.comment": docCommentNode,
+          "doc.section": docSectionNode,
+          "doc.ref": docReferenceNode,
+          "doc.picker": PickerTileNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -25215,6 +25226,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "samples.iris": samplesIrisNode,
           "samples.flights14": samplesFlights14Node,
           "samples.si": samplesSiNode,
+          "samples.portals": samplesPortalNode,
           "samples.starWars": samplesStarWarsNode,
           "samples.populations": samplesPopulationsNode,
           "samples.babyNames": samplesBabyNamesNode,
@@ -25251,6 +25263,8 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "treenotation.wordTypes": treenotationWordTypesNode,
           "columns.first": columnsFirstNode,
           "columns.last": columnsLastNode,
+          "columns.drop": columnsDropNode,
+          "columns.dropConstants": columnsDropConstantsNode,
           "columns.keep": columnsKeepNode,
           "rows.shuffle": rowsShuffleNode,
           "rows.reverse": rowsReverseNode,
@@ -25283,13 +25297,12 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           left: leftNode,
           top: topNode,
           width: widthNode,
-          height: heightNode,
-          comment: commentNode
+          height: heightNode
         }),
         undefined
       )
     }
-    get tileNameCell() {
+    get tileKeywordCell() {
       return this.getWord(0)
     }
     get tileStumpTemplate() {
@@ -25639,6 +25652,7 @@ pre
       })
     }
     isVisible() {
+      if (this.visible === false) return false
       return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
     }
     _isMaximized() {
@@ -25882,7 +25896,7 @@ ${cellInputs.join("\n")}`
   }
 
   class BlankLineNode extends abstractTileTreeComponentNode {
-    isVisible() {
+    get visible() {
       return false
     }
   }
@@ -25925,7 +25939,140 @@ ${cellInputs.join("\n")}`
     }
   }
 
-  class abstractPickerTileNode extends abstractTileTreeComponentNode {
+  class abstractDocNode extends abstractTileTreeComponentNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+  }
+
+  class docTitleNode extends abstractDocNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get stringCell() {
+      return this.getWordsFrom(1)
+    }
+    get bodyStumpTemplate() {
+      return `{tagName} {content}`
+    }
+    get tagName() {
+      return `h1`
+    }
+    get tileSize() {
+      return `600 75`
+    }
+  }
+
+  class docSubtitleNode extends docTitleNode {
+    get tagName() {
+      return `h2`
+    }
+  }
+
+  class docCategoriesNode extends abstractDocNode {
+    get documentCategoryCell() {
+      return this.getWordsFrom(0)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docAuthorNode extends abstractDocNode {
+    get stringCell() {
+      return this.getWordsFrom(0)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docDefaultHiddenNode extends abstractDocNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docDateNode extends abstractDocNode {
+    get dateCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docZoomNode extends abstractDocNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get zoomCell() {
+      return parseFloat(this.getWord(1))
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docLayoutNode extends abstractDocNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get docLayoutOptionCell() {
+      return this.getWord(1)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docCommentNode extends abstractDocNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
+    }
+    get commentKeywordCell() {
+      return this.getWord(0)
+    }
+    get commentCell() {
+      return this.getWordsFrom(1)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docSectionNode extends abstractDocNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
+          subtitle: docSectionSubtitleNode,
+          paragraph: docSectionParagraphNode,
+          link: docSectionLinkNode,
+          code: docSectionCodeNode
+        }),
+        undefined
+      )
+    }
+  }
+
+  class docReferenceNode extends abstractDocNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { url: docReferenceUrlNode }),
+        undefined
+      )
+    }
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get referenceIdCell() {
+      return this.getWord(1)
+    }
+  }
+
+  class abstractPickerTileNode extends abstractDocNode {
     get tileHeader() {
       return `Gallery`
     }
@@ -26014,6 +26161,19 @@ a {name}
       return new jtree.TreeNode.Parser(
         undefined,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
+          "tiles.didyoumean": DidYouMeanTileNode,
+          "doc.title": docTitleNode,
+          "doc.subtitle": docSubtitleNode,
+          "doc.categories": docCategoriesNode,
+          "doc.author": docAuthorNode,
+          "doc.defaultHidden": docDefaultHiddenNode,
+          "doc.date": docDateNode,
+          "doc.zoom": docZoomNode,
+          "doc.layout": docLayoutNode,
+          "doc.comment": docCommentNode,
+          "doc.section": docSectionNode,
+          "doc.ref": docReferenceNode,
+          "doc.picker": PickerTileNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -26085,6 +26245,7 @@ a {name}
           "samples.iris": samplesIrisNode,
           "samples.flights14": samplesFlights14Node,
           "samples.si": samplesSiNode,
+          "samples.portals": samplesPortalNode,
           "samples.starWars": samplesStarWarsNode,
           "samples.populations": samplesPopulationsNode,
           "samples.babyNames": samplesBabyNamesNode,
@@ -26121,6 +26282,8 @@ a {name}
           "treenotation.wordTypes": treenotationWordTypesNode,
           "columns.first": columnsFirstNode,
           "columns.last": columnsLastNode,
+          "columns.drop": columnsDropNode,
+          "columns.dropConstants": columnsDropConstantsNode,
           "columns.keep": columnsKeepNode,
           "rows.shuffle": rowsShuffleNode,
           "rows.reverse": rowsReverseNode,
@@ -26152,8 +26315,7 @@ a {name}
           left: leftNode,
           top: topNode,
           width: widthNode,
-          height: heightNode,
-          comment: commentNode
+          height: heightNode
         }),
         undefined
       )
@@ -28645,17 +28807,20 @@ ${rows
     get tileSize() {
       return `400 100`
     }
-    _getPlaceHolderMessage() {
-      return "Enter a url."
-    }
-    getTileBodyStumpCode() {
-      return `span ${this.getFirstWord()}
+    get bodyStumpTemplate() {
+      return `span {kind}
  class LargeLabel
 input
- value ${this.getContent() || ""}
- placeholder ${this._getPlaceHolderMessage()}
+ value {content}
+ placeholder {placeholderMessage}
  changeCommand changeTileContentAndRenderCommand
  class LargeTileInput`
+    }
+    get placeholderMessage() {
+      return `Enter a url.`
+    }
+    getTileBodyStumpCode() {
+      return this.qFormat(this.bodyStumpTemplate, { kind: this.getFirstWord(), content: this.getContent() || "", placeholderMessage: this.placeholderMessage })
     }
   }
 
@@ -28754,6 +28919,12 @@ input
     }
     get url() {
       return `maia/packages/samples/si.tree`
+    }
+  }
+
+  class samplesPortalNode extends abstractFixedDatasetFromMaiaCollectionNode {
+    get url() {
+      return `maia/packages/samples/portals.ssv`
     }
   }
 
@@ -28902,6 +29073,18 @@ input
   }
 
   class abstractTransformerNode extends abstractProviderNode {
+    get bodyStumpTemplate() {
+      return `span {kind}
+ class LargeLabel
+input
+ value {content}
+ placeholder {placeholderMessage}
+ changeCommand changeTileContentAndRenderCommand
+ class LargeTileInput`
+    }
+    get placeholderMessage() {
+      return ``
+    }
     get tileSize() {
       return `160 100`
     }
@@ -28916,17 +29099,8 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
       this.setIsDataLoaded(true)
       await this._runChildTiles()
     }
-    _getPlaceHolderMessage() {
-      return ""
-    }
     getTileBodyStumpCode() {
-      return `span ${this.getFirstWord()}
- class LargeLabel
-input
- value ${this.getContent() || ""}
- placeholder ${this._getPlaceHolderMessage()}
- changeCommand changeTileContentAndRenderCommand
- class LargeTileInput`
+      return this.qFormat(this.bodyStumpTemplate, { kind: this.getFirstWord(), content: this.getContent() || "", placeholderMessage: this.placeholderMessage })
     }
   }
 
@@ -28947,6 +29121,9 @@ input
     get dateColumnTypeCell() {
       return this.getWordsFrom(0)
     }
+    get placeholderMessage() {
+      return `Enter the source column and new date columns you want, or leave blank to get 'day month year'.`
+    }
     get columnPredictionHints() {
       return `sourceColumn isTemporal=true`
     }
@@ -28962,9 +29139,6 @@ input
           type: outputCol
         }
       })
-    }
-    _getPlaceHolderMessage() {
-      return "Enter the source column and new date columns you want, or leave blank to get 'day month year'."
     }
   }
 
@@ -29326,14 +29500,14 @@ input
     get intCell() {
       return parseInt(this.getWord(1))
     }
+    get placeholderMessage() {
+      return `Enter the number of columns you want to keep`
+    }
     getColumnNamesToKeep() {
       return this.getParentOrDummyTable()
         .getColumnsArrayOfObjects()
         .slice(0, parseInt(this.getContent()))
         .map(col => col.name)
-    }
-    _getPlaceHolderMessage() {
-      return "Enter the number of columns you want to keep"
     }
   }
 
@@ -29344,12 +29518,34 @@ input
     get intCell() {
       return parseInt(this.getWord(1))
     }
+    get placeholderMessage() {
+      return `Enter the number of columns you want to keep`
+    }
     getColumnNamesToKeep() {
       const cols = this.getParentOrDummyTable().getColumnsArrayOfObjects()
       return cols.slice(cols.length - parseInt(this.getContent())).map(col => col.name)
     }
-    _getPlaceHolderMessage() {
-      return "Enter the number of columns you want to keep"
+  }
+
+  class columnsDropNode extends abstractColumnFilterTileNode {
+    get columnNameCell() {
+      return this.getWordsFrom(0)
+    }
+    getColumnNamesToKeep() {
+      const colsToDrop = this.getWordsFrom(1)
+      return this.getParentOrDummyTable()
+        .getColumnsArrayOfObjects()
+        .filter(col => !colsToDrop.includes(col.name))
+        .map(col => col.name)
+    }
+  }
+
+  class columnsDropConstantsNode extends abstractColumnFilterTileNode {
+    getColumnNamesToKeep() {
+      return this.getParentOrDummyTable()
+        .getColumnsArray()
+        .filter(col => col.getReductions().uniqueValues > 1)
+        .map(col => col.getColumnName())
     }
   }
 
@@ -29357,15 +29553,15 @@ input
     get columnNameCell() {
       return this.getWordsFrom(0)
     }
+    get placeholderMessage() {
+      return `Enter the columns to keep.`
+    }
     getColumnNamesToKeep() {
       const colsToKeep = this.getWordsFrom(1)
       return this.getParentOrDummyTable()
         .getColumnsArrayOfObjects()
         .filter(col => colsToKeep.includes(col.name))
         .map(col => col.name)
-    }
-    _getPlaceHolderMessage() {
-      return "Enter the columns to keep."
     }
   }
 
@@ -29389,15 +29585,15 @@ class LargeLabel`
   }
 
   class abstractRowFilterTileNode extends abstractTransformerNode {
+    get placeholderMessage() {
+      return `Enter a string to filter by.`
+    }
     // todo: pass thru.
     // todo: remove this?
     _createOutputTable() {
       const fn = this.getRowFilterFn()
       if (!fn) return this.getParentOrDummyTable().clone()
       return this.getParentOrDummyTable().filterRowsByFn(fn)
-    }
-    _getPlaceHolderMessage() {
-      return "Enter a string to filter by."
     }
   }
 
@@ -29533,8 +29729,8 @@ class LargeLabel`
     get columnNameCell() {
       return this.getWordsFrom(0)
     }
-    _getPlaceHolderMessage() {
-      return "Enter the column to groupby."
+    get placeholderMessage() {
+      return `Enter the column to groupby.`
     }
     _createOutputTable() {
       const groupByColNames = this.getWordsFrom(1)
@@ -29554,13 +29750,13 @@ class LargeLabel`
     get columnNameCell() {
       return this.getWordsFrom(0)
     }
+    get placeholderMessage() {
+      return `Columns you want to sort by`
+    }
     _createOutputTable() {
       const table = this.getParentOrDummyTable().sortBy(this.getWordsFrom(1))
       if (this.getFirstWord().includes("Reverse")) return table.reverseRows()
       return table
-    }
-    _getPlaceHolderMessage() {
-      return "Columns you want to sort by"
     }
   }
 
@@ -29906,7 +30102,7 @@ a {name}
           .replace(this.maiaFileExtensionKey, "")
         return {
           command: "createProgramFromTemplateCommand",
-          name: node.get("data html.h1"),
+          name: node.get("data doc.title"),
           value: id,
           category: lodash.upperFirst(node.get("data categories")),
           description: ""
@@ -29929,38 +30125,83 @@ a {name}
     }
   }
 
-  class abstractDocumentSettingNode extends jtree.GrammarBackedNode {}
+  class abstractDocSectionComponentNode extends jtree.GrammarBackedNode {}
 
-  class layoutNode extends abstractDocumentSettingNode {
-    get documentSettingNameCell() {
+  class docSectionSubtitleNode extends abstractDocSectionComponentNode {
+    get tileKeywordCell() {
       return this.getWord(0)
     }
-    get layoutOptionCell() {
+    get stringCell() {
+      return this.getWordsFrom(1)
+    }
+    get tagName() {
+      return `h2`
+    }
+  }
+
+  class docSectionParagraphNode extends abstractDocSectionComponentNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get stringCell() {
+      return this.getWordsFrom(1)
+    }
+    get tagName() {
+      return `p`
+    }
+  }
+
+  class docSectionLinkNode extends abstractDocSectionComponentNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get urlCell() {
       return this.getWord(1)
     }
-  }
-
-  class zoomNode extends abstractDocumentSettingNode {
-    get documentSettingNameCell() {
-      return this.getWord(0)
-    }
-    get zoomCell() {
-      return parseFloat(this.getWord(1))
+    get tagName() {
+      return `a`
     }
   }
 
-  class defaultHiddenNode extends abstractDocumentSettingNode {
-    get documentSettingNameCell() {
+  class docSectionCodeNode extends abstractDocSectionComponentNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(docLineOfCodeNode, undefined, undefined)
+    }
+    get tileKeywordCell() {
       return this.getWord(0)
+    }
+    get programmingLanguageNameCell() {
+      return this.getWord(1)
+    }
+    get tagName() {
+      return `code`
     }
   }
 
-  class documentCategoriesNode extends abstractDocumentSettingNode {
-    get documentSettingNameCell() {
+  class docLineOfCodeNode extends jtree.GrammarBackedNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(docLineOfCodeNode, undefined, undefined)
+    }
+    get codeCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class commentLineNode extends jtree.GrammarBackedNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
+    }
+    get commentCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docReferenceUrlNode extends jtree.GrammarBackedNode {
+    get tileSettingKeywordCell() {
       return this.getWord(0)
     }
-    get documentCategoryCell() {
-      return this.getWordsFrom(1)
+    get urlCell() {
+      return this.getWord(1)
     }
   }
 
@@ -30005,7 +30246,7 @@ a {name}
       return this._tab
     }
     tilesAreVisible() {
-      return !this.has("defaultHidden")
+      return !this.has(TilesConstants.defaultHidden)
     }
     canUseCustomLayout() {
       const definedLayout = this.get(TilesConstants.layout)
@@ -30073,7 +30314,19 @@ a {name}
       return new jtree.TreeNode.Parser(
         DidYouMeanTileNode,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          "tiles.picker": PickerTileNode,
+          "tiles.didyoumean": DidYouMeanTileNode,
+          "doc.title": docTitleNode,
+          "doc.subtitle": docSubtitleNode,
+          "doc.categories": docCategoriesNode,
+          "doc.author": docAuthorNode,
+          "doc.defaultHidden": docDefaultHiddenNode,
+          "doc.date": docDateNode,
+          "doc.zoom": docZoomNode,
+          "doc.layout": docLayoutNode,
+          "doc.comment": docCommentNode,
+          "doc.section": docSectionNode,
+          "doc.ref": docReferenceNode,
+          "doc.picker": PickerTileNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -30145,6 +30398,7 @@ a {name}
           "samples.iris": samplesIrisNode,
           "samples.flights14": samplesFlights14Node,
           "samples.si": samplesSiNode,
+          "samples.portals": samplesPortalNode,
           "samples.starWars": samplesStarWarsNode,
           "samples.populations": samplesPopulationsNode,
           "samples.babyNames": samplesBabyNamesNode,
@@ -30181,6 +30435,8 @@ a {name}
           "treenotation.wordTypes": treenotationWordTypesNode,
           "columns.first": columnsFirstNode,
           "columns.last": columnsLastNode,
+          "columns.drop": columnsDropNode,
+          "columns.dropConstants": columnsDropConstantsNode,
           "columns.keep": columnsKeepNode,
           "rows.shuffle": rowsShuffleNode,
           "rows.reverse": rowsReverseNode,
@@ -30206,12 +30462,7 @@ a {name}
           "samples.tinyIris": samplesTinyIrisNode,
           "shell.csv": toCsvNode,
           "templates.list": templatesListNode,
-          layout: layoutNode,
-          zoom: zoomNode,
-          defaultHidden: defaultHiddenNode,
-          categories: documentCategoriesNode,
-          "#!": hashBangNode,
-          comment: commentNode
+          "#!": hashBangNode
         }),
         undefined
       )
@@ -30240,17 +30491,39 @@ a {name}
     }
     getGrammarProgram() {
       if (!this._cachedGrammarProgramRoot)
-        this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`layoutOptionCell
+        this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`programmingLanguageNameCell
+ enum javascript latex css html ruby rust python csv tsv xml php typescript lisp swift java c cpp markdown bash
+codeCell
+ highlightScope string
+documentCategoryCell
+ enum shopping chemistry programming socialMedia math parenting writing dataScience
+zoomCell
+ extends numberCell
+referenceIdCell
+ highlightScope string
+docLayoutOptionCell
  enum custom bin tree column tiled
  highlightScope constant
-documentSettingNameCell
- highlightScope entity.name.tag
+commentCell
+ highlightScope comment
+commentKeywordCell
+ highlightScope comment
 errorCell
  highlightScope invalid
 hashBangWordCell
  highlightScope comment
-tileNameCell
- highlightScope variable.function
+stringCell
+ highlightScope string
+urlCell
+ highlightScope constant
+dateCell
+ highlightScope string
+intCell
+ regex \\-?[0-9]+
+numberCell
+ regex \\-?[0-9]*\\.?[0-9]*
+tileKeywordCell
+ highlightScope keyword
 intCell
 tileSettingKeywordCell
  highlightScope variable.language
@@ -30277,16 +30550,6 @@ primitiveTypeCell
  highlightScope constant.numeric
  description In Ohayo, all columns have a primitive type chosen from one of these. The type affects how the values in the column are understood and displayed. For example, a 0 could be interpretted as a "false", the number 0, or a string "0". Ohayo attempts to choose the correct type, but you can override the default with the columns.setType tile.
  enum boolean code date day dir feet hour hourMinute html int millisecond minute month monthDay number numberString object path second string text url usd week year
-commentCell
- highlightScope comment
-commentKeywordCell
- highlightScope comment
-documentCategoryCell
- enum shopping chemistry programming socialMedia math parenting writing machineLearning
-zoomCell
- extends numberCell
-tileKeywordCell
- highlightScope keyword
 parserIdsCell
  description Ohayo has these parsers which convert your raw data to tables.
  enum csv tsv json treeRows tree ssv xml psv text spaced sections json list txt jsonMap jsonVector jsonCounts jsonDataTableWithHeader
@@ -30294,22 +30557,14 @@ parserIdsCell
 booleanCell
  enum false true
  highlightScope constant.numeric
-intCell
- regex \\-?[0-9]+
-numberCell
- regex \\-?[0-9]*\\.?[0-9]*
 pathCell
  highlightScope constant
  description A filepath
 alphanumericCell
  regex [a-zA-Z0-9]+
-stringCell
- highlightScope string
 extraWordCell
  todo Remove this? It looks like its a standard cell type.
  highlightScope invalid
-urlCell
- highlightScope constant
 reductionTypeCell
  enum count sum mean min max median
  highlightScope constant
@@ -30370,9 +30625,9 @@ vegaExampleNameCell
  enum airport_connections area area_cumulative_freq area_horizon area_overlay area_temperature_range area_vertical bar bar_1d bar_1d_rangestep_config bar_aggregate bar_aggregate_count bar_aggregate_format bar_aggregate_size bar_aggregate_sort_by_encoding bar_aggregate_sort_mean bar_aggregate_transform bar_aggregate_vertical bar_argmax bar_argmax_transform bar_array_aggregate bar_binned_data bar_color_disabled_scale bar_column_fold bar_custom_sort_full bar_custom_sort_partial bar_distinct bar_diverging_stack_transform bar_filter_calc bar_fit bar_gantt bar_grouped bar_grouped_horizontal bar_layered_transparent bar_layered_weather bar_month bar_month_temporal bar_size_default bar_size_explicit bar_size_explicit_bad bar_size_fit bar_size_rangestep_small bar_sort_by_count bar_swap_axes bar_swap_custom bar_title bar_title_start bar_tooltip bar_tooltip_multi bar_yearmonth bar_yearmonth_custom_format boxplot_1D_horizontal boxplot_1D_horizontal_custom_mark boxplot_1D_horizontal_explicit boxplot_1D_vertical boxplot_2D_horizontal boxplot_2D_horizontal_color_size boxplot_2D_vertical boxplot_minmax_2D_horizontal boxplot_minmax_2D_horizontal_custom_midtick_color boxplot_minmax_2D_vertical boxplot_tooltip_aggregate boxplot_tooltip_not_aggregate brush_table circle circle_binned circle_binned_maxbins_2 circle_binned_maxbins_20 circle_binned_maxbins_5 circle_bubble_health_income circle_flatten circle_github_punchcard circle_natural_disasters circle_opacity circle_scale_quantile circle_scale_quantize circle_scale_threshold concat_bar_layer_circle concat_bar_scales_discretize concat_bar_scales_discretize_2_cols concat_hover concat_hover_filter concat_layer_voyager_result_future concat_marginal_histograms concat_population_pyramid concat_weather connected_scatterplot embedded_csv errorband_2d_horizontal_color_encoding errorband_2d_vertical_borders errorbar_2d_vertical_ticks errorbar_aggregate errorbar_horizontal_aggregate facet_bullet facet_column_facet_column_point_future facet_column_facet_row_point_future facet_cross_independent_scale facet_custom facet_custom_header facet_independent_scale facet_independent_scale_layer_broken facet_row_facet_row_point_future geo_choropleth geo_circle geo_constant_value geo_custom_projection geo_graticule geo_graticule_object geo_layer geo_layer_line_london geo_layer_multi geo_line geo_point geo_repeat geo_rule geo_sphere geo_text geo_trellis hconcat_weather histogram histogram_bin_change histogram_bin_transform histogram_log histogram_no_spacing histogram_ordinal histogram_ordinal_sort interactive_area_brush interactive_bar_select_highlight interactive_brush interactive_concat_layer interactive_dashboard_europe_pop interactive_layered_crossfilter interactive_layered_crossfilter_discrete interactive_multi_line_label interactive_multi_line_tooltip interactive_overview_detail interactive_paintbrush interactive_paintbrush_color interactive_paintbrush_color_nearest interactive_paintbrush_interval interactive_paintbrush_simple_all interactive_paintbrush_simple_none interactive_panzoom_splom interactive_panzoom_vconcat_shared interactive_query_widgets interactive_seattle_weather interactive_splom interactive_stocks_nearest_index isotype_bar_chart isotype_bar_chart_emoji isotype_grid joinaggregate_mean_difference joinaggregate_mean_difference_by_year joinaggregate_percent_of_total joinaggregate_residual_graph layer_bar_annotations layer_bar_labels layer_bar_labels_style layer_bar_line layer_bar_line_union layer_bar_month layer_boxplot_circle layer_candlestick layer_circle_independent_color layer_color_legend_left layer_cumulative_histogram layer_dual_axis layer_falkensee layer_histogram layer_histogram_global_mean layer_line_co2_concentration layer_line_color_rule layer_line_errorband_2d_horizontal_borders_strokedash layer_line_errorband_ci layer_line_errorband_pre_aggregated layer_line_mean_point_raw layer_overlay layer_point_errorbar_1d_horizontal layer_point_errorbar_1d_vertical layer_point_errorbar_2d_horizontal layer_point_errorbar_2d_horizontal_ci layer_point_errorbar_2d_horizontal_color_encoding layer_point_errorbar_2d_horizontal_custom_ticks layer_point_errorbar_2d_horizontal_iqr layer_point_errorbar_2d_horizontal_stdev layer_point_errorbar_2d_vertical layer_point_errorbar_ci layer_point_errorbar_pre_aggregated_asymmetric_error layer_point_errorbar_pre_aggregated_symmetric_error layer_point_errorbar_pre_aggregated_upper_lower layer_point_errorbar_stdev layer_precipitation_mean layer_ranged_dot layer_rect_extent layer_scatter_errorband_1D_stdev_global_mean layer_scatter_errorband_1d_stdev layer_single_color layer_text_heatmap line line_calculate line_color line_color_binned line_detail line_encoding_impute_keyvals line_encoding_impute_keyvals_sequence line_impute_frame line_impute_keyvals line_impute_method line_impute_transform_frame line_impute_transform_value line_impute_value line_inside_domain_using_clip line_inside_domain_using_transform line_max_year line_mean_month line_mean_year line_monotone line_month line_outside_domain line_overlay line_overlay_stroked line_quarter_legend line_shape_overlay line_skip_invalid line_skip_invalid_mid line_skip_invalid_mid_cap_square line_skip_invalid_mid_overlay line_slope line_step line_timeunit_transform lookup parallel_coordinate point_1d point_1d_array point_2d point_2d_aggregate point_2d_array point_2d_array_named point_2d_tooltip_data point_aggregate_detail point_background point_binned_color point_binned_opacity point_binned_size point_bubble point_color point_color_custom point_color_ordinal point_color_quantitative point_color_shape_constant point_color_with_shape point_colorramp_size point_diverging_color point_dot_timeunit_color point_filled point_href point_invalid_color point_log point_no_axis_domain_grid point_ordinal_color point_overlap point_shape_custom point_tooltip rect_binned_heatmap rect_heatmap rect_heatmap_weather rect_lasagna_future rect_mosaic_labelled rect_mosaic_labelled_with_offset rect_mosaic_simple repeat_histogram repeat_histogram_flights repeat_independent_colors repeat_layer repeat_line_weather repeat_splom_cars repeat_splom_iris rule_color_mean rule_extent sample_scatterplot selection_bind_cylyr selection_bind_origin selection_brush_timeunit selection_clear_brush selection_composition_and selection_composition_or selection_concat selection_filter selection_filter_composition selection_heatmap selection_insert selection_interval_mark_style selection_layer_bar_month selection_multi_condition selection_project_binned_interval selection_project_interval selection_project_interval_x selection_project_interval_x_y selection_project_interval_y selection_project_multi selection_project_multi_cylinders selection_project_multi_cylinders_origin selection_project_multi_origin selection_project_single selection_project_single_cylinders selection_project_single_cylinders_origin selection_project_single_origin selection_resolution_global selection_resolution_intersect selection_resolution_union selection_toggle_altKey selection_toggle_altKey_shiftKey selection_toggle_shiftKey selection_translate_brush_drag selection_translate_brush_shift-drag selection_translate_scatterplot_drag selection_translate_scatterplot_shift-drag selection_type_interval selection_type_interval_invert selection_type_multi selection_type_single selection_type_single_dblclick selection_type_single_mouseover selection_zoom_brush_shift-wheel selection_zoom_brush_wheel selection_zoom_scatterplot_shift-wheel selection_zoom_scatterplot_wheel sequence_line square stacked_area stacked_area_normalize stacked_area_ordinal stacked_area_overlay stacked_area_stream stacked_bar_1d stacked_bar_count stacked_bar_h stacked_bar_h_order stacked_bar_h_order_custom stacked_bar_normalize stacked_bar_population stacked_bar_population_transform stacked_bar_size stacked_bar_sum_opacity stacked_bar_unaggregate stacked_bar_v stacked_bar_weather test_aggregate_nested test_field_with_spaces test_single_point_color test_subobject test_subobject_missing test_subobject_nested text_format text_scatterplot_colored tick_dot tick_dot_thickness tick_sort tick_strip time_output_utc_scale time_output_utc_timeunit time_parse_local time_parse_utc time_parse_utc_format trail_color trellis_anscombe trellis_area trellis_area_sort_array trellis_bar trellis_bar_histogram trellis_bar_histogram_label_rotated trellis_barley trellis_barley_independent trellis_barley_layer_median trellis_column_year trellis_cross_sort trellis_cross_sort_array trellis_line_quarter trellis_row_column trellis_scatter trellis_scatter_binned_row trellis_scatter_small trellis_selections trellis_stacked_bar vconcat_flatten vconcat_weather waterfall_chart wheat_wages window_cumulative_running_average window_percent_of_total window_rank window_top_k window_top_k_others
 abstractTileTreeComponentNode
  abstract
- cells tileNameCell
+ cells tileKeywordCell
  _extendsJsClass AbstractTreeComponent
- inScope hashBangNode abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode commentNode
+ inScope hashBangNode abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode
  catchAllNodeType catchAllErrorNode
  int headerHeight 30
  int footerHeight 30
@@ -30702,6 +30957,7 @@ abstractTileTreeComponentNode
    })
   }
   isVisible() {
+   if (this.visible === false) return false
    return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
   }
   _isMaximized() {
@@ -30943,10 +31199,7 @@ basicRecursiveTileNode
   }
 BlankLineNode
  extends abstractTileTreeComponentNode
- javascript
-  isVisible() {
-   return false
-  }
+ boolean visible false
 DidYouMeanTileNode
  tags noPicker
  description Provides suggestions for misspelled tiles.
@@ -30987,8 +31240,104 @@ DidYouMeanTileNode
   getTileHeaderBern() {
    return ""
   }
-abstractPickerTileNode
+abstractDocNode
+ cells tileKeywordCell
  extends abstractTileTreeComponentNode
+ abstract
+docTitleNode
+ catchAllCellType stringCell
+ description A title
+ example A doc
+  doc.title A Tale of Two Cities
+ string tileSize 600 75
+ extends abstractDocNode
+ cells tileKeywordCell
+ crux doc.title
+ string tagName h1
+ string bodyStumpTemplate
+  {tagName} {content}
+docSubtitleNode
+ extends docTitleNode
+ description A subheader
+ string tagName h2
+ crux doc.subtitle
+docCategoriesNode
+ extends abstractDocNode
+ crux doc.categories
+ description Add some categories to the document for organization.
+ catchAllCellType documentCategoryCell
+ boolean visible false
+docAuthorNode
+ extends abstractDocNode
+ catchAllCellType stringCell
+ crux doc.author
+ description Add one author per line.
+ boolean visible false
+docDefaultHiddenNode
+ crux doc.defaultHidden
+ example
+  doc.defaultHidden
+  samples.portals
+   tables.basic
+    visible
+ description Change default tile visibility to hidden.
+ cells tileKeywordCell
+ extends abstractDocNode
+ boolean visible false
+docDateNode
+ description Date published.
+ extends abstractDocNode
+ crux doc.date
+ catchAllCellType dateCell
+docZoomNode
+ crux doc.zoom
+ description Enlarge or shrink all tiles
+ cells tileKeywordCell zoomCell
+ extends abstractDocNode
+ boolean visible false
+docLayoutNode
+ cells tileKeywordCell docLayoutOptionCell
+ extends abstractDocNode
+ crux doc.layout
+ boolean visible false
+docCommentNode
+ description A comment node
+ cells tileKeywordCell
+ extends abstractDocNode
+ boolean visible false
+ frequency 0
+ example An example program with comments
+  doc.comment get iris data
+  samples.iris
+   doc.comment filter is
+   filter.where Species = virginica
+    doc.comment display results
+    tables.basic
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+ cells commentKeywordCell
+ crux doc.comment
+docSectionNode
+ description A section containing subtitles, paragraphs, code blocks, etc.
+ crux doc.section
+ extends abstractDocNode
+ inScope abstractDocSectionComponentNode
+ example
+  doc.section
+   subtitle Subtitle
+   paragraph Paragraph
+   code python
+    # some code
+docReferenceNode
+ crux doc.ref
+ cells tileKeywordCell referenceIdCell
+ inScope docReferenceUrlNode
+ doc.ref someRefId
+  url https://en.wikipedia.org/wiki/Note_(typography)
+ description A reference to an external source
+ extends abstractDocNode
+abstractPickerTileNode
+ extends abstractDocNode
  string tileSize 480 420
  abstract
  string hakonTemplate
@@ -31048,7 +31397,7 @@ abstractPickerTileNode
 PickerTileNode
  extends abstractPickerTileNode
  description Displays list of available tiles.
- crux tiles.picker
+ crux doc.picker
  string tileHeader Tile Gallery
  javascript
   getChoices() {
@@ -31068,7 +31417,7 @@ PickerTileNode
 abstractMaiaTileNode
  abstract
  extends abstractTileTreeComponentNode
- inScope abstractMaiaTileNode abstractCoreTileSettingTerminalNode commentNode
+ inScope abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode
  cells tileKeywordCell
  string settingKey setting
  string rowDisplayLimitKey rowDisplayLimit
@@ -31438,7 +31787,7 @@ challengePlayNode
   challenge.list
   challenge.play 1
   challenge.play 2
-  layout tiled
+  doc.layout tiled
  string tileSize 640 240
  extends abstractEmptyFooterTileNode
  crux challenge.play
@@ -31691,7 +32040,7 @@ abstractShowTileNode
    show.sum Amount
    show.min Amount
    show.max Amount
-  layout bin
+  doc.layout bin
  string tileSize 140 120
  string dummyDataSetName stockPrice
  extends abstractEmptyFooterTileNode
@@ -33241,7 +33590,7 @@ hackernewsTopNode
      vega.scatter
       xColumn time
       yColumn score
-  layout tree
+  doc.layout tree
  javascript
   async fetchTableInputs() {
    // todo: allow cache breaking.
@@ -33284,7 +33633,7 @@ hackernewsSubmissionsNode
      vega.scatter Comments
       xColumn time
       yColumn score
-  layout tree
+  doc.layout tree
  javascript
   _getFirstUrls() {
    return this.getWordsFrom(2).map(username => \`https://hacker-news.firebaseio.com/v0/user/\${username}.json?print=pretty\`)
@@ -33303,18 +33652,18 @@ webGetNode
   web.get https://raw.githubusercontent.com/treenotation/ohayo/master/maia/packages/samples/iris.tsv
    tables.basic
  frequency .1
- javascript
-  _getPlaceHolderMessage() {
-   return "Enter a url."
-  }
-  getTileBodyStumpCode() {
-   return \`span \${this.getFirstWord()}
+ string placeholderMessage Enter a url.
+ string bodyStumpTemplate
+  span {kind}
    class LargeLabel
   input
-   value \${this.getContent() || ""}
-   placeholder \${this._getPlaceHolderMessage()}
+   value {content}
+   placeholder {placeholderMessage}
    changeCommand changeTileContentAndRenderCommand
-   class LargeTileInput\`
+   class LargeTileInput
+ javascript
+  getTileBodyStumpCode() {
+   return this.qFormat(this.bodyStumpTemplate, { kind: this.getFirstWord(), content: this.getContent() || "", placeholderMessage: this.placeholderMessage })
   }
  string tileSize 400 100
  extends abstractUrlNode
@@ -33415,6 +33764,12 @@ samplesSiNode
  string parser text
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.si
+samplesPortalNode
+ description A list of online data portals.
+ frequency .03
+ string url maia/packages/samples/portals.ssv
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ crux samples.portals
 samplesStarWarsNode
  description All Star Wars characters. Data comes from https://swapi.co/
  frequency .03
@@ -33487,7 +33842,7 @@ redditAllNode
     vega.scatter
      yColumn score
      xColumn created_utc
-  layout bin
+  doc.layout bin
  frequency .05
  javascript
   async fetchTableInputs() {
@@ -33565,7 +33920,16 @@ samplesGapMinderNode
 abstractTransformerNode
  string tileSize 160 100
  extends abstractProviderNode
+ string placeholderMessage 
  abstract
+ string bodyStumpTemplate
+  span {kind}
+   class LargeLabel
+  input
+   value {content}
+   placeholder {placeholderMessage}
+   changeCommand changeTileContentAndRenderCommand
+   class LargeTileInput
  javascript
   getTileFooterStumpCode() {
    const inputCount = this.getParentOrDummyTable().getRowCount()
@@ -33578,17 +33942,8 @@ abstractTransformerNode
    this.setIsDataLoaded(true)
    await this._runChildTiles()
   }
-  _getPlaceHolderMessage() {
-   return ""
-  }
   getTileBodyStumpCode() {
-   return \`span \${this.getFirstWord()}
-   class LargeLabel
-  input
-   value \${this.getContent() || ""}
-   placeholder \${this._getPlaceHolderMessage()}
-   changeCommand changeTileContentAndRenderCommand
-   class LargeTileInput\`
+   return this.qFormat(this.bodyStumpTemplate, { kind: this.getFirstWord(), content: this.getContent() || "", placeholderMessage: this.placeholderMessage })
   }
 abstractColumnAdderTileNode
  abstract
@@ -33605,6 +33960,7 @@ dateAddColumnsNode
   sourceColumn isTemporal=true
  extends abstractColumnAdderTileNode
  crux date.addColumns
+ string placeholderMessage Enter the source column and new date columns you want, or leave blank to get 'day month year'.
  javascript
   getNewColumns() {
    const inputColumnName = this.getSettingsStruct().sourceColumn // todo: this is probably broken. need to fix settings timing issues.
@@ -33618,9 +33974,6 @@ dateAddColumnsNode
      type: outputCol
     }
    })
-  }
-  _getPlaceHolderMessage() {
-   return "Enter the source column and new date columns you want, or leave blank to get 'day month year'."
   }
 mathLogNode
  description Add a column that is the natural log (base e) of another column.
@@ -33984,15 +34337,13 @@ columnsFirstNode
     tables.basic
  extends abstractColumnFilterTileNode
  crux columns.first
+ string placeholderMessage Enter the number of columns you want to keep
  javascript
   getColumnNamesToKeep() {
    return this.getParentOrDummyTable()
     .getColumnsArrayOfObjects()
     .slice(0, parseInt(this.getContent()))
     .map(col => col.name)
-  }
-  _getPlaceHolderMessage() {
-   return "Enter the number of columns you want to keep"
   }
 columnsLastNode
  cells tileKeywordCell intCell
@@ -34003,13 +34354,47 @@ columnsLastNode
     tables.basic
  extends abstractColumnFilterTileNode
  crux columns.last
+ string placeholderMessage Enter the number of columns you want to keep
  javascript
   getColumnNamesToKeep() {
    const cols = this.getParentOrDummyTable().getColumnsArrayOfObjects()
    return cols.slice(cols.length - parseInt(this.getContent())).map(col => col.name)
   }
-  _getPlaceHolderMessage() {
-   return "Enter the number of columns you want to keep"
+columnsDropNode
+ description Drop certain columns. Inverse of columns.keep.
+ extends abstractColumnFilterTileNode
+ example
+  samples.iris
+   columns.drop Petal.Length
+    tables.basic
+ crux columns.drop
+ catchAllCellType columnNameCell
+ javascript
+  getColumnNamesToKeep() {
+   const colsToDrop = this.getWordsFrom(1)
+   return this.getParentOrDummyTable()
+    .getColumnsArrayOfObjects()
+    .filter(col => !colsToDrop.includes(col.name))
+    .map(col => col.name)
+  }
+columnsDropConstantsNode
+ description Drop any columns that contain only a single value.
+ extends abstractColumnFilterTileNode
+ example
+  data.inline
+   content
+    state,country
+    hawaii,usa
+    maine,usa
+   columns.dropConstants
+    columns.describe
+ crux columns.dropConstants
+ javascript
+  getColumnNamesToKeep() {
+   return this.getParentOrDummyTable()
+    .getColumnsArray()
+    .filter(col => col.getReductions().uniqueValues > 1)
+    .map(col => col.getColumnName())
   }
 columnsKeepNode
  catchAllCellType columnNameCell
@@ -34020,6 +34405,7 @@ columnsKeepNode
     tables.basic
  extends abstractColumnFilterTileNode
  crux columns.keep
+ string placeholderMessage Enter the columns to keep.
  javascript
   getColumnNamesToKeep() {
    const colsToKeep = this.getWordsFrom(1)
@@ -34027,9 +34413,6 @@ columnsKeepNode
     .getColumnsArrayOfObjects()
     .filter(col => colsToKeep.includes(col.name))
     .map(col => col.name)
-  }
-  _getPlaceHolderMessage() {
-   return "Enter the columns to keep."
   }
 abstractTransformerNoParamsTileNode
  abstract
@@ -34058,6 +34441,7 @@ rowsReverseNode
 abstractRowFilterTileNode
  abstract
  extends abstractTransformerNode
+ string placeholderMessage Enter a string to filter by.
  javascript
   // todo: pass thru.
   // todo: remove this?
@@ -34065,9 +34449,6 @@ abstractRowFilterTileNode
    const fn = this.getRowFilterFn()
    if (!fn) return this.getParentOrDummyTable().clone()
    return this.getParentOrDummyTable().filterRowsByFn(fn)
-  }
-  _getPlaceHolderMessage() {
-   return "Enter a string to filter by."
   }
 filterWhereNode
  description Each row must meet a certain condition
@@ -34183,10 +34564,8 @@ groupByNode
     tables.basic
  extends abstractTransformerNode
  crux group.by
+ string placeholderMessage Enter the column to groupby.
  javascript
-  _getPlaceHolderMessage() {
-   return "Enter the column to groupby."
-  }
   _createOutputTable() {
    const groupByColNames = this.getWordsFrom(1)
    if (!groupByColNames.length) return this.getParentOrDummyTable().clone()
@@ -34210,17 +34589,15 @@ rowsSortByNode
     rows.reverse
      rows.first 1
       tables.basic Most expensive
-  layout tiled
+  doc.layout tiled
  extends abstractTransformerNode
  crux rows.sortBy
+ string placeholderMessage Columns you want to sort by
  javascript
   _createOutputTable() {
    const table = this.getParentOrDummyTable().sortBy(this.getWordsFrom(1))
    if (this.getFirstWord().includes("Reverse")) return table.reverseRows()
    return table
-  }
-  _getPlaceHolderMessage() {
-   return "Columns you want to sort by"
   }
 rowsSortByReverseNode
  description Sort the rows by a column(s) from largest to smallest.
@@ -34546,7 +34923,7 @@ templatesListNode
      .replace(this.maiaFileExtensionKey, "")
     return {
      command: "createProgramFromTemplateCommand",
-     name: node.get("data html.h1"),
+     name: node.get("data doc.title"),
      value: id,
      category: lodash.upperFirst(node.get("data categories")),
      description: ""
@@ -34565,28 +34942,50 @@ templatesListNode
     name: id + this.maiaFileExtensionKey
    }
   }
-abstractDocumentSettingNode
+abstractDocSectionComponentNode
  abstract
-layoutNode
- cells documentSettingNameCell layoutOptionCell
- extends abstractDocumentSettingNode
- crux layout
-zoomNode
- crux zoom
- description Enlarge or shrink all tiles
- cells documentSettingNameCell zoomCell
- extends abstractDocumentSettingNode
-defaultHiddenNode
- crux defaultHidden
- description Show only tiles with "visible" specified
- cells documentSettingNameCell
- extends abstractDocumentSettingNode
-documentCategoriesNode
- description Add some categories to the document for organization.
- cells documentSettingNameCell
- catchAllCellType documentCategoryCell
- extends abstractDocumentSettingNode
- crux categories
+docSectionSubtitleNode
+ extends abstractDocSectionComponentNode
+ crux subtitle
+ string tagName h2
+ cells tileKeywordCell
+ catchAllCellType stringCell
+docSectionParagraphNode
+ extends abstractDocSectionComponentNode
+ crux paragraph
+ string tagName p
+ cells tileKeywordCell
+ catchAllCellType stringCell
+docSectionLinkNode
+ extends abstractDocSectionComponentNode
+ crux link
+ string tagName a
+ cells tileKeywordCell urlCell
+ example
+  doc.section
+   link http://ohayo.computer Ohayo
+docSectionCodeNode
+ extends abstractDocSectionComponentNode
+ crux code
+ string tagName code
+ cells tileKeywordCell programmingLanguageNameCell
+ catchAllNodeType docLineOfCodeNode
+ example
+  doc.section
+   subtitle Some Code
+   code latex
+    E_0 &= mc^2
+    E &= \\frac{mc^2}{\\sqrt{1-\\frac{v^2}{c^2}}}
+docLineOfCodeNode
+ catchAllCellType codeCell
+ catchAllNodeType docLineOfCodeNode
+commentLineNode
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+docReferenceUrlNode
+ crux url
+ cells tileSettingKeywordCell urlCell
+ description URL for the reference
 catchAllErrorNode
  catchAllCellType errorCell
  baseNodeType errorNode
@@ -34628,7 +35027,7 @@ tilesNode
    return this._tab
   }
   tilesAreVisible() {
-   return !this.has("defaultHidden")
+   return !this.has(TilesConstants.defaultHidden)
   }
   canUseCustomLayout() {
    const definedLayout = this.get(TilesConstants.layout)
@@ -34700,7 +35099,7 @@ maiaNode
  catchAllNodeType DidYouMeanTileNode
  string wallType flex
  description Maia is a programming language for doing data science.
- inScope abstractMaiaTileNode hashBangNode abstractDocumentSettingNode commentNode PickerTileNode
+ inScope abstractTileTreeComponentNode hashBangNode
  javascript
   _getProgramRowCount() {
    return this.getAllRowsFromAllOutputTables().reduce((acc, curr) => acc + curr.length, 0)
@@ -34910,23 +35309,6 @@ postNode
  crux post
 tileSettingNonTerminalContentNode
  baseNodeType blobNode
-commentLineNode
- catchAllCellType commentCell
- catchAllNodeType commentLineNode
-commentNode
- description A comment node
- frequency 0
- example An example program with comments
-  comment get iris data
-  samples.iris
-   comment filter is
-   filter.where Species = virginica
-    comment display results
-    tables.basic
- catchAllCellType commentCell
- catchAllNodeType commentLineNode
- cells commentKeywordCell
- crux comment
 lineOfContentNode
  catchAllNodeType lineOfContentNode
  catchAllCellType stringCell`)
@@ -34938,6 +35320,18 @@ lineOfContentNode
         basicRecursiveTileNode: basicRecursiveTileNode,
         BlankLineNode: BlankLineNode,
         DidYouMeanTileNode: DidYouMeanTileNode,
+        abstractDocNode: abstractDocNode,
+        docTitleNode: docTitleNode,
+        docSubtitleNode: docSubtitleNode,
+        docCategoriesNode: docCategoriesNode,
+        docAuthorNode: docAuthorNode,
+        docDefaultHiddenNode: docDefaultHiddenNode,
+        docDateNode: docDateNode,
+        docZoomNode: docZoomNode,
+        docLayoutNode: docLayoutNode,
+        docCommentNode: docCommentNode,
+        docSectionNode: docSectionNode,
+        docReferenceNode: docReferenceNode,
         abstractPickerTileNode: abstractPickerTileNode,
         PickerTileNode: PickerTileNode,
         abstractMaiaTileNode: abstractMaiaTileNode,
@@ -35032,6 +35426,7 @@ lineOfContentNode
         samplesIrisNode: samplesIrisNode,
         samplesFlights14Node: samplesFlights14Node,
         samplesSiNode: samplesSiNode,
+        samplesPortalNode: samplesPortalNode,
         samplesStarWarsNode: samplesStarWarsNode,
         samplesPopulationsNode: samplesPopulationsNode,
         samplesBabyNamesNode: samplesBabyNamesNode,
@@ -35073,6 +35468,8 @@ lineOfContentNode
         abstractColumnFilterTileNode: abstractColumnFilterTileNode,
         columnsFirstNode: columnsFirstNode,
         columnsLastNode: columnsLastNode,
+        columnsDropNode: columnsDropNode,
+        columnsDropConstantsNode: columnsDropConstantsNode,
         columnsKeepNode: columnsKeepNode,
         abstractTransformerNoParamsTileNode: abstractTransformerNoParamsTileNode,
         rowsShuffleNode: rowsShuffleNode,
@@ -35102,11 +35499,14 @@ lineOfContentNode
         toCsvNode: toCsvNode,
         abstractTemplatePickerTileNode: abstractTemplatePickerTileNode,
         templatesListNode: templatesListNode,
-        abstractDocumentSettingNode: abstractDocumentSettingNode,
-        layoutNode: layoutNode,
-        zoomNode: zoomNode,
-        defaultHiddenNode: defaultHiddenNode,
-        documentCategoriesNode: documentCategoriesNode,
+        abstractDocSectionComponentNode: abstractDocSectionComponentNode,
+        docSectionSubtitleNode: docSectionSubtitleNode,
+        docSectionParagraphNode: docSectionParagraphNode,
+        docSectionLinkNode: docSectionLinkNode,
+        docSectionCodeNode: docSectionCodeNode,
+        docLineOfCodeNode: docLineOfCodeNode,
+        commentLineNode: commentLineNode,
+        docReferenceUrlNode: docReferenceUrlNode,
         catchAllErrorNode: catchAllErrorNode,
         hashBangNode: hashBangNode,
         tilesNode: tilesNode,
@@ -35156,8 +35556,6 @@ lineOfContentNode
         catchAllNodesPostContentNode: catchAllNodesPostContentNode,
         postNode: postNode,
         tileSettingNonTerminalContentNode: tileSettingNonTerminalContentNode,
-        commentLineNode: commentLineNode,
-        commentNode: commentNode,
         lineOfContentNode: lineOfContentNode
       }
     }
@@ -35404,27 +35802,6 @@ lineOfContentNode
     }
   }
 
-  class commentLineNode extends jtree.GrammarBackedNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
-    }
-    get commentCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class commentNode extends jtree.GrammarBackedNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
-    }
-    get commentKeywordCell() {
-      return this.getWord(0)
-    }
-    get commentCell() {
-      return this.getWordsFrom(1)
-    }
-  }
-
   class lineOfContentNode extends jtree.GrammarBackedNode {
     createParser() {
       return new jtree.TreeNode.Parser(lineOfContentNode, undefined, undefined)
@@ -35493,8 +35870,8 @@ challenge
 "use strict";
 window.TemplatesStamp = `file templates/amazon-purchase-history.maia
  data
-  html.h1 Amazon Purchase History
-  comment Delete the below line and replace with your data
+  doc.title Amazon Purchase History
+  doc.comment Delete the below line and replace with your data
   amazon.history
    columns.keep Category ItemTotal OrderDate Title
     tables.basic All Amazon Purchases
@@ -35512,11 +35889,11 @@ window.TemplatesStamp = `file templates/amazon-purchase-history.maia
       vega.bar Items Purchases by Year
        yColumn count
        xColumn year
-  layout column
-  categories shopping
+  doc.layout column
+  doc.categories shopping
 file templates/cancer-rates-in-the-us.maia
  data
-  html.h1 Cancer Rates in the U.S.
+  doc.title Cancer Rates in the U.S.
   cancer.cases
    tables.basic
    show.sum Female Total female cases
@@ -35528,11 +35905,11 @@ file templates/cancer-rates-in-the-us.maia
     vega.bar
      xColumn CancerType
      yColumn Male
-  layout column
-  categories medicine
+  doc.layout column
+  doc.categories medicine
 file templates/git-repo-dashboard.maia
  data
-  html.h1 Desktop Only: Statistics for Local Git Repo
+  doc.title Desktop Only: Statistics for Local Git Repo
   web.get http://localhost:2222/shell?command=gitlog
    date.addColumns
     group.by day
@@ -35550,11 +35927,11 @@ file templates/git-repo-dashboard.maia
    show.rowCount Total Commits
    show.max time Most Recent Commit
    show.min time First Commit
-  layout column
-  categories programming
+  doc.layout column
+  doc.categories programming
 file templates/loc-with-bars.maia
  data
-  html.h1 Desktop Only: Analyze lines of code in a folder
+  doc.title Desktop Only: Analyze lines of code in a folder
   web.get /disk?path=/ohayo/ohayoWebApp&lineStats=true&recursive=true
    filter.without .DS_Store min.js node_modules ignore package-lock.json
     show.sum lines Total LoC
@@ -35570,11 +35947,11 @@ file templates/loc-with-bars.maia
      vega.bar Words
       yColumn words
      tables.basic Top Extensions
-  layout column
-  categories programming
+  doc.layout column
+  doc.categories programming
 file templates/logs.maia
  data
-  html.h1 Exponents
+  doc.title Exponents
    visible
   math.gen exp 0 1 .01
    vega.line 2.718^x from 0 to 1
@@ -35591,12 +35968,104 @@ file templates/logs.maia
     visible
     xColumn input
     yColumn output
-  layout column
-  categories math
-  defaultHidden
+  doc.layout column
+  doc.categories math
+  doc.defaultHidden
+file templates/maia-reference.maia
+ data
+  doc.author Breck Yunits
+  doc.date 12/05/2019
+  doc.categories maia
+  
+  doc.title Maia vis Markdown
+  doc.subtitle The Doc package of tiles makes Maia similar to Markdown.
+  
+  doc.section
+   subtitle Overview
+   paragraph The doc package adds a set of tiles common in something like Markdown, R Markdown, Latex, etc.
+  
+  doc.section
+   subtitle Secondary Notation (aka Text Styling)
+   paragraph Words can be bolded[bold] or italicized[em] or monospaced[mono] or linked[link http://ohayo.computer] or footnoted[ref someRefId].
+  
+  doc.section
+   subtitle Links
+   link A whole sentence can be linked
+    url http://ohayo.computer
+  
+  doc.section
+   subtitle Mixing data with content
+   paragraph You can mix and match doc tiles with any other Maia tile.
+  
+  data.inline
+   parser ssv
+   content
+    team superbowls
+    Patriots 6
+    Bills 0
+   vega.bar
+  
+  doc.section
+   subtitle Layout
+   paragraph Layout changes the layout strategy of the tiles
+   code
+    doc.layout column
+  
+  
+  doc.section
+   subtitle Zoom
+   paragraph Zoom let's you adjust the zoom level of the doc.
+   code
+    doc.zoom .5
+  
+  
+  doc.section
+   subtitle Sections
+   paragraph You can put whole sections into 1 tile.
+   paragraph Sections can have multiple paragraphs.
+   code python
+    # they can have code blocks too
+  
+  doc.section
+   subtitle Default visibilitiy
+   paragraph You can change the default visibility of a tile
+   paragraph The line below will hide all tiles by default.
+   code maia
+    doc.tiles hidden
+   paraph When you hide all tiles, you'll need to opt-in to visible to show tiles.
+   code
+    samples.portals
+     vega.bar
+      visible
+   paragraph By default, all tiles are set to visible, which is equivalent to:
+   code
+    doc.tiles visible
+  
+  
+  doc.section
+   subtitle Categories
+   paragraph You might want to add some tags categorizing your document.
+   code maia
+    doc.categories programming
+  
+  doc.section
+   subtitle Blank lines
+   paragraph
+    Blank lines are fine.
+    
+    In paragraphs.
+  
+  doc.section
+   subtitle Code
+   code python
+    # You can create blocks of code for printing
+    # If you provide a supported language ID, secondary notation (highlighting) can be added.
+  
+  doc.ref someRefId
+   url https://en.wikipedia.org/wiki/Note_(typography)
 file templates/periodic-table.maia
  data
-  html.h1 The Periodic Table
+  doc.title The Periodic Table
   samples.periodicTable
    vega.scatter Boiling Point by Atomic Number
     xColumn AtomicNumber
@@ -35604,11 +36073,21 @@ file templates/periodic-table.maia
    vega.scatter Year of Discovery by Atomic Number
     xColumn Year
     yColumn AtomicNumber
-  layout column
-  categories chemistry
+  doc.layout column
+  doc.categories chemistry
+file templates/portals.maia
+ data
+  doc.title Data Portals
+  samples.portals
+   hidden
+   rows.sortByReverse datasets
+    hidden
+    tables.basic
+  doc.categories dataScience
+  doc.layout column
 file templates/random.maia
  data
-  html.h1 Random Numbers
+  doc.title Random Numbers
   random.int 1000 0 1000
    hidden
    vega.scatter 1000 Random numbers between 0 and 100
@@ -35619,11 +36098,11 @@ file templates/random.maia
     vega.scatter 100 of those
      xColumn index
      yColumn number
-  categories math
-  layout column
+  doc.categories math
+  doc.layout column
 file templates/reddit.maia
  data
-  html.h1 Top Stories on Reddit
+  doc.title Top Stories on Reddit
   reddit.all
    hidden
    columns.keep title created_utc score subreddit url
@@ -35635,35 +36114,35 @@ file templates/reddit.maia
      xColumn created_utc
     vega.bar Top Stories on Reddit Right Now
      yColumn score
-  layout column
-  categories socialMedia
+  doc.layout column
+  doc.categories socialMedia
 file templates/subreddit.maia
  data
-  html.h1 Top stories in a subreddit
+  doc.title Top stories in a subreddit
   reddit.sub Astronomy
    columns.keep title created_utc score subreddit url
     vega.scatter
      yColumn score
      xColumn created_utc
     list.links
-  layout column
-  categories socialMedia
+  doc.layout column
+  doc.categories socialMedia
 file templates/trends-in-baby-names.maia
  data
-  html.h1 Trends in Baby Names
-  comment Uncomment the below line, and delete the following line, to use the full dataset
-  comment  web.get https://raw.githubusercontent.com/hadley/data-baby-names/master/baby-names.csv
+  doc.title Trends in Baby Names
+  doc.comment Uncomment the below line, and delete the following line, to use the full dataset
+  doc.comment  web.get https://raw.githubusercontent.com/hadley/data-baby-names/master/baby-names.csv
   samples.babyNames
    filter.where name = Aria
     filter.where sex = girl
      vega.line
       xColumn year
       yColumn percent
-  layout column
-  categories parenting
+  doc.layout column
+  doc.categories parenting
 file templates/trigonometry.maia
  data
-  html.h1 Trigonometric Functions
+  doc.title Trigonometric Functions
    visible
   math.gen sin 0 10 .1
    vega.line Sin Wave
@@ -35680,29 +36159,29 @@ file templates/trigonometry.maia
     visible
     xColumn input
     yColumn output
-  layout column
-  categories math
-  defaultHidden
+  doc.layout column
+  doc.categories math
+  doc.defaultHidden
 file templates/ucimlr-overview.maia
  data
-  html.h1 The Datasets in UCIMLR
-  layout column
+  doc.title The Datasets in UCIMLR
+  doc.layout column
   ucimlr.datasets
    show.rowCount Total Datasets
    group.by Category
     vega.bar
-   comment  Filter out missing data:
+   doc.comment  Filter out missing data:
    filter.where Year > 1910
     group.by Year
      columns.setType Year year
       vega.bar
        xColumn Year
        yColumn count
-  categories machineLearning
+  doc.categories dataScience
 file templates/word-cloud.maia
  data
-  html.h1 Word Cloud
-  layout column
+  doc.title Word Cloud
+  doc.layout column
   data.inline
    text.wordCount
     text.wordcloud
@@ -35711,7 +36190,7 @@ file templates/word-cloud.maia
    parser text
    content
     If you put some text here, you will make yourself a word cloud. The more text you add, the better it will be. So keep writing, writing, writing, and you will get something that looks good.
-  categories writing
+  doc.categories writing
 `
 "use strict";
 window.OhayoDrums = `panel new createNewBlankProgramCommand ctrl+n New file
@@ -36079,7 +36558,7 @@ ohayo.maia
   markdown.toHtml
  templates.list
  challenge.list
- layout column`
+doc.layout column`
 
 window.DemoTemplates
  = DemoTemplates
@@ -36088,7 +36567,7 @@ window.DemoTemplates
 
 
 const MaiaCodeEditorTemplate = (source, fileName, treeLanguage) =>
-  new jtree.TreeNode(`html.h1 Source code visualization of {fileName}
+  new jtree.TreeNode(`doc.title Source code visualization of {fileName}
 data.inline
  parser text
  treeLanguage {treeLanguage}
@@ -36105,7 +36584,7 @@ data.inline
     text.wordcloud
  content
   {source}
-layout column`).templateToString({ source, fileName, treeLanguage })
+doc.layout column`).templateToString({ source, fileName, treeLanguage })
 
 window.MaiaCodeEditorTemplate
  = MaiaCodeEditorTemplate
@@ -37320,7 +37799,10 @@ TilesConstants.tileScript = "tileScript"
 TilesConstants.tileSize = "tileSize"
 TilesConstants.abstractTileSetting = "abstractTileSetting"
 
-TilesConstants.layout = "layout"
+
+TilesConstants.defaultHidden = "doc.defaultHidden"
+
+TilesConstants.layout = "doc.layout"
 TilesConstants.layouts = {}
 TilesConstants.layouts.custom = "custom"
 TilesConstants.layouts.tiled = "tiled"
@@ -37333,7 +37815,7 @@ TilesConstants.selectedClass = "ui-selected"
 TilesConstants.staySelectedClass = "staySelected"
 
 TilesConstants.maximized = "maximized"
-TilesConstants.pickerTile = "tiles.picker"
+TilesConstants.pickerTile = "doc.picker"
 
 TilesConstants.abstractTileTreeComponentNode = "abstractTileTreeComponentNode"
 
@@ -37380,7 +37862,18 @@ BlobNode
         catchAllErrorNode,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
           "tiles.didyoumean": DidYouMeanTileNode,
-          "tiles.picker": PickerTileNode,
+          "doc.title": docTitleNode,
+          "doc.subtitle": docSubtitleNode,
+          "doc.categories": docCategoriesNode,
+          "doc.author": docAuthorNode,
+          "doc.defaultHidden": docDefaultHiddenNode,
+          "doc.date": docDateNode,
+          "doc.zoom": docZoomNode,
+          "doc.layout": docLayoutNode,
+          "doc.comment": docCommentNode,
+          "doc.section": docSectionNode,
+          "doc.ref": docReferenceNode,
+          "doc.picker": PickerTileNode,
           "#!": hashBangNode,
           hidden: hiddenNode,
           visible: visibleNode,
@@ -37393,7 +37886,7 @@ BlobNode
         undefined
       )
     }
-    get tileNameCell() {
+    get tileKeywordCell() {
       return this.getWord(0)
     }
     get tileStumpTemplate() {
@@ -37743,6 +38236,7 @@ pre
       })
     }
     isVisible() {
+      if (this.visible === false) return false
       return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
     }
     _isMaximized() {
@@ -37986,7 +38480,7 @@ ${cellInputs.join("\n")}`
   }
 
   class BlankLineNode extends abstractTileTreeComponentNode {
-    isVisible() {
+    get visible() {
       return false
     }
   }
@@ -38029,7 +38523,140 @@ ${cellInputs.join("\n")}`
     }
   }
 
-  class abstractPickerTileNode extends abstractTileTreeComponentNode {
+  class abstractDocNode extends abstractTileTreeComponentNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+  }
+
+  class docTitleNode extends abstractDocNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get stringCell() {
+      return this.getWordsFrom(1)
+    }
+    get bodyStumpTemplate() {
+      return `{tagName} {content}`
+    }
+    get tagName() {
+      return `h1`
+    }
+    get tileSize() {
+      return `600 75`
+    }
+  }
+
+  class docSubtitleNode extends docTitleNode {
+    get tagName() {
+      return `h2`
+    }
+  }
+
+  class docCategoriesNode extends abstractDocNode {
+    get documentCategoryCell() {
+      return this.getWordsFrom(0)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docAuthorNode extends abstractDocNode {
+    get stringCell() {
+      return this.getWordsFrom(0)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docDefaultHiddenNode extends abstractDocNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docDateNode extends abstractDocNode {
+    get dateCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docZoomNode extends abstractDocNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get zoomCell() {
+      return parseFloat(this.getWord(1))
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docLayoutNode extends abstractDocNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get docLayoutOptionCell() {
+      return this.getWord(1)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docCommentNode extends abstractDocNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
+    }
+    get commentKeywordCell() {
+      return this.getWord(0)
+    }
+    get commentCell() {
+      return this.getWordsFrom(1)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docSectionNode extends abstractDocNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
+          subtitle: docSectionSubtitleNode,
+          paragraph: docSectionParagraphNode,
+          link: docSectionLinkNode,
+          code: docSectionCodeNode
+        }),
+        undefined
+      )
+    }
+  }
+
+  class docReferenceNode extends abstractDocNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { url: docReferenceUrlNode }),
+        undefined
+      )
+    }
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get referenceIdCell() {
+      return this.getWord(1)
+    }
+  }
+
+  class abstractPickerTileNode extends abstractDocNode {
     get tileHeader() {
       return `Gallery`
     }
@@ -38113,13 +38740,82 @@ a {name}
     }
   }
 
-  class abstractDocumentSettingNode extends jtree.GrammarBackedNode {}
+  class abstractDocSectionComponentNode extends jtree.GrammarBackedNode {}
 
-  class layoutNode extends abstractDocumentSettingNode {
-    get documentSettingNameCell() {
+  class docSectionSubtitleNode extends abstractDocSectionComponentNode {
+    get tileKeywordCell() {
       return this.getWord(0)
     }
-    get layoutOptionCell() {
+    get stringCell() {
+      return this.getWordsFrom(1)
+    }
+    get tagName() {
+      return `h2`
+    }
+  }
+
+  class docSectionParagraphNode extends abstractDocSectionComponentNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get stringCell() {
+      return this.getWordsFrom(1)
+    }
+    get tagName() {
+      return `p`
+    }
+  }
+
+  class docSectionLinkNode extends abstractDocSectionComponentNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get urlCell() {
+      return this.getWord(1)
+    }
+    get tagName() {
+      return `a`
+    }
+  }
+
+  class docSectionCodeNode extends abstractDocSectionComponentNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(docLineOfCodeNode, undefined, undefined)
+    }
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get programmingLanguageNameCell() {
+      return this.getWord(1)
+    }
+    get tagName() {
+      return `code`
+    }
+  }
+
+  class docLineOfCodeNode extends jtree.GrammarBackedNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(docLineOfCodeNode, undefined, undefined)
+    }
+    get codeCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class commentLineNode extends jtree.GrammarBackedNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
+    }
+    get commentCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class docReferenceUrlNode extends jtree.GrammarBackedNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get urlCell() {
       return this.getWord(1)
     }
   }
@@ -38165,7 +38861,7 @@ a {name}
       return this._tab
     }
     tilesAreVisible() {
-      return !this.has("defaultHidden")
+      return !this.has(TilesConstants.defaultHidden)
     }
     canUseCustomLayout() {
       const definedLayout = this.get(TilesConstants.layout)
@@ -38228,25 +38924,47 @@ a {name}
     }
     getGrammarProgram() {
       if (!this._cachedGrammarProgramRoot)
-        this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`layoutOptionCell
+        this._cachedGrammarProgramRoot = new jtree.GrammarProgram(`programmingLanguageNameCell
+ enum javascript latex css html ruby rust python csv tsv xml php typescript lisp swift java c cpp markdown bash
+codeCell
+ highlightScope string
+documentCategoryCell
+ enum shopping chemistry programming socialMedia math parenting writing dataScience
+zoomCell
+ extends numberCell
+referenceIdCell
+ highlightScope string
+docLayoutOptionCell
  enum custom bin tree column tiled
  highlightScope constant
-documentSettingNameCell
- highlightScope entity.name.tag
+commentCell
+ highlightScope comment
+commentKeywordCell
+ highlightScope comment
 errorCell
  highlightScope invalid
 hashBangWordCell
  highlightScope comment
-tileNameCell
- highlightScope variable.function
+stringCell
+ highlightScope string
+urlCell
+ highlightScope constant
+dateCell
+ highlightScope string
+intCell
+ regex \\-?[0-9]+
+numberCell
+ regex \\-?[0-9]*\\.?[0-9]*
+tileKeywordCell
+ highlightScope keyword
 intCell
 tileSettingKeywordCell
  highlightScope variable.language
 abstractTileTreeComponentNode
  abstract
- cells tileNameCell
+ cells tileKeywordCell
  _extendsJsClass AbstractTreeComponent
- inScope hashBangNode abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode commentNode
+ inScope hashBangNode abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode
  catchAllNodeType catchAllErrorNode
  int headerHeight 30
  int footerHeight 30
@@ -38576,6 +39294,7 @@ abstractTileTreeComponentNode
    })
   }
   isVisible() {
+   if (this.visible === false) return false
    return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
   }
   _isMaximized() {
@@ -38817,10 +39536,7 @@ basicRecursiveTileNode
   }
 BlankLineNode
  extends abstractTileTreeComponentNode
- javascript
-  isVisible() {
-   return false
-  }
+ boolean visible false
 DidYouMeanTileNode
  tags noPicker
  description Provides suggestions for misspelled tiles.
@@ -38861,8 +39577,104 @@ DidYouMeanTileNode
   getTileHeaderBern() {
    return ""
   }
-abstractPickerTileNode
+abstractDocNode
+ cells tileKeywordCell
  extends abstractTileTreeComponentNode
+ abstract
+docTitleNode
+ catchAllCellType stringCell
+ description A title
+ example A doc
+  doc.title A Tale of Two Cities
+ string tileSize 600 75
+ extends abstractDocNode
+ cells tileKeywordCell
+ crux doc.title
+ string tagName h1
+ string bodyStumpTemplate
+  {tagName} {content}
+docSubtitleNode
+ extends docTitleNode
+ description A subheader
+ string tagName h2
+ crux doc.subtitle
+docCategoriesNode
+ extends abstractDocNode
+ crux doc.categories
+ description Add some categories to the document for organization.
+ catchAllCellType documentCategoryCell
+ boolean visible false
+docAuthorNode
+ extends abstractDocNode
+ catchAllCellType stringCell
+ crux doc.author
+ description Add one author per line.
+ boolean visible false
+docDefaultHiddenNode
+ crux doc.defaultHidden
+ example
+  doc.defaultHidden
+  samples.portals
+   tables.basic
+    visible
+ description Change default tile visibility to hidden.
+ cells tileKeywordCell
+ extends abstractDocNode
+ boolean visible false
+docDateNode
+ description Date published.
+ extends abstractDocNode
+ crux doc.date
+ catchAllCellType dateCell
+docZoomNode
+ crux doc.zoom
+ description Enlarge or shrink all tiles
+ cells tileKeywordCell zoomCell
+ extends abstractDocNode
+ boolean visible false
+docLayoutNode
+ cells tileKeywordCell docLayoutOptionCell
+ extends abstractDocNode
+ crux doc.layout
+ boolean visible false
+docCommentNode
+ description A comment node
+ cells tileKeywordCell
+ extends abstractDocNode
+ boolean visible false
+ frequency 0
+ example An example program with comments
+  doc.comment get iris data
+  samples.iris
+   doc.comment filter is
+   filter.where Species = virginica
+    doc.comment display results
+    tables.basic
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+ cells commentKeywordCell
+ crux doc.comment
+docSectionNode
+ description A section containing subtitles, paragraphs, code blocks, etc.
+ crux doc.section
+ extends abstractDocNode
+ inScope abstractDocSectionComponentNode
+ example
+  doc.section
+   subtitle Subtitle
+   paragraph Paragraph
+   code python
+    # some code
+docReferenceNode
+ crux doc.ref
+ cells tileKeywordCell referenceIdCell
+ inScope docReferenceUrlNode
+ doc.ref someRefId
+  url https://en.wikipedia.org/wiki/Note_(typography)
+ description A reference to an external source
+ extends abstractDocNode
+abstractPickerTileNode
+ extends abstractDocNode
  string tileSize 480 420
  abstract
  string hakonTemplate
@@ -38922,7 +39734,7 @@ abstractPickerTileNode
 PickerTileNode
  extends abstractPickerTileNode
  description Displays list of available tiles.
- crux tiles.picker
+ crux doc.picker
  string tileHeader Tile Gallery
  javascript
   getChoices() {
@@ -38939,12 +39751,50 @@ PickerTileNode
     return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
    })
   }
-abstractDocumentSettingNode
+abstractDocSectionComponentNode
  abstract
-layoutNode
- cells documentSettingNameCell layoutOptionCell
- extends abstractDocumentSettingNode
- crux layout
+docSectionSubtitleNode
+ extends abstractDocSectionComponentNode
+ crux subtitle
+ string tagName h2
+ cells tileKeywordCell
+ catchAllCellType stringCell
+docSectionParagraphNode
+ extends abstractDocSectionComponentNode
+ crux paragraph
+ string tagName p
+ cells tileKeywordCell
+ catchAllCellType stringCell
+docSectionLinkNode
+ extends abstractDocSectionComponentNode
+ crux link
+ string tagName a
+ cells tileKeywordCell urlCell
+ example
+  doc.section
+   link http://ohayo.computer Ohayo
+docSectionCodeNode
+ extends abstractDocSectionComponentNode
+ crux code
+ string tagName code
+ cells tileKeywordCell programmingLanguageNameCell
+ catchAllNodeType docLineOfCodeNode
+ example
+  doc.section
+   subtitle Some Code
+   code latex
+    E_0 &= mc^2
+    E &= \\frac{mc^2}{\\sqrt{1-\\frac{v^2}{c^2}}}
+docLineOfCodeNode
+ catchAllCellType codeCell
+ catchAllNodeType docLineOfCodeNode
+commentLineNode
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+docReferenceUrlNode
+ crux url
+ cells tileSettingKeywordCell urlCell
+ description URL for the reference
 catchAllErrorNode
  catchAllCellType errorCell
  baseNodeType errorNode
@@ -38986,7 +39836,7 @@ tilesNode
    return this._tab
   }
   tilesAreVisible() {
-   return !this.has("defaultHidden")
+   return !this.has(TilesConstants.defaultHidden)
   }
   canUseCustomLayout() {
    const definedLayout = this.get(TilesConstants.layout)
@@ -39097,10 +39947,28 @@ tileSettingNonTerminalContentNode
         basicRecursiveTileNode: basicRecursiveTileNode,
         BlankLineNode: BlankLineNode,
         DidYouMeanTileNode: DidYouMeanTileNode,
+        abstractDocNode: abstractDocNode,
+        docTitleNode: docTitleNode,
+        docSubtitleNode: docSubtitleNode,
+        docCategoriesNode: docCategoriesNode,
+        docAuthorNode: docAuthorNode,
+        docDefaultHiddenNode: docDefaultHiddenNode,
+        docDateNode: docDateNode,
+        docZoomNode: docZoomNode,
+        docLayoutNode: docLayoutNode,
+        docCommentNode: docCommentNode,
+        docSectionNode: docSectionNode,
+        docReferenceNode: docReferenceNode,
         abstractPickerTileNode: abstractPickerTileNode,
         PickerTileNode: PickerTileNode,
-        abstractDocumentSettingNode: abstractDocumentSettingNode,
-        layoutNode: layoutNode,
+        abstractDocSectionComponentNode: abstractDocSectionComponentNode,
+        docSectionSubtitleNode: docSectionSubtitleNode,
+        docSectionParagraphNode: docSectionParagraphNode,
+        docSectionLinkNode: docSectionLinkNode,
+        docSectionCodeNode: docSectionCodeNode,
+        docLineOfCodeNode: docLineOfCodeNode,
+        commentLineNode: commentLineNode,
+        docReferenceUrlNode: docReferenceUrlNode,
         catchAllErrorNode: catchAllErrorNode,
         hashBangNode: hashBangNode,
         tilesNode: tilesNode,
@@ -42035,7 +42903,7 @@ ${OhayoConstants.panel} 400
   getRenderedTilesDiagnostic() {
     return this.getMountedTilesProgram()
       .getTiles()
-      .filter(tile => tile.isMounted())
+      .filter(tile => tile.isVisible() && tile.isMounted())
   }
 
   // for tests

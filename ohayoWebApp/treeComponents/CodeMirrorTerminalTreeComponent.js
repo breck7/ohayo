@@ -163,7 +163,6 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
       codeWidgets.length = 0
 
       errs
-        .filter(err => !err.isBlankLineError())
         .filter(err => !err.isCursorOnWord(cursor.line, cursor.ch))
         .slice(0, 1) // Only show 1 error at a time. Otherwise UX is not fun.
         .forEach(err => {

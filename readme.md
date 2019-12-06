@@ -33,6 +33,7 @@ Ohayo is still beta, and we are still iterating quickly. We encourage you to pos
 |-|-|-|-|
 |Grid Studio|https://github.com/ricklamers/gridstudio|2019||
 |Observable|https://observablehq.com/|2017||
+|Idyll|https://idyll-lang.org/|2017||
 |Google Data Studio|https://datastudio.google.com/overview|2016|https://de.wikipedia.org/wiki/Google_Data_Studio|
 |Tidyverse|https://www.tidyverse.org/|2016|https://en.wikipedia.org/wiki/Tidyverse|
 |Vega Editor|https://vega.github.io/editor/|2015||
@@ -48,6 +49,7 @@ Ohayo is still beta, and we are still iterating quickly. We encourage you to pos
 |Looker|https://looker.com/|2012|https://en.wikipedia.org/wiki/Looker_(company)|
 |AirTable|https://airtable.com/|2012|https://en.wikipedia.org/wiki/Airtable|
 |Anaconda|https://www.anaconda.com/|2012|https://en.wikipedia.org/wiki/Anaconda_(Python_distribution)|
+|Plotly|https://plot.ly/|2012|https://en.wikipedia.org/wiki/Plotly|
 |RStudio|https://www.rstudio.com/|2011|https://en.wikipedia.org/wiki/RStudio|
 |Microsoft SandDance|https://github.com/microsoft/SandDance|2011|https://en.wikipedia.org/wiki/Microsoft_Garage|
 |Microsoft PowerBI|https://powerbi.microsoft.com/en-us/|2011|https://en.wikipedia.org/wiki/Power_BI|

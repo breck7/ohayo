@@ -1,7 +1,7 @@
 tooling onsave jtree build produceTilesGrammar
-BlankLineNode
- extends abstractTileTreeComponentNode
- javascript
-  isVisible() {
-   return false
-  }
+emptyCell
+tileBlankLineNode
+ boolean visible false
+ pattern ^$
+ tags doNotSynthesize
+ cells emptyCell

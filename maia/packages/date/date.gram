@@ -10,6 +10,7 @@ dateAddColumnsNode
   sourceColumn isTemporal=true
  extends abstractColumnAdderTileNode
  crux date.addColumns
+ string placeholderMessage Enter the source column and new date columns you want, or leave blank to get 'day month year'.
  javascript
   getNewColumns() {
    const inputColumnName = this.getSettingsStruct().sourceColumn // todo: this is probably broken. need to fix settings timing issues.
@@ -23,9 +24,6 @@ dateAddColumnsNode
      type: outputCol
     }
    })
-  }
-  _getPlaceHolderMessage() {
-   return "Enter the source column and new date columns you want, or leave blank to get 'day month year'."
   }
 dateHeatcalNode
  description Shows which days have higher counts.

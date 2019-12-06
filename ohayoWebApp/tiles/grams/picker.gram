@@ -1,6 +1,6 @@
 tooling onsave jtree build produceTilesGrammar
 abstractPickerTileNode
- extends abstractTileTreeComponentNode
+ extends abstractDocTileNode
  string tileSize 480 420
  abstract
  string hakonTemplate
@@ -60,7 +60,7 @@ abstractPickerTileNode
 PickerTileNode
  extends abstractPickerTileNode
  description Displays list of available tiles.
- crux tiles.picker
+ crux doc.picker
  string tileHeader Tile Gallery
  javascript
   getChoices() {

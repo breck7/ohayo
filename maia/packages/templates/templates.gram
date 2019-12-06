@@ -75,9 +75,9 @@ templatesListNode
       .replace(this.maiaFileExtensionKey, "")
      return {
       command: "createProgramFromTemplateCommand",
-      name: node.get("data html.h1"),
+      name: node.get("data doc.title"),
       value: id,
-      category: lodash.upperFirst(node.get("data categories")),
+      category: lodash.upperFirst(node.get("data doc.categories")),
       description: ""
      }
     })

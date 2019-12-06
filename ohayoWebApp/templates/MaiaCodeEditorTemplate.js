@@ -1,7 +1,7 @@
 const { jtree } = require("jtree")
 
 const MaiaCodeEditorTemplate = (source, fileName, treeLanguage) =>
-  new jtree.TreeNode(`html.h1 Source code visualization of {fileName}
+  new jtree.TreeNode(`doc.title Source code visualization of {fileName}
 data.inline
  parser text
  treeLanguage {treeLanguage}
@@ -18,6 +18,6 @@ data.inline
     text.wordcloud
  content
   {source}
-layout column`).templateToString({ source, fileName, treeLanguage })
+doc.layout column`).templateToString({ source, fileName, treeLanguage })
 
 module.exports = MaiaCodeEditorTemplate

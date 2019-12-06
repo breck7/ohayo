@@ -1,4 +1,4 @@
-html.h1 Exponents
+doc.title Exponents
  visible
 math.gen exp 0 1 .01
  vega.line 2.718^x from 0 to 1
@@ -15,6 +15,6 @@ math.gen exp 10 20 .1
   visible
   xColumn input
   yColumn output
-layout column
-categories math
-defaultHidden
+doc.layout column
+doc.categories math
+doc.defaultHidden

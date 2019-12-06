@@ -10,6 +10,6 @@ ohayo.maia
   markdown.toHtml
  templates.list
  challenge.list
- layout column`
+doc.layout column`
 
 module.exports = DemoTemplates

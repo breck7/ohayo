@@ -1,0 +1,221 @@
+tooling onsave jtree build produceTilesGrammar
+programmingLanguageNameCell
+ enum javascript latex css html ruby rust python csv tsv xml php typescript lisp swift java c cpp markdown bash
+ highlightScope constant
+codeCell
+ highlightScope string
+documentCategoryCell
+ highlightScope constant
+ enum shopping chemistry programming socialMedia math parenting writing dataScience
+zoomCell
+ extends numberCell
+referenceIdCell
+ highlightScope string
+docLayoutOptionCell
+ enum custom bin tree column tiled
+ highlightScope constant
+abstractDocSettingNode
+ cells tileKeywordCell
+ abstract
+ boolean visible false
+abstractDocTileNode
+ int footerHeight 0
+ int headerHeight 0
+ cells tileKeywordCell
+ extends abstractTileTreeComponentNode
+ abstract
+ string bodyStumpTemplate
+  {tagName}
+   bern
+    {content}
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
+   contextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    doubleClickCommand toggleTileMaximizeCommand
+   div
+    class TileBody HeaderLess
+    {body}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
+ javascript
+  _getBody() {
+    return this.qFormat(this.bodyStumpTemplate, {content: this.getContent(), tagName: this.tagName})
+  }
+  toStumpCode() {
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
+  }
+docTitleNode
+ catchAllCellType stringCell
+ description A title
+ example A doc
+  doc.title A Tale of Two Cities
+ string tileSize 600 75
+ extends abstractDocTileNode
+ cells tileKeywordCell
+ crux doc.title
+ string tagName h1
+docSubtitleNode
+ extends docTitleNode
+ description A subheader
+ string tagName h2
+ crux doc.subtitle
+abstractDocSectionComponentNode
+ abstract
+docSectionSubtitleNode
+ extends abstractDocSectionComponentNode
+ crux subtitle
+ cells tileKeywordCell
+ catchAllCellType stringCell
+ javascript
+  compile() {
+    return `h2 ${this.getContent()}`
+  }
+docSectionParagraphNode
+ extends abstractDocSectionComponentNode
+ crux paragraph
+ cells tileKeywordCell
+ catchAllCellType stringCell
+ catchAllNodeType docParagraphLineNode
+ string stumpTemplate
+  p
+   bern
+    {content}
+ javascript
+  compile() {
+    return new jtree.TreeNode(this.stumpTemplate).templateToString({content: this.getContentWithChildren()})
+  }
+docSectionLinkNode
+ extends abstractDocSectionComponentNode
+ crux link
+ cells tileKeywordCell urlCell
+ catchAllCellType stringCell
+ string stumpTemplate
+  a {content}
+   href {url}
+ javascript
+  compile() {
+    return new jtree.TreeNode(this.stumpTemplate).templateToString({content: this.getWordsFrom(2).join(" "), url: this.getWord(1)})
+  }
+ example
+  doc.section
+   link http://ohayo.computer Ohayo
+docSectionCodeNode
+ extends abstractDocSectionComponentNode
+ crux code
+ cells tileKeywordCell programmingLanguageNameCell
+ catchAllNodeType docLineOfCodeNode
+ string stumpTemplate
+  code
+   bern
+    {content}
+ javascript
+  compile() {
+    return new jtree.TreeNode(this.stumpTemplate).templateToString({content: this.childrenToString()})
+  }
+ example
+  doc.section
+   subtitle Some Code
+   code latex
+    E_0 &= mc^2
+    E &= \frac{mc^2}{\sqrt{1-\frac{v^2}{c^2}}}
+docLineOfCodeNode
+ catchAllCellType codeCell
+ catchAllNodeType docLineOfCodeNode
+docParagraphLineNode
+ catchAllCellType stringCell
+ catchAllNodeType docParagraphLineNode
+docCategoriesNode
+ extends abstractDocSettingNode
+ crux doc.categories
+ description Add some categories to the document for organization.
+ catchAllCellType documentCategoryCell
+docAuthorNode
+ extends abstractDocSettingNode
+ catchAllCellType stringCell
+ crux doc.author
+ description Add one author per line.
+docDefaultHiddenNode
+ crux doc.defaultHidden
+ example
+  doc.defaultHidden
+  samples.portals
+   tables.basic
+    visible
+ description Change default tile visibility to hidden.
+ cells tileKeywordCell
+ extends abstractDocSettingNode
+docDateNode
+ description Date published.
+ extends abstractDocSettingNode
+ crux doc.date
+ catchAllCellType dateCell
+docZoomNode
+ crux doc.zoom
+ description Enlarge or shrink all tiles
+ cells tileKeywordCell zoomCell
+ extends abstractDocSettingNode
+docLayoutNode
+ cells tileKeywordCell docLayoutOptionCell
+ extends abstractDocSettingNode
+ crux doc.layout
+commentCell
+ highlightScope comment
+commentKeywordCell
+ highlightScope comment
+commentLineNode
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+docCommentNode
+ description A comment node
+ cells commentKeywordCell
+ extends abstractTileTreeComponentNode
+ boolean visible false
+ frequency 0
+ example An example program with comments
+  doc.comment get iris data
+  samples.iris
+   doc.comment filter is
+   filter.where Species = virginica
+    doc.comment display results
+    tables.basic
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+ crux doc.comment
+docSectionNode
+ description A section containing subtitles, paragraphs, code blocks, etc.
+ crux doc.section
+ extends abstractDocTileNode
+ inScope abstractDocSectionComponentNode
+ javascript
+  _getBody() {
+    return this.compile()
+  }
+  _getCompiledLine() {
+    return ""
+  }
+ example
+  doc.section
+   subtitle Subtitle
+   paragraph Paragraph
+   code python
+    # some code
+docReferenceUrlNode
+ crux url
+ cells tileSettingKeywordCell urlCell
+ description URL for the reference
+docReferenceNode
+ crux doc.ref
+ cells tileKeywordCell referenceIdCell
+ inScope docReferenceUrlNode
+ string tagName p
+ doc.ref someRefId
+  url https://en.wikipedia.org/wiki/Note_(typography)
+ description A reference to an external source
+ extends abstractDocTileNode

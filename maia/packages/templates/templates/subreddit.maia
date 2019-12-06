@@ -1,9 +1,9 @@
-html.h1 Top stories in a subreddit
+doc.title Top stories in a subreddit
 reddit.sub Astronomy
  columns.keep title created_utc score subreddit url
   vega.scatter
    yColumn score
    xColumn created_utc
   list.links
-layout column
-categories socialMedia
+doc.layout column
+doc.categories socialMedia

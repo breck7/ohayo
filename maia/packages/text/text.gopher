@@ -7,4 +7,4 @@ testProgram declaration.maia
      filter.where wordLength > 5
       rows.sortByReverse count
        tables.basic
- layout tiled
+ doc.layout tiled

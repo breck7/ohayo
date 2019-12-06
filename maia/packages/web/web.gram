@@ -5,18 +5,18 @@ webGetNode
   web.get https://raw.githubusercontent.com/treenotation/ohayo/master/maia/packages/samples/iris.tsv
    tables.basic
  frequency .1
- javascript
-  _getPlaceHolderMessage() {
-   return "Enter a url."
-  }
-  getTileBodyStumpCode() {
-   return `span ${this.getFirstWord()}
+ string placeholderMessage Enter a url.
+ string bodyStumpTemplate
+  span {kind}
    class LargeLabel
   input
-   value ${this.getContent() || ""}
-   placeholder ${this._getPlaceHolderMessage()}
+   value {content}
+   placeholder {placeholderMessage}
    changeCommand changeTileContentAndRenderCommand
-   class LargeTileInput`
+   class LargeTileInput
+ javascript
+  getTileBodyStumpCode() {
+   return this.qFormat(this.bodyStumpTemplate, {kind: this.getFirstWord(), content : this.getContent() || "", placeholderMessage: this.placeholderMessage})
   }
  string tileSize 400 100
  extends abstractUrlNode

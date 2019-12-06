@@ -16,7 +16,7 @@ hackernewsTopNode
      vega.scatter
       xColumn time
       yColumn score
-  layout tree
+  doc.layout tree
  javascript
   async fetchTableInputs() {
    // todo: allow cache breaking.
@@ -59,7 +59,7 @@ hackernewsSubmissionsNode
      vega.scatter Comments
       xColumn time
       yColumn score
-  layout tree
+  doc.layout tree
  javascript
   _getFirstUrls() {
    return this.getWordsFrom(2).map(username => `https://hacker-news.firebaseio.com/v0/user/${username}.json?print=pretty`)

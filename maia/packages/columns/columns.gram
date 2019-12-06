@@ -8,15 +8,13 @@ columnsFirstNode
     tables.basic
  extends abstractColumnFilterTileNode
  crux columns.first
+ string placeholderMessage Enter the number of columns you want to keep
  javascript
   getColumnNamesToKeep() {
    return this.getParentOrDummyTable()
     .getColumnsArrayOfObjects()
     .slice(0, parseInt(this.getContent()))
     .map(col => col.name)
-  }
-  _getPlaceHolderMessage() {
-   return "Enter the number of columns you want to keep"
   }
 columnsLastNode
  cells tileKeywordCell intCell
@@ -27,13 +25,11 @@ columnsLastNode
     tables.basic
  extends abstractColumnFilterTileNode
  crux columns.last
+ string placeholderMessage Enter the number of columns you want to keep
  javascript
   getColumnNamesToKeep() {
    const cols = this.getParentOrDummyTable().getColumnsArrayOfObjects()
    return cols.slice(cols.length - parseInt(this.getContent())).map(col => col.name)
-  }
-  _getPlaceHolderMessage() {
-   return "Enter the number of columns you want to keep"
   }
 columnsSetTypeNode
  cells tileKeywordCell columnNameCell primitiveTypeCell
@@ -51,6 +47,42 @@ columnsSetTypeNode
    const colToChange = this.getWord(1)
    const newType = this.getWord(2)
    return this.getParentOrDummyTable().changeColumnType(colToChange, newType)
+  }
+columnsDropNode
+ description Drop certain columns. Inverse of columns.keep.
+ extends abstractColumnFilterTileNode
+ example
+  samples.iris
+   columns.drop Petal.Length
+    tables.basic
+ crux columns.drop
+ catchAllCellType columnNameCell
+ javascript
+  getColumnNamesToKeep() {
+   const colsToDrop = this.getWordsFrom(1)
+   return this.getParentOrDummyTable()
+    .getColumnsArrayOfObjects()
+    .filter(col => !colsToDrop.includes(col.name))
+    .map(col => col.name)
+  }
+columnsDropConstantsNode
+ description Drop any columns that contain only a single value.
+ extends abstractColumnFilterTileNode
+ example
+  data.inline
+   content
+    state,country
+    hawaii,usa
+    maine,usa
+   columns.dropConstants
+    columns.describe
+ crux columns.dropConstants
+ javascript
+  getColumnNamesToKeep() {
+   return this.getParentOrDummyTable()
+    .getColumnsArray()
+    .filter(col => col.getReductions().uniqueValues > 1)
+    .map(col => col.getColumnName())
   }
 columnsDescribeNode
  description Computes statistics for each input column.
@@ -83,6 +115,7 @@ columnsKeepNode
     tables.basic
  extends abstractColumnFilterTileNode
  crux columns.keep
+ string placeholderMessage Enter the columns to keep.
  javascript
   getColumnNamesToKeep() {
    const colsToKeep = this.getWordsFrom(1)
@@ -90,7 +123,4 @@ columnsKeepNode
     .getColumnsArrayOfObjects()
     .filter(col => colsToKeep.includes(col.name))
     .map(col => col.name)
-  }
-  _getPlaceHolderMessage() {
-   return "Enter the columns to keep."
   }

@@ -8,6 +8,6 @@ test challengeRegressionCountShouldBe10
       text.wordCount
        filter.where word = people
         show.max count Count
-    layout column
+    doc.layout column
    assertLengthIs getRenderedTilesDiagnostic 5
    assertStringIncludes getStumpNodeStringWithoutCssAndSvg h3 10

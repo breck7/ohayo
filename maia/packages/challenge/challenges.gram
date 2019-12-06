@@ -12,7 +12,7 @@ challengePlayNode
   challenge.list
   challenge.play 1
   challenge.play 2
-  layout tiled
+  doc.layout tiled
  string tileSize 640 240
  extends abstractEmptyFooterTileNode
  crux challenge.play

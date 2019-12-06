@@ -8,7 +8,10 @@ TilesConstants.tileScript = "tileScript"
 TilesConstants.tileSize = "tileSize"
 TilesConstants.abstractTileSetting = "abstractTileSetting"
 
-TilesConstants.layout = "layout"
+
+TilesConstants.defaultHidden = "doc.defaultHidden"
+
+TilesConstants.layout = "doc.layout"
 TilesConstants.layouts = {}
 TilesConstants.layouts.custom = "custom"
 TilesConstants.layouts.tiled = "tiled"
@@ -21,7 +24,7 @@ TilesConstants.selectedClass = "ui-selected"
 TilesConstants.staySelectedClass = "staySelected"
 
 TilesConstants.maximized = "maximized"
-TilesConstants.pickerTile = "tiles.picker"
+TilesConstants.pickerTile = "doc.picker"
 
 TilesConstants.abstractTileTreeComponentNode = "abstractTileTreeComponentNode"
 

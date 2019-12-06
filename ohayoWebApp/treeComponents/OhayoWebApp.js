@@ -627,7 +627,7 @@ ${OhayoConstants.panel} 400
   getRenderedTilesDiagnostic() {
     return this.getMountedTilesProgram()
       .getTiles()
-      .filter(tile => tile.isMounted())
+      .filter(tile => tile.isVisible() && tile.isMounted())
   }
 
   // for tests

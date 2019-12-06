@@ -1,8 +1,8 @@
-html.h1 Data Portals
+doc.title Data Portals
 samples.portals
  hidden
  rows.sortByReverse datasets
   hidden
   tables.basic
-categories dataScience
-layout column
+doc.categories dataScience
+doc.layout column
