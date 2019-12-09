@@ -65,7 +65,7 @@ PickerTileNode
  javascript
   getChoices() {
    const allChoices = this.getRootNode()
-    .getGrammarProgram()
+    .getHandGrammarProgram()
     .getTopNodeTypeDefinitions()
    const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
    const theChoices = filteredChoices.length ? filteredChoices : allChoices

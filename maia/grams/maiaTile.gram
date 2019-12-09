@@ -56,7 +56,8 @@ abstractMaiaTileNode
   getRunTimeEnumOptions(cell) {
    // todo: only works if codemirror === tab
    try {
-    if (cell.getCellTypeId() === "columnNameCell") {
+    // todo: handle at static time.
+    if (cell.getCellTypeId() === "columnNameCell" && this.isLoaded()) {
      const mirrorNode = typeof app === "undefined" ? this : app
             .mountedProgram
             .nodeAtLine(this.getLineNumber() - 1)

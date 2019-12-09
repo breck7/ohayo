@@ -61,14 +61,25 @@ rowsSortByReverseNode
  extends rowsSortByNode
  crux rows.sortByReverse
 rowsDropIfMissingNode
- cells tileKeywordCell columnNameCell
- description Drop a row if it is missing a value in a column.
+ cells tileKeywordCell
+ description Drop a row if it is missing any values in any column, or missing a value in one of the specified columns.
  extends filterWhereNode
+ catchAllCellType columnNameCell
  crux rows.dropIfMissing
+ example
+  data.inline
+   content
+    name,age
+    bob,
+    mike,55
+   rows.dropIfMissing
+    show.rowCount
  javascript
   getRowFilterFn() {
    const column = this.getContent()
-   return row => row[column] !== ""
+   if (column)
+    return row => row[column] !== "" && row[column] !== undefined
+   return row => Object.values().some(value => value === "" || value === undefined)
   }
 rowsAddIndexColumnNode
  description Add an index column to the data.

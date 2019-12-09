@@ -22,7 +22,8 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
     const program = this._makeProgramFromLineNumber(lineNumber)
     let result = await program.execute(this.getRootNode())
 
-    if (typeof result !== "string") result = result.join("\n")
+    if (Array.isArray(result)) result = result.join("\n")
+    if (result === undefined) result = "undefined"
 
     this._getTab().logMessageText(encodeURIComponent(result))
     this.getRootNode().renderApp()
@@ -37,9 +38,7 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
   }
 
   _compileLine(lineNumber) {
-    const program = this._makeProgramFromLineNumber(lineNumber)
-    const grammarProgram = program.getDefinition()
-    return program.compile()
+    return this._makeProgramFromLineNumber(lineNumber).compile()
   }
 
   async compileLineCommand(lineNumber) {

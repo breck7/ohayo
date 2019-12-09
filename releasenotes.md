@@ -1,3 +1,10 @@
+16.1.0 2019-12-8
+----------------
+- New: rows.dropIfMissing tile
+- Infra: updated to Jtree 49
+- Infra: examples are now type checked
+- Infra: command line maia now doesn't print anything unless tiles do it
+
 16.0.1 2019-12-6
 ----------------
 - Fix: whitespace in doc.code is now pre

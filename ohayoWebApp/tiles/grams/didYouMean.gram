@@ -20,7 +20,7 @@ DidYouMeanTileNode
    const closestTile = jtree.Utils.didYouMean(
     input,
     this.getRootNode()
-     .getGrammarProgram()
+     .getHandGrammarProgram()
      .getTopNodeTypeDefinitions()
      .map(def => def.get("crux"))
    )

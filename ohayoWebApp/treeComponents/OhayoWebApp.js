@@ -213,7 +213,7 @@ ${OhayoConstants.panel} 400
   }
 
   getMaiaGrammarAsTree() {
-    if (!this._maiaGrammarTree) this._maiaGrammarTree = new maiaNode().getGrammarProgram()
+    if (!this._maiaGrammarTree) this._maiaGrammarTree = new maiaNode().getHandGrammarProgram()
     return this._maiaGrammarTree
   }
 
@@ -223,9 +223,9 @@ ${OhayoConstants.panel} 400
       this._grammars["maia"] = maiaNode // todo: do the same as the others?
       this._grammars["tiles"] = tilesNode
       // todo: do the below on demand? is this slow?
-      this._combineWithTilesAndRegisterGrammar("fire", new fireNode().getGrammarProgram().toTreeNode())
-      this._combineWithTilesAndRegisterGrammar("hakon", new hakonNode().getGrammarProgram().toTreeNode())
-      this._combineWithTilesAndRegisterGrammar("stump", new stumpNode().getGrammarProgram().toTreeNode())
+      this._combineWithTilesAndRegisterGrammar("fire", new fireNode().getHandGrammarProgram().toTreeNode())
+      this._combineWithTilesAndRegisterGrammar("hakon", new hakonNode().getHandGrammarProgram().toTreeNode())
+      this._combineWithTilesAndRegisterGrammar("stump", new stumpNode().getHandGrammarProgram().toTreeNode())
     }
     return this._grammars
   }
@@ -240,16 +240,16 @@ ${OhayoConstants.panel} 400
         if (node.toString().includes("boolean isTileAttribute true")) node.set("extends", "abstractTileSettingTerminalNode")
         else node.set("extends", "abstractTileTreeComponentNode")
       })
-    const grammarProgram = new jtree.GrammarProgram(
+    const handGrammarProgram = new jtree.HandGrammarProgram(
       new tilesNode()
-        .getGrammarProgram()
+        .getHandGrammarProgram()
         .toString()
         .trim() +
         "\n" +
         grammarCode.toString()
     )
-    if (this.isNodeJs()) grammarProgram._setDirName(__dirname) // todo: hacky, remove
-    this._grammars[extension] = grammarProgram.getRootConstructor()
+    if (this.isNodeJs()) handGrammarProgram._setDirName(__dirname) // todo: hacky, remove
+    this._grammars[extension] = handGrammarProgram.compileAndReturnRootConstructor()
   }
 
   getTargetNode() {
@@ -999,8 +999,8 @@ div - ${errors.join("\ndiv - ")}`
   }
 
   async saveCompiledCommand() {
-    const grammarProgram = this.mountedProgram.getGrammarProgram()
-    const outputExtension = grammarProgram.getTargetExtension()
+    const handGrammarProgram = this.mountedProgram.getHandGrammarProgram()
+    const outputExtension = handGrammarProgram.getTargetExtension()
     const filename = jtree.Utils.stringToPermalink(jtree.Utils.removeFileExtension(this.mountedTab.getFileName())) + "." + outputExtension
     this.willowBrowser.downloadFile(this.mountedProgram.compile(), filename, "text/" + outputExtension)
   }
@@ -1008,8 +1008,9 @@ div - ${errors.join("\ndiv - ")}`
   async executeProgramCommand() {
     // todo: sec considerations? prevent someone from triggering this command w/o user input.
     let result = await this.mountedTab.getTabProgram().execute()
-    if (typeof result !== "string") result = result.join("\n")
-    this.mountedTab.logMessageText(encodeURIComponent(result))
+    if (Array.isArray(result)) result = result.join("\n")
+    if (result === undefined) result = "undefined"
+    this.mountedTab.logMessageText(encodeURIComponent(result.toString()))
     this.renderApp()
   }
 
@@ -1314,8 +1315,8 @@ div - ${errors.join("\ndiv - ")}`
 
   async _doTileQualityCheckCommand() {
     // Note: currently required a mountedProgram
-    const grammarProgram = this.mountedProgram.getGrammarProgram()
-    const topNodeTypes = grammarProgram.getTopNodeTypeDefinitions().map(def => def.get("crux"))
+    const handGrammarProgram = this.mountedProgram.getHandGrammarProgram()
+    const topNodeTypes = handGrammarProgram.getTopNodeTypeDefinitions().map(def => def.get("crux"))
 
     const sourceCode = topNodeTypes.join("\n") + `\n${TilesConstants.layout} ${TilesConstants.layouts.column}`
     const tab = await this._createAndOpen(sourceCode, "all-tiles" + OhayoConstants.fileExtensions.maia)

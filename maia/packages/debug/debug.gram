@@ -89,7 +89,7 @@ debugGrammarTreeNode
   async fetchTableInputs() {
    const fileExtension = this.getWord(1) || "maia"
    const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
-   const tree = new programClass("").getGrammarProgram().getNodeTypeFamilyTree()
+   const tree = new programClass("").getHandGrammarProgram().getNodeTypeFamilyTree()
    return { rows: [{ text: tree.toString() }] }
   }
 debugSleepNode

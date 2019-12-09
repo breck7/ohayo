@@ -126,6 +126,8 @@ abstractTileTreeComponentNode
    return this.tileScript
   }
   _areRequirementsLoaded() {
+    if (this.isNodeJs())
+    return true
    const loadingMap = this.getTab()
     .getRootNode()
     .getDefinitionLoadingPromiseMap()

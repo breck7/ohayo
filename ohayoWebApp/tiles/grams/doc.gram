@@ -211,11 +211,12 @@ docReferenceUrlNode
  cells tileSettingKeywordCell urlCell
  description URL for the reference
 docReferenceNode
+ extends abstractDocTileNode
  crux doc.ref
  cells tileKeywordCell referenceIdCell
  inScope docReferenceUrlNode
  string tagName p
- doc.ref someRefId
-  url https://en.wikipedia.org/wiki/Note_(typography)
+ example
+  doc.ref someRefId
+   url https://en.wikipedia.org/wiki/Note_(typography)
  description A reference to an external source
- extends abstractDocTileNode

@@ -73,7 +73,7 @@ tilesNode
    const tiles = this.getTiles()
    const stats = {
     tiles: tiles.length,
-    treeLanguage: this.getGrammarProgram().getExtensionName(),
+    treeLanguage: this.getHandGrammarProgram().getExtensionName(),
     url: this.getTab().getFileName()
    }
    stats.timeToLoad = this.getTiles()

@@ -10,7 +10,7 @@ const rootDir = __dirname + "/"
 
 const { AbstractBuilder } = require("jtree/products/AbstractBuilder.node.js")
 const { TypeScriptRewriter } = require("jtree/products/TypeScriptRewriter.js")
-const project = require("jtree/langs/project/project.node.js")
+const project = require("jtree/products/project.nodejs.js")
 const { Disk } = require("jtree/products/Disk.node.js")
 
 class Builder extends AbstractBuilder {
@@ -179,7 +179,7 @@ ${header}
     this._getAllSourceFiles()
       .filter(file => file.endsWith(".gram") || file.endsWith(".grammar"))
       .forEach(file => {
-        jtree.formatFile(file, __dirname + "/node_modules/jtree/langs/grammar/grammar.grammar")
+        jtree.formatFileInPlace(file, __dirname + "/node_modules/jtree/langs/grammar/grammar.grammar")
       })
   }
 
@@ -202,28 +202,40 @@ cp -r ${__dirname}/images ${distFolder}/;`
     const fileTestTree: any = {}
     const oswarmNode = require("./testing/oswarm.nodejs.js")
     const gopherNode = require("./testing/gopher.nodejs.js")
+    const swarmNode = require("jtree/products/swarm.nodejs.js")
+    const grammarNode = require("jtree/products/grammar.nodejs.js")
 
-    // allTestFiles
-    //   .filter(file => file.endsWith(".grammar"))
-    //   .forEach(file => {
-    //     fileTestTree[file] = this.makeGrammarFileTestTree(file)
-    //   })
+    allTestFiles
+      .filter(file => file.endsWith(".grammar"))
+      .forEach(file => {
+        fileTestTree[file] = (equal: Function) => {
+          // Act
+          const program = new grammarNode(Disk.read(file))
+          const errs = program.getAllErrors()
+          if (errs.length) console.log(errs.join("\n"))
+          //Assert
+          equal(errs.length, 0, "should be no errors in grammar")
+        }
+      })
 
     allTestFiles
       .filter(file => file.endsWith(".test.js") || file.endsWith(".test.ts"))
       .forEach(file => {
         fileTestTree[file] = require(file).testTree
       })
+
     allTestFiles
       .filter(file => file.endsWith(".swarm"))
       .forEach(file => {
-        Object.assign(fileTestTree, jtree.makeProgram(file, `${rootDir}node_modules/jtree/langs/swarm/swarm.grammar`).compileToRacer(file))
+        Object.assign(fileTestTree, new swarmNode(Disk.read(file)).compileToRacer(file))
       })
+
     allTestFiles
       .filter(file => file.endsWith(".oswarm"))
       .forEach(file => {
         Object.assign(fileTestTree, new oswarmNode(Disk.read(file)).compileToRacer(file))
       })
+
     allTestFiles
       .filter(file => file.endsWith(".gopher"))
       .forEach(file => {
@@ -239,8 +251,17 @@ cp -r ${__dirname}/images ${distFolder}/;`
     return jtree.Utils.flatten([__dirname + "/maia/", __dirname + "/ohayoWebApp/"].map(getFiles))
   }
 
+  private _getMaiaExamplesTestTree() {
+    const maiaPath = `${__dirname}/maia/maia.nodejs.js`
+    const maiaNode = require(maiaPath)
+    const handGrammarProgram = new maiaNode().getHandGrammarProgram()
+    return handGrammarProgram.examplesToTestBlocks(maiaNode)
+  }
+
   async test() {
     const fileTree = this._makeTestTreeForFolder(this._getAllSourceFiles())
+    fileTree.maiaExamples = this._getMaiaExamplesTestTree()
+
     const runner = new jtree.TestRacer(fileTree)
     await runner.execute()
     runner.finish()
@@ -315,7 +336,7 @@ ${common}`
     combined.delete("tooling")
     combined.toDisk(combinedGrammarFilePath)
     // todo: for now we need to sort grammar files otherwise things will be used before defined.
-    jtree.formatFile(combinedGrammarFilePath, __dirname + "/node_modules/jtree/langs/grammar/grammar.grammar")
+    jtree.formatFileInPlace(combinedGrammarFilePath, __dirname + "/node_modules/jtree/langs/grammar/grammar.grammar")
 
     console.log(jtree.compileGrammarForBrowser(combinedGrammarFilePath, compiledOutputFolder, true))
     console.log(jtree.compileGrammarForNodeJs(combinedGrammarFilePath, compiledOutputFolder, true))

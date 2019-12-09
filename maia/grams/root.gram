@@ -21,6 +21,10 @@ maiaNode
  description Maia is a programming language for doing data science.
  inScope abstractTileTreeComponentNode tileBlankLineNode abstractDocSettingNode hashBangNode
  javascript
+  async execute() {
+    await Promise.all(this.map(node => node.execute()))
+    // Use shell tiles to do any outputs
+  }
   _getProgramRowCount() {
    return this.getAllRowsFromAllOutputTables().reduce((acc, curr) => acc + curr.length, 0)
   }

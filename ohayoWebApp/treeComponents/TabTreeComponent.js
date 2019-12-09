@@ -40,7 +40,7 @@ class TabTreeComponent extends AbstractTreeComponent {
   }
 
   getContextMenuCommandsStumpCode() {
-    const grammarProgram = this.getTabProgram().getGrammarProgram()
+    const handGrammarProgram = this.getTabProgram().getHandGrammarProgram()
 
     return `a Save File
  clickCommand saveTabAndNotifyCommand
@@ -58,7 +58,7 @@ a Log program stats
  clickCommand printProgramStatsCommand
 a Close all other files
  clickCommand closeAllTabsExceptFocusedTabCommand
-a Save compiled '${grammarProgram.getTargetExtension()}' file
+a Save compiled '${handGrammarProgram.getTargetExtension()}' file
  tabindex -1
  clickCommand saveCompiledCommand`
   }

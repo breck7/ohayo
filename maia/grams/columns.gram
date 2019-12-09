@@ -18,7 +18,9 @@ abstractColumnNode
   getRunTimeEnumOptions(cell) {
    // todo: only works if codemirror === tab
    try {
-    if (cell.getCellTypeId() === "columnNameCell") {
+    // todo: handle at static time.
+    const parentTile = this.getParent()
+    if (cell.getCellTypeId() === "columnNameCell" && parentTile.isLoaded()) {
       const mirrorNode = typeof app === "undefined" ? this : app
             .mountedProgram
             .nodeAtLine(this.getLineNumber() - 1)

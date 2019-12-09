@@ -98,7 +98,7 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
     const tile = this.getTargetTile()
     const tileNames = tile
       .getRootNode()
-      .getGrammarProgram()
+      .getHandGrammarProgram()
       ._getInScopeNodeTypeIds()
       .filter(name => !name.includes("_") && !name.startsWith("@"))
     tileNames.sort()
