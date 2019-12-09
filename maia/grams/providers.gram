@@ -45,7 +45,7 @@ abstractProviderNode
     rows: []
    }
   }
-  async _executeChildNodes() {
+  async _execute() {
    const timeLoadStarted = this._getProcessTimeInMilliseconds()
    this._timeLastLoadStarted = timeLoadStarted
    const fetchedTableInputs = await this.fetchTableInputs()
@@ -59,7 +59,7 @@ abstractProviderNode
    this._outputTable = new Table(fetchedTableInputs.rows, fetchedTableInputs.columnDefinitions, this.getRowClass())
    this._timeToLoad = this._getProcessTimeInMilliseconds() - timeLoadStarted
    this.setIsDataLoaded(true)
-   await this._runChildTiles()
+   await this._executeChildNodes()
   }
 useCacheNode
  cells tileSettingKeywordCell booleanCell
@@ -136,9 +136,9 @@ abstractFixedDatasetFromUrlNode
  abstract
 abstractDummyNode
  javascript
-  async _executeChildNodes() {
+  async _execute() {
    this.setIsDataLoaded(true)
-   await this._runChildTiles()
+   await this._executeChildNodes()
   }
  string tileSize 300 150
  extends abstractProviderNode

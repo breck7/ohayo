@@ -3,7 +3,25 @@ toCsvNode
  description Print input table to console as csv.
  extends abstractMaiaTileNode
  crux shell.csv
+ example
+  samples.presidents
+   filter.where HomeState = Illinois
+    shell.csv
  javascript
   execute() {
-   console.log(this.getParentOrDummyTable().toDelimited(","))
+   console.log(this._getMessage())
+  }
+  _getMessage() {
+    return this.getParentOrDummyTable().toDelimited(",")
+  }
+toTypeScriptInterfaceNode
+ extends toCsvNode
+ crux shell.typescript
+ example
+  samples.presidents
+   shell.typescript
+ javascript
+  _getMessage() {
+    // todo: gopher is evaling this in test
+    return this.getParentOrDummyTable().toTypeScriptInterface()
   }

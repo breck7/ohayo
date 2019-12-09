@@ -347,15 +347,15 @@ abstractTileTreeComponentNode
    return this.has(TilesConstants.maximized)
   }
   async _executeChildNodes() {
-   await this._runChildTiles()
-  }
-  async _runChildTiles() {
    await Promise.all(this.getChildTiles().map(tile => tile.execute()))
+  }
+  async _execute() {
+    await this._executeChildNodes()
   }
   async execute() {
    try {
     this.setRunTimePhaseError("execute")
-    await this._executeChildNodes()
+    await this._execute()
    } catch (err) {
     this.setRunTimePhaseError("execute", err)
     console.error(err)

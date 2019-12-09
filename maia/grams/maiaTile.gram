@@ -110,9 +110,9 @@ abstractMaiaTileNode
    data.unshift(header)
    return data
   }
-  async _executeChildNodes() {
+  async _execute() {
    this.setIsDataLoaded(true)
-   return super._executeChildNodes()
+   await this._executeChildNodes()
   }
   getTileQualityCheck() {
    const definition = this.getDefinition()

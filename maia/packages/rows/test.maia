@@ -1,0 +1,7 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+data.inline
+ content
+  name,age
+  bob,
+  mike,55
+ shell.typescript

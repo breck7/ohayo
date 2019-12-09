@@ -13698,8 +13698,8 @@ class TreeUtils {
     const prng = this._getPseudoRandom0to1FloatGenerator(seed)
     const sampled = {}
     const populationSize = population.length
+    if (quantity >= populationSize) return population.slice(0)
     const picked = []
-    if (quantity >= populationSize) quantity = populationSize
     while (picked.length < quantity) {
       const index = Math.floor(prng() * populationSize)
       if (sampled[index]) continue
@@ -16454,7 +16454,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "48.1.0"
+TreeNode.getVersion = () => "49.0.1"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -19798,10 +19798,10 @@ class Column {
   isInvalidValue(value) {
     return this.getPrimitiveTypeObj().isInvalidValue(value)
   }
-  _getSample() {
+  _getFirstNonEmptyValueFromSampleSet() {
     if (this._sample === undefined) {
       const sampleSet = this._getSampleSet()
-      this._sample = sampleSet.length ? sampleSet[0] : ""
+      this._sample = sampleSet.length ? sampleSet.find(value => value !== undefined && value !== null && value !== NaN && value !== "") : ""
     }
     return this._sample
   }
@@ -19844,7 +19844,7 @@ class Column {
   }
   isLink() {
     if (this._isLink !== undefined) return this._isLink
-    const sample = this._getSample()
+    const sample = this._getFirstNonEmptyValueFromSampleSet()
     if (!this.isString() || !sample || !sample.match) this._isLink = false
     else this._isLink = sample.match(/^(https?\:|\/)/) ? true : false
     return this._isLink
@@ -19889,7 +19889,7 @@ class Column {
   }
   getFormat() {
     if (this._getColDefObject().format) return this._getColDefObject().format
-    return this.getPrimitiveTypeObj().getDefaultFormat(this.getColumnName(), this._getSample())
+    return this.getPrimitiveTypeObj().getDefaultFormat(this.getColumnName(), this._getFirstNonEmptyValueFromSampleSet())
   }
   getBlankPercentage() {
     let blankCount = 0
@@ -20071,9 +20071,9 @@ class Column {
   }
   _inferType() {
     const columnObj = this._getColDefObject()
-    const sample = this._getSample()
+    const sample = this._getFirstNonEmptyValueFromSampleSet()
     if (columnObj && columnObj.type && Column.getPrimitiveTypeByName(columnObj.type)) return Column.getPrimitiveTypeByName(columnObj.type)
-    const guesses = Column._getColumnProbabilities(this.getColumnName(), this._getSample())
+    const guesses = Column._getColumnProbabilities(this.getColumnName(), this._getFirstNonEmptyValueFromSampleSet())
     let max = 0
     let bestGuess = null
     for (let typeScore in guesses) {
@@ -21319,10 +21319,11 @@ var ComparisonOperators
 // todo: remove detectAndAddParam?
 // todo: remove rowclass param?
 class Table {
-  constructor(rowsArray = [], columnsArrayOrMap = [], rowClass = Row, detectAndAddColumns = true) {
+  constructor(rowsArray = [], columnsArrayOrMap = [], rowClass = Row, detectAndAddColumns = true, samplingSeed = Date.now()) {
     this._columnsMap = {}
     this._ctime = new jtree.TreeNode()._getProcessTimeInMilliseconds()
     this._tableId = this._getUniqueId()
+    this._samplingSeed = samplingSeed
     // if this is ALREADY CARDS, should we be a view?
     this._rows = rowsArray.map(source => (source instanceof Row ? source : new rowClass(source, this)))
     // Add detected columns first, so they can be overwritten
@@ -21454,7 +21455,7 @@ class Table {
   }
   _getSampleSet() {
     const SAMPLE_SET_SIZE = 30 // todo: fix.
-    if (!this._sampleSet) this._sampleSet = jtree.Utils.sampleWithoutReplacement(this.getRows(), SAMPLE_SET_SIZE, Date.now())
+    if (!this._sampleSet) this._sampleSet = jtree.Utils.sampleWithoutReplacement(this.getRows(), SAMPLE_SET_SIZE, this._samplingSeed)
     return this._sampleSet
   }
   _getDetectedColumnNames() {
@@ -25288,6 +25289,10 @@ pre
  class TilePencilButton
  clickCommand toggleToolbarCommand`
     }
+    get errorLogMessageStumpTemplate() {
+      return `div Error occurred. See console.
+ class OhayoError`
+    }
     get visibleKey() {
       return `visible`
     }
@@ -25360,6 +25365,7 @@ pre
       return this.tileScript
     }
     _areRequirementsLoaded() {
+      if (this.isNodeJs()) return true
       const loadingMap = this.getTab()
         .getRootNode()
         .getDefinitionLoadingPromiseMap()
@@ -25584,24 +25590,19 @@ pre
       return this.has(TilesConstants.maximized)
     }
     async _executeChildNodes() {
-      await this._runChildTiles()
-    }
-    async _runChildTiles() {
       await Promise.all(this.getChildTiles().map(tile => tile.execute()))
     }
+    async _execute() {
+      await this._executeChildNodes()
+    }
     async execute() {
-      console.log(1)
       try {
         this.setRunTimePhaseError("execute")
-        await this._executeChildNodes()
+        await this._execute()
       } catch (err) {
         this.setRunTimePhaseError("execute", err)
         console.error(err)
-        const theme = this.getTheme()
-        this.emitLogMessage(`div
-   bern
-    Error occurred. See console.
-   style color: ${theme.errorColor};`)
+        this.emitLogMessage(this.errorLogMessageStumpTemplate)
       }
       return this
     }
@@ -26188,10 +26189,10 @@ a {name}
           "rows.shuffle": rowsShuffleNode,
           "rows.reverse": rowsReverseNode,
           "filter.where": filterWhereNode,
-          "rows.dropIfMissing": rowsDropIfMissingNode,
           "filter.with": filterWithNode,
           "filter.without": filterWithoutNode,
           "rows.first": rowsFirstNode,
+          "rows.dropIfMissing": rowsDropIfMissingNode,
           "rows.last": rowsLastNode,
           "columns.setType": columnsSetTypeNode,
           "group.by": groupByNode,
@@ -26207,7 +26208,9 @@ a {name}
           "random.float": randomFloatNode,
           "random.int": randomIntNode,
           "samples.tinyIris": samplesTinyIrisNode,
+          "assert.rowCount": assertRowCountNode,
           "shell.csv": toCsvNode,
+          "shell.typescript": toTypeScriptInterfaceNode,
           "templates.list": templatesListNode,
           hidden: hiddenNode,
           visible: visibleNode,
@@ -26302,7 +26305,7 @@ pre
       // todo: only works if codemirror === tab
       try {
         // todo: handle at static time.
-        if (cell.getCellTypeId() === "columnNameCell") {
+        if (cell.getCellTypeId() === "columnNameCell" && this.isLoaded()) {
           const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
           return mirrorNode.getParentOrDummyTable().getColumnNames()
         }
@@ -26351,9 +26354,9 @@ pre
       data.unshift(header)
       return data
     }
-    async _executeChildNodes() {
+    async _execute() {
       this.setIsDataLoaded(true)
-      return super._executeChildNodes()
+      await this._executeChildNodes()
     }
     getTileQualityCheck() {
       const definition = this.getDefinition()
@@ -28489,7 +28492,7 @@ span Rows Out: ${table.getRowCount()} Columns Out: ${table.getColumnCount()} Tim
         rows: []
       }
     }
-    async _executeChildNodes() {
+    async _execute() {
       const timeLoadStarted = this._getProcessTimeInMilliseconds()
       this._timeLastLoadStarted = timeLoadStarted
       const fetchedTableInputs = await this.fetchTableInputs()
@@ -28503,7 +28506,7 @@ span Rows Out: ${table.getRowCount()} Columns Out: ${table.getColumnCount()} Tim
       this._outputTable = new Table(fetchedTableInputs.rows, fetchedTableInputs.columnDefinitions, this.getRowClass())
       this._timeToLoad = this._getProcessTimeInMilliseconds() - timeLoadStarted
       this.setIsDataLoaded(true)
-      await this._runChildTiles()
+      await this._executeChildNodes()
     }
   }
 
@@ -28939,9 +28942,9 @@ input
     get tileSize() {
       return `300 150`
     }
-    async _executeChildNodes() {
+    async _execute() {
       this.setIsDataLoaded(true)
-      await this._runChildTiles()
+      await this._executeChildNodes()
     }
   }
 
@@ -29003,10 +29006,10 @@ input
       return `${this.getTileToolbarButtonStumpCode()}
 span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: ${outputTable.getColumnCount()}`
     }
-    async _executeChildNodes() {
+    async _execute() {
       this._outputTable = this._createOutputTable()
       this.setIsDataLoaded(true)
-      await this._runChildTiles()
+      await this._executeChildNodes()
     }
     getTileBodyStumpCode() {
       return this.qFormat(this.bodyStumpTemplate, { kind: this.getFirstWord(), content: this.getContent() || "", placeholderMessage: this.placeholderMessage })
@@ -29535,20 +29538,6 @@ class LargeLabel`
     }
   }
 
-  class rowsDropIfMissingNode extends filterWhereNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get columnNameCell() {
-      return this.getWordsFrom(1)
-    }
-    getRowFilterFn() {
-      const column = this.getContent()
-      if (column) return row => row[column] !== "" && row[column] !== undefined
-      return row => Object.values().some(value => value === "" || value === undefined)
-    }
-  }
-
   class filterWithNode extends abstractRowFilterTileNode {
     get stringCell() {
       return this.getWordsFrom(0)
@@ -29593,6 +29582,24 @@ class LargeLabel`
       const limit = parseInt(this.getContent())
       if (isNaN(limit)) return undefined
       return (row, rowIndex) => rowIndex < limit
+    }
+  }
+
+  class rowsDropIfMissingNode extends abstractRowFilterTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWordsFrom(1)
+    }
+    get placeholderMessage() {
+      return `Leave blank to filter a row if it is missing any column, or specifiy column name(s).`
+    }
+    getRowFilterFn() {
+      const column = this.getContent()
+      const isValueEmpty = value => value === undefined || value === "" || (typeof value === "number" && isNaN(value))
+      if (column) return row => !isValueEmpty(row[column])
+      return row => !Object.values(row).some(isValueEmpty)
     }
   }
 
@@ -29928,9 +29935,39 @@ class LargeLabel`
     }
   }
 
+  class assertRowCountNode extends abstractMaiaTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get intCell() {
+      return parseInt(this.getWord(1))
+    }
+    get visible() {
+      return false
+    }
+    async execute() {
+      const num = this.getWord(1)
+      if (!num) return super.execute()
+      const expected = parseInt(num)
+      const actual = this.getParentOrDummyTable().getRowCount()
+      if (actual !== expected) throw new Error(`Expected ${expected} but got ${actual}`)
+      return super.execute()
+    }
+  }
+
   class toCsvNode extends abstractMaiaTileNode {
     execute() {
-      console.log(this.getParentOrDummyTable().toDelimited(","))
+      console.log(this._getMessage())
+    }
+    _getMessage() {
+      return this.getParentOrDummyTable().toDelimited(",")
+    }
+  }
+
+  class toTypeScriptInterfaceNode extends toCsvNode {
+    _getMessage() {
+      // todo: gopher is evaling this in test
+      return this.getParentOrDummyTable().toTypeScriptInterface()
     }
   }
 
@@ -30434,10 +30471,10 @@ a {name}
           "rows.shuffle": rowsShuffleNode,
           "rows.reverse": rowsReverseNode,
           "filter.where": filterWhereNode,
-          "rows.dropIfMissing": rowsDropIfMissingNode,
           "filter.with": filterWithNode,
           "filter.without": filterWithoutNode,
           "rows.first": rowsFirstNode,
+          "rows.dropIfMissing": rowsDropIfMissingNode,
           "rows.last": rowsLastNode,
           "columns.setType": columnsSetTypeNode,
           "group.by": groupByNode,
@@ -30453,7 +30490,9 @@ a {name}
           "random.float": randomFloatNode,
           "random.int": randomIntNode,
           "samples.tinyIris": samplesTinyIrisNode,
+          "assert.rowCount": assertRowCountNode,
           "shell.csv": toCsvNode,
+          "shell.typescript": toTypeScriptInterfaceNode,
           "templates.list": templatesListNode,
           "doc.categories": docCategoriesNode,
           "doc.author": docAuthorNode,
@@ -30468,6 +30507,10 @@ a {name}
     }
     get wallType() {
       return `flex`
+    }
+    async execute() {
+      await Promise.all(this.map(node => node.execute()))
+      // Use shell tiles to do any outputs
     }
     _getProgramRowCount() {
       return this.getAllRowsFromAllOutputTables().reduce((acc, curr) => acc + curr.length, 0)
@@ -30635,6 +30678,9 @@ abstractTileTreeComponentNode
  int footerHeight 30
  string hiddenKey hidden
  string visibleKey visible
+ string errorLogMessageStumpTemplate
+  div Error occurred. See console.
+   class OhayoError
  string pencilStumpTemplate
   span {icon}
    class TilePencilButton
@@ -30750,6 +30796,7 @@ abstractTileTreeComponentNode
    return this.tileScript
   }
   _areRequirementsLoaded() {
+   if (this.isNodeJs()) return true
    const loadingMap = this.getTab()
     .getRootNode()
     .getDefinitionLoadingPromiseMap()
@@ -30966,24 +31013,19 @@ abstractTileTreeComponentNode
    return this.has(TilesConstants.maximized)
   }
   async _executeChildNodes() {
-   await this._runChildTiles()
-  }
-  async _runChildTiles() {
    await Promise.all(this.getChildTiles().map(tile => tile.execute()))
   }
+  async _execute() {
+   await this._executeChildNodes()
+  }
   async execute() {
-   console.log(1)
    try {
     this.setRunTimePhaseError("execute")
-    await this._executeChildNodes()
+    await this._execute()
    } catch (err) {
     this.setRunTimePhaseError("execute", err)
     console.error(err)
-    const theme = this.getTheme()
-    this.emitLogMessage(\`div
-     bern
-      Error occurred. See console.
-     style color: \${theme.errorColor};\`)
+    this.emitLogMessage(this.errorLogMessageStumpTemplate)
    }
    return this
   }
@@ -31465,7 +31507,7 @@ abstractMaiaTileNode
    // todo: only works if codemirror === tab
    try {
     // todo: handle at static time.
-    if (cell.getCellTypeId() === "columnNameCell") {
+    if (cell.getCellTypeId() === "columnNameCell" && this.isLoaded()) {
      const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
      return mirrorNode.getParentOrDummyTable().getColumnNames()
     }
@@ -31514,9 +31556,9 @@ abstractMaiaTileNode
    data.unshift(header)
    return data
   }
-  async _executeChildNodes() {
+  async _execute() {
    this.setIsDataLoaded(true)
-   return super._executeChildNodes()
+   await this._executeChildNodes()
   }
   getTileQualityCheck() {
    const definition = this.getDefinition()
@@ -33431,7 +33473,7 @@ abstractProviderNode
     rows: []
    }
   }
-  async _executeChildNodes() {
+  async _execute() {
    const timeLoadStarted = this._getProcessTimeInMilliseconds()
    this._timeLastLoadStarted = timeLoadStarted
    const fetchedTableInputs = await this.fetchTableInputs()
@@ -33445,7 +33487,7 @@ abstractProviderNode
    this._outputTable = new Table(fetchedTableInputs.rows, fetchedTableInputs.columnDefinitions, this.getRowClass())
    this._timeToLoad = this._getProcessTimeInMilliseconds() - timeLoadStarted
    this.setIsDataLoaded(true)
-   await this._runChildTiles()
+   await this._executeChildNodes()
   }
 abstractUrlNoCellsNode
  boolean useCache true
@@ -33882,9 +33924,9 @@ redditSubNode
  crux reddit.sub
 abstractDummyNode
  javascript
-  async _executeChildNodes() {
+  async _execute() {
    this.setIsDataLoaded(true)
-   await this._runChildTiles()
+   await this._executeChildNodes()
   }
  string tileSize 300 150
  extends abstractProviderNode
@@ -33941,10 +33983,10 @@ abstractTransformerNode
    return \`\${this.getTileToolbarButtonStumpCode()}
   span Rows In: \${inputCount} Rows Out: \${outputTable.getRowCount()} Columns Out: \${outputTable.getColumnCount()}\`
   }
-  async _executeChildNodes() {
+  async _execute() {
    this._outputTable = this._createOutputTable()
    this.setIsDataLoaded(true)
-   await this._runChildTiles()
+   await this._executeChildNodes()
   }
   getTileBodyStumpCode() {
    return this.qFormat(this.bodyStumpTemplate, { kind: this.getFirstWord(), content: this.getContent() || "", placeholderMessage: this.placeholderMessage })
@@ -34480,26 +34522,6 @@ filterWhereNode
    if (!column) return table
    return table.filterClonedRowsByScalar(columnName, comparison, untypedScalarValue)
   }
-rowsDropIfMissingNode
- cells tileKeywordCell
- description Drop a row if it is missing any values in any column, or missing a value in one of the specified columns.
- extends filterWhereNode
- catchAllCellType columnNameCell
- crux rows.dropIfMissing
- example
-  data.inline
-   content
-    name,age
-    bob,
-    mike,55
-   rows.dropIfMissing
-    show.rowCount
- javascript
-  getRowFilterFn() {
-   const column = this.getContent()
-   if (column) return row => row[column] !== "" && row[column] !== undefined
-   return row => Object.values().some(value => value === "" || value === undefined)
-  }
 filterWithNode
  description Each row must contain all of these words
  frequency .01
@@ -34539,6 +34561,30 @@ rowsFirstNode
    const limit = parseInt(this.getContent())
    if (isNaN(limit)) return undefined
    return (row, rowIndex) => rowIndex < limit
+  }
+rowsDropIfMissingNode
+ cells tileKeywordCell
+ string placeholderMessage Leave blank to filter a row if it is missing any column, or specifiy column name(s).
+ description Drop a row if it is missing any values in any column, or missing a value in one of the specified columns.
+ extends abstractRowFilterTileNode
+ catchAllCellType columnNameCell
+ crux rows.dropIfMissing
+ example
+  data.inline
+   content
+    name,age
+    bob,
+    mike,55
+   assert.rowCount 2
+   rows.dropIfMissing
+    show.rowCount
+    assert.rowCount 1
+ javascript
+  getRowFilterFn() {
+   const column = this.getContent()
+   const isValueEmpty = value => value === undefined || value === "" || (typeof value === "number" && isNaN(value))
+   if (column) return row => !isValueEmpty(row[column])
+   return row => !Object.values(row).some(isValueEmpty)
   }
 rowsLastNode
  cells tileKeywordCell intCell
@@ -34855,13 +34901,52 @@ samplesTinyIrisNode
   async fetchTableInputs() {
    return new TableParser().parseTableInputsFromString(this.getDataContent(), this.getParserId())
   }
+assertRowCountNode
+ description Throw an error if row count not correct.
+ example Basics
+  data.inline
+   content
+    country
+    usa
+   assert.rowCount 1
+ extends abstractMaiaTileNode
+ cells tileKeywordCell intCell
+ crux assert.rowCount
+ boolean visible false
+ javascript
+  async execute() {
+   const num = this.getWord(1)
+   if (!num) return super.execute()
+   const expected = parseInt(num)
+   const actual = this.getParentOrDummyTable().getRowCount()
+   if (actual !== expected) throw new Error(\`Expected \${expected} but got \${actual}\`)
+   return super.execute()
+  }
 toCsvNode
  description Print input table to console as csv.
  extends abstractMaiaTileNode
  crux shell.csv
+ example
+  samples.presidents
+   filter.where HomeState = Illinois
+    shell.csv
  javascript
   execute() {
-   console.log(this.getParentOrDummyTable().toDelimited(","))
+   console.log(this._getMessage())
+  }
+  _getMessage() {
+   return this.getParentOrDummyTable().toDelimited(",")
+  }
+toTypeScriptInterfaceNode
+ extends toCsvNode
+ crux shell.typescript
+ example
+  samples.presidents
+   shell.typescript
+ javascript
+  _getMessage() {
+   // todo: gopher is evaling this in test
+   return this.getParentOrDummyTable().toTypeScriptInterface()
   }
 abstractTemplatePickerTileNode
  extends abstractMaiaTileNode
@@ -35187,6 +35272,10 @@ maiaNode
  description Maia is a programming language for doing data science.
  inScope abstractTileTreeComponentNode tileBlankLineNode abstractDocSettingNode hashBangNode
  javascript
+  async execute() {
+   await Promise.all(this.map(node => node.execute()))
+   // Use shell tiles to do any outputs
+  }
   _getProgramRowCount() {
    return this.getAllRowsFromAllOutputTables().reduce((acc, curr) => acc + curr.length, 0)
   }
@@ -35254,7 +35343,8 @@ abstractColumnNode
    // todo: only works if codemirror === tab
    try {
     // todo: handle at static time.
-    if (cell.getCellTypeId() === "columnNameCell") {
+    const parentTile = this.getParent()
+    if (cell.getCellTypeId() === "columnNameCell" && parentTile.isLoaded()) {
      const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
      return mirrorNode
       .getParent()
@@ -35557,10 +35647,10 @@ lineOfContentNode
         rowsReverseNode: rowsReverseNode,
         abstractRowFilterTileNode: abstractRowFilterTileNode,
         filterWhereNode: filterWhereNode,
-        rowsDropIfMissingNode: rowsDropIfMissingNode,
         filterWithNode: filterWithNode,
         filterWithoutNode: filterWithoutNode,
         rowsFirstNode: rowsFirstNode,
+        rowsDropIfMissingNode: rowsDropIfMissingNode,
         rowsLastNode: rowsLastNode,
         columnsSetTypeNode: columnsSetTypeNode,
         groupByNode: groupByNode,
@@ -35577,7 +35667,9 @@ lineOfContentNode
         randomFloatNode: randomFloatNode,
         randomIntNode: randomIntNode,
         samplesTinyIrisNode: samplesTinyIrisNode,
+        assertRowCountNode: assertRowCountNode,
         toCsvNode: toCsvNode,
+        toTypeScriptInterfaceNode: toTypeScriptInterfaceNode,
         abstractTemplatePickerTileNode: abstractTemplatePickerTileNode,
         templatesListNode: templatesListNode,
         tileBlankLineNode: tileBlankLineNode,
@@ -35699,7 +35791,8 @@ lineOfContentNode
       // todo: only works if codemirror === tab
       try {
         // todo: handle at static time.
-        if (cell.getCellTypeId() === "columnNameCell") {
+        const parentTile = this.getParent()
+        if (cell.getCellTypeId() === "columnNameCell" && parentTile.isLoaded()) {
           const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
           return mirrorNode
             .getParent()
@@ -38236,6 +38329,10 @@ pre
  class TilePencilButton
  clickCommand toggleToolbarCommand`
     }
+    get errorLogMessageStumpTemplate() {
+      return `div Error occurred. See console.
+ class OhayoError`
+    }
     get visibleKey() {
       return `visible`
     }
@@ -38308,6 +38405,7 @@ pre
       return this.tileScript
     }
     _areRequirementsLoaded() {
+      if (this.isNodeJs()) return true
       const loadingMap = this.getTab()
         .getRootNode()
         .getDefinitionLoadingPromiseMap()
@@ -38532,24 +38630,19 @@ pre
       return this.has(TilesConstants.maximized)
     }
     async _executeChildNodes() {
-      await this._runChildTiles()
-    }
-    async _runChildTiles() {
       await Promise.all(this.getChildTiles().map(tile => tile.execute()))
     }
+    async _execute() {
+      await this._executeChildNodes()
+    }
     async execute() {
-      console.log(1)
       try {
         this.setRunTimePhaseError("execute")
-        await this._executeChildNodes()
+        await this._execute()
       } catch (err) {
         this.setRunTimePhaseError("execute", err)
         console.error(err)
-        const theme = this.getTheme()
-        this.emitLogMessage(`div
-   bern
-    Error occurred. See console.
-   style color: ${theme.errorColor};`)
+        this.emitLogMessage(this.errorLogMessageStumpTemplate)
       }
       return this
     }
@@ -39330,6 +39423,9 @@ abstractTileTreeComponentNode
  int footerHeight 30
  string hiddenKey hidden
  string visibleKey visible
+ string errorLogMessageStumpTemplate
+  div Error occurred. See console.
+   class OhayoError
  string pencilStumpTemplate
   span {icon}
    class TilePencilButton
@@ -39445,6 +39541,7 @@ abstractTileTreeComponentNode
    return this.tileScript
   }
   _areRequirementsLoaded() {
+   if (this.isNodeJs()) return true
    const loadingMap = this.getTab()
     .getRootNode()
     .getDefinitionLoadingPromiseMap()
@@ -39661,24 +39758,19 @@ abstractTileTreeComponentNode
    return this.has(TilesConstants.maximized)
   }
   async _executeChildNodes() {
-   await this._runChildTiles()
-  }
-  async _runChildTiles() {
    await Promise.all(this.getChildTiles().map(tile => tile.execute()))
   }
+  async _execute() {
+   await this._executeChildNodes()
+  }
   async execute() {
-   console.log(1)
    try {
     this.setRunTimePhaseError("execute")
-    await this._executeChildNodes()
+    await this._execute()
    } catch (err) {
     this.setRunTimePhaseError("execute", err)
     console.error(err)
-    const theme = this.getTheme()
-    this.emitLogMessage(\`div
-     bern
-      Error occurred. See console.
-     style color: \${theme.errorColor};\`)
+    this.emitLogMessage(this.errorLogMessageStumpTemplate)
    }
    return this
   }
@@ -41788,7 +41880,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "16.0.1"
+const Version = "16.2.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 

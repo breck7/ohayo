@@ -80,9 +80,10 @@ rowsDropIfMissingNode
  javascript
   getRowFilterFn() {
    const column = this.getContent()
+   const isValueEmpty = value => value === undefined || value === "" || (typeof value === "number" && isNaN(value))
    if (column)
-    return row => row[column] !== "" && row[column] !== undefined
-   return row => Object.values(row).some(value => value === "" || value === undefined)
+    return row => !isValueEmpty(row[column])
+   return row => !Object.values(row).some(isValueEmpty)
   }
 rowsAddIndexColumnNode
  description Add an index column to the data.

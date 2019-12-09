@@ -19,10 +19,10 @@ abstractTransformerNode
    return `${this.getTileToolbarButtonStumpCode()}
   span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: ${outputTable.getColumnCount()}`
   }
-  async _executeChildNodes() {
+  async _execute() {
    this._outputTable = this._createOutputTable()
    this.setIsDataLoaded(true)
-   await this._runChildTiles()
+   await this._executeChildNodes()
   }
   getTileBodyStumpCode() {
    return this.qFormat(this.bodyStumpTemplate, {kind: this.getFirstWord(), content : this.getContent() || "", placeholderMessage: this.placeholderMessage})

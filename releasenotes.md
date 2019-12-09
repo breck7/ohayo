@@ -1,3 +1,8 @@
+16.2.0 2019-12-9
+----------------
+- Fix: dropIfMissing fix
+- Infra: updated jtree to get deterministic table parsing
+
 16.1.0 2019-12-8
 ----------------
 - New: rows.dropIfMissing tile
