@@ -11,6 +11,9 @@ abstractTileTreeComponentNode
  int footerHeight 30
  string hiddenKey hidden
  string visibleKey visible
+ string errorLogMessageStumpTemplate
+  div Error occurred. See console.
+   class OhayoError
  string pencilStumpTemplate
   span {icon}
    class TilePencilButton
@@ -356,11 +359,7 @@ abstractTileTreeComponentNode
    } catch (err) {
     this.setRunTimePhaseError("execute", err)
     console.error(err)
-    const theme = this.getTheme()
-    this.emitLogMessage(`div
-     bern
-      Error occurred. See console.
-     style color: ${theme.errorColor};`)
+    this.emitLogMessage(this.errorLogMessageStumpTemplate)
    }
    return this
   }

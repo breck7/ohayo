@@ -8,3 +8,15 @@ test reverseSort
       rows.first 1
        tables.basic
    assertStringExcludes getStumpNodeString setosa
+test dropMissing
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    data.inline
+     content
+      name,age
+      bob,
+      mike,55
+     assert.rowCount 2
+     rows.dropIfMissing
+      assert.rowCount 1

@@ -1,0 +1,24 @@
+tooling onsave jtree build produceMaiaGrammar
+assertRowCountNode
+ description Throw an error if row count not correct.
+ example Basics
+  data.inline
+   content
+    country
+    usa
+   assert.rowCount 1
+ extends abstractMaiaTileNode
+ cells tileKeywordCell intCell
+ crux assert.rowCount
+ boolean visible false
+ javascript
+  async execute() {
+    const num = this.getWord(1)
+    if (!num)
+      return super.execute()
+    const expected = parseInt(num)
+    const actual = this.getParentOrDummyTable().getRowCount()
+    if (actual !== expected)
+      throw new Error(`Expected ${expected} but got ${actual}`)
+    return super.execute()
+  }
