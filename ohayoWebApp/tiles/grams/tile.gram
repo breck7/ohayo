@@ -374,7 +374,7 @@ abstractTileTreeComponentNode
   }
   async triggerTileMethodCommand(value, methodName) {
    await this[methodName](value)
-   await this._runAfterTileUpdate(tile)
+   await this._runAfterTileUpdate(this)
   }
   // todo: refactor.
   async changeTileTypeCommand(newValue) {

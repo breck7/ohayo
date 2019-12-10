@@ -13448,6 +13448,9 @@ class TreeUtils {
           .replace(/ /g, "-")
       : ""
   }
+  static isValueEmpty(value) {
+    return value === undefined || value === "" || (typeof value === "number" && isNaN(value))
+  }
   static stringToPermalink(str) {
     return this._permalink(str, /[^a-z0-9- _\.]/gi)
   }
@@ -16454,7 +16457,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "49.0.1"
+TreeNode.getVersion = () => "49.1.0"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -19801,7 +19804,7 @@ class Column {
   _getFirstNonEmptyValueFromSampleSet() {
     if (this._sample === undefined) {
       const sampleSet = this._getSampleSet()
-      this._sample = sampleSet.length ? sampleSet.find(value => value !== undefined && value !== null && value !== NaN && value !== "") : ""
+      this._sample = sampleSet.length ? sampleSet.find(value => !jtree.Utils.isValueEmpty(value)) : ""
     }
     return this._sample
   }
@@ -21550,6 +21553,30 @@ ${cols}
       if (col.name === columnName) col.type = newType
     })
     return new Table(this.cloneNativeJavascriptTypedRows(), cols, undefined, false)
+  }
+  renameColumns(nameMap) {
+    const rows = this.getRows()
+      .map(row => row.rowToObjectWithOnlyNativeJavascriptTypes())
+      .map(obj => {
+        const newObj = {}
+        Object.keys(nameMap).forEach(oldName => {
+          newObj[nameMap[oldName]] = obj[oldName]
+        })
+        return newObj
+      })
+    const cols = this.getColumnsArrayOfObjects()
+    cols.forEach(col => {
+      col.name = nameMap[col.name]
+    })
+    return new Table(rows, cols, undefined, false)
+  }
+  cloneWithCleanColumnNames() {
+    const nameMap = {}
+    const cols = this.getColumnsArrayOfObjects()
+    cols.forEach(col => {
+      nameMap[col.name] = col.name.replace(/[^a-z0-9]/gi, "")
+    })
+    return this.renameColumns(nameMap)
   }
   // todo: can be made more effcicent
   dropAllColumnsExcept(columnsToKeep) {
@@ -25617,7 +25644,7 @@ pre
     }
     async triggerTileMethodCommand(value, methodName) {
       await this[methodName](value)
-      await this._runAfterTileUpdate(tile)
+      await this._runAfterTileUpdate(this)
     }
     // todo: refactor.
     async changeTileTypeCommand(newValue) {
@@ -26194,6 +26221,7 @@ a {name}
           "rows.first": rowsFirstNode,
           "rows.dropIfMissing": rowsDropIfMissingNode,
           "rows.last": rowsLastNode,
+          "columns.cleanNames": columnsCleanNamesNode,
           "columns.setType": columnsSetTypeNode,
           "group.by": groupByNode,
           "rows.sortBy": rowsSortByNode,
@@ -29466,7 +29494,7 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
       return this.getWordsFrom(0)
     }
     get placeholderMessage() {
-      return `Enter the columns to keep.`
+      return `Enter the column names to keep.`
     }
     getColumnNamesToKeep() {
       const colsToKeep = this.getWordsFrom(1)
@@ -29597,9 +29625,8 @@ class LargeLabel`
     }
     getRowFilterFn() {
       const column = this.getContent()
-      const isValueEmpty = value => value === undefined || value === "" || (typeof value === "number" && isNaN(value))
-      if (column) return row => !isValueEmpty(row[column])
-      return row => !Object.values(row).some(isValueEmpty)
+      if (column) return row => !jtree.Utils.isValueEmpty(row[column])
+      return row => !Object.values(row).some(jtree.Utils.isValueEmpty)
     }
   }
 
@@ -29615,6 +29642,15 @@ class LargeLabel`
       if (isNaN(limit)) return undefined
       const start = this.getParentOrDummyTable().getRowCount() - limit
       return (row, rowIndex) => rowIndex >= start
+    }
+  }
+
+  class columnsCleanNamesNode extends abstractTransformerNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    _createOutputTable() {
+      return this.getParentOrDummyTable().cloneWithCleanColumnNames()
     }
   }
 
@@ -29762,7 +29798,7 @@ class LargeLabel`
       else this.setContent(this.getWebApp().initLocalDataStorage(this.constructor.name + ".data", value))
     }
     getTileBodyStumpCode() {
-      const text = encodeURIComponent(this.getDataContent())
+      const text = lodash.escape(this.getDataContent())
       return this.qFormat(this.bodyStumpTemplate, { text })
     }
   }
@@ -30476,6 +30512,7 @@ a {name}
           "rows.first": rowsFirstNode,
           "rows.dropIfMissing": rowsDropIfMissingNode,
           "rows.last": rowsLastNode,
+          "columns.cleanNames": columnsCleanNamesNode,
           "columns.setType": columnsSetTypeNode,
           "group.by": groupByNode,
           "rows.sortBy": rowsSortByNode,
@@ -31040,7 +31077,7 @@ abstractTileTreeComponentNode
   }
   async triggerTileMethodCommand(value, methodName) {
    await this[methodName](value)
-   await this._runAfterTileUpdate(tile)
+   await this._runAfterTileUpdate(this)
   }
   // todo: refactor.
   async changeTileTypeCommand(newValue) {
@@ -34453,7 +34490,7 @@ columnsKeepNode
     tables.basic
  extends abstractColumnFilterTileNode
  crux columns.keep
- string placeholderMessage Enter the columns to keep.
+ string placeholderMessage Enter the column names to keep.
  javascript
   getColumnNamesToKeep() {
    const colsToKeep = this.getWordsFrom(1)
@@ -34582,9 +34619,8 @@ rowsDropIfMissingNode
  javascript
   getRowFilterFn() {
    const column = this.getContent()
-   const isValueEmpty = value => value === undefined || value === "" || (typeof value === "number" && isNaN(value))
-   if (column) return row => !isValueEmpty(row[column])
-   return row => !Object.values(row).some(isValueEmpty)
+   if (column) return row => !jtree.Utils.isValueEmpty(row[column])
+   return row => !Object.values(row).some(jtree.Utils.isValueEmpty)
   }
 rowsLastNode
  cells tileKeywordCell intCell
@@ -34597,6 +34633,20 @@ rowsLastNode
    if (isNaN(limit)) return undefined
    const start = this.getParentOrDummyTable().getRowCount() - limit
    return (row, rowIndex) => rowIndex >= start
+  }
+columnsCleanNamesNode
+ crux columns.cleanNames
+ cells tileKeywordCell
+ description Simplifies column names by removing punctuation.
+ example
+  samples.iris
+   columns.describe
+   columns.cleanNames
+    columns.describe
+ extends abstractTransformerNode
+ javascript
+  _createOutputTable() {
+   return this.getParentOrDummyTable().cloneWithCleanColumnNames()
   }
 columnsSetTypeNode
  cells tileKeywordCell columnNameCell primitiveTypeCell
@@ -34744,7 +34794,7 @@ dataLocalStorageNode
    else this.setContent(this.getWebApp().initLocalDataStorage(this.constructor.name + ".data", value))
   }
   getTileBodyStumpCode() {
-   const text = encodeURIComponent(this.getDataContent())
+   const text = lodash.escape(this.getDataContent())
    return this.qFormat(this.bodyStumpTemplate, { text })
   }
  extends dataInlineNode
@@ -35652,6 +35702,7 @@ lineOfContentNode
         rowsFirstNode: rowsFirstNode,
         rowsDropIfMissingNode: rowsDropIfMissingNode,
         rowsLastNode: rowsLastNode,
+        columnsCleanNamesNode: columnsCleanNamesNode,
         columnsSetTypeNode: columnsSetTypeNode,
         groupByNode: groupByNode,
         rowsSortByNode: rowsSortByNode,
@@ -38657,7 +38708,7 @@ pre
     }
     async triggerTileMethodCommand(value, methodName) {
       await this[methodName](value)
-      await this._runAfterTileUpdate(tile)
+      await this._runAfterTileUpdate(this)
     }
     // todo: refactor.
     async changeTileTypeCommand(newValue) {
@@ -39785,7 +39836,7 @@ abstractTileTreeComponentNode
   }
   async triggerTileMethodCommand(value, methodName) {
    await this[methodName](value)
-   await this._runAfterTileUpdate(tile)
+   await this._runAfterTileUpdate(this)
   }
   // todo: refactor.
   async changeTileTypeCommand(newValue) {
@@ -41880,7 +41931,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "16.2.0"
+const Version = "16.3.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 

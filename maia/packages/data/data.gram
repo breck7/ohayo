@@ -70,7 +70,7 @@ dataLocalStorageNode
    else this.setContent(this.getWebApp().initLocalDataStorage(this.constructor.name + ".data", value))
   }
   getTileBodyStumpCode() {
-    const text = encodeURIComponent(this.getDataContent())
+    const text = lodash.escape(this.getDataContent())
     return this.qFormat(this.bodyStumpTemplate, {text})
   }
  extends dataInlineNode

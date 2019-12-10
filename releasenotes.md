@@ -1,3 +1,8 @@
+16.3.0 2019-12-9
+----------------
+- Fix: data.localStorage editing bug fix
+- New: columns.cleanNames tile
+
 16.2.0 2019-12-9
 ----------------
 - Fix: dropIfMissing fix

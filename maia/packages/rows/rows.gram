@@ -80,10 +80,9 @@ rowsDropIfMissingNode
  javascript
   getRowFilterFn() {
    const column = this.getContent()
-   const isValueEmpty = value => value === undefined || value === "" || (typeof value === "number" && isNaN(value))
    if (column)
-    return row => !isValueEmpty(row[column])
-   return row => !Object.values(row).some(isValueEmpty)
+    return row => !jtree.Utils.isValueEmpty(row[column])
+   return row => !Object.values(row).some(jtree.Utils.isValueEmpty)
   }
 rowsAddIndexColumnNode
  description Add an index column to the data.

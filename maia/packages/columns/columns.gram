@@ -16,6 +16,20 @@ columnsFirstNode
     .slice(0, parseInt(this.getContent()))
     .map(col => col.name)
   }
+columnsCleanNamesNode
+ crux columns.cleanNames
+ cells tileKeywordCell
+ description Simplifies column names by removing punctuation.
+ example
+  samples.iris
+   columns.describe
+   columns.cleanNames
+    columns.describe
+ extends abstractTransformerNode
+ javascript
+  _createOutputTable() {
+    return this.getParentOrDummyTable().cloneWithCleanColumnNames()
+   }
 columnsLastNode
  cells tileKeywordCell intCell
  description Keeps only the last N columns.
@@ -117,7 +131,7 @@ columnsKeepNode
     tables.basic
  extends abstractColumnFilterTileNode
  crux columns.keep
- string placeholderMessage Enter the columns to keep.
+ string placeholderMessage Enter the column names to keep.
  javascript
   getColumnNamesToKeep() {
    const colsToKeep = this.getWordsFrom(1)
