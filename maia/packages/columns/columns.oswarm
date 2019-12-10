@@ -15,3 +15,11 @@ test keep
       rows.sortBy IMDB_Rating
        tables.basic
    assertStringExcludes getStumpNodeString DVD
+test autocomplete
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    samples.iris
+     columns.keep 
+   assertParagraphIs getAutocompleteResultsAtDocEndDiagnostic
+    Sepal.Length Sepal.Width Petal.Length Petal.Width Species

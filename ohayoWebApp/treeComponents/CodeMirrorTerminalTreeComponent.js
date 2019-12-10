@@ -80,6 +80,8 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
 
     keyMap[CodeMirrorConstants.keyMap.cmdS] = async () => {
       await this.saveChangesCommand()
+      const app = this.getRootNode()
+      await app.cellCheckProgramCommand()
       // todo: scroll to proper tile
       const tile = this._getClosestTileAtCurrentLine()
       if (tile) tile.scrollIntoView()

@@ -1,6 +1,6 @@
 tooling onsave jtree build produceMaiaGrammar
 abstractTemplatePickerTileNode
- extends abstractMaiaTileNode
+ extends abstractProviderNode
  todo This is duplicate code from picker. Add mixins to Grammar?
  string tileSize 480 420
  abstract
@@ -44,7 +44,7 @@ abstractTemplatePickerTileNode
  string tileHeader Gallery
  javascript
   async fetchTableInputs() {
-   return { rows: this.getChoices().map(obj => obj.toObject()) }
+   return { rows: this.getChoices() }
   }
   getTileBodyStumpCode() {
    let lastCat = ""

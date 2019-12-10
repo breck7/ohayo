@@ -1,3 +1,14 @@
+16.4.0 2019-12-9
+----------------
+-
+
+16.4.0 2019-12-9
+----------------
+- Fix: column name autocomplete fixes and tests
+- New: Print error count onsave in code editor
+- New: templates now a provider
+- Infra: Tile requirement loading code cleanup.
+
 16.3.0 2019-12-9
 ----------------
 - Fix: data.localStorage editing bug fix

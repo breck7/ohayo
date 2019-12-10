@@ -50,7 +50,7 @@ tilesNode
   }
   async loadAndIncrementalRender() {
    const app = this.getTab().getRootNode()
-   await Promise.all(this.getTiles().map(tile => tile.loadRequirements()))
+   await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))
    await Promise.all(
     this.getRootLevelTiles().map(async tile => {
      await tile.execute()

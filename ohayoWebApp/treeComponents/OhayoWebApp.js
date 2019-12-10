@@ -803,10 +803,13 @@ ${OhayoConstants.panel} 400
   async cellCheckProgramCommand() {
     const program = this.mountedTab.getTabProgram()
     const errors = program.getAllErrors().map(err => err.getMessage())
-    this.mountedTab.addStumpCodeMessageToLog(
-      `strong ${errors.length} errors in ${this.mountedTab.getFileName()}
-div - ${errors.join("\ndiv - ")}`
-    )
+    if (errors.length)
+      this.mountedTab.addStumpCodeMessageToLog(
+        `div ${errors.length} errors in ${this.mountedTab.getFileName()}
+ class OhayoError
+ div - ${errors.join("\n div - ")}`
+      )
+    else this.mountedTab.addStumpCodeMessageToLog(`div 0 errors in ${this.mountedTab.getFileName()}`)
     this.renderApp()
   }
 
@@ -901,6 +904,16 @@ div - ${errors.join("\ndiv - ")}`
 
   async moveFileCommand(existingFullDiskFilePath, newFullDiskFilePath) {
     return this.moveFile(existingFullDiskFilePath, newFullDiskFilePath)
+  }
+
+  getAutocompleteResultsAtDocEndDiagnostic() {
+    const lastLineIndex = this.mountedProgram.getNumberOfLines() - 1
+    const lastLineNode = this.mountedProgram.nodeAtLine(lastLineIndex)
+    const charIndex = lastLineNode.getIndentLevel() + lastLineNode.getLine().length - 1
+    return this.mountedProgram
+      .getAutocompleteResultsAt(lastLineIndex, charIndex)
+      .matches.map(match => match.text)
+      .join(" ")
   }
 
   async createNewBlankProgramCommand(filename = "untitled" + OhayoConstants.fileExtensions.maia) {

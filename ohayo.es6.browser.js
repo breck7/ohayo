@@ -25356,14 +25356,14 @@ pre
         .getShadowElement()
       if (el) el.scrollIntoView()
     }
-    async loadRequirements() {
+    async loadBrowserRequirements() {
       const loadingMap = this.getTab()
         .getRootNode()
         .getDefinitionLoadingPromiseMap()
-      if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeLoadRequirementsPromise(loadingMap))
+      if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
       await loadingMap.get(this.constructor)
     }
-    async _makeLoadRequirementsPromise(loadingMap) {
+    async _makeBrowserLoadRequirementsPromise(loadingMap) {
       const app = this.getWebApp()
       const cssScript = this[TilesConstants.tileCssScript]
       if (cssScript) this._loadTileCss(cssScript)
@@ -25388,18 +25388,17 @@ pre
             .join("\n")
         )
     }
-    _hasRequirements() {
+    _hasBrowserRequirements() {
       return this.tileScript
     }
-    _areRequirementsLoaded() {
+    _areBrowserRequirementsLoaded() {
       if (this.isNodeJs()) return true
-      const loadingMap = this.getTab()
-        .getRootNode()
-        .getDefinitionLoadingPromiseMap()
-      return !this._hasRequirements() || loadingMap.get(this.constructor) === true
+      // todo: cleanup. assumes app is here in browser.
+      const loadingMap = app.getDefinitionLoadingPromiseMap()
+      return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
     }
     isLoaded() {
-      return this._areRequirementsLoaded()
+      return this._areBrowserRequirementsLoaded()
     }
     getErrorMessageHtml() {
       const errors = Object.values(this.getRunTimePhaseErrors())
@@ -25653,7 +25652,11 @@ pre
       // todo: destroy or something? how do we reparse.
       this.unmountAndDestroy()
       const app = this.getTab().getRootNode()
-      await this.getRootNode().loadRequirements()
+      await Promise.all(
+        this.getRootNode()
+          .getTiles()
+          .map(tile => tile.loadBrowserRequirements())
+      )
       await this.getTab().autosaveAndRender()
       newNode.runAndrenderAndGetRenderReport()
     }
@@ -26236,10 +26239,10 @@ a {name}
           "random.float": randomFloatNode,
           "random.int": randomIntNode,
           "samples.tinyIris": samplesTinyIrisNode,
+          "templates.list": templatesListNode,
           "assert.rowCount": assertRowCountNode,
           "shell.csv": toCsvNode,
           "shell.typescript": toTypeScriptInterfaceNode,
-          "templates.list": templatesListNode,
           hidden: hiddenNode,
           visible: visibleNode,
           maximized: maximizedNode,
@@ -29971,43 +29974,7 @@ class LargeLabel`
     }
   }
 
-  class assertRowCountNode extends abstractMaiaTileNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get intCell() {
-      return parseInt(this.getWord(1))
-    }
-    get visible() {
-      return false
-    }
-    async execute() {
-      const num = this.getWord(1)
-      if (!num) return super.execute()
-      const expected = parseInt(num)
-      const actual = this.getParentOrDummyTable().getRowCount()
-      if (actual !== expected) throw new Error(`Expected ${expected} but got ${actual}`)
-      return super.execute()
-    }
-  }
-
-  class toCsvNode extends abstractMaiaTileNode {
-    execute() {
-      console.log(this._getMessage())
-    }
-    _getMessage() {
-      return this.getParentOrDummyTable().toDelimited(",")
-    }
-  }
-
-  class toTypeScriptInterfaceNode extends toCsvNode {
-    _getMessage() {
-      // todo: gopher is evaling this in test
-      return this.getParentOrDummyTable().toTypeScriptInterface()
-    }
-  }
-
-  class abstractTemplatePickerTileNode extends abstractMaiaTileNode {
+  class abstractTemplatePickerTileNode extends abstractProviderNode {
     get tileHeader() {
       return `Gallery`
     }
@@ -30055,7 +30022,7 @@ a {name}
       return `480 420`
     }
     async fetchTableInputs() {
-      return { rows: this.getChoices().map(obj => obj.toObject()) }
+      return { rows: this.getChoices() }
     }
     getTileBodyStumpCode() {
       let lastCat = ""
@@ -30105,6 +30072,42 @@ a {name}
         template: node.getNode("data").childrenToString(),
         name: id + this.maiaFileExtensionKey
       }
+    }
+  }
+
+  class assertRowCountNode extends abstractMaiaTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get intCell() {
+      return parseInt(this.getWord(1))
+    }
+    get visible() {
+      return false
+    }
+    async execute() {
+      const num = this.getWord(1)
+      if (!num) return super.execute()
+      const expected = parseInt(num)
+      const actual = this.getParentOrDummyTable().getRowCount()
+      if (actual !== expected) throw new Error(`Expected ${expected} but got ${actual}`)
+      return super.execute()
+    }
+  }
+
+  class toCsvNode extends abstractMaiaTileNode {
+    execute() {
+      console.log(this._getMessage())
+    }
+    _getMessage() {
+      return this.getParentOrDummyTable().toDelimited(",")
+    }
+  }
+
+  class toTypeScriptInterfaceNode extends toCsvNode {
+    _getMessage() {
+      // todo: gopher is evaling this in test
+      return this.getParentOrDummyTable().toTypeScriptInterface()
     }
   }
 
@@ -30342,7 +30345,7 @@ a {name}
     }
     async loadAndIncrementalRender() {
       const app = this.getTab().getRootNode()
-      await Promise.all(this.getTiles().map(tile => tile.loadRequirements()))
+      await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))
       await Promise.all(
         this.getRootLevelTiles().map(async tile => {
           await tile.execute()
@@ -30527,10 +30530,10 @@ a {name}
           "random.float": randomFloatNode,
           "random.int": randomIntNode,
           "samples.tinyIris": samplesTinyIrisNode,
+          "templates.list": templatesListNode,
           "assert.rowCount": assertRowCountNode,
           "shell.csv": toCsvNode,
           "shell.typescript": toTypeScriptInterfaceNode,
-          "templates.list": templatesListNode,
           "doc.categories": docCategoriesNode,
           "doc.author": docAuthorNode,
           "doc.defaultHidden": docDefaultHiddenNode,
@@ -30797,14 +30800,14 @@ abstractTileTreeComponentNode
     .getShadowElement()
    if (el) el.scrollIntoView()
   }
-  async loadRequirements() {
+  async loadBrowserRequirements() {
    const loadingMap = this.getTab()
     .getRootNode()
     .getDefinitionLoadingPromiseMap()
-   if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeLoadRequirementsPromise(loadingMap))
+   if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
    await loadingMap.get(this.constructor)
   }
-  async _makeLoadRequirementsPromise(loadingMap) {
+  async _makeBrowserLoadRequirementsPromise(loadingMap) {
    const app = this.getWebApp()
    const cssScript = this[TilesConstants.tileCssScript]
    if (cssScript) this._loadTileCss(cssScript)
@@ -30829,18 +30832,17 @@ abstractTileTreeComponentNode
       .join("\\n")
     )
   }
-  _hasRequirements() {
+  _hasBrowserRequirements() {
    return this.tileScript
   }
-  _areRequirementsLoaded() {
+  _areBrowserRequirementsLoaded() {
    if (this.isNodeJs()) return true
-   const loadingMap = this.getTab()
-    .getRootNode()
-    .getDefinitionLoadingPromiseMap()
-   return !this._hasRequirements() || loadingMap.get(this.constructor) === true
+   // todo: cleanup. assumes app is here in browser.
+   const loadingMap = app.getDefinitionLoadingPromiseMap()
+   return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
   }
   isLoaded() {
-   return this._areRequirementsLoaded()
+   return this._areBrowserRequirementsLoaded()
   }
   getErrorMessageHtml() {
    const errors = Object.values(this.getRunTimePhaseErrors())
@@ -31086,7 +31088,11 @@ abstractTileTreeComponentNode
    // todo: destroy or something? how do we reparse.
    this.unmountAndDestroy()
    const app = this.getTab().getRootNode()
-   await this.getRootNode().loadRequirements()
+   await Promise.all(
+    this.getRootNode()
+     .getTiles()
+     .map(tile => tile.loadBrowserRequirements())
+   )
    await this.getTab().autosaveAndRender()
    newNode.runAndrenderAndGetRenderReport()
   }
@@ -34951,55 +34957,8 @@ samplesTinyIrisNode
   async fetchTableInputs() {
    return new TableParser().parseTableInputsFromString(this.getDataContent(), this.getParserId())
   }
-assertRowCountNode
- description Throw an error if row count not correct.
- example Basics
-  data.inline
-   content
-    country
-    usa
-   assert.rowCount 1
- extends abstractMaiaTileNode
- cells tileKeywordCell intCell
- crux assert.rowCount
- boolean visible false
- javascript
-  async execute() {
-   const num = this.getWord(1)
-   if (!num) return super.execute()
-   const expected = parseInt(num)
-   const actual = this.getParentOrDummyTable().getRowCount()
-   if (actual !== expected) throw new Error(\`Expected \${expected} but got \${actual}\`)
-   return super.execute()
-  }
-toCsvNode
- description Print input table to console as csv.
- extends abstractMaiaTileNode
- crux shell.csv
- example
-  samples.presidents
-   filter.where HomeState = Illinois
-    shell.csv
- javascript
-  execute() {
-   console.log(this._getMessage())
-  }
-  _getMessage() {
-   return this.getParentOrDummyTable().toDelimited(",")
-  }
-toTypeScriptInterfaceNode
- extends toCsvNode
- crux shell.typescript
- example
-  samples.presidents
-   shell.typescript
- javascript
-  _getMessage() {
-   // todo: gopher is evaling this in test
-   return this.getParentOrDummyTable().toTypeScriptInterface()
-  }
 abstractTemplatePickerTileNode
- extends abstractMaiaTileNode
+ extends abstractProviderNode
  todo This is duplicate code from picker. Add mixins to Grammar?
  string tileSize 480 420
  abstract
@@ -35043,7 +35002,7 @@ abstractTemplatePickerTileNode
  string tileHeader Gallery
  javascript
   async fetchTableInputs() {
-   return { rows: this.getChoices().map(obj => obj.toObject()) }
+   return { rows: this.getChoices() }
   }
   getTileBodyStumpCode() {
    let lastCat = ""
@@ -35092,6 +35051,53 @@ templatesListNode
     template: node.getNode("data").childrenToString(),
     name: id + this.maiaFileExtensionKey
    }
+  }
+assertRowCountNode
+ description Throw an error if row count not correct.
+ example Basics
+  data.inline
+   content
+    country
+    usa
+   assert.rowCount 1
+ extends abstractMaiaTileNode
+ cells tileKeywordCell intCell
+ crux assert.rowCount
+ boolean visible false
+ javascript
+  async execute() {
+   const num = this.getWord(1)
+   if (!num) return super.execute()
+   const expected = parseInt(num)
+   const actual = this.getParentOrDummyTable().getRowCount()
+   if (actual !== expected) throw new Error(\`Expected \${expected} but got \${actual}\`)
+   return super.execute()
+  }
+toCsvNode
+ description Print input table to console as csv.
+ extends abstractMaiaTileNode
+ crux shell.csv
+ example
+  samples.presidents
+   filter.where HomeState = Illinois
+    shell.csv
+ javascript
+  execute() {
+   console.log(this._getMessage())
+  }
+  _getMessage() {
+   return this.getParentOrDummyTable().toDelimited(",")
+  }
+toTypeScriptInterfaceNode
+ extends toCsvNode
+ crux shell.typescript
+ example
+  samples.presidents
+   shell.typescript
+ javascript
+  _getMessage() {
+   // todo: gopher is evaling this in test
+   return this.getParentOrDummyTable().toTypeScriptInterface()
   }
 tileBlankLineNode
  boolean visible false
@@ -35266,7 +35272,7 @@ tilesNode
   }
   async loadAndIncrementalRender() {
    const app = this.getTab().getRootNode()
-   await Promise.all(this.getTiles().map(tile => tile.loadRequirements()))
+   await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))
    await Promise.all(
     this.getRootLevelTiles().map(async tile => {
      await tile.execute()
@@ -35393,13 +35399,11 @@ abstractColumnNode
    // todo: only works if codemirror === tab
    try {
     // todo: handle at static time.
-    const parentTile = this.getParent()
-    if (cell.getCellTypeId() === "columnNameCell" && parentTile.isLoaded()) {
-     const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
-     return mirrorNode
-      .getParent()
-      .getParentOrDummyTable()
-      .getColumnNames()
+    const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
+    const mirrorParent = mirrorNode && mirrorNode.getParent()
+    if (cell.getCellTypeId() === "columnNameCell" && mirrorParent && mirrorParent.isLoaded()) {
+     const options = mirrorParent.getParentOrDummyTable().getColumnNames()
+     return options
     }
    } catch (err) {
     console.log(err)
@@ -35718,11 +35722,11 @@ lineOfContentNode
         randomFloatNode: randomFloatNode,
         randomIntNode: randomIntNode,
         samplesTinyIrisNode: samplesTinyIrisNode,
+        abstractTemplatePickerTileNode: abstractTemplatePickerTileNode,
+        templatesListNode: templatesListNode,
         assertRowCountNode: assertRowCountNode,
         toCsvNode: toCsvNode,
         toTypeScriptInterfaceNode: toTypeScriptInterfaceNode,
-        abstractTemplatePickerTileNode: abstractTemplatePickerTileNode,
-        templatesListNode: templatesListNode,
         tileBlankLineNode: tileBlankLineNode,
         abstractDocSettingNode: abstractDocSettingNode,
         docCategoriesNode: docCategoriesNode,
@@ -35842,13 +35846,11 @@ lineOfContentNode
       // todo: only works if codemirror === tab
       try {
         // todo: handle at static time.
-        const parentTile = this.getParent()
-        if (cell.getCellTypeId() === "columnNameCell" && parentTile.isLoaded()) {
-          const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
-          return mirrorNode
-            .getParent()
-            .getParentOrDummyTable()
-            .getColumnNames()
+        const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
+        const mirrorParent = mirrorNode && mirrorNode.getParent()
+        if (cell.getCellTypeId() === "columnNameCell" && mirrorParent && mirrorParent.isLoaded()) {
+          const options = mirrorParent.getParentOrDummyTable().getColumnNames()
+          return options
         }
       } catch (err) {
         console.log(err)
@@ -38420,14 +38422,14 @@ pre
         .getShadowElement()
       if (el) el.scrollIntoView()
     }
-    async loadRequirements() {
+    async loadBrowserRequirements() {
       const loadingMap = this.getTab()
         .getRootNode()
         .getDefinitionLoadingPromiseMap()
-      if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeLoadRequirementsPromise(loadingMap))
+      if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
       await loadingMap.get(this.constructor)
     }
-    async _makeLoadRequirementsPromise(loadingMap) {
+    async _makeBrowserLoadRequirementsPromise(loadingMap) {
       const app = this.getWebApp()
       const cssScript = this[TilesConstants.tileCssScript]
       if (cssScript) this._loadTileCss(cssScript)
@@ -38452,18 +38454,17 @@ pre
             .join("\n")
         )
     }
-    _hasRequirements() {
+    _hasBrowserRequirements() {
       return this.tileScript
     }
-    _areRequirementsLoaded() {
+    _areBrowserRequirementsLoaded() {
       if (this.isNodeJs()) return true
-      const loadingMap = this.getTab()
-        .getRootNode()
-        .getDefinitionLoadingPromiseMap()
-      return !this._hasRequirements() || loadingMap.get(this.constructor) === true
+      // todo: cleanup. assumes app is here in browser.
+      const loadingMap = app.getDefinitionLoadingPromiseMap()
+      return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
     }
     isLoaded() {
-      return this._areRequirementsLoaded()
+      return this._areBrowserRequirementsLoaded()
     }
     getErrorMessageHtml() {
       const errors = Object.values(this.getRunTimePhaseErrors())
@@ -38717,7 +38718,11 @@ pre
       // todo: destroy or something? how do we reparse.
       this.unmountAndDestroy()
       const app = this.getTab().getRootNode()
-      await this.getRootNode().loadRequirements()
+      await Promise.all(
+        this.getRootNode()
+          .getTiles()
+          .map(tile => tile.loadBrowserRequirements())
+      )
       await this.getTab().autosaveAndRender()
       newNode.runAndrenderAndGetRenderReport()
     }
@@ -39387,7 +39392,7 @@ a {name}
     }
     async loadAndIncrementalRender() {
       const app = this.getTab().getRootNode()
-      await Promise.all(this.getTiles().map(tile => tile.loadRequirements()))
+      await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))
       await Promise.all(
         this.getRootLevelTiles().map(async tile => {
           await tile.execute()
@@ -39556,14 +39561,14 @@ abstractTileTreeComponentNode
     .getShadowElement()
    if (el) el.scrollIntoView()
   }
-  async loadRequirements() {
+  async loadBrowserRequirements() {
    const loadingMap = this.getTab()
     .getRootNode()
     .getDefinitionLoadingPromiseMap()
-   if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeLoadRequirementsPromise(loadingMap))
+   if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
    await loadingMap.get(this.constructor)
   }
-  async _makeLoadRequirementsPromise(loadingMap) {
+  async _makeBrowserLoadRequirementsPromise(loadingMap) {
    const app = this.getWebApp()
    const cssScript = this[TilesConstants.tileCssScript]
    if (cssScript) this._loadTileCss(cssScript)
@@ -39588,18 +39593,17 @@ abstractTileTreeComponentNode
       .join("\\n")
     )
   }
-  _hasRequirements() {
+  _hasBrowserRequirements() {
    return this.tileScript
   }
-  _areRequirementsLoaded() {
+  _areBrowserRequirementsLoaded() {
    if (this.isNodeJs()) return true
-   const loadingMap = this.getTab()
-    .getRootNode()
-    .getDefinitionLoadingPromiseMap()
-   return !this._hasRequirements() || loadingMap.get(this.constructor) === true
+   // todo: cleanup. assumes app is here in browser.
+   const loadingMap = app.getDefinitionLoadingPromiseMap()
+   return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
   }
   isLoaded() {
-   return this._areRequirementsLoaded()
+   return this._areBrowserRequirementsLoaded()
   }
   getErrorMessageHtml() {
    const errors = Object.values(this.getRunTimePhaseErrors())
@@ -39845,7 +39849,11 @@ abstractTileTreeComponentNode
    // todo: destroy or something? how do we reparse.
    this.unmountAndDestroy()
    const app = this.getTab().getRootNode()
-   await this.getRootNode().loadRequirements()
+   await Promise.all(
+    this.getRootNode()
+     .getTiles()
+     .map(tile => tile.loadBrowserRequirements())
+   )
    await this.getTab().autosaveAndRender()
    newNode.runAndrenderAndGetRenderReport()
   }
@@ -40418,7 +40426,7 @@ tilesNode
   }
   async loadAndIncrementalRender() {
    const app = this.getTab().getRootNode()
-   await Promise.all(this.getTiles().map(tile => tile.loadRequirements()))
+   await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))
    await Promise.all(
     this.getRootLevelTiles().map(async tile => {
      await tile.execute()
@@ -41048,6 +41056,8 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
 
     keyMap[CodeMirrorConstants.keyMap.cmdS] = async () => {
       await this.saveChangesCommand()
+      const app = this.getRootNode()
+      await app.cellCheckProgramCommand()
       // todo: scroll to proper tile
       const tile = this._getClosestTileAtCurrentLine()
       if (tile) tile.scrollIntoView()
@@ -41931,7 +41941,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "16.3.0"
+const Version = "16.4.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
@@ -43399,10 +43409,13 @@ ${OhayoConstants.panel} 400
   async cellCheckProgramCommand() {
     const program = this.mountedTab.getTabProgram()
     const errors = program.getAllErrors().map(err => err.getMessage())
-    this.mountedTab.addStumpCodeMessageToLog(
-      `strong ${errors.length} errors in ${this.mountedTab.getFileName()}
-div - ${errors.join("\ndiv - ")}`
-    )
+    if (errors.length)
+      this.mountedTab.addStumpCodeMessageToLog(
+        `div ${errors.length} errors in ${this.mountedTab.getFileName()}
+ class OhayoError
+ div - ${errors.join("\n div - ")}`
+      )
+    else this.mountedTab.addStumpCodeMessageToLog(`div 0 errors in ${this.mountedTab.getFileName()}`)
     this.renderApp()
   }
 
@@ -43497,6 +43510,16 @@ div - ${errors.join("\ndiv - ")}`
 
   async moveFileCommand(existingFullDiskFilePath, newFullDiskFilePath) {
     return this.moveFile(existingFullDiskFilePath, newFullDiskFilePath)
+  }
+
+  getAutocompleteResultsAtDocEndDiagnostic() {
+    const lastLineIndex = this.mountedProgram.getNumberOfLines() - 1
+    const lastLineNode = this.mountedProgram.nodeAtLine(lastLineIndex)
+    const charIndex = lastLineNode.getIndentLevel() + lastLineNode.getLine().length - 1
+    return this.mountedProgram
+      .getAutocompleteResultsAt(lastLineIndex, charIndex)
+      .matches.map(match => match.text)
+      .join(" ")
   }
 
   async createNewBlankProgramCommand(filename = "untitled" + OhayoConstants.fileExtensions.maia) {

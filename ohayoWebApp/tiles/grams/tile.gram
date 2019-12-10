@@ -93,14 +93,14 @@ abstractTileTreeComponentNode
     .getShadowElement()
    if (el) el.scrollIntoView()
   }
-  async loadRequirements() {
+  async loadBrowserRequirements() {
    const loadingMap = this.getTab()
     .getRootNode()
     .getDefinitionLoadingPromiseMap()
-   if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeLoadRequirementsPromise(loadingMap))
+   if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
    await loadingMap.get(this.constructor)
   }
-  async _makeLoadRequirementsPromise(loadingMap) {
+  async _makeBrowserLoadRequirementsPromise(loadingMap) {
    const app = this.getWebApp()
    const cssScript = this[TilesConstants.tileCssScript]
    if (cssScript) this._loadTileCss(cssScript)
@@ -125,19 +125,17 @@ abstractTileTreeComponentNode
       .join("\n")
     )
   }
-  _hasRequirements() {
+  _hasBrowserRequirements() {
    return this.tileScript
   }
-  _areRequirementsLoaded() {
-    if (this.isNodeJs())
-    return true
-   const loadingMap = this.getTab()
-    .getRootNode()
-    .getDefinitionLoadingPromiseMap()
-   return !this._hasRequirements() || loadingMap.get(this.constructor) === true
+  _areBrowserRequirementsLoaded() {
+   if (this.isNodeJs()) return true
+   // todo: cleanup. assumes app is here in browser.
+   const loadingMap = app.getDefinitionLoadingPromiseMap()
+   return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
   }
   isLoaded() {
-   return this._areRequirementsLoaded()
+   return this._areBrowserRequirementsLoaded()
   }
   getErrorMessageHtml() {
    const errors = Object.values(this.getRunTimePhaseErrors())
@@ -350,7 +348,7 @@ abstractTileTreeComponentNode
    await Promise.all(this.getChildTiles().map(tile => tile.execute()))
   }
   async _execute() {
-    await this._executeChildNodes()
+   await this._executeChildNodes()
   }
   async execute() {
    try {
@@ -383,7 +381,7 @@ abstractTileTreeComponentNode
    // todo: destroy or something? how do we reparse.
    this.unmountAndDestroy()
    const app = this.getTab().getRootNode()
-   await this.getRootNode().loadRequirements()
+   await Promise.all(this.getRootNode().getTiles().map(tile => tile.loadBrowserRequirements()))
    await this.getTab().autosaveAndRender()
    newNode.runAndrenderAndGetRenderReport()
   }

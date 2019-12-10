@@ -19,15 +19,15 @@ abstractColumnNode
    // todo: only works if codemirror === tab
    try {
     // todo: handle at static time.
-    const parentTile = this.getParent()
-    if (cell.getCellTypeId() === "columnNameCell" && parentTile.isLoaded()) {
-      const mirrorNode = typeof app === "undefined" ? this : app
+    const mirrorNode = typeof app === "undefined" ? this : app
             .mountedProgram
             .nodeAtLine(this.getLineNumber() - 1)
-     return mirrorNode
-            .getParent()
+    const mirrorParent = mirrorNode && mirrorNode.getParent()
+    if (cell.getCellTypeId() === "columnNameCell" && mirrorParent && mirrorParent.isLoaded()) {
+     const options = mirrorParent
             .getParentOrDummyTable()
             .getColumnNames()
+     return options
     }
    } catch (err) {
     console.log(err)
