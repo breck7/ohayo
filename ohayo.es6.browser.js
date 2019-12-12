@@ -14208,6 +14208,7 @@ class TreeNode extends AbstractNode {
   }
   execute() {}
   async loadRequirements(context) {
+    // todo: remove
     await Promise.all(this.map(node => node.loadRequirements(context)))
   }
   getErrors() {
@@ -16457,7 +16458,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "49.1.0"
+TreeNode.getVersion = () => "49.2.0"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -19213,6 +19214,9 @@ class BooleanType extends AbstractPrimitiveType {
     // todo: handle false, etc
     return val ? 1 : 0
   }
+  synthesizeValue(randomNumberFn) {
+    return Math.round(randomNumberFn())
+  }
   getJavascriptTypeName() {
     return JavascriptNativeTypeNames.boolean
   }
@@ -19238,6 +19242,16 @@ class BooleanType extends AbstractPrimitiveType {
 class AbstractNumeric extends AbstractPrimitiveType {
   fromStringToNumeric(value) {
     return parseFloat(value)
+  }
+  synthesizeValue(randomNumberFn) {
+    // todo: min/max etc
+    return this.getMin() + Math.floor((this.getMax() - this.getMin()) * randomNumberFn())
+  }
+  getMax() {
+    return 100
+  }
+  getMin() {
+    return 0
   }
   getAsNativeJavascriptType(val) {
     if (val === undefined) return NaN
@@ -19374,6 +19388,9 @@ class ObjectType extends AbstractPrimitiveType {
   getStringExamples() {
     return ["{score: 10}"]
   }
+  synthesizeValue() {
+    return {}
+  }
   fromStringToNumeric() {
     return undefined
   }
@@ -19405,6 +19422,9 @@ class AbstractStringCol extends AbstractPrimitiveType {
   }
   getVegaType() {
     return VegaTypes.nominal
+  }
+  synthesizeValue() {
+    return "randomString"
   }
   getJavascriptTypeName() {
     return JavascriptNativeTypeNames.string
@@ -19458,6 +19478,9 @@ class AbstractTemporal extends AbstractPrimitiveType {
   }
   getJavascriptTypeName() {
     return JavascriptNativeTypeNames.Date
+  }
+  synthesizeValue() {
+    return new Date()
   }
   isNumeric() {
     return true
@@ -19814,6 +19837,9 @@ class Column {
   getPrimitiveTypeObj() {
     if (!this._type) this._type = this._inferType()
     return this._type
+  }
+  synthesizeValue(randomNumberFn) {
+    return this.getPrimitiveTypeObj().synthesizeValue(randomNumberFn)
   }
   isTemporal() {
     return this.getPrimitiveTypeObj().isTemporal()
@@ -21603,6 +21629,22 @@ ${cols}
     rows.push(newRow)
     return new Table(rows, this.getColumnsMap())
   }
+  _synthesizeRow(randomNumberFn) {
+    const row = {}
+    this.getColumnsArray().forEach(column => {
+      row[column.getColumnName()] = column.synthesizeValue(randomNumberFn)
+    })
+    return row
+  }
+  synthesizeTable(rowcount, seed) {
+    const randomNumberFn = jtree.Utils.makeSemiRandomFn(seed)
+    const rows = []
+    while (rowcount) {
+      rows.push(this._synthesizeRow(randomNumberFn))
+      rowcount--
+    }
+    return new Table(rows, this.getColumnsArray().map(col => col.toObject()))
+  }
   // todo: we don't need any cloning here--here create a new sorted array with poitners
   // to same rows
   shuffleRows() {
@@ -21633,6 +21675,12 @@ ${cols}
   toDelimited(delimiter) {
     return this.toTree().toDelimited(delimiter, this.getColumnNames())
   }
+  toSimpleSchema() {
+    return this.getColumnsArray()
+      .map(col => `${col.getColumnName()} ${col.getPrimitiveTypeName()}`)
+      .join("\n")
+  }
+  // todo: toProtoBuf, toSqlLite, toJsonSchema, toJsonLd, toCapnProto, toApacheArrow, toFlatBuffers
   // guess which are the more important/informative/interesting columns
   getColumnsByImportance() {
     const columnsMap = this.getColumnsMap()
@@ -26208,6 +26256,8 @@ a {name}
           "data.eval": dataEvalNode,
           "join.by": joinByNode,
           "match.columnsFuzzy": matchColumnsFuzzyNode,
+          "schema.toTypescript": schemaTypeScriptNode,
+          "schema.toSimple": schemaSimpleNode,
           "text.wordCount": textWordCountNode,
           "text.lineCount": textLineCountNode,
           "treenotation.wordTypes": treenotationWordTypesNode,
@@ -26226,6 +26276,8 @@ a {name}
           "rows.last": rowsLastNode,
           "columns.cleanNames": columnsCleanNamesNode,
           "columns.setType": columnsSetTypeNode,
+          "data.synth": dataSynthNode,
+          "data.usabilityScore": dataUsabilityScoreNode,
           "group.by": groupByNode,
           "rows.sortBy": rowsSortByNode,
           "rows.sortByReverse": rowsSortByReverseNode,
@@ -26241,8 +26293,8 @@ a {name}
           "samples.tinyIris": samplesTinyIrisNode,
           "templates.list": templatesListNode,
           "assert.rowCount": assertRowCountNode,
-          "shell.csv": toCsvNode,
-          "shell.typescript": toTypeScriptInterfaceNode,
+          "print.text": printNode,
+          "print.csv": printCsvNode,
           hidden: hiddenNode,
           visible: visibleNode,
           maximized: maximizedNode,
@@ -26597,6 +26649,9 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
   }
 
   class samplesListNode extends abstractSnippetGalleryNode {
+    get isDataPublicDomain() {
+      return true
+    }
     get itemFormat() {
       return `{id} - {description}`
     }
@@ -26835,6 +26890,11 @@ table
  bern
   {content}`
     }
+    get hakonTemplate() {
+      return `.abstractHtmlNode
+ code
+  user-select text`
+    }
     getTileFooterStumpCode() {
       return this.getTileToolbarButtonStumpCode()
     }
@@ -26998,8 +27058,12 @@ h3 {number}`
     getTileBodyStumpCode() {
       const columnName = this.getWord(1)
       if (!columnName) return `No data for ${this.getFirstWord()}`
-      const col = this.getParentOrDummyTable().getTableColumnByName(columnName)
-      if (!col) return ""
+      const table = this.getParentOrDummyTable()
+      const col = table.getTableColumnByName(columnName)
+      if (!col) {
+        console.log(`No column named ${columnName}`)
+        return ""
+      }
       const reductionName = this.getWord(0).split(".")[1]
       const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
       const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
@@ -27014,6 +27078,9 @@ h3 {number}`
     get titleCell() {
       return this.getWordsFrom(1)
     }
+    get defaultTitle() {
+      return `Total rows`
+    }
     get dummyDataSetName() {
       return `stockPrice`
     }
@@ -27021,7 +27088,7 @@ h3 {number}`
       return `140 120`
     }
     getTileBodyStumpCode() {
-      const title = this.getWordsFrom(1).join(" ") || "Total rows"
+      const title = this.getWordsFrom(1).join(" ") || this.defaultTitle
       return this.qFormat(this.bodyStumpTemplate, { title, number: this._getNumber() })
     }
     _getNumber() {
@@ -27030,6 +27097,9 @@ h3 {number}`
   }
 
   class showColumnCountNode extends showRowCountNode {
+    get defaultTitle() {
+      return `Total columns`
+    }
     _getNumber() {
       return this.getParentOrDummyTable().getColumnNames().length
     }
@@ -28836,11 +28906,27 @@ input
     get url() {
       return `maia/packages/samples/telescopes.tsv`
     }
+    get dataUrl() {
+      return `https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/telescopes.tsv`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
+    get dataDescription() {
+      return `## Provenance
+This list was put together by a group of remote workers in a Google spreadsheet in 2017 and hasn't been updated in a while.`
+    }
   }
 
   class samplesMtcarsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/mtcars.tsv`
+    }
+    get dataUrl() {
+      return `https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html`
+    }
+    get isDataPublicDomain() {
+      return true
     }
   }
 
@@ -28848,11 +28934,23 @@ input
     get url() {
       return `maia/packages/samples/iris.tsv`
     }
+    get isDataPublicDomain() {
+      return true
+    }
+    get dataUrl() {
+      return `https://archive.ics.uci.edu/ml/datasets/iris`
+    }
   }
 
   class samplesFlights14Node extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/flights14-sample.csv`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
+    get dataUrl() {
+      return `https://github.com/Rdatatable/data.table/blob/master/vignettes/flights14.csv`
     }
   }
 
@@ -28863,17 +28961,35 @@ input
     get url() {
       return `maia/packages/samples/si.tree`
     }
+    get dataUrl() {
+      return `https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/si.tree`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
   }
 
   class samplesPortalNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/portals.ssv`
     }
+    get dataUrl() {
+      return `https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/portals.ssv`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
   }
 
   class samplesStarWarsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/starwars.json`
+    }
+    get dataLicense() {
+      return BSD
+    }
+    get isDataPublicDomain() {
+      return false
     }
   }
 
@@ -28893,11 +29009,17 @@ input
     get url() {
       return `maia/packages/samples/declaration-of-independence.text`
     }
+    get isDataPublicDomain() {
+      return true
+    }
   }
 
   class samplesPeriodicTableNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/periodic-table.csv`
+    }
+    get dataUrl() {
+      return `https://gist.github.com/GoodmanSciences/c2dd862cd38f21b0ad36b8f96b4bf1ee`
     }
   }
 
@@ -28910,6 +29032,9 @@ input
   class samplesPresidentsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/presidents.csv`
+    }
+    get isDataPublicDomain() {
+      return true
     }
   }
 
@@ -28980,12 +29105,18 @@ input
   }
 
   class samplesPatientsNode extends abstractDummyNode {
+    get isDataPublicDomain() {
+      return true
+    }
     get dummyDataSetName() {
       return `patients`
     }
   }
 
   class samplesPoemNode extends abstractDummyNode {
+    get isDataPublicDomain() {
+      return true
+    }
     get dummyDataSetName() {
       return `poem`
     }
@@ -28998,12 +29129,18 @@ input
   }
 
   class samplesTreeProgramNode extends abstractDummyNode {
+    get isDataPublicDomain() {
+      return true
+    }
     get dummyDataSetName() {
       return `treeProgram`
     }
   }
 
   class samplesWaterBillNode extends abstractDummyNode {
+    get isDataPublicDomain() {
+      return true
+    }
     get dummyDataSetName() {
       return `waterBill`
     }
@@ -29377,6 +29514,20 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
     }
   }
 
+  class schemaTypeScriptNode extends abstractNewRowsTransformerTileNode {
+    makeNewRows() {
+      return [{ text: this.getParentOrDummyTable().toTypeScriptInterface() }]
+    }
+  }
+
+  class schemaSimpleNode extends abstractNewRowsTransformerTileNode {
+    makeNewRows() {
+      const schema = this.getParentOrDummyTable().toSimpleSchema()
+      const oneLiner = schema.replace(/ /g, ":").replace(/\n/g, " ")
+      return [{ text: oneLiner + "\n\n" + schema }]
+    }
+  }
+
   class textWordCountNode extends abstractNewRowsTransformerTileNode {
     get dummyDataSetName() {
       return `poem`
@@ -29674,6 +29825,74 @@ class LargeLabel`
     }
   }
 
+  class dataSynthNode extends abstractTransformerNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { schema: schemaNode }),
+        undefined
+      )
+    }
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get intCell() {
+      return parseInt(this.getWord(1))
+    }
+    get schemaSimpleCell() {
+      return this.getWordsFrom(2)
+    }
+    _createOutputTable() {
+      const schema = this._getSchema()
+      const table = !schema ? this.getParentOrDummyTable() : new Table([], schema)
+      return table.synthesizeTable(this.intCell || 30, Date.now())
+    }
+    _getSchema() {
+      const schema = this.getNode("schema")
+      if (schema) return schema.toJTableColumnDefinitionMap()
+      const words = this.getWordsFrom(2)
+      if (words.length)
+        return words.map(word => {
+          const parts = word.split(":")
+          return {
+            name: parts[0],
+            type: parts[1]
+          }
+        })
+    }
+  }
+
+  class dataUsabilityScoreNode extends abstractTransformerNode {
+    get criteria() {
+      return `metadata
+ licenseSpecified
+ tags
+ subtitle
+ overviewDescription
+fileFormats
+ fileDescriptions
+ columnSpecifications
+ acceptableFileFormats
+assurance
+ provenance
+ update
+ hasPublicKernel`
+    }
+    _createOutputTable() {
+      const parentTile = this.getParent()
+      const def = parentTile.getDefinition()
+      const row = {
+        licenseSpecified: !!parentTile.isDataPublicDomain,
+        tags: !!def.get("tags"),
+        overviewDescription: parentTile.dataDescription || !!def.get("description"),
+        dataUrl: !!parentTile.dataUrl
+      }
+      // todo: a very simplistic approximation of Kaggle's data usability score
+      row.score = Object.values(row).filter(item => item).length * 2.5
+      return new Table([row])
+    }
+  }
+
   class groupByNode extends abstractTransformerNode {
     createParser() {
       return new jtree.TreeNode.Parser(
@@ -29960,6 +30179,9 @@ class LargeLabel`
 4.9,2,virginica
 1.5,0.2,setosa`
     }
+    get isDataPublicDomain() {
+      return true
+    }
     getDataContent() {
       return this.data
     }
@@ -30095,19 +30317,18 @@ a {name}
     }
   }
 
-  class toCsvNode extends abstractMaiaTileNode {
+  class printNode extends abstractMaiaTileNode {
     execute() {
       console.log(this._getMessage())
     }
     _getMessage() {
-      return this.getParentOrDummyTable().toDelimited(",")
+      return this.getPipishInput()
     }
   }
 
-  class toTypeScriptInterfaceNode extends toCsvNode {
+  class printCsvNode extends printNode {
     _getMessage() {
-      // todo: gopher is evaling this in test
-      return this.getParentOrDummyTable().toTypeScriptInterface()
+      return this.getParentOrDummyTable().toDelimited(",")
     }
   }
 
@@ -30499,6 +30720,8 @@ a {name}
           "data.eval": dataEvalNode,
           "join.by": joinByNode,
           "match.columnsFuzzy": matchColumnsFuzzyNode,
+          "schema.toTypescript": schemaTypeScriptNode,
+          "schema.toSimple": schemaSimpleNode,
           "text.wordCount": textWordCountNode,
           "text.lineCount": textLineCountNode,
           "treenotation.wordTypes": treenotationWordTypesNode,
@@ -30517,6 +30740,8 @@ a {name}
           "rows.last": rowsLastNode,
           "columns.cleanNames": columnsCleanNamesNode,
           "columns.setType": columnsSetTypeNode,
+          "data.synth": dataSynthNode,
+          "data.usabilityScore": dataUsabilityScoreNode,
           "group.by": groupByNode,
           "rows.sortBy": rowsSortByNode,
           "rows.sortByReverse": rowsSortByReverseNode,
@@ -30532,8 +30757,8 @@ a {name}
           "samples.tinyIris": samplesTinyIrisNode,
           "templates.list": templatesListNode,
           "assert.rowCount": assertRowCountNode,
-          "shell.csv": toCsvNode,
-          "shell.typescript": toTypeScriptInterfaceNode,
+          "print.text": printNode,
+          "print.csv": printCsvNode,
           "doc.categories": docCategoriesNode,
           "doc.author": docAuthorNode,
           "doc.defaultHidden": docDefaultHiddenNode,
@@ -30660,6 +30885,9 @@ challengeIdCell
 challengeAnswerCell
  extends numberCell
 localStorageKeyCell
+schemaSimpleCell
+ highlightScope string
+ examples name:string score:int
 dateColumnTypeCell
  enum day month year monthDay
  highlightScope constant
@@ -30675,7 +30903,7 @@ comparisonCell
 hackerNewsUserNameCell
  highlightScope string
 htmlTextTagCell
- enum div pre p h1 h2 h3 h4 h5 h6
+ enum div pre p h1 h2 h3 h4 h5 h6 code
 htmlCell
  highlightScope string
 needleColumnNameCell
@@ -31786,6 +32014,7 @@ samplesListNode
  description View all available sample tiles
  string title All samples:
  string itemFormat {id} - {description}
+ boolean isDataPublicDomain true
  extends abstractSnippetGalleryNode
  crux samples.list
  javascript
@@ -31996,6 +32225,10 @@ abstractHtmlNode
  description An HTML element
  inScope styleNode contentNode
  extends abstractEmptyFooterTileNode
+ string hakonTemplate
+  .abstractHtmlNode
+   code
+    user-select text
  abstract
  string bodyStumpTemplate
   {tag}
@@ -32139,8 +32372,12 @@ abstractShowTileNode
   getTileBodyStumpCode() {
    const columnName = this.getWord(1)
    if (!columnName) return \`No data for \${this.getFirstWord()}\`
-   const col = this.getParentOrDummyTable().getTableColumnByName(columnName)
-   if (!col) return ""
+   const table = this.getParentOrDummyTable()
+   const col = table.getTableColumnByName(columnName)
+   if (!col) {
+    console.log(\`No column named \${columnName}\`)
+    return ""
+   }
    const reductionName = this.getWord(0).split(".")[1]
    const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
    const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
@@ -32154,10 +32391,11 @@ showRowCountNode
  string dummyDataSetName stockPrice
  cells tileKeywordCell
  extends abstractShowTileNode
+ string defaultTitle Total rows
  crux show.rowCount
  javascript
   getTileBodyStumpCode() {
-   const title = this.getWordsFrom(1).join(" ") || "Total rows"
+   const title = this.getWordsFrom(1).join(" ") || this.defaultTitle
    return this.qFormat(this.bodyStumpTemplate, { title, number: this._getNumber() })
   }
   _getNumber() {
@@ -32165,6 +32403,7 @@ showRowCountNode
   }
 showColumnCountNode
  extends showRowCountNode
+ string defaultTitle Total columns
  description Show the total number of columns
  crux show.columnCount
  javascript
@@ -33819,6 +34058,12 @@ kaggleDatasetsHeartNode
  crux kaggle.datasets.heart
 samplesTelescopesNode
  description A partial list of humankind's largest telescopes.
+ string dataDescription
+  ## Provenance
+  This list was put together by a group of remote workers in a Google spreadsheet in 2017 and hasn't been updated in a while.
+ boolean isDataPublicDomain true
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/telescopes.tsv
+ tags astronomy
  frequency .03
  example Display list of links to telescope websites.
   samples.telescopes
@@ -33828,23 +34073,31 @@ samplesTelescopesNode
  crux samples.telescopes
 samplesMtcarsNode
  description Dataset from 1974 Motor Trend US magazine.
+ boolean isDataPublicDomain true
+ string dataUrl https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html
  frequency .03
  string url maia/packages/samples/mtcars.tsv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.mtcars
 samplesIrisNode
  description The famous Iris flower data set.
+ string dataUrl https://archive.ics.uci.edu/ml/datasets/iris
+ boolean isDataPublicDomain true
  frequency .15
  string url maia/packages/samples/iris.tsv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.iris
 samplesFlights14Node
- description On-Time flights data from the Bureau of Transporation Statistics for all the flights that departed from New York City airports in 2014. The data is available only for Jan-Oct'14.
+ description On-Time flights data from the Bureau of Transportation Statistics for all the flights that departed from New York City airports in 2014. The data is available only for Jan-Oct'14.
+ string dataUrl https://github.com/Rdatatable/data.table/blob/master/vignettes/flights14.csv
+ boolean isDataPublicDomain true
  string url maia/packages/samples/flights14-sample.csv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.flights14
 samplesSiNode
  description A description of The International System of Units (SI) aka the metric system.
+ boolean isDataPublicDomain true
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/si.tree
  example View outline of SI system.
   samples.si
    treenotation.outline
@@ -33855,6 +34108,8 @@ samplesSiNode
  crux samples.si
 samplesPortalNode
  description A list of online data portals.
+ boolean isDataPublicDomain true
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/portals.ssv
  frequency .03
  string url maia/packages/samples/portals.ssv
  extends abstractFixedDatasetFromMaiaCollectionNode
@@ -33862,6 +34117,8 @@ samplesPortalNode
 samplesStarWarsNode
  description All Star Wars characters. Data comes from https://swapi.co/
  frequency .03
+ boolean isDataPublicDomain false
+ boolean dataLicense BSD
  string url maia/packages/samples/starwars.json
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.starWars
@@ -33879,12 +34136,14 @@ samplesBabyNamesNode
  crux samples.babyNames
 samplesDeclarationNode
  description The 1776 Declaration of Independence
+ boolean isDataPublicDomain true
  frequency .02
  string url maia/packages/samples/declaration-of-independence.text
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.declaration
 samplesPeriodicTableNode
  description Periodic table from https://gist.github.com/GoodmanSciences
+ string dataUrl https://gist.github.com/GoodmanSciences/c2dd862cd38f21b0ad36b8f96b4bf1ee
  frequency .15
  extends abstractFixedDatasetFromMaiaCollectionNode
  string url maia/packages/samples/periodic-table.csv
@@ -33896,6 +34155,7 @@ samplesLettersNode
  string url maia/packages/samples/letters.tsv
  crux samples.letters
 samplesPresidentsNode
+ boolean isDataPublicDomain true
  description CSV of president's of United States.
  frequency .03
  string url maia/packages/samples/presidents.csv
@@ -33977,11 +34237,13 @@ abstractDummyNode
 samplesPatientsNode
  description A row for each patient in a sample clinical dataset.
  string dummyDataSetName patients
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.patients
 samplesPoemNode
  description The Road Not Taken by Robert Frost
  string dummyDataSetName poem
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.poem
 samplesOuterSpaceNode
@@ -33992,12 +34254,14 @@ samplesOuterSpaceNode
 samplesTreeProgramNode
  description A simple program in a Tree Language.
  string dummyDataSetName treeProgram
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.treeProgram
 samplesWaterBillNode
  description A family's water bill.
  frequency .15
  string dummyDataSetName waterBill
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.waterBill
 samplesGapMinderNode
@@ -34352,6 +34616,32 @@ matchColumnsFuzzyNode
     }
    })
   }
+schemaTypeScriptNode
+ description Generates a TypeScript interface for the parent table.
+ extends abstractNewRowsTransformerTileNode
+ crux schema.toTypescript
+ example
+  samples.presidents
+   schema.toTypescript
+    html.printAs code
+ javascript
+  makeNewRows() {
+   return [{ text: this.getParentOrDummyTable().toTypeScriptInterface() }]
+  }
+schemaSimpleNode
+ description Generate a simple schema of the parent table.
+ extends abstractNewRowsTransformerTileNode
+ crux schema.toSimple
+ example
+  samples.presidents
+   schema.toSimple
+    html.printAs code
+ javascript
+  makeNewRows() {
+   const schema = this.getParentOrDummyTable().toSimpleSchema()
+   const oneLiner = schema.replace(/ /g, ":").replace(/\\n/g, " ")
+   return [{ text: oneLiner + "\\n\\n" + schema }]
+  }
 textWordCountNode
  description Splits a string into words and counts the number of uses of each word.
  string dummyDataSetName poem
@@ -34671,6 +34961,82 @@ columnsSetTypeNode
    const newType = this.getWord(2)
    return this.getParentOrDummyTable().changeColumnType(colToChange, newType)
   }
+dataSynthNode
+ description Synthesizes new datasets based upon the parent tiles schema.
+ crux data.synth
+ catchAllCellType schemaSimpleCell
+ extends abstractTransformerNode
+ inScope schemaNode
+ javascript
+  _createOutputTable() {
+   const schema = this._getSchema()
+   const table = !schema ? this.getParentOrDummyTable() : new Table([], schema)
+   return table.synthesizeTable(this.intCell || 30, Date.now())
+  }
+  _getSchema() {
+   const schema = this.getNode("schema")
+   if (schema) return schema.toJTableColumnDefinitionMap()
+   const words = this.getWordsFrom(2)
+   if (words.length)
+    return words.map(word => {
+     const parts = word.split(":")
+     return {
+      name: parts[0],
+      type: parts[1]
+     }
+    })
+  }
+ cells tileKeywordCell intCell
+ example
+  samples.iris
+   data.synth 100
+    show.rowCount
+ example
+  data.synth 100
+   schema
+    name string
+    score int
+    finished boolean
+   show.columnCount
+ example
+  data.synth 100 name:string score:int finished:boolean
+dataUsabilityScoreNode
+ extends abstractTransformerNode
+ description Generates a Data Usability Score for the input table.
+ crux data.usabilityScore
+ example
+  samples.iris
+   data.usabilityScore
+    tables.basic
+    show.max score
+ javascript
+  _createOutputTable() {
+   const parentTile = this.getParent()
+   const def = parentTile.getDefinition()
+   const row = {
+    licenseSpecified: !!parentTile.isDataPublicDomain,
+    tags: !!def.get("tags"),
+    overviewDescription: parentTile.dataDescription || !!def.get("description"),
+    dataUrl: !!parentTile.dataUrl
+   }
+   // todo: a very simplistic approximation of Kaggle's data usability score
+   row.score = Object.values(row).filter(item => item).length * 2.5
+   return new Table([row])
+  }
+ string criteria
+  metadata
+   licenseSpecified
+   tags
+   subtitle
+   overviewDescription
+  fileFormats
+   fileDescriptions
+   columnSpecifications
+   acceptableFileFormats
+  assurance
+   provenance
+   update
+   hasPublicKernel
 groupByNode
  frequency .01
  catchAllCellType columnNameCell
@@ -34930,6 +35296,7 @@ randomIntNode
  extends abstractRandomTileNode
 samplesTinyIrisNode
  description A snippet of the Iris dataset.
+ boolean isDataPublicDomain true
  string data
   petal_length,petal_width,species
   4.9,1.8,virginica
@@ -35073,31 +35440,34 @@ assertRowCountNode
    if (actual !== expected) throw new Error(\`Expected \${expected} but got \${actual}\`)
    return super.execute()
   }
-toCsvNode
- description Print input table to console as csv.
+printNode
+ description Print input table to console as text.
  extends abstractMaiaTileNode
- crux shell.csv
+ crux print.text
  example
-  samples.presidents
-   filter.where HomeState = Illinois
-    shell.csv
+  data.inline
+   parser text
+   content
+    Hello world
+   print.text
  javascript
   execute() {
    console.log(this._getMessage())
   }
   _getMessage() {
-   return this.getParentOrDummyTable().toDelimited(",")
+   return this.getPipishInput()
   }
-toTypeScriptInterfaceNode
- extends toCsvNode
- crux shell.typescript
+printCsvNode
+ description Print input table to console as csv.
+ extends printNode
+ crux print.csv
  example
   samples.presidents
-   shell.typescript
+   filter.where HomeState = Illinois
+    print.csv
  javascript
   _getMessage() {
-   // todo: gopher is evaling this in test
-   return this.getParentOrDummyTable().toTypeScriptInterface()
+   return this.getParentOrDummyTable().toDelimited(",")
   }
 tileBlankLineNode
  boolean visible false
@@ -35542,7 +35912,23 @@ tileSettingNonTerminalContentNode
  baseNodeType blobNode
 lineOfContentNode
  catchAllNodeType lineOfContentNode
- catchAllCellType stringCell`)
+ catchAllCellType stringCell
+columnDefinitionNode
+ cells columnNameCell primitiveTypeCell
+schemaNode
+ crux schema
+ description A basic schema language consisting of one column name followed by a primitive column type per line.
+ cells tileSettingKeywordCell
+ catchAllNodeType columnDefinitionNode
+ javascript
+  toJTableColumnDefinitionMap() {
+   return this.map(row => {
+    return {
+     name: row.getWord(0),
+     type: row.getWord(1)
+    }
+   })
+  }`)
       return this._cachedHandGrammarProgramRoot
     }
     static getNodeTypeMap() {
@@ -35687,6 +36073,8 @@ lineOfContentNode
         dataEvalNode: dataEvalNode,
         joinByNode: joinByNode,
         matchColumnsFuzzyNode: matchColumnsFuzzyNode,
+        schemaTypeScriptNode: schemaTypeScriptNode,
+        schemaSimpleNode: schemaSimpleNode,
         textWordCountNode: textWordCountNode,
         textLineCountNode: textLineCountNode,
         treenotationWordTypesNode: treenotationWordTypesNode,
@@ -35708,6 +36096,8 @@ lineOfContentNode
         rowsLastNode: rowsLastNode,
         columnsCleanNamesNode: columnsCleanNamesNode,
         columnsSetTypeNode: columnsSetTypeNode,
+        dataSynthNode: dataSynthNode,
+        dataUsabilityScoreNode: dataUsabilityScoreNode,
         groupByNode: groupByNode,
         rowsSortByNode: rowsSortByNode,
         rowsSortByReverseNode: rowsSortByReverseNode,
@@ -35725,8 +36115,8 @@ lineOfContentNode
         abstractTemplatePickerTileNode: abstractTemplatePickerTileNode,
         templatesListNode: templatesListNode,
         assertRowCountNode: assertRowCountNode,
-        toCsvNode: toCsvNode,
-        toTypeScriptInterfaceNode: toTypeScriptInterfaceNode,
+        printNode: printNode,
+        printCsvNode: printCsvNode,
         tileBlankLineNode: tileBlankLineNode,
         abstractDocSettingNode: abstractDocSettingNode,
         docCategoriesNode: docCategoriesNode,
@@ -35793,7 +36183,9 @@ lineOfContentNode
         catchAllNodesPostContentNode: catchAllNodesPostContentNode,
         postNode: postNode,
         tileSettingNonTerminalContentNode: tileSettingNonTerminalContentNode,
-        lineOfContentNode: lineOfContentNode
+        lineOfContentNode: lineOfContentNode,
+        columnDefinitionNode: columnDefinitionNode,
+        schemaNode: schemaNode
       }
     }
   }
@@ -36045,6 +36437,32 @@ lineOfContentNode
     }
     get stringCell() {
       return this.getWordsFrom(0)
+    }
+  }
+
+  class columnDefinitionNode extends jtree.GrammarBackedNode {
+    get columnNameCell() {
+      return this.getWord(0)
+    }
+    get primitiveTypeCell() {
+      return this.getWord(1)
+    }
+  }
+
+  class schemaNode extends jtree.GrammarBackedNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(columnDefinitionNode, undefined, undefined)
+    }
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    toJTableColumnDefinitionMap() {
+      return this.map(row => {
+        return {
+          name: row.getWord(0),
+          type: row.getWord(1)
+        }
+      })
     }
   }
 
@@ -36403,6 +36821,18 @@ file templates/trigonometry.maia
   doc.layout column
   doc.categories math
   doc.defaultHidden
+file templates/typescript-interface-generator.maia
+ data
+  doc.title TypeScript Interface Generator
+  data.inline
+   content
+    state,number
+    Hawaii,50
+   schema.toTypescript
+    hidden
+    html.printAs code
+  doc.layout column
+  doc.categories programming
 file templates/ucimlr-overview.maia
  data
   doc.title The Datasets in UCIMLR
@@ -41941,7 +42371,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "16.4.0"
+const Version = "17.0.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 

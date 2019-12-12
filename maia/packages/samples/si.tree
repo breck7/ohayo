@@ -1,4 +1,6 @@
 source https://en.wikipedia.org/wiki/International_System_of_Units
+description This dataset attemps to put all the SI units into a single tree structure.
+license Public domain
 prefixes
  yotta Y 24
  zetta Z 21

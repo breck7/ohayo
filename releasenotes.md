@@ -1,12 +1,27 @@
-16.4.0 2019-12-9
-----------------
+17.0.0 2019-12-11
+-----------------
 -
+
+Edge 2019-12-10
+---------------
+- New: data.synth tile
+- New: schema.toSimple and schema.toTypescript tiles
+- New: data.usabilityScore tile
+- New: print.text and print.csv methods
+- New: isDataPublicDomain, dataUrl, and dataDescription properties for data usability score
+- New: started adding meta data to datasets
+- New: typescript interface generator template
+- Breaking: shell.csv is now print.csv and shell.typescript is now schema.toTypescript
+- Fix: html tiles selectable
+- Fix: show.columnCount default title fix
+- Infra: updated Jtree
 
 16.4.0 2019-12-9
 ----------------
 - Fix: column name autocomplete fixes and tests
 - New: Print error count onsave in code editor
 - New: templates now a provider
+- New: shell.typescript
 - Infra: Tile requirement loading code cleanup.
 
 16.3.0 2019-12-9

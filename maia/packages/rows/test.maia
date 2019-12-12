@@ -4,4 +4,5 @@ data.inline
   name,age
   bob,
   mike,55
- shell.typescript
+ schema.toTypescript
+  print.text

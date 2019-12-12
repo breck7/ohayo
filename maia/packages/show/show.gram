@@ -33,8 +33,12 @@ abstractShowTileNode
   getTileBodyStumpCode() {
    const columnName = this.getWord(1)
    if (!columnName) return `No data for ${this.getFirstWord()}`
-   const col = this.getParentOrDummyTable().getTableColumnByName(columnName)
-   if (!col) return ""
+   const table = this.getParentOrDummyTable()
+   const col = table.getTableColumnByName(columnName)
+   if (!col) {
+    console.log(`No column named ${columnName}`)
+    return ""
+   }
    const reductionName = this.getWord(0).split(".")[1]
    const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
    const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
@@ -48,10 +52,11 @@ showRowCountNode
  string dummyDataSetName stockPrice
  cells tileKeywordCell
  extends abstractShowTileNode
+ string defaultTitle Total rows
  crux show.rowCount
  javascript
   getTileBodyStumpCode() {
-   const title = this.getWordsFrom(1).join(" ") || "Total rows"
+   const title = this.getWordsFrom(1).join(" ") || this.defaultTitle
    return this.qFormat(this.bodyStumpTemplate, {title, number: this._getNumber()})
   }
   _getNumber() {
@@ -59,6 +64,7 @@ showRowCountNode
   }
 showColumnCountNode
  extends showRowCountNode
+ string defaultTitle Total columns
  description Show the total number of columns
  crux show.columnCount
  javascript
