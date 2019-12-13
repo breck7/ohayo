@@ -1,12 +1,32 @@
-16.4.0 2019-12-9
-----------------
--
+17.0.0 2019-12-12
+-----------------
+- New: data.synth tile
+- New: schema.toSimple and schema.toTypescript tiles
+- New: data.usabilityScore tile
+- New: print.text and print.csv methods
+- New: isDataPublicDomain, dataUrl, and dataDescription properties for data usability score
+- New: text.firstLetter tile
+- New: columns.rename tile
+- New: fill.missing tile
+- New: templates: boiling point, periodic table, country-names, country pops, ohayo product, declaration, typescript interface generator
+- New: now gallery tiles pass through data
+- New: data.about tile
+- New: debug.grammar tile
+- New: moz.top500 tile
+- Breaking: shell.csv is now print.csv and shell.typescript is now schema.toTypescript
+- Breaking: text.substring tile now renames column to "substring". Use columns.rename for old behavior.
+- Fix: html tiles selectable
+- Fix: show.columnCount default title fix
+- Fix: fixed bugs in population.tsv
+- Infra: updated Jtree to 49.4.0
+- Infra: fabWithLocalStorage.html route
 
 16.4.0 2019-12-9
 ----------------
 - Fix: column name autocomplete fixes and tests
 - New: Print error count onsave in code editor
 - New: templates now a provider
+- New: shell.typescript
 - Infra: Tile requirement loading code cleanup.
 
 16.3.0 2019-12-9

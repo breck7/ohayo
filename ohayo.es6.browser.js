@@ -13396,6 +13396,20 @@ class TreeUtils {
   static escapeRegExp(str) {
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
   }
+  static sum(arr) {
+    return arr.reduce((curr, next) => curr + next, 0)
+  }
+  static makeVector(length, fill = 0) {
+    return new Array(length).fill(fill)
+  }
+  static makeMatrix(cols, rows, fill = 0) {
+    const matrix = []
+    while (rows) {
+      matrix.push(TreeUtils.makeVector(cols, fill))
+      rows--
+    }
+    return matrix
+  }
   static removeNonAscii(str) {
     // https://stackoverflow.com/questions/20856197/remove-non-ascii-character-in-string
     return str.replace(/[^\x00-\x7F]/g, "")
@@ -13449,7 +13463,7 @@ class TreeUtils {
       : ""
   }
   static isValueEmpty(value) {
-    return value === undefined || value === "" || (typeof value === "number" && isNaN(value))
+    return value === undefined || value === "" || (typeof value === "number" && isNaN(value)) || (value instanceof Date && isNaN(value))
   }
   static stringToPermalink(str) {
     return this._permalink(str, /[^a-z0-9- _\.]/gi)
@@ -14208,6 +14222,7 @@ class TreeNode extends AbstractNode {
   }
   execute() {}
   async loadRequirements(context) {
+    // todo: remove
     await Promise.all(this.map(node => node.loadRequirements(context)))
   }
   getErrors() {
@@ -16457,7 +16472,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "49.1.0"
+TreeNode.getVersion = () => "49.4.0"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -18319,6 +18334,65 @@ class HandGrammarProgram extends AbstractGrammarDefinitionNode {
       }
     }
   }
+  trainModel(programs, programConstructor = this.compileAndReturnRootConstructor()) {
+    const nodeDefs = this.getValidConcreteAndAbstractNodeTypeDefinitions()
+    const nodeDefCountIncludingRoot = nodeDefs.length + 1
+    const matrix = TreeUtils.makeMatrix(nodeDefCountIncludingRoot, nodeDefCountIncludingRoot, 0)
+    const idToIndex = {}
+    const indexToId = {}
+    nodeDefs.forEach((def, index) => {
+      const id = def._getId()
+      idToIndex[id] = index + 1
+      indexToId[index + 1] = id
+    })
+    programs.forEach(code => {
+      const exampleProgram = new programConstructor(code)
+      exampleProgram.getTopDownArray().forEach(node => {
+        const nodeIndex = idToIndex[node.getDefinition()._getId()]
+        const parentNode = node.getParent()
+        if (!nodeIndex) return undefined
+        if (parentNode.isRoot()) matrix[0][nodeIndex]++
+        else {
+          const parentIndex = idToIndex[parentNode.getDefinition()._getId()]
+          if (!parentIndex) return undefined
+          matrix[parentIndex][nodeIndex]++
+        }
+      })
+    })
+    return {
+      idToIndex,
+      indexToId,
+      matrix
+    }
+  }
+  _mapPredictions(predictionsVector, model) {
+    const total = TreeUtils.sum(predictionsVector)
+    const predictions = predictionsVector.slice(1).map((count, index) => {
+      const id = model.indexToId[index + 1]
+      return {
+        id: id,
+        def: this.getNodeTypeDefinitionByNodeTypeId(id),
+        count,
+        prob: count / total
+      }
+    })
+    predictions.sort(TreeUtils.makeSortByFn(prediction => prediction.count)).reverse()
+    return predictions
+  }
+  predictChildren(model, node) {
+    return this._mapPredictions(this._predictChildren(model, node), model)
+  }
+  predictParents(model, node) {
+    return this._mapPredictions(this._predictParents(model, node), model)
+  }
+  _predictChildren(model, node) {
+    return model.matrix[node.isRoot() ? 0 : model.idToIndex[node.getDefinition()._getId()]]
+  }
+  _predictParents(model, node) {
+    if (node.isRoot()) return []
+    const nodeIndex = model.idToIndex[node.getDefinition()._getId()]
+    return model.matrix.map(row => row[nodeIndex])
+  }
   _compileAndReturnNodeTypeMap() {
     if (!this._cache_compiledLoadedNodeTypes) this._compileAndEvalGrammar()
     return this._cache_compiledLoadedNodeTypes
@@ -19213,6 +19287,9 @@ class BooleanType extends AbstractPrimitiveType {
     // todo: handle false, etc
     return val ? 1 : 0
   }
+  synthesizeValue(randomNumberFn) {
+    return Math.round(randomNumberFn())
+  }
   getJavascriptTypeName() {
     return JavascriptNativeTypeNames.boolean
   }
@@ -19238,6 +19315,16 @@ class BooleanType extends AbstractPrimitiveType {
 class AbstractNumeric extends AbstractPrimitiveType {
   fromStringToNumeric(value) {
     return parseFloat(value)
+  }
+  synthesizeValue(randomNumberFn) {
+    // todo: min/max etc
+    return this.getMin() + Math.floor((this.getMax() - this.getMin()) * randomNumberFn())
+  }
+  getMax() {
+    return 100
+  }
+  getMin() {
+    return 0
   }
   getAsNativeJavascriptType(val) {
     if (val === undefined) return NaN
@@ -19374,6 +19461,9 @@ class ObjectType extends AbstractPrimitiveType {
   getStringExamples() {
     return ["{score: 10}"]
   }
+  synthesizeValue() {
+    return {}
+  }
   fromStringToNumeric() {
     return undefined
   }
@@ -19405,6 +19495,9 @@ class AbstractStringCol extends AbstractPrimitiveType {
   }
   getVegaType() {
     return VegaTypes.nominal
+  }
+  synthesizeValue() {
+    return "randomString"
   }
   getJavascriptTypeName() {
     return JavascriptNativeTypeNames.string
@@ -19458,6 +19551,9 @@ class AbstractTemporal extends AbstractPrimitiveType {
   }
   getJavascriptTypeName() {
     return JavascriptNativeTypeNames.Date
+  }
+  synthesizeValue() {
+    return new Date()
   }
   isNumeric() {
     return true
@@ -19814,6 +19910,9 @@ class Column {
   getPrimitiveTypeObj() {
     if (!this._type) this._type = this._inferType()
     return this._type
+  }
+  synthesizeValue(randomNumberFn) {
+    return this.getPrimitiveTypeObj().synthesizeValue(randomNumberFn)
   }
   isTemporal() {
     return this.getPrimitiveTypeObj().isTemporal()
@@ -21441,6 +21540,13 @@ class Table {
       .map(row => row.rowToObjectWithOnlyNativeJavascriptTypes())
       .map(obj => Object.assign({}, obj))
   }
+  fillMissing(columnName, value) {
+    const filled = this.cloneNativeJavascriptTypedRows().map(row => {
+      if (jtree.Utils.isValueEmpty(row[columnName])) row[columnName] = value
+      return row
+    })
+    return new Table(filled, this.getColumnsArrayOfObjects())
+  }
   getTableColumnByName(name) {
     return this.getColumnsMap()[name]
   }
@@ -21558,15 +21664,15 @@ ${cols}
     const rows = this.getRows()
       .map(row => row.rowToObjectWithOnlyNativeJavascriptTypes())
       .map(obj => {
-        const newObj = {}
         Object.keys(nameMap).forEach(oldName => {
-          newObj[nameMap[oldName]] = obj[oldName]
+          obj[nameMap[oldName]] = obj[oldName]
+          delete obj[oldName]
         })
-        return newObj
+        return obj
       })
     const cols = this.getColumnsArrayOfObjects()
     cols.forEach(col => {
-      col.name = nameMap[col.name]
+      if (nameMap[col.name]) col.name = nameMap[col.name]
     })
     return new Table(rows, cols, undefined, false)
   }
@@ -21603,6 +21709,22 @@ ${cols}
     rows.push(newRow)
     return new Table(rows, this.getColumnsMap())
   }
+  _synthesizeRow(randomNumberFn) {
+    const row = {}
+    this.getColumnsArray().forEach(column => {
+      row[column.getColumnName()] = column.synthesizeValue(randomNumberFn)
+    })
+    return row
+  }
+  synthesizeTable(rowcount, seed) {
+    const randomNumberFn = jtree.Utils.makeSemiRandomFn(seed)
+    const rows = []
+    while (rowcount) {
+      rows.push(this._synthesizeRow(randomNumberFn))
+      rowcount--
+    }
+    return new Table(rows, this.getColumnsArray().map(col => col.toObject()))
+  }
   // todo: we don't need any cloning here--here create a new sorted array with poitners
   // to same rows
   shuffleRows() {
@@ -21633,6 +21755,12 @@ ${cols}
   toDelimited(delimiter) {
     return this.toTree().toDelimited(delimiter, this.getColumnNames())
   }
+  toSimpleSchema() {
+    return this.getColumnsArray()
+      .map(col => `${col.getColumnName()} ${col.getPrimitiveTypeName()}`)
+      .join("\n")
+  }
+  // todo: toProtoBuf, toSqlLite, toJsonSchema, toJsonLd, toCapnProto, toApacheArrow, toFlatBuffers
   // guess which are the more important/informative/interesting columns
   getColumnsByImportance() {
     const columnsMap = this.getColumnsMap()
@@ -26144,6 +26272,7 @@ a {name}
           "dcjs.comingSoon": dcjsComingSoonNode,
           "finos.perspective.comingSoon": finosPerspectiveComingSoonNode,
           "fivethirtyeight.comingSoon": fivethirtyeightComingSoonNode,
+          "gov.comingSoon": GovNode,
           "highcharts.comingSoon": highchartsComingSoonNode,
           "re3data.comingSoon": re3dataComingSoonNode,
           "zing.comingSoon": zingComingSoonNode,
@@ -26151,8 +26280,8 @@ a {name}
           "debug.dump": debugDumpNode,
           "web.dump": webDumpNode,
           "debug.commands": debugCommandsNode,
-          "debug.grammarTree": debugGrammarTreeNode,
           "debug.sleep": debugSleepNode,
+          "debug.noop": debugNoOpNode,
           "debug.throw": debugThrowNode,
           "editor.gallery": editorGalleryNode,
           "handsontable.basic": handsontableBasicNode,
@@ -26171,6 +26300,7 @@ a {name}
           "web.post": webPostNode,
           "cancer.cases": cancerCasesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
+          "moz.top500": mozTop500Node,
           "samples.telescopes": samplesTelescopesNode,
           "samples.mtcars": samplesMtcarsNode,
           "samples.iris": samplesIrisNode,
@@ -26203,11 +26333,14 @@ a {name}
           "text.split": textSplitNode,
           "text.toLowerCase": textToLowerCaseNode,
           "text.substring": textSubstringNode,
+          "text.firstLetter": testFirstLetterNode,
           "columns.describe": columnsDescribeNode,
           "columns.list": columnsListNode,
           "data.eval": dataEvalNode,
           "join.by": joinByNode,
           "match.columnsFuzzy": matchColumnsFuzzyNode,
+          "schema.toTypescript": schemaTypeScriptNode,
+          "schema.toSimple": schemaSimpleNode,
           "text.wordCount": textWordCountNode,
           "text.lineCount": textLineCountNode,
           "treenotation.wordTypes": treenotationWordTypesNode,
@@ -26224,8 +26357,13 @@ a {name}
           "rows.first": rowsFirstNode,
           "rows.dropIfMissing": rowsDropIfMissingNode,
           "rows.last": rowsLastNode,
+          "columns.rename": columnsRenameNode,
           "columns.cleanNames": columnsCleanNamesNode,
           "columns.setType": columnsSetTypeNode,
+          "data.synth": dataSynthNode,
+          "data.about": dataAboutNode,
+          "data.usabilityScore": dataUsabilityScoreNode,
+          "fill.missing": fillMissingNode,
           "group.by": groupByNode,
           "rows.sortBy": rowsSortByNode,
           "rows.sortByReverse": rowsSortByReverseNode,
@@ -26233,6 +26371,8 @@ a {name}
           "data.inline": dataInlineNode,
           "data.localStorage": dataLocalStorageNode,
           "debug.parserTest": debugParserTestNode,
+          "debug.grammar": debugGrammarNode,
+          "debug.grammarTree": debugGrammarTreeNode,
           "editor.files": editorFilesNode,
           "editor.commandHistory": editorCommandHistoryNode,
           "math.gen": mathGenNode,
@@ -26241,8 +26381,8 @@ a {name}
           "samples.tinyIris": samplesTinyIrisNode,
           "templates.list": templatesListNode,
           "assert.rowCount": assertRowCountNode,
-          "shell.csv": toCsvNode,
-          "shell.typescript": toTypeScriptInterfaceNode,
+          "print.text": printNode,
+          "print.csv": printCsvNode,
           hidden: hiddenNode,
           visible: visibleNode,
           maximized: maximizedNode,
@@ -26559,6 +26699,15 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
       return `600 240`
     }
     getGalleryNodes() {}
+    async _execute() {
+      this._outputTable = new Table(
+        this.getGalleryNodes()
+          .toDataTable()
+          .slice(1)
+      )
+      this.setIsDataLoaded(true)
+      await this._executeChildNodes()
+    }
     getTileBodyStumpCode() {
       return this.qFormat(this.bodyStumpTemplate, {
         title: this.title,
@@ -26597,6 +26746,9 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
   }
 
   class samplesListNode extends abstractSnippetGalleryNode {
+    get isDataPublicDomain() {
+      return true
+    }
     get itemFormat() {
       return `{id} - {description}`
     }
@@ -26835,6 +26987,11 @@ table
  bern
   {content}`
     }
+    get hakonTemplate() {
+      return `.abstractHtmlNode
+ code
+  user-select text`
+    }
     getTileFooterStumpCode() {
       return this.getTileToolbarButtonStumpCode()
     }
@@ -26998,8 +27155,12 @@ h3 {number}`
     getTileBodyStumpCode() {
       const columnName = this.getWord(1)
       if (!columnName) return `No data for ${this.getFirstWord()}`
-      const col = this.getParentOrDummyTable().getTableColumnByName(columnName)
-      if (!col) return ""
+      const table = this.getParentOrDummyTable()
+      const col = table.getTableColumnByName(columnName)
+      if (!col) {
+        console.log(`No column named ${columnName}`)
+        return ""
+      }
       const reductionName = this.getWord(0).split(".")[1]
       const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
       const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
@@ -27014,6 +27175,9 @@ h3 {number}`
     get titleCell() {
       return this.getWordsFrom(1)
     }
+    get defaultTitle() {
+      return `Total rows`
+    }
     get dummyDataSetName() {
       return `stockPrice`
     }
@@ -27021,7 +27185,7 @@ h3 {number}`
       return `140 120`
     }
     getTileBodyStumpCode() {
-      const title = this.getWordsFrom(1).join(" ") || "Total rows"
+      const title = this.getWordsFrom(1).join(" ") || this.defaultTitle
       return this.qFormat(this.bodyStumpTemplate, { title, number: this._getNumber() })
     }
     _getNumber() {
@@ -27030,6 +27194,9 @@ h3 {number}`
   }
 
   class showColumnCountNode extends showRowCountNode {
+    get defaultTitle() {
+      return `Total columns`
+    }
     _getNumber() {
       return this.getParentOrDummyTable().getColumnNames().length
     }
@@ -27751,6 +27918,12 @@ genderColumn isString=true`
     }
   }
 
+  class GovNode extends abstractComingSoonNode {
+    get content() {
+      return `We don't have support yet for https://www.data.gov/`
+    }
+  }
+
   class highchartsComingSoonNode extends abstractComingSoonNode {
     get content() {
       return `We don't have support yet for https://www.highcharts.com/blog/snippets/3d-solar-system/`
@@ -27824,21 +27997,6 @@ a Run Tile Quality Check
     }
   }
 
-  class debugGrammarTreeNode extends abstractChartNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get supportedTreeLanguageCell() {
-      return this.getWord(1)
-    }
-    async fetchTableInputs() {
-      const fileExtension = this.getWord(1) || "maia"
-      const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
-      const tree = new programClass("").getHandGrammarProgram().getNodeTypeFamilyTree()
-      return { rows: [{ text: tree.toString() }] }
-    }
-  }
-
   class debugSleepNode extends abstractChartNode {
     get tileKeywordCell() {
       return this.getWord(0)
@@ -27856,6 +28014,18 @@ a Run Tile Quality Check
       const ms = parseInt(this.getWord(1) || 1)
       await this.getWebApp().sleepCommand(ms)
       return { rows: jtree.Utils.javascriptTableWithHeaderRowToObjects(DummyDataSets[this.getWord(2) || "stockPrice"]) }
+    }
+  }
+
+  class debugNoOpNode extends abstractChartNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get anyCell() {
+      return this.getWordsFrom(1)
+    }
+    get visible() {
+      return false
     }
   }
 
@@ -28287,10 +28457,13 @@ count isString=false`
     get tileScript() {
       return `maia/packages/text/wordcloud2.min.js`
     }
-    getTileBodyStumpCode() {
+    get bodyStumpTemplate() {
       return `div
-class divWhereWordCloudWillGo
-style width: 100%; height: 100%;`
+ class divWhereWordCloudWillGo
+ style width: 100%; height: 100%;`
+    }
+    getTileBodyStumpCode() {
+      return this.bodyStumpTemplate
     }
     _getAllWords() {
       return this.getRequiredTableWithHeader(["name", "count"])
@@ -28832,9 +29005,31 @@ input
     }
   }
 
+  class mozTop500Node extends abstractFixedDatasetFromMaiaCollectionNode {
+    get url() {
+      return `maia/packages/moz/top500Domains.csv`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
+    get dataUrl() {
+      return `https://moz.com/top500`
+    }
+  }
+
   class samplesTelescopesNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/telescopes.tsv`
+    }
+    get dataUrl() {
+      return `https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/telescopes.tsv`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
+    get dataDescription() {
+      return `## Provenance
+This list was put together by a group of remote workers in a Google spreadsheet in 2017 and hasn't been updated in a while.`
     }
   }
 
@@ -28842,17 +29037,35 @@ input
     get url() {
       return `maia/packages/samples/mtcars.tsv`
     }
+    get dataUrl() {
+      return `https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
   }
 
   class samplesIrisNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/iris.tsv`
     }
+    get isDataPublicDomain() {
+      return true
+    }
+    get dataUrl() {
+      return `https://archive.ics.uci.edu/ml/datasets/iris`
+    }
   }
 
   class samplesFlights14Node extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/flights14-sample.csv`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
+    get dataUrl() {
+      return `https://github.com/Rdatatable/data.table/blob/master/vignettes/flights14.csv`
     }
   }
 
@@ -28863,17 +29076,35 @@ input
     get url() {
       return `maia/packages/samples/si.tree`
     }
+    get dataUrl() {
+      return `https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/si.tree`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
   }
 
   class samplesPortalNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/portals.ssv`
     }
+    get dataUrl() {
+      return `https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/portals.ssv`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
   }
 
   class samplesStarWarsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/starwars.json`
+    }
+    get dataLicense() {
+      return `BSD`
+    }
+    get isDataPublicDomain() {
+      return false
     }
   }
 
@@ -28893,11 +29124,17 @@ input
     get url() {
       return `maia/packages/samples/declaration-of-independence.text`
     }
+    get isDataPublicDomain() {
+      return true
+    }
   }
 
   class samplesPeriodicTableNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/periodic-table.csv`
+    }
+    get dataUrl() {
+      return `https://gist.github.com/GoodmanSciences/c2dd862cd38f21b0ad36b8f96b4bf1ee`
     }
   }
 
@@ -28910,6 +29147,9 @@ input
   class samplesPresidentsNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/presidents.csv`
+    }
+    get isDataPublicDomain() {
+      return true
     }
   }
 
@@ -28980,12 +29220,18 @@ input
   }
 
   class samplesPatientsNode extends abstractDummyNode {
+    get isDataPublicDomain() {
+      return true
+    }
     get dummyDataSetName() {
       return `patients`
     }
   }
 
   class samplesPoemNode extends abstractDummyNode {
+    get isDataPublicDomain() {
+      return true
+    }
     get dummyDataSetName() {
       return `poem`
     }
@@ -28998,12 +29244,18 @@ input
   }
 
   class samplesTreeProgramNode extends abstractDummyNode {
+    get isDataPublicDomain() {
+      return true
+    }
     get dummyDataSetName() {
       return `treeProgram`
     }
   }
 
   class samplesWaterBillNode extends abstractDummyNode {
+    get isDataPublicDomain() {
+      return true
+    }
     get dummyDataSetName() {
       return `waterBill`
     }
@@ -29231,30 +29483,47 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
     get columnNameCell() {
       return this.getWord(1)
     }
-    get newColumnNameCell() {
-      return this.getWord(2)
-    }
     get startIndexCell() {
-      return parseInt(this.getWord(3))
+      return parseInt(this.getWord(2))
     }
     get lengthCell() {
-      return parseInt(this.getWord(4))
+      return parseInt(this.getWord(3))
+    }
+    get destinationColumnName() {
+      return `substring`
     }
     get dummyDataSetName() {
       return `poem`
     }
     getNewColumns() {
       const sourceColumnName = this.getWord(1)
-      const destinationColumnName = this.getWord(2)
-      const startPosition = parseInt(this.getWord(3))
-      const endPosition = this.getWord(4) === undefined ? undefined : parseInt(this.getWord(4))
+      const startPosition = typeof this.startIndex !== undefined ? this.startIndex : parseInt(this.getWord(2))
+      const endPosition = typeof this.endIndex !== undefined ? this.endIndex : this.getWord(3) === undefined ? undefined : parseInt(this.getWord(3))
       return [
         {
           source: sourceColumnName,
-          name: destinationColumnName,
-          accessorFn: row => (row[sourceColumnName] ? row[sourceColumnName].substr(startPosition, endPosition) : "")
+          name: this.destinationColumnName,
+          accessorFn: row => (row[sourceColumnName] ? row[sourceColumnName].toString().substr(startPosition, endPosition) : "")
         }
       ]
+    }
+  }
+
+  class testFirstLetterNode extends textSubstringNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    get endIndex() {
+      return 1
+    }
+    get startIndex() {
+      return 0
+    }
+    get destinationColumnName() {
+      return `firstLetter`
     }
   }
 
@@ -29374,6 +29643,20 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
           confidence: parseFloat((1 - match.score).toFixed(3))
         }
       })
+    }
+  }
+
+  class schemaTypeScriptNode extends abstractNewRowsTransformerTileNode {
+    makeNewRows() {
+      return [{ text: this.getParentOrDummyTable().toTypeScriptInterface() }]
+    }
+  }
+
+  class schemaSimpleNode extends abstractNewRowsTransformerTileNode {
+    makeNewRows() {
+      const schema = this.getParentOrDummyTable().toSimpleSchema()
+      const oneLiner = schema.replace(/ /g, ":").replace(/\n/g, " ")
+      return [{ text: oneLiner + "\n\n" + schema }]
     }
   }
 
@@ -29648,6 +29931,23 @@ class LargeLabel`
     }
   }
 
+  class columnsRenameNode extends abstractTransformerNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    get newColumnNameCell() {
+      return this.getWord(2)
+    }
+    _createOutputTable() {
+      const renameMap = {}
+      renameMap[this.getWord(1)] = this.getWord(2)
+      return this.getParentOrDummyTable().renameColumns(renameMap)
+    }
+  }
+
   class columnsCleanNamesNode extends abstractTransformerNode {
     get tileKeywordCell() {
       return this.getWord(0)
@@ -29671,6 +29971,83 @@ class LargeLabel`
       const colToChange = this.getWord(1)
       const newType = this.getWord(2)
       return this.getParentOrDummyTable().changeColumnType(colToChange, newType)
+    }
+  }
+
+  class dataSynthNode extends abstractTransformerNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { schema: schemaNode }),
+        undefined
+      )
+    }
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get intCell() {
+      return parseInt(this.getWord(1))
+    }
+    get schemaSimpleCell() {
+      return this.getWordsFrom(2)
+    }
+    _createOutputTable() {
+      const schema = this._getSchema()
+      const table = !schema ? this.getParentOrDummyTable() : new Table([], schema)
+      return table.synthesizeTable(this.intCell || 30, Date.now())
+    }
+    _getSchema() {
+      const schema = this.getNode("schema")
+      if (schema) return schema.toJTableColumnDefinitionMap()
+      const words = this.getWordsFrom(2)
+      if (words.length)
+        return words.map(word => {
+          const parts = word.split(":")
+          return {
+            name: parts[0],
+            type: parts[1]
+          }
+        })
+    }
+  }
+
+  class dataAboutNode extends abstractTransformerNode {
+    _getDataSetInfo() {
+      const parentTile = this.getParent()
+      const def = parentTile.getDefinition()
+      return {
+        licenseSpecified: parentTile.isDataPublicDomain,
+        tags: def.get("tags"),
+        overviewDescription: parentTile.dataDescription || def.get("description"),
+        dataUrl: parentTile.dataUrl
+      }
+    }
+    _createOutputTable() {
+      return new Table([this._getDataSetInfo()])
+    }
+  }
+
+  class dataUsabilityScoreNode extends dataAboutNode {
+    _createOutputTable() {
+      const row = this._getDataSetInfo()
+      // todo: a very simplistic approximation of Kaggle's data usability score
+      row.score = Object.values(row).filter(item => !!item).length * 2.5
+      return new Table([row])
+    }
+  }
+
+  class fillMissingNode extends abstractTransformerNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    get anyCell() {
+      return this.getWord(2)
+    }
+    _createOutputTable() {
+      return this.getParentOrDummyTable().fillMissing(this.getWord(1), this.getWord(2))
     }
   }
 
@@ -29824,6 +30201,36 @@ class LargeLabel`
     }
   }
 
+  class debugGrammarNode extends abstractProviderNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get supportedTreeLanguageCell() {
+      return this.getWord(1)
+    }
+    async fetchTableInputs() {
+      const fileExtension = this.getWord(1) || "maia"
+      const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
+      const tree = new programClass("").getHandGrammarProgram()
+      return { rows: [{ text: tree.toString() }] }
+    }
+  }
+
+  class debugGrammarTreeNode extends abstractProviderNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get supportedTreeLanguageCell() {
+      return this.getWord(1)
+    }
+    async fetchTableInputs() {
+      const fileExtension = this.getWord(1) || "maia"
+      const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
+      const tree = new programClass("").getHandGrammarProgram().getNodeTypeFamilyTree()
+      return { rows: [{ text: tree.toString() }] }
+    }
+  }
+
   class editorFilesNode extends abstractProviderNode {
     get tileSize() {
       return `140 120`
@@ -29960,6 +30367,9 @@ class LargeLabel`
 4.9,2,virginica
 1.5,0.2,setosa`
     }
+    get isDataPublicDomain() {
+      return true
+    }
     getDataContent() {
       return this.data
     }
@@ -30095,19 +30505,18 @@ a {name}
     }
   }
 
-  class toCsvNode extends abstractMaiaTileNode {
+  class printNode extends abstractMaiaTileNode {
     execute() {
       console.log(this._getMessage())
     }
     _getMessage() {
-      return this.getParentOrDummyTable().toDelimited(",")
+      return this.getPipishInput()
     }
   }
 
-  class toTypeScriptInterfaceNode extends toCsvNode {
+  class printCsvNode extends printNode {
     _getMessage() {
-      // todo: gopher is evaling this in test
-      return this.getParentOrDummyTable().toTypeScriptInterface()
+      return this.getParentOrDummyTable().toDelimited(",")
     }
   }
 
@@ -30435,6 +30844,7 @@ a {name}
           "dcjs.comingSoon": dcjsComingSoonNode,
           "finos.perspective.comingSoon": finosPerspectiveComingSoonNode,
           "fivethirtyeight.comingSoon": fivethirtyeightComingSoonNode,
+          "gov.comingSoon": GovNode,
           "highcharts.comingSoon": highchartsComingSoonNode,
           "re3data.comingSoon": re3dataComingSoonNode,
           "zing.comingSoon": zingComingSoonNode,
@@ -30442,8 +30852,8 @@ a {name}
           "debug.dump": debugDumpNode,
           "web.dump": webDumpNode,
           "debug.commands": debugCommandsNode,
-          "debug.grammarTree": debugGrammarTreeNode,
           "debug.sleep": debugSleepNode,
+          "debug.noop": debugNoOpNode,
           "debug.throw": debugThrowNode,
           "editor.gallery": editorGalleryNode,
           "handsontable.basic": handsontableBasicNode,
@@ -30462,6 +30872,7 @@ a {name}
           "web.post": webPostNode,
           "cancer.cases": cancerCasesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
+          "moz.top500": mozTop500Node,
           "samples.telescopes": samplesTelescopesNode,
           "samples.mtcars": samplesMtcarsNode,
           "samples.iris": samplesIrisNode,
@@ -30494,11 +30905,14 @@ a {name}
           "text.split": textSplitNode,
           "text.toLowerCase": textToLowerCaseNode,
           "text.substring": textSubstringNode,
+          "text.firstLetter": testFirstLetterNode,
           "columns.describe": columnsDescribeNode,
           "columns.list": columnsListNode,
           "data.eval": dataEvalNode,
           "join.by": joinByNode,
           "match.columnsFuzzy": matchColumnsFuzzyNode,
+          "schema.toTypescript": schemaTypeScriptNode,
+          "schema.toSimple": schemaSimpleNode,
           "text.wordCount": textWordCountNode,
           "text.lineCount": textLineCountNode,
           "treenotation.wordTypes": treenotationWordTypesNode,
@@ -30515,8 +30929,13 @@ a {name}
           "rows.first": rowsFirstNode,
           "rows.dropIfMissing": rowsDropIfMissingNode,
           "rows.last": rowsLastNode,
+          "columns.rename": columnsRenameNode,
           "columns.cleanNames": columnsCleanNamesNode,
           "columns.setType": columnsSetTypeNode,
+          "data.synth": dataSynthNode,
+          "data.about": dataAboutNode,
+          "data.usabilityScore": dataUsabilityScoreNode,
+          "fill.missing": fillMissingNode,
           "group.by": groupByNode,
           "rows.sortBy": rowsSortByNode,
           "rows.sortByReverse": rowsSortByReverseNode,
@@ -30524,6 +30943,8 @@ a {name}
           "data.inline": dataInlineNode,
           "data.localStorage": dataLocalStorageNode,
           "debug.parserTest": debugParserTestNode,
+          "debug.grammar": debugGrammarNode,
+          "debug.grammarTree": debugGrammarTreeNode,
           "editor.files": editorFilesNode,
           "editor.commandHistory": editorCommandHistoryNode,
           "math.gen": mathGenNode,
@@ -30532,8 +30953,8 @@ a {name}
           "samples.tinyIris": samplesTinyIrisNode,
           "templates.list": templatesListNode,
           "assert.rowCount": assertRowCountNode,
-          "shell.csv": toCsvNode,
-          "shell.typescript": toTypeScriptInterfaceNode,
+          "print.text": printNode,
+          "print.csv": printCsvNode,
           "doc.categories": docCategoriesNode,
           "doc.author": docAuthorNode,
           "doc.defaultHidden": docDefaultHiddenNode,
@@ -30581,7 +31002,7 @@ codeCell
  highlightScope string
 documentCategoryCell
  highlightScope constant
- enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo
+ enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history
 zoomCell
  extends numberCell
 referenceIdCell
@@ -30660,6 +31081,9 @@ challengeIdCell
 challengeAnswerCell
  extends numberCell
 localStorageKeyCell
+schemaSimpleCell
+ highlightScope string
+ examples name:string score:int
 dateColumnTypeCell
  enum day month year monthDay
  highlightScope constant
@@ -30675,7 +31099,7 @@ comparisonCell
 hackerNewsUserNameCell
  highlightScope string
 htmlTextTagCell
- enum div pre p h1 h2 h3 h4 h5 h6
+ enum div pre p h1 h2 h3 h4 h5 h6 code
 htmlCell
  highlightScope string
 needleColumnNameCell
@@ -31325,6 +31749,7 @@ DidYouMeanTileNode
 abstractDocTileNode
  int footerHeight 0
  int headerHeight 0
+ tags noPicker
  cells tileKeywordCell
  extends abstractTileTreeComponentNode
  abstract
@@ -31750,6 +32175,15 @@ abstractSnippetGalleryNode
     clickCommand appendSnippetTemplateCommand
  javascript
   getGalleryNodes() {}
+  async _execute() {
+   this._outputTable = new Table(
+    this.getGalleryNodes()
+     .toDataTable()
+     .slice(1)
+   )
+   this.setIsDataLoaded(true)
+   await this._executeChildNodes()
+  }
   getTileBodyStumpCode() {
    return this.qFormat(this.bodyStumpTemplate, {
     title: this.title,
@@ -31786,6 +32220,7 @@ samplesListNode
  description View all available sample tiles
  string title All samples:
  string itemFormat {id} - {description}
+ boolean isDataPublicDomain true
  extends abstractSnippetGalleryNode
  crux samples.list
  javascript
@@ -31996,6 +32431,10 @@ abstractHtmlNode
  description An HTML element
  inScope styleNode contentNode
  extends abstractEmptyFooterTileNode
+ string hakonTemplate
+  .abstractHtmlNode
+   code
+    user-select text
  abstract
  string bodyStumpTemplate
   {tag}
@@ -32139,8 +32578,12 @@ abstractShowTileNode
   getTileBodyStumpCode() {
    const columnName = this.getWord(1)
    if (!columnName) return \`No data for \${this.getFirstWord()}\`
-   const col = this.getParentOrDummyTable().getTableColumnByName(columnName)
-   if (!col) return ""
+   const table = this.getParentOrDummyTable()
+   const col = table.getTableColumnByName(columnName)
+   if (!col) {
+    console.log(\`No column named \${columnName}\`)
+    return ""
+   }
    const reductionName = this.getWord(0).split(".")[1]
    const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
    const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
@@ -32154,10 +32597,11 @@ showRowCountNode
  string dummyDataSetName stockPrice
  cells tileKeywordCell
  extends abstractShowTileNode
+ string defaultTitle Total rows
  crux show.rowCount
  javascript
   getTileBodyStumpCode() {
-   const title = this.getWordsFrom(1).join(" ") || "Total rows"
+   const title = this.getWordsFrom(1).join(" ") || this.defaultTitle
    return this.qFormat(this.bodyStumpTemplate, { title, number: this._getNumber() })
   }
   _getNumber() {
@@ -32165,6 +32609,7 @@ showRowCountNode
   }
 showColumnCountNode
  extends showRowCountNode
+ string defaultTitle Total columns
  description Show the total number of columns
  crux show.columnCount
  javascript
@@ -32809,6 +33254,10 @@ fivethirtyeightComingSoonNode
  string content We don't have support yet for https://github.com/fivethirtyeight/data/
  extends abstractComingSoonNode
  crux fivethirtyeight.comingSoon
+GovNode
+ string content We don't have support yet for https://www.data.gov/
+ extends abstractComingSoonNode
+ crux gov.comingSoon
 highchartsComingSoonNode
  string content We don't have support yet for https://www.highcharts.com/blog/snippets/3d-solar-system/
  extends abstractComingSoonNode
@@ -32873,6 +33322,7 @@ webDumpNode
  crux web.dump
 debugCommandsNode
  description Tools for ohayo developers.
+ tags noPicker
  example Show debug commands
   debug.commands
  extends abstractChartNode
@@ -32886,21 +33336,6 @@ debugCommandsNode
  javascript
   getTileBodyStumpCode() {
    return this.bodyStumpTemplate
-  }
-debugGrammarTreeNode
- description Show the family tree for a grammar.
- cells tileKeywordCell supportedTreeLanguageCell
- example Show the family tree for a grammar
-  debug.grammarTree maia
-   treenotation.outline
- extends abstractChartNode
- crux debug.grammarTree
- javascript
-  async fetchTableInputs() {
-   const fileExtension = this.getWord(1) || "maia"
-   const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
-   const tree = new programClass("").getHandGrammarProgram().getNodeTypeFamilyTree()
-   return { rows: [{ text: tree.toString() }] }
   }
 debugSleepNode
  cells tileKeywordCell millisecondsCell dummyDataSetIdCell
@@ -32917,6 +33352,13 @@ debugSleepNode
    await this.getWebApp().sleepCommand(ms)
    return { rows: jtree.Utils.javascriptTableWithHeaderRowToObjects(DummyDataSets[this.getWord(2) || "stockPrice"]) }
   }
+debugNoOpNode
+ cells tileKeywordCell
+ catchAllCellType anyCell
+ description A noop.
+ boolean visible false
+ crux debug.noop
+ extends abstractChartNode
 debugThrowNode
  description Throws an error during load. Used for testing.
  cells tileKeywordCell tileEventNameCell
@@ -33290,11 +33732,13 @@ textWordcloudNode
   samples.poem
    text.wordCount
     text.wordcloud
+ string bodyStumpTemplate
+  div
+   class divWhereWordCloudWillGo
+   style width: 100%; height: 100%;
  javascript
   getTileBodyStumpCode() {
-   return \`div
-  class divWhereWordCloudWillGo
-  style width: 100%; height: 100%;\`
+   return this.bodyStumpTemplate
   }
   _getAllWords() {
    return this.getRequiredTableWithHeader(["name", "count"])
@@ -33817,8 +34261,21 @@ kaggleDatasetsHeartNode
  string url maia/packages/kaggle/heart.csv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux kaggle.datasets.heart
+mozTop500Node
+ description Moz's list of the most popular 500 websites on the internet.
+ string dataUrl https://moz.com/top500
+ boolean isDataPublicDomain true
+ string url maia/packages/moz/top500Domains.csv
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ crux moz.top500
 samplesTelescopesNode
  description A partial list of humankind's largest telescopes.
+ string dataDescription
+  ## Provenance
+  This list was put together by a group of remote workers in a Google spreadsheet in 2017 and hasn't been updated in a while.
+ boolean isDataPublicDomain true
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/telescopes.tsv
+ tags astronomy
  frequency .03
  example Display list of links to telescope websites.
   samples.telescopes
@@ -33828,23 +34285,31 @@ samplesTelescopesNode
  crux samples.telescopes
 samplesMtcarsNode
  description Dataset from 1974 Motor Trend US magazine.
+ boolean isDataPublicDomain true
+ string dataUrl https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html
  frequency .03
  string url maia/packages/samples/mtcars.tsv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.mtcars
 samplesIrisNode
  description The famous Iris flower data set.
+ string dataUrl https://archive.ics.uci.edu/ml/datasets/iris
+ boolean isDataPublicDomain true
  frequency .15
  string url maia/packages/samples/iris.tsv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.iris
 samplesFlights14Node
- description On-Time flights data from the Bureau of Transporation Statistics for all the flights that departed from New York City airports in 2014. The data is available only for Jan-Oct'14.
+ description On-Time flights data from the Bureau of Transportation Statistics for all the flights that departed from New York City airports in 2014. The data is available only for Jan-Oct'14.
+ string dataUrl https://github.com/Rdatatable/data.table/blob/master/vignettes/flights14.csv
+ boolean isDataPublicDomain true
  string url maia/packages/samples/flights14-sample.csv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.flights14
 samplesSiNode
  description A description of The International System of Units (SI) aka the metric system.
+ boolean isDataPublicDomain true
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/si.tree
  example View outline of SI system.
   samples.si
    treenotation.outline
@@ -33855,6 +34320,8 @@ samplesSiNode
  crux samples.si
 samplesPortalNode
  description A list of online data portals.
+ boolean isDataPublicDomain true
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/portals.ssv
  frequency .03
  string url maia/packages/samples/portals.ssv
  extends abstractFixedDatasetFromMaiaCollectionNode
@@ -33862,6 +34329,8 @@ samplesPortalNode
 samplesStarWarsNode
  description All Star Wars characters. Data comes from https://swapi.co/
  frequency .03
+ boolean isDataPublicDomain false
+ string dataLicense BSD
  string url maia/packages/samples/starwars.json
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.starWars
@@ -33879,12 +34348,14 @@ samplesBabyNamesNode
  crux samples.babyNames
 samplesDeclarationNode
  description The 1776 Declaration of Independence
+ boolean isDataPublicDomain true
  frequency .02
  string url maia/packages/samples/declaration-of-independence.text
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.declaration
 samplesPeriodicTableNode
  description Periodic table from https://gist.github.com/GoodmanSciences
+ string dataUrl https://gist.github.com/GoodmanSciences/c2dd862cd38f21b0ad36b8f96b4bf1ee
  frequency .15
  extends abstractFixedDatasetFromMaiaCollectionNode
  string url maia/packages/samples/periodic-table.csv
@@ -33896,6 +34367,7 @@ samplesLettersNode
  string url maia/packages/samples/letters.tsv
  crux samples.letters
 samplesPresidentsNode
+ boolean isDataPublicDomain true
  description CSV of president's of United States.
  frequency .03
  string url maia/packages/samples/presidents.csv
@@ -33977,11 +34449,13 @@ abstractDummyNode
 samplesPatientsNode
  description A row for each patient in a sample clinical dataset.
  string dummyDataSetName patients
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.patients
 samplesPoemNode
  description The Road Not Taken by Robert Frost
  string dummyDataSetName poem
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.poem
 samplesOuterSpaceNode
@@ -33992,12 +34466,14 @@ samplesOuterSpaceNode
 samplesTreeProgramNode
  description A simple program in a Tree Language.
  string dummyDataSetName treeProgram
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.treeProgram
 samplesWaterBillNode
  description A family's water bill.
  frequency .15
  string dummyDataSetName waterBill
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.waterBill
 samplesGapMinderNode
@@ -34199,29 +34675,37 @@ textToLowerCaseNode
  extends abstractColumnAdderTileNode
  crux text.toLowerCase
 textSubstringNode
- description Extract parts of one column into another column.
- cells tileKeywordCell columnNameCell newColumnNameCell startIndexCell lengthCell
+ description Extract parts of one column into another column called "substring".
+ cells tileKeywordCell columnNameCell startIndexCell lengthCell
  example Select the first character of someone's name
   samples.presidents
-   text.substring name firstLetter 0 1
+   text.substring name 0 1
     tables.basic
  string dummyDataSetName poem
  extends abstractColumnAdderTileNode
  crux text.substring
+ string destinationColumnName substring
  javascript
   getNewColumns() {
    const sourceColumnName = this.getWord(1)
-   const destinationColumnName = this.getWord(2)
-   const startPosition = parseInt(this.getWord(3))
-   const endPosition = this.getWord(4) === undefined ? undefined : parseInt(this.getWord(4))
+   const startPosition = typeof this.startIndex !== undefined ? this.startIndex : parseInt(this.getWord(2))
+   const endPosition = typeof this.endIndex !== undefined ? this.endIndex : this.getWord(3) === undefined ? undefined : parseInt(this.getWord(3))
    return [
     {
      source: sourceColumnName,
-     name: destinationColumnName,
-     accessorFn: row => (row[sourceColumnName] ? row[sourceColumnName].substr(startPosition, endPosition) : "")
+     name: this.destinationColumnName,
+     accessorFn: row => (row[sourceColumnName] ? row[sourceColumnName].toString().substr(startPosition, endPosition) : "")
     }
    ]
   }
+testFirstLetterNode
+ extends textSubstringNode
+ crux text.firstLetter
+ description Extracts the first letter of a column into a new column called "firstLetter"
+ cells tileKeywordCell columnNameCell
+ string destinationColumnName firstLetter
+ int startIndex 0
+ int endIndex 1
 abstractNewRowsTransformerTileNode
  abstract
  extends abstractTransformerNode
@@ -34352,6 +34836,32 @@ matchColumnsFuzzyNode
     }
    })
   }
+schemaTypeScriptNode
+ description Generates a TypeScript interface for the parent table.
+ extends abstractNewRowsTransformerTileNode
+ crux schema.toTypescript
+ example
+  samples.presidents
+   schema.toTypescript
+    html.printAs code
+ javascript
+  makeNewRows() {
+   return [{ text: this.getParentOrDummyTable().toTypeScriptInterface() }]
+  }
+schemaSimpleNode
+ description Generate a simple schema of the parent table.
+ extends abstractNewRowsTransformerTileNode
+ crux schema.toSimple
+ example
+  samples.presidents
+   schema.toSimple
+    html.printAs code
+ javascript
+  makeNewRows() {
+   const schema = this.getParentOrDummyTable().toSimpleSchema()
+   const oneLiner = schema.replace(/ /g, ":").replace(/\\n/g, " ")
+   return [{ text: oneLiner + "\\n\\n" + schema }]
+  }
 textWordCountNode
  description Splits a string into words and counts the number of uses of each word.
  string dummyDataSetName poem
@@ -34392,6 +34902,9 @@ textLineCountNode
   }
  extends abstractNewRowsTransformerTileNode
  crux text.lineCount
+ example
+  text.lineCount
+   tables.basic
 treenotationWordTypesNode
  description Generates the word types for a Tree Language program.
  example See counts of word types in a Tree Language program.
@@ -34640,6 +35153,20 @@ rowsLastNode
    const start = this.getParentOrDummyTable().getRowCount() - limit
    return (row, rowIndex) => rowIndex >= start
   }
+columnsRenameNode
+ crux columns.rename
+ cells tileKeywordCell columnNameCell newColumnNameCell
+ description Rename a column
+ extends abstractTransformerNode
+ javascript
+  _createOutputTable() {
+   const renameMap = {}
+   renameMap[this.getWord(1)] = this.getWord(2)
+   return this.getParentOrDummyTable().renameColumns(renameMap)
+  }
+ example
+  samples.iris
+   columns.rename Species Classification
 columnsCleanNamesNode
  crux columns.cleanNames
  cells tileKeywordCell
@@ -34670,6 +35197,95 @@ columnsSetTypeNode
    const colToChange = this.getWord(1)
    const newType = this.getWord(2)
    return this.getParentOrDummyTable().changeColumnType(colToChange, newType)
+  }
+dataSynthNode
+ description Synthesizes new datasets based upon the parent tiles schema.
+ crux data.synth
+ catchAllCellType schemaSimpleCell
+ extends abstractTransformerNode
+ inScope schemaNode
+ javascript
+  _createOutputTable() {
+   const schema = this._getSchema()
+   const table = !schema ? this.getParentOrDummyTable() : new Table([], schema)
+   return table.synthesizeTable(this.intCell || 30, Date.now())
+  }
+  _getSchema() {
+   const schema = this.getNode("schema")
+   if (schema) return schema.toJTableColumnDefinitionMap()
+   const words = this.getWordsFrom(2)
+   if (words.length)
+    return words.map(word => {
+     const parts = word.split(":")
+     return {
+      name: parts[0],
+      type: parts[1]
+     }
+    })
+  }
+ cells tileKeywordCell intCell
+ example
+  samples.iris
+   data.synth 100
+    show.rowCount
+ example
+  data.synth 100
+   schema
+    name string
+    score int
+    finished boolean
+   show.columnCount
+ example
+  data.synth 100 name:string score:int finished:boolean
+dataAboutNode
+ extends abstractTransformerNode
+ description Gets metadata about a dataset.
+ crux data.about
+ javascript
+  _getDataSetInfo() {
+   const parentTile = this.getParent()
+   const def = parentTile.getDefinition()
+   return {
+    licenseSpecified: parentTile.isDataPublicDomain,
+    tags: def.get("tags"),
+    overviewDescription: parentTile.dataDescription || def.get("description"),
+    dataUrl: parentTile.dataUrl
+   }
+  }
+  _createOutputTable() {
+   return new Table([this._getDataSetInfo()])
+  }
+dataUsabilityScoreNode
+ extends dataAboutNode
+ description Generates a Data Usability Score for the input table.
+ crux data.usabilityScore
+ example
+  samples.iris
+   data.usabilityScore
+    tables.basic
+    show.max score
+ javascript
+  _createOutputTable() {
+   const row = this._getDataSetInfo()
+   // todo: a very simplistic approximation of Kaggle's data usability score
+   row.score = Object.values(row).filter(item => !!item).length * 2.5
+   return new Table([row])
+  }
+fillMissingNode
+ cells tileKeywordCell columnNameCell anyCell
+ description Fill any missing cell in the provided column name with the provided value.
+ extends abstractTransformerNode
+ crux fill.missing
+ example
+  data.inline
+   content
+    name,score
+    bob,
+    mike,55
+   fill.missing score 0
+ javascript
+  _createOutputTable() {
+   return this.getParentOrDummyTable().fillMissing(this.getWord(1), this.getWord(2))
   }
 groupByNode
  frequency .01
@@ -34829,6 +35445,38 @@ debugParserTestNode
    }
    return [{ rows: [] }]
   }
+debugGrammarNode
+ description Get the grammar for an included language.
+ tags noPicker
+ cells tileKeywordCell supportedTreeLanguageCell
+ crux debug.grammar
+ extends abstractProviderNode
+ example Print the grammar
+  debug.grammar maia
+   treenotation.outline
+ javascript
+  async fetchTableInputs() {
+   const fileExtension = this.getWord(1) || "maia"
+   const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
+   const tree = new programClass("").getHandGrammarProgram()
+   return { rows: [{ text: tree.toString() }] }
+  }
+debugGrammarTreeNode
+ description Show the family tree for a grammar.
+ tags noPicker
+ cells tileKeywordCell supportedTreeLanguageCell
+ example Show the family tree for a grammar
+  debug.grammarTree maia
+   treenotation.outline
+ extends abstractProviderNode
+ crux debug.grammarTree
+ javascript
+  async fetchTableInputs() {
+   const fileExtension = this.getWord(1) || "maia"
+   const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
+   const tree = new programClass("").getHandGrammarProgram().getNodeTypeFamilyTree()
+   return { rows: [{ text: tree.toString() }] }
+  }
 editorFilesNode
  description Fetch your files in the current working folder.
  example
@@ -34930,6 +35578,7 @@ randomIntNode
  extends abstractRandomTileNode
 samplesTinyIrisNode
  description A snippet of the Iris dataset.
+ boolean isDataPublicDomain true
  string data
   petal_length,petal_width,species
   4.9,1.8,virginica
@@ -35054,6 +35703,7 @@ templatesListNode
   }
 assertRowCountNode
  description Throw an error if row count not correct.
+ tags noPicker
  example Basics
   data.inline
    content
@@ -35073,31 +35723,34 @@ assertRowCountNode
    if (actual !== expected) throw new Error(\`Expected \${expected} but got \${actual}\`)
    return super.execute()
   }
-toCsvNode
- description Print input table to console as csv.
+printNode
+ description Print input table to console as text.
  extends abstractMaiaTileNode
- crux shell.csv
+ crux print.text
  example
-  samples.presidents
-   filter.where HomeState = Illinois
-    shell.csv
+  data.inline
+   parser text
+   content
+    Hello world
+   print.text
  javascript
   execute() {
    console.log(this._getMessage())
   }
   _getMessage() {
-   return this.getParentOrDummyTable().toDelimited(",")
+   return this.getPipishInput()
   }
-toTypeScriptInterfaceNode
- extends toCsvNode
- crux shell.typescript
+printCsvNode
+ description Print input table to console as csv.
+ extends printNode
+ crux print.csv
  example
   samples.presidents
-   shell.typescript
+   filter.where HomeState = Illinois
+    print.csv
  javascript
   _getMessage() {
-   // todo: gopher is evaling this in test
-   return this.getParentOrDummyTable().toTypeScriptInterface()
+   return this.getParentOrDummyTable().toDelimited(",")
   }
 tileBlankLineNode
  boolean visible false
@@ -35542,7 +36195,23 @@ tileSettingNonTerminalContentNode
  baseNodeType blobNode
 lineOfContentNode
  catchAllNodeType lineOfContentNode
- catchAllCellType stringCell`)
+ catchAllCellType stringCell
+columnDefinitionNode
+ cells columnNameCell primitiveTypeCell
+schemaNode
+ crux schema
+ description A basic schema language consisting of one column name followed by a primitive column type per line.
+ cells tileSettingKeywordCell
+ catchAllNodeType columnDefinitionNode
+ javascript
+  toJTableColumnDefinitionMap() {
+   return this.map(row => {
+    return {
+     name: row.getWord(0),
+     type: row.getWord(1)
+    }
+   })
+  }`)
       return this._cachedHandGrammarProgramRoot
     }
     static getNodeTypeMap() {
@@ -35613,6 +36282,7 @@ lineOfContentNode
         dcjsComingSoonNode: dcjsComingSoonNode,
         finosPerspectiveComingSoonNode: finosPerspectiveComingSoonNode,
         fivethirtyeightComingSoonNode: fivethirtyeightComingSoonNode,
+        GovNode: GovNode,
         highchartsComingSoonNode: highchartsComingSoonNode,
         re3dataComingSoonNode: re3dataComingSoonNode,
         zingComingSoonNode: zingComingSoonNode,
@@ -35620,8 +36290,8 @@ lineOfContentNode
         debugDumpNode: debugDumpNode,
         webDumpNode: webDumpNode,
         debugCommandsNode: debugCommandsNode,
-        debugGrammarTreeNode: debugGrammarTreeNode,
         debugSleepNode: debugSleepNode,
+        debugNoOpNode: debugNoOpNode,
         debugThrowNode: debugThrowNode,
         editorGalleryNode: editorGalleryNode,
         handsontableBasicNode: handsontableBasicNode,
@@ -35646,6 +36316,7 @@ lineOfContentNode
         abstractFixedDatasetFromMaiaCollectionNode: abstractFixedDatasetFromMaiaCollectionNode,
         cancerCasesNode: cancerCasesNode,
         kaggleDatasetsHeartNode: kaggleDatasetsHeartNode,
+        mozTop500Node: mozTop500Node,
         samplesTelescopesNode: samplesTelescopesNode,
         samplesMtcarsNode: samplesMtcarsNode,
         samplesIrisNode: samplesIrisNode,
@@ -35681,12 +36352,15 @@ lineOfContentNode
         textSplitNode: textSplitNode,
         textToLowerCaseNode: textToLowerCaseNode,
         textSubstringNode: textSubstringNode,
+        testFirstLetterNode: testFirstLetterNode,
         abstractNewRowsTransformerTileNode: abstractNewRowsTransformerTileNode,
         columnsDescribeNode: columnsDescribeNode,
         columnsListNode: columnsListNode,
         dataEvalNode: dataEvalNode,
         joinByNode: joinByNode,
         matchColumnsFuzzyNode: matchColumnsFuzzyNode,
+        schemaTypeScriptNode: schemaTypeScriptNode,
+        schemaSimpleNode: schemaSimpleNode,
         textWordCountNode: textWordCountNode,
         textLineCountNode: textLineCountNode,
         treenotationWordTypesNode: treenotationWordTypesNode,
@@ -35706,8 +36380,13 @@ lineOfContentNode
         rowsFirstNode: rowsFirstNode,
         rowsDropIfMissingNode: rowsDropIfMissingNode,
         rowsLastNode: rowsLastNode,
+        columnsRenameNode: columnsRenameNode,
         columnsCleanNamesNode: columnsCleanNamesNode,
         columnsSetTypeNode: columnsSetTypeNode,
+        dataSynthNode: dataSynthNode,
+        dataAboutNode: dataAboutNode,
+        dataUsabilityScoreNode: dataUsabilityScoreNode,
+        fillMissingNode: fillMissingNode,
         groupByNode: groupByNode,
         rowsSortByNode: rowsSortByNode,
         rowsSortByReverseNode: rowsSortByReverseNode,
@@ -35715,6 +36394,8 @@ lineOfContentNode
         dataInlineNode: dataInlineNode,
         dataLocalStorageNode: dataLocalStorageNode,
         debugParserTestNode: debugParserTestNode,
+        debugGrammarNode: debugGrammarNode,
+        debugGrammarTreeNode: debugGrammarTreeNode,
         editorFilesNode: editorFilesNode,
         editorCommandHistoryNode: editorCommandHistoryNode,
         mathGenNode: mathGenNode,
@@ -35725,8 +36406,8 @@ lineOfContentNode
         abstractTemplatePickerTileNode: abstractTemplatePickerTileNode,
         templatesListNode: templatesListNode,
         assertRowCountNode: assertRowCountNode,
-        toCsvNode: toCsvNode,
-        toTypeScriptInterfaceNode: toTypeScriptInterfaceNode,
+        printNode: printNode,
+        printCsvNode: printCsvNode,
         tileBlankLineNode: tileBlankLineNode,
         abstractDocSettingNode: abstractDocSettingNode,
         docCategoriesNode: docCategoriesNode,
@@ -35793,7 +36474,9 @@ lineOfContentNode
         catchAllNodesPostContentNode: catchAllNodesPostContentNode,
         postNode: postNode,
         tileSettingNonTerminalContentNode: tileSettingNonTerminalContentNode,
-        lineOfContentNode: lineOfContentNode
+        lineOfContentNode: lineOfContentNode,
+        columnDefinitionNode: columnDefinitionNode,
+        schemaNode: schemaNode
       }
     }
   }
@@ -36048,6 +36731,32 @@ lineOfContentNode
     }
   }
 
+  class columnDefinitionNode extends jtree.GrammarBackedNode {
+    get columnNameCell() {
+      return this.getWord(0)
+    }
+    get primitiveTypeCell() {
+      return this.getWord(1)
+    }
+  }
+
+  class schemaNode extends jtree.GrammarBackedNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(columnDefinitionNode, undefined, undefined)
+    }
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    toJTableColumnDefinitionMap() {
+      return this.map(row => {
+        return {
+          name: row.getWord(0),
+          type: row.getWord(1)
+        }
+      })
+    }
+  }
+
   window.maiaNode = maiaNode
 }
 
@@ -36128,6 +36837,16 @@ window.TemplatesStamp = `file templates/amazon-purchase-history.maia
        xColumn year
   doc.layout column
   doc.categories shopping
+file templates/boiling-points.maia
+ data
+  doc.title Boiling Points
+  samples.periodicTable
+   vega.scatter Boiling Point by Atomic Number
+    xColumn AtomicNumber
+    yColumn BoilingPoint
+    colorColumn Phase
+  doc.layout column
+  doc.categories chemistry
 file templates/cancer-rates-in-the-us.maia
  data
   doc.title Cancer Rates in the U.S.
@@ -36144,6 +36863,83 @@ file templates/cancer-rates-in-the-us.maia
      yColumn Male
   doc.layout column
   doc.categories medicine
+file templates/country-names.maia
+ data
+  doc.title Exploring Country Names
+  samples.populations
+   hidden
+   doc.subtitle How many countrys are there in this dataset?
+   show.rowCount Countries
+   text.firstLetter Country
+    hidden
+    group.by firstLetter
+     hidden
+     vega.bar How many country names begin with each letter (in English)?
+     show.rowCount Letters used
+     doc.subtitle No countries have a name starting with X.
+  doc.layout column
+  doc.categories geography
+file templates/country-populations.maia
+ data
+  doc.title Largest Countries by Population
+   visible
+  samples.populations
+   rows.sortBy Population2016
+    vega.bar Population by Country
+     visible
+     yColumn Population2016
+     colorColumn Continent
+    group.by Continent
+     reduce Population2016 sum Population2016
+     vega.bar Population by Region
+      visible
+      yColumn Population2016
+  doc.layout column
+  doc.defaultHidden
+  doc.categories geography
+file templates/declaration-of-independence.maia
+ data
+  doc.title Declaration of Independence
+  doc.layout column
+  doc.categories history
+  samples.declaration
+   hidden
+   html.printAs pre
+   text.wordCount
+    hidden
+    show.sum count Words
+    text.wordcloud
+file templates/discovery-of-elements.maia
+ data
+  doc.title Discovery of the Elements
+   visible
+  doc.subtitle What is the growth in known elements over time?
+   visible
+  samples.periodicTable
+   fill.missing Year 1000
+    columns.keep Element Year
+     rows.sortBy Year
+      tables.basic
+       rowDisplayLimit 200
+       visible
+    group.by Year
+     rows.sortBy Year
+      rows.runningTotal count
+       vega.bar Number of Elements Found Each Year
+        xColumn Year
+        yColumn count
+        visible
+       vega.line Cumulative Number of Elements
+        xColumn Year
+        yColumn total
+        visible
+   vega.scatter Year of Discovery by Atomic Number
+    xColumn Year
+    yColumn AtomicNumber
+    visible
+  doc.layout column
+  doc.categories chemistry
+  doc.defaultHidden
 file templates/git-repo-dashboard.maia
  data
   doc.title Desktop Only: Statistics for Local Git Repo
@@ -36243,6 +37039,11 @@ file templates/maia-reference.maia
    vega.bar Number of Superbowl Wins
   
   
+  doc.subtitle A List of All Tiles
+  debug.grammarTree maia
+   hidden
+   treenotation.outline
+  
   doc.section
    subtitle Secondary Notation (aka Text Styling)
    paragraph Words can be bolded[bold] or italicized[em] or monospaced[mono] or linked[link http://ohayo.computer] or footnoted[ref someRefId].
@@ -36304,18 +37105,43 @@ file templates/maia-reference.maia
   
   doc.ref someRefId
    url https://en.wikipedia.org/wiki/Note_(typography)
-file templates/periodic-table.maia
+file templates/most-popular-websites.maia
  data
-  doc.title The Periodic Table
-  samples.periodicTable
-   vega.scatter Boiling Point by Atomic Number
-    xColumn AtomicNumber
-    yColumn BoilingPoint
-   vega.scatter Year of Discovery by Atomic Number
-    xColumn Year
-    yColumn AtomicNumber
+  doc.title 500 Most Popular Websites
   doc.layout column
-  doc.categories chemistry
+  doc.categories web
+  moz.top500
+   hidden
+   columns.setType LinkingRootDomains numberString
+    hidden
+    tables.basic
+    vega.bar Number of Inbound Links
+     xColumn Rank
+     yColumn LinkingRootDomains
+file templates/ohayo-product-stats.maia
+ data
+  doc.title Ohayo Product Stats
+  doc.categories ohayo
+  doc.layout column
+  templates.list
+   hidden
+   show.rowCount Number of Templates
+  challenge.list
+   hidden
+   show.rowCount Number of Challenges
+  debug.grammarTree maia
+   hidden
+   text.lineCount
+    hidden
+    show.max lines Number of Maia Nodes
+  doc.comment Todo: show.static 2 Number of Included Datasets
+  doc.comment Todo: show.static 2 Number of Linked Datasets
+  debug.grammar maia
+   hidden
+   text.lineCount
+    hidden
+    show.max lines Maia Grammar Lines of Code
+  doc.comment Todo: show.static 2 Maia Grammar Lines of Javascript Code
 file templates/portals.maia
  data
   doc.title Data Portals
@@ -36403,6 +37229,18 @@ file templates/trigonometry.maia
   doc.layout column
   doc.categories math
   doc.defaultHidden
+file templates/typescript-interface-generator.maia
+ data
+  doc.title TypeScript Interface Generator
+  data.inline
+   content
+    state,number
+    Hawaii,50
+   schema.toTypescript
+    hidden
+    html.printAs code
+  doc.layout column
+  doc.categories programming
 file templates/ucimlr-overview.maia
  data
   doc.title The Datasets in UCIMLR
@@ -39438,7 +40276,7 @@ codeCell
  highlightScope string
 documentCategoryCell
  highlightScope constant
- enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo
+ enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history
 zoomCell
  extends numberCell
 referenceIdCell
@@ -40086,6 +40924,7 @@ DidYouMeanTileNode
 abstractDocTileNode
  int footerHeight 0
  int headerHeight 0
+ tags noPicker
  cells tileKeywordCell
  extends abstractTileTreeComponentNode
  abstract
@@ -41941,7 +42780,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "16.4.0"
+const Version = "17.0.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 

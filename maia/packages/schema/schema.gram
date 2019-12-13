@@ -1,0 +1,27 @@
+tooling onsave jtree build produceMaiaGrammar
+schemaTypeScriptNode
+ description Generates a TypeScript interface for the parent table.
+ extends abstractNewRowsTransformerTileNode
+ crux schema.toTypescript
+ example
+  samples.presidents
+   schema.toTypescript
+    html.printAs code
+ javascript
+  makeNewRows() {
+   return [{ text: this.getParentOrDummyTable().toTypeScriptInterface() }]
+  }
+schemaSimpleNode
+ description Generate a simple schema of the parent table.
+ extends abstractNewRowsTransformerTileNode
+ crux schema.toSimple
+ example
+  samples.presidents
+   schema.toSimple
+    html.printAs code
+ javascript
+  makeNewRows() {
+   const schema = this.getParentOrDummyTable().toSimpleSchema()
+   const oneLiner = schema.replace(/ /g, ":").replace(/\n/g, " ")
+   return [{ text: oneLiner + "\n\n" + schema }]
+  }

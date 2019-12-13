@@ -11,11 +11,13 @@ textWordcloudNode
   samples.poem
    text.wordCount
     text.wordcloud
+ string bodyStumpTemplate
+  div
+   class divWhereWordCloudWillGo
+   style width: 100%; height: 100%;
  javascript
   getTileBodyStumpCode() {
-   return `div
-  class divWhereWordCloudWillGo
-  style width: 100%; height: 100%;`
+   return this.bodyStumpTemplate
   }
   _getAllWords() {
    return this.getRequiredTableWithHeader(["name", "count"])
@@ -140,29 +142,37 @@ textToLowerCaseNode
  extends abstractColumnAdderTileNode
  crux text.toLowerCase
 textSubstringNode
- description Extract parts of one column into another column.
- cells tileKeywordCell columnNameCell newColumnNameCell startIndexCell lengthCell
+ description Extract parts of one column into another column called "substring".
+ cells tileKeywordCell columnNameCell startIndexCell lengthCell
  example Select the first character of someone's name
   samples.presidents
-   text.substring name firstLetter 0 1
+   text.substring name 0 1
     tables.basic
  string dummyDataSetName poem
  extends abstractColumnAdderTileNode
  crux text.substring
+ string destinationColumnName substring
  javascript
   getNewColumns() {
    const sourceColumnName = this.getWord(1)
-   const destinationColumnName = this.getWord(2)
-   const startPosition = parseInt(this.getWord(3))
-   const endPosition = this.getWord(4) === undefined ? undefined : parseInt(this.getWord(4))
+   const startPosition = typeof this.startIndex !== undefined ? this.startIndex : parseInt(this.getWord(2))
+   const endPosition = typeof this.endIndex !== undefined ? this.endIndex : this.getWord(3) === undefined ? undefined : parseInt(this.getWord(3))
    return [
     {
      source: sourceColumnName,
-     name: destinationColumnName,
-     accessorFn: row => (row[sourceColumnName] ? row[sourceColumnName].substr(startPosition, endPosition) : "")
+     name: this.destinationColumnName,
+     accessorFn: row => (row[sourceColumnName] ? row[sourceColumnName].toString().substr(startPosition, endPosition) : "")
     }
    ]
   }
+testFirstLetterNode
+ extends textSubstringNode
+ crux text.firstLetter
+ description Extracts the first letter of a column into a new column called "firstLetter"
+ cells tileKeywordCell columnNameCell
+ string destinationColumnName firstLetter
+ int startIndex 0
+ int endIndex 1
 textWordCountNode
  description Splits a string into words and counts the number of uses of each word.
  string dummyDataSetName poem
@@ -203,3 +213,6 @@ textLineCountNode
   }
  extends abstractNewRowsTransformerTileNode
  crux text.lineCount
+ example
+  text.lineCount
+   tables.basic

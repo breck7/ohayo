@@ -1,6 +1,6 @@
 tooling onsave jtree build produceMaiaGrammar
 htmlTextTagCell
- enum div pre p h1 h2 h3 h4 h5 h6
+ enum div pre p h1 h2 h3 h4 h5 h6 code
 htmlCell
  highlightScope string
 abstractHtmlNode
@@ -9,6 +9,10 @@ abstractHtmlNode
  description An HTML element
  inScope styleNode contentNode
  extends abstractEmptyFooterTileNode
+ string hakonTemplate
+  .abstractHtmlNode
+   code
+    user-select text
  abstract
  string bodyStumpTemplate
   {tag}

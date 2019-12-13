@@ -41,7 +41,7 @@ The program below:
     #! /usr/bin/env node /usr/local/bin/jtree
     samples.presidents
      filter.where HomeState = Illinois
-      shell.csv
+      print.csv
 
 Prints this output:
 

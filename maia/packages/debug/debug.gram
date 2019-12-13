@@ -63,6 +63,7 @@ debugDumpNode
   }
 debugCommandsNode
  description Tools for ohayo developers.
+ tags noPicker
  example Show debug commands
   debug.commands
  extends abstractChartNode
@@ -77,13 +78,30 @@ debugCommandsNode
   getTileBodyStumpCode() {
    return this.bodyStumpTemplate
   }
+debugGrammarNode
+ description Get the grammar for an included language.
+ tags noPicker
+ cells tileKeywordCell supportedTreeLanguageCell
+ crux debug.grammar
+ extends abstractProviderNode
+ example Print the grammar
+  debug.grammar maia
+   treenotation.outline
+ javascript
+  async fetchTableInputs() {
+   const fileExtension = this.getWord(1) || "maia"
+   const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
+   const tree = new programClass("").getHandGrammarProgram()
+   return { rows: [{ text: tree.toString() }] }
+  }
 debugGrammarTreeNode
  description Show the family tree for a grammar.
+ tags noPicker
  cells tileKeywordCell supportedTreeLanguageCell
  example Show the family tree for a grammar
   debug.grammarTree maia
    treenotation.outline
- extends abstractChartNode
+ extends abstractProviderNode
  crux debug.grammarTree
  javascript
   async fetchTableInputs() {
@@ -108,6 +126,13 @@ debugSleepNode
     .sleepCommand(ms)
    return { rows: jtree.Utils.javascriptTableWithHeaderRowToObjects(DummyDataSets[this.getWord(2) || "stockPrice"]) }
   }
+debugNoOpNode
+ cells tileKeywordCell
+ catchAllCellType anyCell
+ description A noop.
+ boolean visible false
+ crux debug.noop
+ extends abstractChartNode
 debugThrowNode
  description Throws an error during load. Used for testing.
  cells tileKeywordCell tileEventNameCell

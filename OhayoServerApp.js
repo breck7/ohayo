@@ -129,6 +129,10 @@ class FabServer extends OhayoServerApp {
   _addOtherRoutes() {
     const sendFabMessage = (req, res) => res.send(`This is fab server. Visit ${this._getHomePage()} instead.`)
 
+    this.app.get("/fabWithLocalStorage.html", (req, res) => {
+      res.send(fs.readFileSync(__dirname + "/" + this._getHomePage(), "utf8"))
+    })
+
     this.app.get("/index.html", sendFabMessage)
     this.app.get("/", sendFabMessage)
 

@@ -251,6 +251,18 @@ cp -r ${__dirname}/images ${distFolder}/;`
     return jtree.Utils.flatten([__dirname + "/maia/", __dirname + "/ohayoWebApp/"].map(getFiles))
   }
 
+  trainMaiaModel() {
+    const maiaNode = require(__dirname + "/maia/maia.nodejs.js")
+    const testBlankProgram = new maiaNode()
+    const handGrammarProgram = testBlankProgram.getHandGrammarProgram()
+    const examples: string[] = handGrammarProgram.getNodesByGlobPath("* example").map((node: any) => node.childrenToString())
+    const templates = new jtree.TreeNode(Disk.read(__dirname + "/maia/packages/templates/Templates.stamp"))
+      .getNodesByGlobPath("file data")
+      .map((node: any) => node.childrenToString())
+    const model = handGrammarProgram.trainModel(examples.concat(templates), maiaNode)
+    Disk.writeJson(__dirname + "/maia/maia.model.js", model)
+  }
+
   private _getMaiaExamplesTestTree() {
     const maiaPath = `${__dirname}/maia/maia.nodejs.js`
     const maiaNode = require(maiaPath)

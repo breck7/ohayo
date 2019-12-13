@@ -1,6 +1,7 @@
 tooling onsave jtree build produceMaiaGrammar
 assertRowCountNode
  description Throw an error if row count not correct.
+ tags noPicker
  example Basics
   data.inline
    content

@@ -95,6 +95,11 @@ abstractSnippetGalleryNode
     clickCommand appendSnippetTemplateCommand
  javascript
   getGalleryNodes() {}
+  async _execute() {
+   this._outputTable = new Table(this.getGalleryNodes().toDataTable().slice(1))
+   this.setIsDataLoaded(true)
+   await this._executeChildNodes()
+  }
   getTileBodyStumpCode() {
    return this.qFormat(this.bodyStumpTemplate, {
     title: this.title,

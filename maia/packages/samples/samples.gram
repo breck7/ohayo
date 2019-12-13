@@ -3,6 +3,7 @@ samplesListNode
  description View all available sample tiles
  string title All samples:
  string itemFormat {id} - {description}
+ boolean isDataPublicDomain true
  extends abstractSnippetGalleryNode
  crux samples.list
  javascript
@@ -22,6 +23,12 @@ samplesListNode
   }
 samplesTelescopesNode
  description A partial list of humankind's largest telescopes.
+ string dataDescription
+  ## Provenance
+  This list was put together by a group of remote workers in a Google spreadsheet in 2017 and hasn't been updated in a while.
+ boolean isDataPublicDomain true
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/telescopes.tsv
+ tags astronomy
  frequency .03
  example Display list of links to telescope websites.
   samples.telescopes
@@ -31,23 +38,31 @@ samplesTelescopesNode
  crux samples.telescopes
 samplesMtcarsNode
  description Dataset from 1974 Motor Trend US magazine.
+ boolean isDataPublicDomain true
+ string dataUrl https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html
  frequency .03
  string url maia/packages/samples/mtcars.tsv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.mtcars
 samplesIrisNode
  description The famous Iris flower data set.
+ string dataUrl https://archive.ics.uci.edu/ml/datasets/iris
+ boolean isDataPublicDomain true
  frequency .15
  string url maia/packages/samples/iris.tsv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.iris
 samplesFlights14Node
- description On-Time flights data from the Bureau of Transporation Statistics for all the flights that departed from New York City airports in 2014. The data is available only for Jan-Oct'14.
+ description On-Time flights data from the Bureau of Transportation Statistics for all the flights that departed from New York City airports in 2014. The data is available only for Jan-Oct'14.
+ string dataUrl https://github.com/Rdatatable/data.table/blob/master/vignettes/flights14.csv
+ boolean isDataPublicDomain true
  string url maia/packages/samples/flights14-sample.csv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.flights14
 samplesSiNode
  description A description of The International System of Units (SI) aka the metric system.
+ boolean isDataPublicDomain true
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/si.tree
  example View outline of SI system.
   samples.si
    treenotation.outline
@@ -58,6 +73,8 @@ samplesSiNode
  crux samples.si
 samplesPortalNode
  description A list of online data portals.
+ boolean isDataPublicDomain true
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/portals.ssv
  frequency .03
  string url maia/packages/samples/portals.ssv
  extends abstractFixedDatasetFromMaiaCollectionNode
@@ -65,6 +82,8 @@ samplesPortalNode
 samplesStarWarsNode
  description All Star Wars characters. Data comes from https://swapi.co/
  frequency .03
+ boolean isDataPublicDomain false
+ string dataLicense BSD
  string url maia/packages/samples/starwars.json
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux samples.starWars
@@ -82,6 +101,7 @@ samplesBabyNamesNode
  crux samples.babyNames
 samplesDeclarationNode
  description The 1776 Declaration of Independence
+ boolean isDataPublicDomain true
  frequency .02
  string url maia/packages/samples/declaration-of-independence.text
  extends abstractFixedDatasetFromMaiaCollectionNode
@@ -89,11 +109,13 @@ samplesDeclarationNode
 samplesPatientsNode
  description A row for each patient in a sample clinical dataset.
  string dummyDataSetName patients
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.patients
 samplesPoemNode
  description The Road Not Taken by Robert Frost
  string dummyDataSetName poem
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.poem
 samplesOuterSpaceNode
@@ -104,12 +126,14 @@ samplesOuterSpaceNode
 samplesTreeProgramNode
  description A simple program in a Tree Language.
  string dummyDataSetName treeProgram
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.treeProgram
 samplesWaterBillNode
  description A family's water bill.
  frequency .15
  string dummyDataSetName waterBill
+ boolean isDataPublicDomain true
  extends abstractDummyNode
  crux samples.waterBill
 samplesGapMinderNode
@@ -120,6 +144,7 @@ samplesGapMinderNode
  crux samples.gapMinder
 samplesPeriodicTableNode
  description Periodic table from https://gist.github.com/GoodmanSciences
+ string dataUrl https://gist.github.com/GoodmanSciences/c2dd862cd38f21b0ad36b8f96b4bf1ee
  frequency .15
  extends abstractFixedDatasetFromMaiaCollectionNode
  string url maia/packages/samples/periodic-table.csv
@@ -131,6 +156,7 @@ samplesLettersNode
  string url maia/packages/samples/letters.tsv
  crux samples.letters
 samplesPresidentsNode
+ boolean isDataPublicDomain true
  description CSV of president's of United States.
  frequency .03
  string url maia/packages/samples/presidents.csv
@@ -138,6 +164,7 @@ samplesPresidentsNode
  crux samples.presidents
 samplesTinyIrisNode
  description A snippet of the Iris dataset.
+ boolean isDataPublicDomain true
  string data
   petal_length,petal_width,species
   4.9,1.8,virginica

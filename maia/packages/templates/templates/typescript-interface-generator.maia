@@ -1,0 +1,10 @@
+doc.title TypeScript Interface Generator
+data.inline
+ content
+  state,number
+  Hawaii,50
+ schema.toTypescript
+  hidden
+  html.printAs code
+doc.layout column
+doc.categories programming

@@ -6,7 +6,7 @@ codeCell
  highlightScope string
 documentCategoryCell
  highlightScope constant
- enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo
+ enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history
 zoomCell
  extends numberCell
 referenceIdCell
@@ -25,6 +25,7 @@ abstractDocSettingNode
 abstractDocTileNode
  int footerHeight 0
  int headerHeight 0
+ tags noPicker
  cells tileKeywordCell
  extends abstractTileTreeComponentNode
  abstract

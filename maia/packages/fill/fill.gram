@@ -1,0 +1,17 @@
+tooling onsave jtree build produceMaiaGrammar
+fillMissingNode
+ cells tileKeywordCell columnNameCell anyCell
+ description Fill any missing cell in the provided column name with the provided value.
+ extends abstractTransformerNode
+ crux fill.missing
+ example
+  data.inline
+   content
+    name,score
+    bob,
+    mike,55
+   fill.missing score 0
+ javascript
+  _createOutputTable() {
+    return this.getParentOrDummyTable().fillMissing(this.getWord(1), this.getWord(2))
+  }

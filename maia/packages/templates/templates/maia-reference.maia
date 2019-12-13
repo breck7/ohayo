@@ -31,6 +31,11 @@ data.inline
  vega.bar Number of Superbowl Wins
 
 
+doc.subtitle A List of All Tiles
+debug.grammarTree maia
+ hidden
+ treenotation.outline
+
 doc.section
  subtitle Secondary Notation (aka Text Styling)
  paragraph Words can be bolded[bold] or italicized[em] or monospaced[mono] or linked[link http://ohayo.computer] or footnoted[ref someRefId].

@@ -1,0 +1,14 @@
+doc.title Exploring Country Names
+samples.populations
+ hidden
+ doc.subtitle How many countrys are there in this dataset?
+ show.rowCount Countries
+ text.firstLetter Country
+  hidden
+  group.by firstLetter
+   hidden
+   vega.bar How many country names begin with each letter (in English)?
+   show.rowCount Letters used
+   doc.subtitle No countries have a name starting with X.
+doc.layout column
+doc.categories geography

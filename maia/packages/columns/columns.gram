@@ -16,6 +16,20 @@ columnsFirstNode
     .slice(0, parseInt(this.getContent()))
     .map(col => col.name)
   }
+columnsRenameNode
+ crux columns.rename
+ cells tileKeywordCell columnNameCell newColumnNameCell
+ description Rename a column
+ extends abstractTransformerNode
+ javascript
+  _createOutputTable() {
+   const renameMap = {}
+   renameMap[this.getWord(1)] = this.getWord(2)
+   return this.getParentOrDummyTable().renameColumns(renameMap)
+  }
+ example
+  samples.iris
+   columns.rename Species Classification
 columnsCleanNamesNode
  crux columns.cleanNames
  cells tileKeywordCell
@@ -28,8 +42,8 @@ columnsCleanNamesNode
  extends abstractTransformerNode
  javascript
   _createOutputTable() {
-    return this.getParentOrDummyTable().cloneWithCleanColumnNames()
-   }
+   return this.getParentOrDummyTable().cloneWithCleanColumnNames()
+  }
 columnsLastNode
  cells tileKeywordCell intCell
  description Keeps only the last N columns.

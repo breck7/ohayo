@@ -1,0 +1,11 @@
+doc.title 500 Most Popular Websites
+doc.layout column
+doc.categories web
+moz.top500
+ hidden
+ columns.setType LinkingRootDomains numberString
+  hidden
+  tables.basic
+  vega.bar Number of Inbound Links
+   xColumn Rank
+   yColumn LinkingRootDomains

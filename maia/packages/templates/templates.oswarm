@@ -5,4 +5,4 @@ test templates
   appendTileCommand templates.list
    assertStringIncludes getStumpNodeString Baby Names
    executeCommandOnStumpWithClassCommand clickCommand pickerItemButton
-    assertStringIs getMountedTab.getFileName periodic-table.maia
+    assertStringIs getMountedTab.getFileName boiling-points.maia

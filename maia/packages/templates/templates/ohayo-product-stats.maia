@@ -1,0 +1,22 @@
+doc.title Ohayo Product Stats
+doc.categories ohayo
+doc.layout column
+templates.list
+ hidden
+ show.rowCount Number of Templates
+challenge.list
+ hidden
+ show.rowCount Number of Challenges
+debug.grammarTree maia
+ hidden
+ text.lineCount
+  hidden
+  show.max lines Number of Maia Nodes
+doc.comment Todo: show.static 2 Number of Included Datasets
+doc.comment Todo: show.static 2 Number of Linked Datasets
+debug.grammar maia
+ hidden
+ text.lineCount
+  hidden
+  show.max lines Maia Grammar Lines of Code
+doc.comment Todo: show.static 2 Maia Grammar Lines of Javascript Code
