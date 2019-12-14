@@ -1,3 +1,8 @@
+Edge 2019-12-13
+---------------
+- New: text.matches tile
+- Infra: dataDomain property on web connected providers
+
 17.0.0 2019-12-12
 -----------------
 - New: data.synth tile

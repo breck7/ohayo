@@ -4,6 +4,11 @@ doc.layout column
 templates.list
  hidden
  show.rowCount Number of Templates
+debug.grammar maia
+ hidden
+ text.matches string dataDomain
+  hidden
+  show.max count Number of Integrated Web Data Sources
 challenge.list
  hidden
  show.rowCount Number of Challenges
@@ -12,8 +17,7 @@ debug.grammarTree maia
  text.lineCount
   hidden
   show.max lines Number of Maia Nodes
-doc.comment Todo: show.static 2 Number of Included Datasets
-doc.comment Todo: show.static 2 Number of Linked Datasets
+doc.comment show.static 2 Number of 0 Included Datasets
 debug.grammar maia
  hidden
  text.lineCount

@@ -5,6 +5,7 @@ abstractHackernewsNode
  frequency .01
  tags internetConnectionRequired
  extends abstractUrlNode
+ string dataDomain news.ycombinator.com
  abstract
 hackernewsTopNode
  cells tileKeywordCell quantityCell
