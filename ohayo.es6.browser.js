@@ -37265,6 +37265,28 @@ file templates/logs.maia
   doc.layout column
   doc.categories math
   doc.defaultHidden
+file templates/maia-grammar-analysis.maia
+ data
+  doc.title Maia Grammar Analysis
+  doc.categories ohayo
+  doc.layout column
+  debug.grammar maia
+   hidden
+   text.lineCount
+    hidden
+    show.max lines Maia Grammar Lines of Code
+   text.wordCount
+    hidden
+    show.sum count Maia Total Grammar Words
+    show.rowCount Maia Unique Words
+    text.wordcloud
+   text.wordCount
+    hidden
+    rows.sortByReverse count
+     hidden
+     rows.first 10
+      hidden
+      tables.basic Top 10 Words
 file templates/maia-reference.maia
  data
   doc.title Maia Reference
@@ -37407,6 +37429,10 @@ file templates/ohayo-product-stats.maia
    text.lineCount
     hidden
     show.max lines Maia Grammar Lines of Code
+   text.wordCount
+    hidden
+    show.sum count Maia Total Grammar Words
+    show.rowCount Maia Unique Words
   doc.comment Todo: show.static 2 Maia Grammar Lines of Javascript Code
 file templates/planets-on-wikipedia.maia
  data
