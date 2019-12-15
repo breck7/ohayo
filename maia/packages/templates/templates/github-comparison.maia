@@ -1,0 +1,11 @@
+doc.title GitHub Comparison
+doc.subtitle A comparison of Ohayo with RStudio and Jupyter Notebook.
+github.info rstudio/rstudio jupyter/notebook treenotation/ohayo
+ hidden
+ vega.bar Stars Comparison
+  yColumn stargazers_count
+ vega.scatter Stars by Year Created
+  xColumn created_at
+  yColumn stargazers_count
+doc.layout column
+doc.categories programming

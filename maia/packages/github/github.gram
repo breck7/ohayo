@@ -1,0 +1,13 @@
+tooling onsave jtree build produceMaiaGrammar
+githubRepoCell
+ extends anyCell
+githubInfoNode
+ frequency .01
+ tags internetConnectionRequired
+ extends abstractUrlsNode
+ string dataDomain github.com
+ catchAllCellType githubRepoCell
+ cells tileKeywordCell
+ description Get basic information on a GitHub repo(s)
+ string urlPrefix https://api.github.com/repos/
+ crux github.info

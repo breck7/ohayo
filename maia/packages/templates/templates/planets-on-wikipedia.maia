@@ -1,0 +1,13 @@
+doc.title The Planets on Wikipedia
+wikipedia.page Venus Mercury_(planet) Earth Mars Neptune Saturn Jupiter Uranus
+ hidden
+ tables.basic
+ columns.keep title extract
+  hidden
+  text.combine extract
+   hidden
+   text.wordCount
+    hidden
+    text.wordcloud
+doc.categories wikipedia
+doc.layout column

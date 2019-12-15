@@ -6,7 +6,7 @@ codeCell
  highlightScope string
 documentCategoryCell
  highlightScope constant
- enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history
+ enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
 zoomCell
  extends numberCell
 referenceIdCell

@@ -1,0 +1,10 @@
+doc.title GitHub Project Stats
+github.info treenotation/ohayo
+ hidden
+ show.value full_name Name
+ show.value description Description
+ show.value created_at Created
+ show.value pushed_at Last Updated
+ show.value stargazers_count Stars
+doc.layout column
+doc.categories programming

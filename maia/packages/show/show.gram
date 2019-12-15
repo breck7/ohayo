@@ -39,7 +39,7 @@ abstractShowTileNode
     console.log(`No column named ${columnName}`)
     return ""
    }
-   const reductionName = this.getWord(0).split(".")[1]
+   const reductionName = this.reductionName || this.getWord(0).split(".")[1]
    const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
    const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
    return this.qFormat(this.bodyStumpTemplate, {title, number})
@@ -84,6 +84,11 @@ showStaticNode
    const title = this.getWordsFrom(2).join(" ")
    return this.qFormat(this.bodyStumpTemplate, {title, number: this.getWord(1) || ""})
   }
+showValueNode
+ description Show the value of a column with 1 row
+ extends abstractShowTileNode
+ crux show.value
+ string reductionName median
 showMedianNode
  description Show the median value of a column
  extends abstractShowTileNode

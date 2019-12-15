@@ -1,0 +1,22 @@
+tooling onsave jtree build produceMaiaGrammar
+wikipediaPermalinkCell
+ extends anyCell
+wikipediaContentNode
+ frequency .01
+ tags internetConnectionRequired
+ extends abstractUrlNode
+ string dataDomain wikipedia.org
+ catchAllCellType wikipediaPermalinkCell
+ cells tileKeywordCell
+ description Get content of a wikipedia page(s)
+ javascript
+  getUrl() {
+    return this.urlPrefix + this.wikipediaPermalinkCell.join("|")
+  }
+  async fetchTableInputs() {
+   const inputs = await super.fetchTableInputs()
+   // todo: cleanup
+   return { rows: Object.values(inputs.rows[0].query.pages) }
+  }
+ string urlPrefix https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&origin=*&titles=
+ crux wikipedia.page

@@ -2,6 +2,7 @@ tooling onsave jtree build produceMaiaGrammar
 subredditNameCell
 redditAllNode
  tags internetConnectionRequired
+ string dataDomain reddit.com
  description Fetches top stories from r/all.
  example A simple reddit dashboard
   reddit.all

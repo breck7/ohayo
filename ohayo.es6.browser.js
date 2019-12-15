@@ -26247,6 +26247,7 @@ a {name}
           "show.rowCount": showRowCountNode,
           "show.columnCount": showColumnCountNode,
           "show.static": showStaticNode,
+          "show.value": showValueNode,
           "show.median": showMedianNode,
           "show.sum": showSumNode,
           "show.mean": showMeanNode,
@@ -26292,12 +26293,15 @@ a {name}
           "tables.dump": tablesDumpNode,
           "text.wordcloud": textWordcloudNode,
           "treenotation.3d": treenotation3dNode,
+          "github.info": githubInfoNode,
           "disk.browse": diskBrowseNode,
           "disk.read": diskReadNode,
           "hackernews.top": hackernewsTopNode,
           "hackernews.submissions": hackernewsSubmissionsNode,
+          "publicapis.entries": publicApisNode,
           "web.get": webGetNode,
           "web.post": webPostNode,
+          "wikipedia.page": wikipediaContentNode,
           "cancer.cases": cancerCasesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "moz.top500": mozTop500Node,
@@ -26368,6 +26372,8 @@ a {name}
           "rows.sortBy": rowsSortByNode,
           "rows.sortByReverse": rowsSortByReverseNode,
           "rows.addOne": rowsAddOneNode,
+          "text.matches": textMatchesNode,
+          "text.combine": textCombineNode,
           "data.inline": dataInlineNode,
           "data.localStorage": dataLocalStorageNode,
           "debug.parserTest": debugParserTestNode,
@@ -27161,7 +27167,7 @@ h3 {number}`
         console.log(`No column named ${columnName}`)
         return ""
       }
-      const reductionName = this.getWord(0).split(".")[1]
+      const reductionName = this.reductionName || this.getWord(0).split(".")[1]
       const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
       const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
       return this.qFormat(this.bodyStumpTemplate, { title, number })
@@ -27215,6 +27221,12 @@ h3 {number}`
     getTileBodyStumpCode() {
       const title = this.getWordsFrom(2).join(" ")
       return this.qFormat(this.bodyStumpTemplate, { title, number: this.getWord(1) || "" })
+    }
+  }
+
+  class showValueNode extends abstractShowTileNode {
+    get reductionName() {
+      return `median`
     }
   }
 
@@ -28735,6 +28747,7 @@ span Rows Out: ${table.getRowCount()} Columns Out: ${table.getColumnCount()} Tim
       return struct.urlCell || this.getContent() || this.url || ""
     }
     getParserId() {
+      if (this.parser) return this.parser
       const url = this.getUrl()
       if (super.getParserId()) return super.getParserId()
       const extension = jtree.Utils.getFileExtension(url)
@@ -28771,7 +28784,9 @@ bern
       try {
         const data = await this._getData(url)
         const parser = new TableParser()
-        return typeof data === "string" ? parser.parseTableInputsFromString(data, parserId) : parser.parseTableInputsFromObject(data, parserId)
+        if (typeof data === "string") return parser.parseTableInputsFromString(data, parserId)
+        if (this.jsonPath) return parser.parseTableInputsFromObject(data[this.jsonPath], parserId)
+        return parser.parseTableInputsFromObject(data, parserId)
       } catch (err) {
         // todo: solve the superagent not throwing response message thing.
         const txt = (err.text || err.toString()).substr(0, 280)
@@ -28792,6 +28807,40 @@ bern
     }
     get tileSize() {
       return `300 100`
+    }
+  }
+
+  class abstractUrlsNode extends abstractUrlNode {
+    getUrls() {
+      return this.getWordsFrom(1).map(url => (this.urlPrefix || "") + url)
+    }
+    async fetchTableInputs() {
+      // todo: allow cache breaking.
+      const app = this.getWebApp()
+      const willowBrowser = app.getWillowBrowser()
+      let allResults = []
+      const urls = this.getUrls()
+      const fetchMethod = async url => (app.isUrlGetProxyAvailable() ? willowBrowser.httpGetUrlFromProxyCache(url) : willowBrowser.httpGetUrlFromCache(url))
+      for (let url of urls) {
+        const response = await fetchMethod(url)
+        allResults.push(response)
+      }
+      return { rows: allResults.map(res => res.asJson) }
+    }
+  }
+
+  class githubInfoNode extends abstractUrlsNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get githubRepoCell() {
+      return this.getWordsFrom(1)
+    }
+    get urlPrefix() {
+      return `https://api.github.com/repos/`
+    }
+    get dataDomain() {
+      return `github.com`
     }
   }
 
@@ -28862,7 +28911,11 @@ ${rows
     }
   }
 
-  class abstractHackernewsNode extends abstractUrlNode {}
+  class abstractHackernewsNode extends abstractUrlNode {
+    get dataDomain() {
+      return `news.ycombinator.com`
+    }
+  }
 
   class hackernewsTopNode extends abstractHackernewsNode {
     get tileKeywordCell() {
@@ -28916,6 +28969,24 @@ ${rows
     }
     _parseNextUrls(response) {
       return response.asJson.submitted.map(id => `https://hacker-news.firebaseio.com/v0/item/${id}.json?print=pretty`)
+    }
+  }
+
+  class publicApisNode extends abstractUrlNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get jsonPath() {
+      return `entries`
+    }
+    get parser() {
+      return `json`
+    }
+    get url() {
+      return `https://api.publicapis.org/entries`
+    }
+    get dataDomain() {
+      return `publicapis.org`
     }
   }
 
@@ -28976,6 +29047,29 @@ input
         .httpPostUrl(url, { q: postData.trim() })
       this._setWillowHttpResponse(res)
       return res.getParsedDataOrText()
+    }
+  }
+
+  class wikipediaContentNode extends abstractUrlNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get wikipediaPermalinkCell() {
+      return this.getWordsFrom(1)
+    }
+    get urlPrefix() {
+      return `https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&origin=*&titles=`
+    }
+    get dataDomain() {
+      return `wikipedia.org`
+    }
+    getUrl() {
+      return this.urlPrefix + this.wikipediaPermalinkCell.join("|")
+    }
+    async fetchTableInputs() {
+      const inputs = await super.fetchTableInputs()
+      // todo: cleanup
+      return { rows: Object.values(inputs.rows[0].query.pages) }
     }
   }
 
@@ -29177,6 +29271,9 @@ This list was put together by a group of remote workers in a Google spreadsheet 
     }
     get url() {
       return `https://www.reddit.com/r/all/top/.json?sort=top`
+    }
+    get dataDomain() {
+      return `reddit.com`
     }
     async fetchTableInputs() {
       const inputs = await super.fetchTableInputs()
@@ -30104,6 +30201,35 @@ class LargeLabel`
     }
   }
 
+  class textMatchesNode extends abstractTransformerNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get anyCell() {
+      return this.getWordsFrom(1)
+    }
+    _createOutputTable() {
+      return new Table([{ count: this.getPipishInput().match(new RegExp(this.getContent(), "g")).length }])
+    }
+  }
+
+  class textCombineNode extends abstractTransformerNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    _createOutputTable() {
+      // todo: cleanup
+      const text = this.getParentOrDummyTable()
+        .getRows()
+        .map(row => row.getRowOriginalValue(this.columnNameCell))
+        .join("\n")
+      return new Table([{ text }])
+    }
+  }
+
   class dataInlineNode extends abstractProviderNode {
     createParser() {
       return new jtree.TreeNode.Parser(
@@ -30819,6 +30945,7 @@ a {name}
           "show.rowCount": showRowCountNode,
           "show.columnCount": showColumnCountNode,
           "show.static": showStaticNode,
+          "show.value": showValueNode,
           "show.median": showMedianNode,
           "show.sum": showSumNode,
           "show.mean": showMeanNode,
@@ -30864,12 +30991,15 @@ a {name}
           "tables.dump": tablesDumpNode,
           "text.wordcloud": textWordcloudNode,
           "treenotation.3d": treenotation3dNode,
+          "github.info": githubInfoNode,
           "disk.browse": diskBrowseNode,
           "disk.read": diskReadNode,
           "hackernews.top": hackernewsTopNode,
           "hackernews.submissions": hackernewsSubmissionsNode,
+          "publicapis.entries": publicApisNode,
           "web.get": webGetNode,
           "web.post": webPostNode,
+          "wikipedia.page": wikipediaContentNode,
           "cancer.cases": cancerCasesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "moz.top500": mozTop500Node,
@@ -30940,6 +31070,8 @@ a {name}
           "rows.sortBy": rowsSortByNode,
           "rows.sortByReverse": rowsSortByReverseNode,
           "rows.addOne": rowsAddOneNode,
+          "text.matches": textMatchesNode,
+          "text.combine": textCombineNode,
           "data.inline": dataInlineNode,
           "data.localStorage": dataLocalStorageNode,
           "debug.parserTest": debugParserTestNode,
@@ -31002,7 +31134,7 @@ codeCell
  highlightScope string
 documentCategoryCell
  highlightScope constant
- enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history
+ enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
 zoomCell
  extends numberCell
 referenceIdCell
@@ -31096,6 +31228,8 @@ scalarValueCell
 comparisonCell
  enum < > <= >= = !=
  highlightScope constant
+githubRepoCell
+ extends anyCell
 hackerNewsUserNameCell
  highlightScope string
 htmlTextTagCell
@@ -31132,6 +31266,8 @@ vegaDataSetCell
 vegaExampleNameCell
  highlightScope constant.numeric
  enum airport_connections area area_cumulative_freq area_horizon area_overlay area_temperature_range area_vertical bar bar_1d bar_1d_rangestep_config bar_aggregate bar_aggregate_count bar_aggregate_format bar_aggregate_size bar_aggregate_sort_by_encoding bar_aggregate_sort_mean bar_aggregate_transform bar_aggregate_vertical bar_argmax bar_argmax_transform bar_array_aggregate bar_binned_data bar_color_disabled_scale bar_column_fold bar_custom_sort_full bar_custom_sort_partial bar_distinct bar_diverging_stack_transform bar_filter_calc bar_fit bar_gantt bar_grouped bar_grouped_horizontal bar_layered_transparent bar_layered_weather bar_month bar_month_temporal bar_size_default bar_size_explicit bar_size_explicit_bad bar_size_fit bar_size_rangestep_small bar_sort_by_count bar_swap_axes bar_swap_custom bar_title bar_title_start bar_tooltip bar_tooltip_multi bar_yearmonth bar_yearmonth_custom_format boxplot_1D_horizontal boxplot_1D_horizontal_custom_mark boxplot_1D_horizontal_explicit boxplot_1D_vertical boxplot_2D_horizontal boxplot_2D_horizontal_color_size boxplot_2D_vertical boxplot_minmax_2D_horizontal boxplot_minmax_2D_horizontal_custom_midtick_color boxplot_minmax_2D_vertical boxplot_tooltip_aggregate boxplot_tooltip_not_aggregate brush_table circle circle_binned circle_binned_maxbins_2 circle_binned_maxbins_20 circle_binned_maxbins_5 circle_bubble_health_income circle_flatten circle_github_punchcard circle_natural_disasters circle_opacity circle_scale_quantile circle_scale_quantize circle_scale_threshold concat_bar_layer_circle concat_bar_scales_discretize concat_bar_scales_discretize_2_cols concat_hover concat_hover_filter concat_layer_voyager_result_future concat_marginal_histograms concat_population_pyramid concat_weather connected_scatterplot embedded_csv errorband_2d_horizontal_color_encoding errorband_2d_vertical_borders errorbar_2d_vertical_ticks errorbar_aggregate errorbar_horizontal_aggregate facet_bullet facet_column_facet_column_point_future facet_column_facet_row_point_future facet_cross_independent_scale facet_custom facet_custom_header facet_independent_scale facet_independent_scale_layer_broken facet_row_facet_row_point_future geo_choropleth geo_circle geo_constant_value geo_custom_projection geo_graticule geo_graticule_object geo_layer geo_layer_line_london geo_layer_multi geo_line geo_point geo_repeat geo_rule geo_sphere geo_text geo_trellis hconcat_weather histogram histogram_bin_change histogram_bin_transform histogram_log histogram_no_spacing histogram_ordinal histogram_ordinal_sort interactive_area_brush interactive_bar_select_highlight interactive_brush interactive_concat_layer interactive_dashboard_europe_pop interactive_layered_crossfilter interactive_layered_crossfilter_discrete interactive_multi_line_label interactive_multi_line_tooltip interactive_overview_detail interactive_paintbrush interactive_paintbrush_color interactive_paintbrush_color_nearest interactive_paintbrush_interval interactive_paintbrush_simple_all interactive_paintbrush_simple_none interactive_panzoom_splom interactive_panzoom_vconcat_shared interactive_query_widgets interactive_seattle_weather interactive_splom interactive_stocks_nearest_index isotype_bar_chart isotype_bar_chart_emoji isotype_grid joinaggregate_mean_difference joinaggregate_mean_difference_by_year joinaggregate_percent_of_total joinaggregate_residual_graph layer_bar_annotations layer_bar_labels layer_bar_labels_style layer_bar_line layer_bar_line_union layer_bar_month layer_boxplot_circle layer_candlestick layer_circle_independent_color layer_color_legend_left layer_cumulative_histogram layer_dual_axis layer_falkensee layer_histogram layer_histogram_global_mean layer_line_co2_concentration layer_line_color_rule layer_line_errorband_2d_horizontal_borders_strokedash layer_line_errorband_ci layer_line_errorband_pre_aggregated layer_line_mean_point_raw layer_overlay layer_point_errorbar_1d_horizontal layer_point_errorbar_1d_vertical layer_point_errorbar_2d_horizontal layer_point_errorbar_2d_horizontal_ci layer_point_errorbar_2d_horizontal_color_encoding layer_point_errorbar_2d_horizontal_custom_ticks layer_point_errorbar_2d_horizontal_iqr layer_point_errorbar_2d_horizontal_stdev layer_point_errorbar_2d_vertical layer_point_errorbar_ci layer_point_errorbar_pre_aggregated_asymmetric_error layer_point_errorbar_pre_aggregated_symmetric_error layer_point_errorbar_pre_aggregated_upper_lower layer_point_errorbar_stdev layer_precipitation_mean layer_ranged_dot layer_rect_extent layer_scatter_errorband_1D_stdev_global_mean layer_scatter_errorband_1d_stdev layer_single_color layer_text_heatmap line line_calculate line_color line_color_binned line_detail line_encoding_impute_keyvals line_encoding_impute_keyvals_sequence line_impute_frame line_impute_keyvals line_impute_method line_impute_transform_frame line_impute_transform_value line_impute_value line_inside_domain_using_clip line_inside_domain_using_transform line_max_year line_mean_month line_mean_year line_monotone line_month line_outside_domain line_overlay line_overlay_stroked line_quarter_legend line_shape_overlay line_skip_invalid line_skip_invalid_mid line_skip_invalid_mid_cap_square line_skip_invalid_mid_overlay line_slope line_step line_timeunit_transform lookup parallel_coordinate point_1d point_1d_array point_2d point_2d_aggregate point_2d_array point_2d_array_named point_2d_tooltip_data point_aggregate_detail point_background point_binned_color point_binned_opacity point_binned_size point_bubble point_color point_color_custom point_color_ordinal point_color_quantitative point_color_shape_constant point_color_with_shape point_colorramp_size point_diverging_color point_dot_timeunit_color point_filled point_href point_invalid_color point_log point_no_axis_domain_grid point_ordinal_color point_overlap point_shape_custom point_tooltip rect_binned_heatmap rect_heatmap rect_heatmap_weather rect_lasagna_future rect_mosaic_labelled rect_mosaic_labelled_with_offset rect_mosaic_simple repeat_histogram repeat_histogram_flights repeat_independent_colors repeat_layer repeat_line_weather repeat_splom_cars repeat_splom_iris rule_color_mean rule_extent sample_scatterplot selection_bind_cylyr selection_bind_origin selection_brush_timeunit selection_clear_brush selection_composition_and selection_composition_or selection_concat selection_filter selection_filter_composition selection_heatmap selection_insert selection_interval_mark_style selection_layer_bar_month selection_multi_condition selection_project_binned_interval selection_project_interval selection_project_interval_x selection_project_interval_x_y selection_project_interval_y selection_project_multi selection_project_multi_cylinders selection_project_multi_cylinders_origin selection_project_multi_origin selection_project_single selection_project_single_cylinders selection_project_single_cylinders_origin selection_project_single_origin selection_resolution_global selection_resolution_intersect selection_resolution_union selection_toggle_altKey selection_toggle_altKey_shiftKey selection_toggle_shiftKey selection_translate_brush_drag selection_translate_brush_shift-drag selection_translate_scatterplot_drag selection_translate_scatterplot_shift-drag selection_type_interval selection_type_interval_invert selection_type_multi selection_type_single selection_type_single_dblclick selection_type_single_mouseover selection_zoom_brush_shift-wheel selection_zoom_brush_wheel selection_zoom_scatterplot_shift-wheel selection_zoom_scatterplot_wheel sequence_line square stacked_area stacked_area_normalize stacked_area_ordinal stacked_area_overlay stacked_area_stream stacked_bar_1d stacked_bar_count stacked_bar_h stacked_bar_h_order stacked_bar_h_order_custom stacked_bar_normalize stacked_bar_population stacked_bar_population_transform stacked_bar_size stacked_bar_sum_opacity stacked_bar_unaggregate stacked_bar_v stacked_bar_weather test_aggregate_nested test_field_with_spaces test_single_point_color test_subobject test_subobject_missing test_subobject_nested text_format text_scatterplot_colored tick_dot tick_dot_thickness tick_sort tick_strip time_output_utc_scale time_output_utc_timeunit time_parse_local time_parse_utc time_parse_utc_format trail_color trellis_anscombe trellis_area trellis_area_sort_array trellis_bar trellis_bar_histogram trellis_bar_histogram_label_rotated trellis_barley trellis_barley_independent trellis_barley_layer_median trellis_column_year trellis_cross_sort trellis_cross_sort_array trellis_line_quarter trellis_row_column trellis_scatter trellis_scatter_binned_row trellis_scatter_small trellis_selections trellis_stacked_bar vconcat_flatten vconcat_weather waterfall_chart wheat_wages window_cumulative_running_average window_percent_of_total window_rank window_top_k window_top_k_others
+wikipediaPermalinkCell
+ extends anyCell
 abstractTileTreeComponentNode
  abstract
  cells tileKeywordCell
@@ -32584,7 +32720,7 @@ abstractShowTileNode
     console.log(\`No column named \${columnName}\`)
     return ""
    }
-   const reductionName = this.getWord(0).split(".")[1]
+   const reductionName = this.reductionName || this.getWord(0).split(".")[1]
    const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
    const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
    return this.qFormat(this.bodyStumpTemplate, { title, number })
@@ -32629,6 +32765,11 @@ showStaticNode
    const title = this.getWordsFrom(2).join(" ")
    return this.qFormat(this.bodyStumpTemplate, { title, number: this.getWord(1) || "" })
   }
+showValueNode
+ description Show the value of a column with 1 row
+ extends abstractShowTileNode
+ crux show.value
+ string reductionName median
 showMedianNode
  description Show the median value of a column
  extends abstractShowTileNode
@@ -33990,6 +34131,7 @@ abstractUrlNoCellsNode
    return struct.urlCell || this.getContent() || this.url || ""
   }
   getParserId() {
+   if (this.parser) return this.parser
    const url = this.getUrl()
    if (super.getParserId()) return super.getParserId()
    const extension = jtree.Utils.getFileExtension(url)
@@ -34026,7 +34168,9 @@ abstractUrlNoCellsNode
    try {
     const data = await this._getData(url)
     const parser = new TableParser()
-    return typeof data === "string" ? parser.parseTableInputsFromString(data, parserId) : parser.parseTableInputsFromObject(data, parserId)
+    if (typeof data === "string") return parser.parseTableInputsFromString(data, parserId)
+    if (this.jsonPath) return parser.parseTableInputsFromObject(data[this.jsonPath], parserId)
+    return parser.parseTableInputsFromObject(data, parserId)
    } catch (err) {
     // todo: solve the superagent not throwing response message thing.
     const txt = (err.text || err.toString()).substr(0, 280)
@@ -34041,6 +34185,35 @@ abstractUrlNode
  string tileSize 300 100
  extends abstractUrlNoCellsNode
  abstract
+abstractUrlsNode
+ extends abstractUrlNode
+ javascript
+  getUrls() {
+   return this.getWordsFrom(1).map(url => (this.urlPrefix || "") + url)
+  }
+  async fetchTableInputs() {
+   // todo: allow cache breaking.
+   const app = this.getWebApp()
+   const willowBrowser = app.getWillowBrowser()
+   let allResults = []
+   const urls = this.getUrls()
+   const fetchMethod = async url => (app.isUrlGetProxyAvailable() ? willowBrowser.httpGetUrlFromProxyCache(url) : willowBrowser.httpGetUrlFromCache(url))
+   for (let url of urls) {
+    const response = await fetchMethod(url)
+    allResults.push(response)
+   }
+   return { rows: allResults.map(res => res.asJson) }
+  }
+githubInfoNode
+ frequency .01
+ tags internetConnectionRequired
+ extends abstractUrlsNode
+ string dataDomain github.com
+ catchAllCellType githubRepoCell
+ cells tileKeywordCell
+ description Get basic information on a GitHub repo(s)
+ string urlPrefix https://api.github.com/repos/
+ crux github.info
 diskBrowseNode
  frequency .01
  tags localVersion
@@ -34112,6 +34285,7 @@ abstractHackernewsNode
  frequency .01
  tags internetConnectionRequired
  extends abstractUrlNode
+ string dataDomain news.ycombinator.com
  abstract
 hackernewsTopNode
  cells tileKeywordCell quantityCell
@@ -34179,6 +34353,17 @@ hackernewsSubmissionsNode
   }
  extends hackernewsTopNode
  crux hackernews.submissions
+publicApisNode
+ frequency .01
+ tags internetConnectionRequired
+ extends abstractUrlNode
+ string dataDomain publicapis.org
+ cells tileKeywordCell
+ description Get all public APIs
+ string url https://api.publicapis.org/entries
+ crux publicapis.entries
+ string parser json
+ string jsonPath entries
 webGetNode
  description Get a URL and parse the fetched data.
  example Fetch a TSV from the web and show results
@@ -34234,6 +34419,25 @@ webPostNode
  string tileSize 400 130
  extends abstractUrlNode
  crux web.post
+wikipediaContentNode
+ frequency .01
+ tags internetConnectionRequired
+ extends abstractUrlNode
+ string dataDomain wikipedia.org
+ catchAllCellType wikipediaPermalinkCell
+ cells tileKeywordCell
+ description Get content of a wikipedia page(s)
+ javascript
+  getUrl() {
+   return this.urlPrefix + this.wikipediaPermalinkCell.join("|")
+  }
+  async fetchTableInputs() {
+   const inputs = await super.fetchTableInputs()
+   // todo: cleanup
+   return { rows: Object.values(inputs.rows[0].query.pages) }
+  }
+ string urlPrefix https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&origin=*&titles=
+ crux wikipedia.page
 abstractFixedDatasetFromUrlNode
  description A dataset that generally is fixed and will never change.
  extends abstractUrlNoCellsNode
@@ -34391,6 +34595,7 @@ vegaDataNode
  crux vega.data
 redditAllNode
  tags internetConnectionRequired
+ string dataDomain reddit.com
  description Fetches top stories from r/all.
  example A simple reddit dashboard
   reddit.all
@@ -35346,6 +35551,30 @@ rowsAddOneNode
   _createOutputTable() {
    return this.getParentOrDummyTable().addRow(this.getWordsFrom(1))
   }
+textMatchesNode
+ description Scans the input text for a pattern and returns number of hits.
+ crux text.matches
+ cells tileKeywordCell
+ catchAllCellType anyCell
+ extends abstractTransformerNode
+ javascript
+  _createOutputTable() {
+   return new Table([{ count: this.getPipishInput().match(new RegExp(this.getContent(), "g")).length }])
+  }
+textCombineNode
+ description Combine all cells in a column into 1 text block
+ extends abstractTransformerNode
+ crux text.combine
+ cells tileKeywordCell columnNameCell
+ javascript
+  _createOutputTable() {
+   // todo: cleanup
+   const text = this.getParentOrDummyTable()
+    .getRows()
+    .map(row => row.getRowOriginalValue(this.columnNameCell))
+    .join("\\n")
+   return new Table([{ text }])
+  }
 dataInlineNode
  inScope contentNode parserNode treeLanguageNode
  frequency .2
@@ -36252,6 +36481,7 @@ schemaNode
         showRowCountNode: showRowCountNode,
         showColumnCountNode: showColumnCountNode,
         showStaticNode: showStaticNode,
+        showValueNode: showValueNode,
         showMedianNode: showMedianNode,
         showSumNode: showSumNode,
         showMeanNode: showMeanNode,
@@ -36305,13 +36535,17 @@ schemaNode
         abstractProviderNode: abstractProviderNode,
         abstractUrlNoCellsNode: abstractUrlNoCellsNode,
         abstractUrlNode: abstractUrlNode,
+        abstractUrlsNode: abstractUrlsNode,
+        githubInfoNode: githubInfoNode,
         diskBrowseNode: diskBrowseNode,
         diskReadNode: diskReadNode,
         abstractHackernewsNode: abstractHackernewsNode,
         hackernewsTopNode: hackernewsTopNode,
         hackernewsSubmissionsNode: hackernewsSubmissionsNode,
+        publicApisNode: publicApisNode,
         webGetNode: webGetNode,
         webPostNode: webPostNode,
+        wikipediaContentNode: wikipediaContentNode,
         abstractFixedDatasetFromUrlNode: abstractFixedDatasetFromUrlNode,
         abstractFixedDatasetFromMaiaCollectionNode: abstractFixedDatasetFromMaiaCollectionNode,
         cancerCasesNode: cancerCasesNode,
@@ -36391,6 +36625,8 @@ schemaNode
         rowsSortByNode: rowsSortByNode,
         rowsSortByReverseNode: rowsSortByReverseNode,
         rowsAddOneNode: rowsAddOneNode,
+        textMatchesNode: textMatchesNode,
+        textCombineNode: textCombineNode,
         dataInlineNode: dataInlineNode,
         dataLocalStorageNode: dataLocalStorageNode,
         debugParserTestNode: debugParserTestNode,
@@ -36962,6 +37198,31 @@ file templates/git-repo-dashboard.maia
    show.min time First Commit
   doc.layout column
   doc.categories programming
+file templates/github-comparison.maia
+ data
+  doc.title GitHub Comparison
+  doc.subtitle A comparison of Ohayo with RStudio and Jupyter Notebook.
+  github.info rstudio/rstudio jupyter/notebook treenotation/ohayo
+   hidden
+   vega.bar Stars Comparison
+    yColumn stargazers_count
+   vega.scatter Stars by Year Created
+    xColumn created_at
+    yColumn stargazers_count
+  doc.layout column
+  doc.categories programming
+file templates/github-project-stats.maia
+ data
+  doc.title GitHub Project Stats
+  github.info treenotation/ohayo
+   hidden
+   show.value full_name Name
+   show.value description Description
+   show.value created_at Created
+   show.value pushed_at Last Updated
+   show.value stargazers_count Stars
+  doc.layout column
+  doc.categories programming
 file templates/loc-with-bars.maia
  data
   doc.title Desktop Only: Analyze lines of code in a folder
@@ -37126,6 +37387,11 @@ file templates/ohayo-product-stats.maia
   templates.list
    hidden
    show.rowCount Number of Templates
+  debug.grammar maia
+   hidden
+   text.matches string dataDomain
+    hidden
+    show.max count Number of Integrated Web Data Sources
   challenge.list
    hidden
    show.rowCount Number of Challenges
@@ -37134,14 +37400,29 @@ file templates/ohayo-product-stats.maia
    text.lineCount
     hidden
     show.max lines Number of Maia Nodes
-  doc.comment Todo: show.static 2 Number of Included Datasets
-  doc.comment Todo: show.static 2 Number of Linked Datasets
+  doc.comment show.static 2 Number of 0 Included Datasets
+  doc.comment show.static 2 Number of Datasets on Datasets.ohayo.computer
   debug.grammar maia
    hidden
    text.lineCount
     hidden
     show.max lines Maia Grammar Lines of Code
   doc.comment Todo: show.static 2 Maia Grammar Lines of Javascript Code
+file templates/planets-on-wikipedia.maia
+ data
+  doc.title The Planets on Wikipedia
+  wikipedia.page Venus Mercury_(planet) Earth Mars Neptune Saturn Jupiter Uranus
+   hidden
+   tables.basic
+   columns.keep title extract
+    hidden
+    text.combine extract
+     hidden
+     text.wordCount
+      hidden
+      text.wordcloud
+  doc.categories wikipedia
+  doc.layout column
 file templates/portals.maia
  data
   doc.title Data Portals
@@ -37152,6 +37433,23 @@ file templates/portals.maia
     tables.basic
   doc.categories dataScience
   doc.layout column
+file templates/public-apis.maia
+ data
+  doc.title Public APIs
+  doc.subtitle An overview of the Public API project to build a list of free APIs for use in software and web development. 
+  publicapis.entries
+   hidden
+   group.by Category
+    hidden
+    vega.bar API Categories
+   filter.where Auth = 
+    hidden
+    filter.where Cors = no
+     hidden
+     tables.basic Fully open APIS
+   tables.basic All APIS
+  doc.layout column
+  doc.categories programming
 file templates/random.maia
  data
   doc.title Random Numbers
@@ -40276,7 +40574,7 @@ codeCell
  highlightScope string
 documentCategoryCell
  highlightScope constant
- enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history
+ enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
 zoomCell
  extends numberCell
 referenceIdCell
@@ -42780,7 +43078,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "17.0.0"
+const Version = "17.1.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 

@@ -1,3 +1,15 @@
+17.1.0 2019-12-14
+-----------------
+- New: show.value tile
+- New: text.matches tile
+- New: github.info tile
+- New: GitHub basic info template and github comparison template
+- New: wikipedia.page tile
+- New: publicapis.entries tile
+- New: wikipedia, publicapi, and maia grammar templates
+- Infra: dataDomain property on web connected providers
+- Infra: abstractUrls node
+
 17.0.0 2019-12-12
 -----------------
 - New: data.synth tile

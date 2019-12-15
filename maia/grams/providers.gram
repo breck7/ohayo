@@ -79,6 +79,8 @@ abstractUrlNoCellsNode
    return struct.urlCell || this.getContent() || this.url || ""
   }
   getParserId() {
+   if (this.parser)
+     return this.parser
    const url = this.getUrl()
    if (super.getParserId()) return super.getParserId()
    const extension = jtree.Utils.getFileExtension(url)
@@ -115,7 +117,11 @@ abstractUrlNoCellsNode
    try {
     const data = await this._getData(url)
     const parser = new TableParser()
-    return typeof data === "string" ? parser.parseTableInputsFromString(data, parserId) : parser.parseTableInputsFromObject(data, parserId)
+    if (typeof data === "string")
+      return parser.parseTableInputsFromString(data, parserId)
+    if (this.jsonPath)
+      return parser.parseTableInputsFromObject(data[this.jsonPath], parserId)
+    return parser.parseTableInputsFromObject(data, parserId)
    } catch (err) {
     // todo: solve the superagent not throwing response message thing.
     const txt = (err.text || err.toString()).substr(0, 280)
@@ -130,6 +136,25 @@ abstractUrlNode
  string tileSize 300 100
  extends abstractUrlNoCellsNode
  abstract
+abstractUrlsNode
+ extends abstractUrlNode
+ javascript
+  getUrls() {
+    return this.getWordsFrom(1).map(url => (this.urlPrefix || "") + url)
+  }
+  async fetchTableInputs() {
+   // todo: allow cache breaking.
+   const app = this.getWebApp()
+   const willowBrowser = app.getWillowBrowser()
+   let allResults = []
+   const urls = this.getUrls()
+   const fetchMethod = async url => app.isUrlGetProxyAvailable() ? willowBrowser.httpGetUrlFromProxyCache(url) : willowBrowser.httpGetUrlFromCache(url)
+   for (let url of urls) {
+    const response = await fetchMethod(url)
+    allResults.push(response)
+   }
+   return { rows: allResults.map(res => res.asJson) }
+  }
 abstractFixedDatasetFromUrlNode
  description A dataset that generally is fixed and will never change.
  extends abstractUrlNoCellsNode

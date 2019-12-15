@@ -173,6 +173,27 @@ testFirstLetterNode
  string destinationColumnName firstLetter
  int startIndex 0
  int endIndex 1
+textMatchesNode
+ description Scans the input text for a pattern and returns number of hits.
+ crux text.matches
+ cells tileKeywordCell
+ catchAllCellType anyCell
+ extends abstractTransformerNode
+ javascript
+  _createOutputTable() {
+    return new Table([{ count: this.getPipishInput().match(new RegExp(this.getContent(), "g")).length }])
+  }
+textCombineNode
+ description Combine all cells in a column into 1 text block
+ extends abstractTransformerNode
+ crux text.combine
+ cells tileKeywordCell columnNameCell
+ javascript
+  _createOutputTable() {
+    // todo: cleanup
+    const text = this.getParentOrDummyTable().getRows().map(row => row.getRowOriginalValue(this.columnNameCell)).join("\n")
+    return new Table([{ text}])
+  }
 textWordCountNode
  description Splits a string into words and counts the number of uses of each word.
  string dummyDataSetName poem

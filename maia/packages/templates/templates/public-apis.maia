@@ -1,0 +1,15 @@
+doc.title Public APIs
+doc.subtitle An overview of the Public API project to build a list of free APIs for use in software and web development. 
+publicapis.entries
+ hidden
+ group.by Category
+  hidden
+  vega.bar API Categories
+ filter.where Auth = 
+  hidden
+  filter.where Cors = no
+   hidden
+   tables.basic Fully open APIS
+ tables.basic All APIS
+doc.layout column
+doc.categories programming
