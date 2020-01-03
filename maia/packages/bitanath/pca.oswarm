@@ -1,0 +1,10 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test pca
+ createNewBlankProgramCommand
+  assertStringExcludes getStumpNodeString pc2
+  pasteCommand
+   withParagraph
+    samples.iris
+     bitanath.pca
+      tables.basic
+   assertStringIncludes getStumpNodeString pc2

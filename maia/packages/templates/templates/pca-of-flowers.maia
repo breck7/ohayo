@@ -1,0 +1,12 @@
+doc.title PCA Demonstration
+samples.iris
+ hidden
+ bitanath.pca
+  hidden
+  vega.scatter PCA of the Iris Dataset
+   xColumn pc1
+   yColumn pc2
+   colorColumn Species
+doc.layout column
+doc.categories math
+doc.subtitle This demonstration uses the PCA library from <a href="https://github.com/bitanath/pca">bitanath</a>. 

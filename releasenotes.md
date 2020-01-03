@@ -1,3 +1,8 @@
+17.2.0 2020-1-3
+---------------
+- New: pca tile
+- Fix: updated jtree to get clean columns name fix
+
 17.1.0 2019-12-14
 -----------------
 - New: show.value tile

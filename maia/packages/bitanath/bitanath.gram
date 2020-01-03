@@ -1,0 +1,34 @@
+tooling onsave jtree build produceMaiaGrammar
+pcaNode
+ description Add Principal Component Columns to input table.
+ string github https://github.com/bitanath/pca
+ example
+  samples.iris
+   bitanath.pca
+    tables.basic
+ string tileScript maia/packages/bitanath/pca.js
+ string tileScript maia/packages/mathjs/math.min.js
+ extends abstractTransformerNode
+ crux bitanath.pca
+ javascript
+  get pcaLib() {
+    return this.isNodeJs() ? require(__dirname + '/packages/bitanath/pca.js') : PCA
+  }
+  get mathLib() {
+    return this.isNodeJs() ? require(__dirname + '/packages/mathjs/math.min.js') : math
+  }
+  _createOutputTable() {
+    const table = this.getParentOrDummyTable()
+    const matrix = table.toNumericMatrix()
+    const vectors = this.pcaLib.getEigenVectors(matrix)
+    const pcaRows = vectors.map(vec => vec.vector)
+    const rows = table.getRows().map((row, index) => {
+      const obj = row.rowToObjectWithOnlyNativeJavascriptTypes()
+      const vec = matrix[index]
+      obj.pc1 = this.mathLib.dot(vec, pcaRows[0])
+      obj.pc2 = this.mathLib.dot(vec, pcaRows[1])
+      obj.pc3 = this.mathLib.dot(vec, pcaRows[2])
+      return obj
+      })
+    return new Table(rows)
+  }

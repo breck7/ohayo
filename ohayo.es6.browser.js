@@ -15809,10 +15809,14 @@ class TreeNode extends AbstractNode {
     this._getNodesByLineRegex(matches, regex)
     return matches
   }
+  // todo: remove?
   getNodesByLinePrefixes(columns) {
     const matches = []
     this._getNodesByLineRegex(matches, columns.map(str => new RegExp("^" + str)))
     return matches
+  }
+  nodesThatStartWith(prefix) {
+    return this.filter(node => node.getLine().startsWith(prefix))
   }
   _getNodesByLineRegex(matches, regs) {
     const rgs = regs.slice(0)
@@ -16472,7 +16476,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "49.4.0"
+TreeNode.getVersion = () => "49.5.0"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -19238,13 +19242,16 @@ jtree.getVersion = () => TreeNode.getVersion()
 window.jtree = jtree
 ;
 
+//onsave jtree build produce jtable.browser.js
+//onsave jtree build produce jtable.node.js
 // todo: create a Tree Language for number formatting
 // https://github.com/gentooboontoo/js-quantities
 // https://github.com/moment/moment/issues/2469
 // todo: ugly. how do we ditch this or test?
-moment.createFromInputFallback = function(momentConfig) {
-  momentConfig._d = new Date(momentConfig._i)
-}
+if (typeof moment !== "undefined")
+  moment.createFromInputFallback = function(momentConfig) {
+    momentConfig._d = new Date(momentConfig._i)
+  }
 var VegaTypes
 ;(function(VegaTypes) {
   VegaTypes["nominal"] = "nominal"
@@ -20079,6 +20086,9 @@ class Column {
   getMax() {
     return this.getReductions().max
   }
+  getMin() {
+    return this.getReductions().min
+  }
   getMean() {
     return this.getReductions().mean
   }
@@ -20240,6 +20250,8 @@ const PrimitiveTypes = {
 }
 window.Column = Column
 window.PrimitiveTypes = PrimitiveTypes
+//onsave jtree build produce jtable.browser.js
+//onsave jtree build produce jtable.node.js
 class Row {
   constructor(sourceObject = {}, table) {
     this._puid = this._getUniqueId()
@@ -20251,9 +20263,6 @@ class Row {
     return Row._uniqueId
   }
   destroy() {}
-  _getRowTable() {
-    return this._table
-  }
   async destroyRow() {}
   getAsArray(headerRow) {
     const obj = this.rowToObjectWithOnlyNativeJavascriptTypes()
@@ -20262,9 +20271,12 @@ class Row {
   getRowSourceObject() {
     return this._sourceObject
   }
+  toVector() {
+    return Object.values(this.rowToObjectWithOnlyNativeJavascriptTypes())
+  }
   // todo: rowToObjectWithOnlyNativeJavascriptTypes method? Its numerics where we need and strings where we need.
   _parseIntoObjectWithOnlyNativeJavascriptTypes() {
-    const columns = this._getRowTable().getColumnsMap()
+    const columns = this._table.getColumnsMap()
     const typedNode = {}
     Object.keys(columns).forEach(colName => {
       typedNode[colName] = this._getRowValueFromSourceColOrOriginalCol(colName)
@@ -20273,7 +20285,7 @@ class Row {
   }
   // why from source col? if we always copy, we shouldnt need that, correct? perhaps have an audit array of all operations on a row?
   _getRowValueFromSourceColOrOriginalCol(colName) {
-    const columns = this._getRowTable().getColumnsMap()
+    const columns = this._table.getColumnsMap()
     const destColumn = columns[colName]
     const sourceColName = destColumn.getSourceColumnName()
     const sourceCol = columns[sourceColName]
@@ -20318,6 +20330,8 @@ class Row {
 }
 Row._uniqueId = 0
 window.Row = Row
+//onsave jtree build produce jtable.browser.js
+//onsave jtree build produce jtable.node.js
 var TableParserIds
 ;(function(TableParserIds) {
   TableParserIds["csv"] = "csv"
@@ -21349,6 +21363,8 @@ And that has made all the difference.`
   ]
 }
 window.DummyDataSets = DummyDataSets
+//onsave jtree build produce jtable.browser.js
+//onsave jtree build produce jtable.node.js
 class PivotTable {
   constructor(rows, inputColumns, outputColumns) {
     this._columns = {}
@@ -21532,6 +21548,19 @@ class Table {
   getJavascriptNativeTypedValues() {
     return this.getRows().map(row => row.rowToObjectWithOnlyNativeJavascriptTypes())
   }
+  toMatrix() {
+    return this.getRows().map(row => row.toVector())
+  }
+  toNumericMatrix() {
+    // todo: right now it drops them. should we 1 hot them?
+    const numericNames = this.getColumnsArray()
+      .filter(col => col.isNumeric())
+      .map(col => col.getColumnName())
+    return this.getRows().map(row => {
+      const obj = row.rowToObjectWithOnlyNativeJavascriptTypes()
+      return numericNames.map(name => obj[name])
+    })
+  }
   clone() {
     return new Table(this.cloneNativeJavascriptTypedRows())
   }
@@ -21665,7 +21694,9 @@ ${cols}
       .map(row => row.rowToObjectWithOnlyNativeJavascriptTypes())
       .map(obj => {
         Object.keys(nameMap).forEach(oldName => {
-          obj[nameMap[oldName]] = obj[oldName]
+          const newName = nameMap[oldName]
+          if (newName === oldName) return
+          obj[newName] = obj[oldName]
           delete obj[oldName]
         })
         return obj
@@ -25495,8 +25526,11 @@ pre
       const app = this.getWebApp()
       const cssScript = this[TilesConstants.tileCssScript]
       if (cssScript) this._loadTileCss(cssScript)
-      const scriptPath = this[TilesConstants.tileScript]
-      if (scriptPath) await app.getWillowBrowser().appendScript(scriptPath)
+      const def = this.getDefinition()
+      const scriptPaths = def.nodesThatStartWith("string " + TilesConstants.tileScript).map(node => node.getWord(2))
+      const thisScript = this[TilesConstants.tileScript]
+      if (thisScript && !scriptPaths.includes(thisScript)) scriptPaths.push(thisScript)
+      if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
       loadingMap.set(this.constructor, true)
     }
     _loadTileCss(css) {
@@ -26136,6 +26170,8 @@ ${cellInputs.join("\n")}`
     }
   }
 
+  class docToolingNode extends docCommentNode {}
+
   class abstractPickerTileNode extends abstractTileTreeComponentNode {
     get tileHeader() {
       return `Gallery`
@@ -26231,6 +26267,7 @@ a {name}
           "doc.section": docSectionNode,
           "doc.ref": docReferenceNode,
           "doc.comment": docCommentNode,
+          "doc.tooling": docToolingNode,
           "doc.picker": PickerTileNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
@@ -26361,6 +26398,7 @@ a {name}
           "rows.first": rowsFirstNode,
           "rows.dropIfMissing": rowsDropIfMissingNode,
           "rows.last": rowsLastNode,
+          "bitanath.pca": pcaNode,
           "columns.rename": columnsRenameNode,
           "columns.cleanNames": columnsCleanNamesNode,
           "columns.setType": columnsSetTypeNode,
@@ -30028,6 +30066,33 @@ class LargeLabel`
     }
   }
 
+  class pcaNode extends abstractTransformerNode {
+    get tileScript() {
+      return `maia/packages/bitanath/pca.js`
+    }
+    get github() {
+      return `https://github.com/bitanath/pca`
+    }
+    get pcaLib() {
+      return this.isNodeJs() ? require("pca-js") : PCA
+    }
+    _createOutputTable() {
+      const table = this.getParentOrDummyTable()
+      const matrix = table.toNumericMatrix()
+      const vectors = this.pcaLib.getEigenVectors(matrix)
+      const pcaRows = vectors.map(vec => vec.vector)
+      const rows = table.getRows().map((row, index) => {
+        const obj = row.rowToObjectWithOnlyNativeJavascriptTypes()
+        const vec = matrix[index]
+        obj.pc1 = math.dot(vec, pcaRows[0])
+        obj.pc2 = math.dot(vec, pcaRows[1])
+        obj.pc3 = math.dot(vec, pcaRows[2])
+        return obj
+      })
+      return new Table(rows)
+    }
+  }
+
   class columnsRenameNode extends abstractTransformerNode {
     get tileKeywordCell() {
       return this.getWord(0)
@@ -30929,6 +30994,7 @@ a {name}
           "doc.section": docSectionNode,
           "doc.ref": docReferenceNode,
           "doc.comment": docCommentNode,
+          "doc.tooling": docToolingNode,
           "doc.picker": PickerTileNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
@@ -31059,6 +31125,7 @@ a {name}
           "rows.first": rowsFirstNode,
           "rows.dropIfMissing": rowsDropIfMissingNode,
           "rows.last": rowsLastNode,
+          "bitanath.pca": pcaNode,
           "columns.rename": columnsRenameNode,
           "columns.cleanNames": columnsCleanNamesNode,
           "columns.setType": columnsSetTypeNode,
@@ -31134,7 +31201,7 @@ codeCell
  highlightScope string
 documentCategoryCell
  highlightScope constant
- enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
+ enum shopping biology chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
 zoomCell
  extends numberCell
 referenceIdCell
@@ -31371,8 +31438,11 @@ abstractTileTreeComponentNode
    const app = this.getWebApp()
    const cssScript = this[TilesConstants.tileCssScript]
    if (cssScript) this._loadTileCss(cssScript)
-   const scriptPath = this[TilesConstants.tileScript]
-   if (scriptPath) await app.getWillowBrowser().appendScript(scriptPath)
+   const def = this.getDefinition()
+   const scriptPaths = def.nodesThatStartWith("string " + TilesConstants.tileScript).map(node => node.getWord(2))
+   const thisScript = this[TilesConstants.tileScript]
+   if (thisScript && !scriptPaths.includes(thisScript)) scriptPaths.push(thisScript)
+   if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
    loadingMap.set(this.constructor, true)
   }
   _loadTileCss(css) {
@@ -31975,6 +32045,9 @@ docCommentNode
  catchAllCellType commentCell
  catchAllNodeType commentLineNode
  crux doc.comment
+docToolingNode
+ extends docCommentNode
+ crux doc.tooling
 abstractPickerTileNode
  extends abstractTileTreeComponentNode
  string tileSize 480 420
@@ -35358,6 +35431,36 @@ rowsLastNode
    const start = this.getParentOrDummyTable().getRowCount() - limit
    return (row, rowIndex) => rowIndex >= start
   }
+pcaNode
+ description Add Principal Component Columns to input table.
+ string github https://github.com/bitanath/pca
+ example
+  samples.iris
+   bitanath.pca
+    tables.basic
+ string tileScript maia/packages/bitanath/pca.js
+ string tileScript maia/packages/mathjs/math.min.js
+ extends abstractTransformerNode
+ crux bitanath.pca
+ javascript
+  get pcaLib() {
+   return this.isNodeJs() ? require("pca-js") : PCA
+  }
+  _createOutputTable() {
+   const table = this.getParentOrDummyTable()
+   const matrix = table.toNumericMatrix()
+   const vectors = this.pcaLib.getEigenVectors(matrix)
+   const pcaRows = vectors.map(vec => vec.vector)
+   const rows = table.getRows().map((row, index) => {
+    const obj = row.rowToObjectWithOnlyNativeJavascriptTypes()
+    const vec = matrix[index]
+    obj.pc1 = math.dot(vec, pcaRows[0])
+    obj.pc2 = math.dot(vec, pcaRows[1])
+    obj.pc3 = math.dot(vec, pcaRows[2])
+    return obj
+   })
+   return new Table(rows)
+  }
 columnsRenameNode
  crux columns.rename
  cells tileKeywordCell columnNameCell newColumnNameCell
@@ -35897,8 +36000,8 @@ abstractTemplatePickerTileNode
   }
 templatesListNode
  extends abstractTemplatePickerTileNode
- description Displays list of available templates.
- frequency .11
+ description Displays templates.
+ frequency .22
  crux templates.list
  string tileHeader Template Gallery
  javascript
@@ -36454,6 +36557,7 @@ schemaNode
         docSectionNode: docSectionNode,
         docReferenceNode: docReferenceNode,
         docCommentNode: docCommentNode,
+        docToolingNode: docToolingNode,
         abstractPickerTileNode: abstractPickerTileNode,
         PickerTileNode: PickerTileNode,
         abstractMaiaTileNode: abstractMaiaTileNode,
@@ -36614,6 +36718,7 @@ schemaNode
         rowsFirstNode: rowsFirstNode,
         rowsDropIfMissingNode: rowsDropIfMissingNode,
         rowsLastNode: rowsLastNode,
+        pcaNode: pcaNode,
         columnsRenameNode: columnsRenameNode,
         columnsCleanNamesNode: columnsCleanNamesNode,
         columnsSetTypeNode: columnsSetTypeNode,
@@ -37434,6 +37539,20 @@ file templates/ohayo-product-stats.maia
     show.sum count Maia Total Grammar Words
     show.rowCount Maia Unique Words
   doc.comment Todo: show.static 2 Maia Grammar Lines of Javascript Code
+file templates/pca-of-flowers.maia
+ data
+  doc.title PCA Demonstration
+  samples.iris
+   hidden
+   bitanath.pca
+    hidden
+    vega.scatter PCA of the Iris Dataset
+     xColumn pc1
+     yColumn pc2
+     colorColumn Species
+  doc.layout column
+  doc.categories math
+  doc.subtitle This demonstration uses the PCA library from <a href="https://github.com/bitanath/pca">bitanath</a>. 
 file templates/planets-on-wikipedia.maia
  data
   doc.title The Planets on Wikipedia
@@ -39595,8 +39714,11 @@ pre
       const app = this.getWebApp()
       const cssScript = this[TilesConstants.tileCssScript]
       if (cssScript) this._loadTileCss(cssScript)
-      const scriptPath = this[TilesConstants.tileScript]
-      if (scriptPath) await app.getWillowBrowser().appendScript(scriptPath)
+      const def = this.getDefinition()
+      const scriptPaths = def.nodesThatStartWith("string " + TilesConstants.tileScript).map(node => node.getWord(2))
+      const thisScript = this[TilesConstants.tileScript]
+      if (thisScript && !scriptPaths.includes(thisScript)) scriptPaths.push(thisScript)
+      if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
       loadingMap.set(this.constructor, true)
     }
     _loadTileCss(css) {
@@ -40236,6 +40358,8 @@ ${cellInputs.join("\n")}`
     }
   }
 
+  class docToolingNode extends docCommentNode {}
+
   class abstractPickerTileNode extends abstractTileTreeComponentNode {
     get tileHeader() {
       return `Gallery`
@@ -40600,7 +40724,7 @@ codeCell
  highlightScope string
 documentCategoryCell
  highlightScope constant
- enum shopping chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
+ enum shopping biology chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
 zoomCell
  extends numberCell
 referenceIdCell
@@ -40734,8 +40858,11 @@ abstractTileTreeComponentNode
    const app = this.getWebApp()
    const cssScript = this[TilesConstants.tileCssScript]
    if (cssScript) this._loadTileCss(cssScript)
-   const scriptPath = this[TilesConstants.tileScript]
-   if (scriptPath) await app.getWillowBrowser().appendScript(scriptPath)
+   const def = this.getDefinition()
+   const scriptPaths = def.nodesThatStartWith("string " + TilesConstants.tileScript).map(node => node.getWord(2))
+   const thisScript = this[TilesConstants.tileScript]
+   if (thisScript && !scriptPaths.includes(thisScript)) scriptPaths.push(thisScript)
+   if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
    loadingMap.set(this.constructor, true)
   }
   _loadTileCss(css) {
@@ -41338,6 +41465,9 @@ docCommentNode
  catchAllCellType commentCell
  catchAllNodeType commentLineNode
  crux doc.comment
+docToolingNode
+ extends docCommentNode
+ crux doc.tooling
 abstractPickerTileNode
  extends abstractTileTreeComponentNode
  string tileSize 480 420
@@ -41687,6 +41817,7 @@ tileSettingNonTerminalContentNode
         docSectionNode: docSectionNode,
         docReferenceNode: docReferenceNode,
         docCommentNode: docCommentNode,
+        docToolingNode: docToolingNode,
         abstractPickerTileNode: abstractPickerTileNode,
         PickerTileNode: PickerTileNode,
         tileBlankLineNode: tileBlankLineNode,
@@ -43104,7 +43235,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "17.1.0"
+const Version = "17.2.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 

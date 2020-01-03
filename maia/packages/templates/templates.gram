@@ -61,8 +61,8 @@ abstractTemplatePickerTileNode
   }
 templatesListNode
  extends abstractTemplatePickerTileNode
- description Displays list of available templates.
- frequency .11
+ description Displays templates.
+ frequency .22
  crux templates.list
  string tileHeader Template Gallery
  javascript

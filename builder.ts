@@ -183,6 +183,10 @@ ${header}
       })
   }
 
+  startServer() {
+    this._startServer(8888, __dirname + "/")
+  }
+
   buildDist(distFolder = `${__dirname}/dist`) {
     exec(
       `echo "Remove dist folder first";

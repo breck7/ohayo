@@ -104,8 +104,12 @@ abstractTileTreeComponentNode
    const app = this.getWebApp()
    const cssScript = this[TilesConstants.tileCssScript]
    if (cssScript) this._loadTileCss(cssScript)
-   const scriptPath = this[TilesConstants.tileScript]
-   if (scriptPath) await app.getWillowBrowser().appendScript(scriptPath)
+   const def = this.getDefinition()
+   const scriptPaths = def.nodesThatStartWith("string " + TilesConstants.tileScript).map(node => node.getWord(2))
+   const thisScript = this[TilesConstants.tileScript]
+   if (thisScript && !scriptPaths.includes(thisScript))
+    scriptPaths.push(thisScript)
+   if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
    loadingMap.set(this.constructor, true)
   }
   _loadTileCss(css) {
