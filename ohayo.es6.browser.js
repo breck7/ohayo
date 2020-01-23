@@ -26298,7 +26298,7 @@ a {name}
           "vega.emoji": vegaEmojiNode,
           "vega.histogram": vegaHistogramNode,
           "vega.example": vegaExampleNode,
-          "date.heatcal": dateHeatcalNode,
+          "calendar.heat": calendarHeatNode,
           "icons.human": iconsHumanNode,
           "icons.circle": iconsCircleNode,
           "markdown.toHtml": markdownToHtmlNode,
@@ -26342,6 +26342,7 @@ a {name}
           "cancer.cases": cancerCasesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "moz.top500": mozTop500Node,
+          "owid.lifeExpectancy": lifeExpectancyNode,
           "samples.telescopes": samplesTelescopesNode,
           "samples.mtcars": samplesMtcarsNode,
           "samples.iris": samplesIrisNode,
@@ -26367,11 +26368,14 @@ a {name}
           "samples.waterBill": samplesWaterBillNode,
           "samples.gapMinder": samplesGapMinderNode,
           "date.addColumns": dateAddColumnsNode,
+          "gen.constant": genConstantNode,
+          "gen.growth": genGrowthNode,
           "math.log": mathLogNode,
           "rows.addIndexColumn": rowsAddIndexColumnNode,
           "rows.runningTotal": rowsRunningTotalNode,
           "text.length": textLengthNode,
           "text.split": textSplitNode,
+          "text.reverseSplit": reverseTextSplitNode,
           "text.toLowerCase": textToLowerCaseNode,
           "text.substring": textSubstringNode,
           "text.firstLetter": testFirstLetterNode,
@@ -26406,6 +26410,7 @@ a {name}
           "data.about": dataAboutNode,
           "data.usabilityScore": dataUsabilityScoreNode,
           "fill.missing": fillMissingNode,
+          "gen.range": genRangeNode,
           "group.by": groupByNode,
           "rows.sortBy": rowsSortByNode,
           "rows.sortByReverse": rowsSortByReverseNode,
@@ -27585,7 +27590,7 @@ yColumn isString=false`
     }
   }
 
-  class dateHeatcalNode extends abstractHeaderlessChartTileNode {
+  class calendarHeatNode extends abstractHeaderlessChartTileNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -27634,7 +27639,7 @@ ${quinSvgs}
 </g>`
     }
     getTileBodyStumpCode() {
-      const svg = this.getSvg()
+      const svg = this._getSvg()
       return this.qFormat(this.bodyStumpTemplate, { svg })
     }
     _getDayMap(quins, rows, dayColumnName, countColumnName) {
@@ -27707,7 +27712,7 @@ ${quinSvgs}
         .join("")
       return `<g>${dataSquares}</g>`
     }
-    getSvg() {
+    _getSvg() {
       const inputTable = this.getParentOrDummyTable()
       const rows = inputTable.getJavascriptNativeTypedValues()
       if (!rows.length) return ""
@@ -29149,6 +29154,12 @@ input
     }
   }
 
+  class lifeExpectancyNode extends abstractFixedDatasetFromMaiaCollectionNode {
+    get url() {
+      return `maia/packages/owid/life-expectancy.csv`
+    }
+  }
+
   class samplesTelescopesNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/samples/telescopes.tsv`
@@ -29472,6 +29483,57 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
     }
   }
 
+  class genConstantNode extends abstractColumnAdderTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    get primitiveTypeCell() {
+      return this.getWord(2)
+    }
+    get anyCell() {
+      return this.getWord(3)
+    }
+    getNewColumns() {
+      return [
+        {
+          name: this.columnNameCell,
+          type: this.primitiveTypeCell,
+          accessorFn: row => this.anyCell
+        }
+      ]
+    }
+  }
+
+  class genGrowthNode extends abstractColumnAdderTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    get minCell() {
+      return parseFloat(this.getWord(2))
+    }
+    get growthRateCell() {
+      return parseFloat(this.getWord(3))
+    }
+    getNewColumns() {
+      let total = this.minCell
+      return [
+        {
+          name: this.columnNameCell,
+          accessorFn: (row, rowIndex) => {
+            total = total * (1 + this.growthRateCell)
+            return total
+          }
+        }
+      ]
+    }
+  }
+
   class mathLogNode extends abstractColumnAdderTileNode {
     get tileKeywordCell() {
       return this.getWord(0)
@@ -29576,7 +29638,10 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
         return {
           source: sourceColumnName,
           name: destinationColumnName,
-          accessorFn: row => row[sourceColumnName].split(delimiter)[index]
+          accessorFn: row => {
+            const words = row[sourceColumnName].split(delimiter)
+            return this.reverseSplit ? words.reverse()[index] : words[index]
+          }
         }
       })
       return [
@@ -29586,6 +29651,12 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
           accessorFn: row => row[sourceColumnName].length
         }
       ]
+    }
+  }
+
+  class reverseTextSplitNode extends textSplitNode {
+    get reverseSplit() {
+      return [true]
     }
   }
 
@@ -30074,7 +30145,10 @@ class LargeLabel`
       return `https://github.com/bitanath/pca`
     }
     get pcaLib() {
-      return this.isNodeJs() ? require("pca-js") : PCA
+      return this.isNodeJs() ? require(__dirname + "/packages/bitanath/pca.js") : PCA
+    }
+    get mathLib() {
+      return this.isNodeJs() ? require(__dirname + "/packages/mathjs/math.min.js") : math
     }
     _createOutputTable() {
       const table = this.getParentOrDummyTable()
@@ -30084,9 +30158,9 @@ class LargeLabel`
       const rows = table.getRows().map((row, index) => {
         const obj = row.rowToObjectWithOnlyNativeJavascriptTypes()
         const vec = matrix[index]
-        obj.pc1 = math.dot(vec, pcaRows[0])
-        obj.pc2 = math.dot(vec, pcaRows[1])
-        obj.pc3 = math.dot(vec, pcaRows[2])
+        obj.pc1 = this.mathLib.dot(vec, pcaRows[0])
+        obj.pc2 = this.mathLib.dot(vec, pcaRows[1])
+        obj.pc3 = this.mathLib.dot(vec, pcaRows[2])
         return obj
       })
       return new Table(rows)
@@ -30210,6 +30284,37 @@ class LargeLabel`
     }
     _createOutputTable() {
       return this.getParentOrDummyTable().fillMissing(this.getWord(1), this.getWord(2))
+    }
+  }
+
+  class genRangeNode extends abstractTransformerNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get newColumnNameCell() {
+      return this.getWord(1)
+    }
+    get minCell() {
+      return parseFloat(this.getWord(2))
+    }
+    get maxCell() {
+      return parseFloat(this.getWord(3))
+    }
+    get stepCell() {
+      return parseFloat(this.getWord(4))
+    }
+    _createOutputTable() {
+      const rows = []
+      // todo: protect against infinite loops
+      let currentValue = this.minCell
+      if (!this.stepCell) throw new Error("Step cannot be zero.")
+      while (currentValue <= this.maxCell) {
+        const row = []
+        row[this.newColumnNameCell] = currentValue
+        rows.push(row)
+        currentValue += this.stepCell
+      }
+      return new Table(rows)
     }
   }
 
@@ -31025,7 +31130,7 @@ a {name}
           "vega.emoji": vegaEmojiNode,
           "vega.histogram": vegaHistogramNode,
           "vega.example": vegaExampleNode,
-          "date.heatcal": dateHeatcalNode,
+          "calendar.heat": calendarHeatNode,
           "icons.human": iconsHumanNode,
           "icons.circle": iconsCircleNode,
           "markdown.toHtml": markdownToHtmlNode,
@@ -31069,6 +31174,7 @@ a {name}
           "cancer.cases": cancerCasesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "moz.top500": mozTop500Node,
+          "owid.lifeExpectancy": lifeExpectancyNode,
           "samples.telescopes": samplesTelescopesNode,
           "samples.mtcars": samplesMtcarsNode,
           "samples.iris": samplesIrisNode,
@@ -31094,11 +31200,14 @@ a {name}
           "samples.waterBill": samplesWaterBillNode,
           "samples.gapMinder": samplesGapMinderNode,
           "date.addColumns": dateAddColumnsNode,
+          "gen.constant": genConstantNode,
+          "gen.growth": genGrowthNode,
           "math.log": mathLogNode,
           "rows.addIndexColumn": rowsAddIndexColumnNode,
           "rows.runningTotal": rowsRunningTotalNode,
           "text.length": textLengthNode,
           "text.split": textSplitNode,
+          "text.reverseSplit": reverseTextSplitNode,
           "text.toLowerCase": textToLowerCaseNode,
           "text.substring": textSubstringNode,
           "text.firstLetter": testFirstLetterNode,
@@ -31133,6 +31242,7 @@ a {name}
           "data.about": dataAboutNode,
           "data.usabilityScore": dataUsabilityScoreNode,
           "fill.missing": fillMissingNode,
+          "gen.range": genRangeNode,
           "group.by": groupByNode,
           "rows.sortBy": rowsSortByNode,
           "rows.sortByReverse": rowsSortByReverseNode,
@@ -31238,6 +31348,8 @@ minCell
  extends numberCell
 maxCell
  extends numberCell
+stepCell
+ extends numberCell
 millisecondsCell
  extends intCell
 titleCell
@@ -31295,6 +31407,8 @@ scalarValueCell
 comparisonCell
  enum < > <= >= = !=
  highlightScope constant
+growthRateCell
+ extends numberCell
 githubRepoCell
  extends anyCell
 hackerNewsUserNameCell
@@ -33127,7 +33241,7 @@ vegaExampleNode
    // else if (values) return values
    return []
   }
-dateHeatcalNode
+calendarHeatNode
  description Shows which days have higher counts.
  inScope countNode dayColumnNode
  string tileSize 750 200
@@ -33136,7 +33250,7 @@ dateHeatcalNode
   dayColumn getPrimitiveTypeName=day
  string dummyDataSetName waterBill
  extends abstractHeaderlessChartTileNode
- crux date.heatcal
+ crux calendar.heat
  string bodyStumpTemplate
   div
    class heatCal
@@ -33167,7 +33281,7 @@ dateHeatcalNode
   </g>\`
   }
   getTileBodyStumpCode() {
-   const svg = this.getSvg()
+   const svg = this._getSvg()
    return this.qFormat(this.bodyStumpTemplate, { svg })
   }
   _getDayMap(quins, rows, dayColumnName, countColumnName) {
@@ -33240,7 +33354,7 @@ dateHeatcalNode
     .join("")
    return \`<g>\${dataSquares}</g>\`
   }
-  getSvg() {
+  _getSvg() {
    const inputTable = this.getParentOrDummyTable()
    const rows = inputTable.getJavascriptNativeTypedValues()
    if (!rows.length) return ""
@@ -34545,6 +34659,11 @@ mozTop500Node
  string url maia/packages/moz/top500Domains.csv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux moz.top500
+lifeExpectancyNode
+ description Life expectancy data.
+ string url maia/packages/owid/life-expectancy.csv
+ extends abstractFixedDatasetFromMaiaCollectionNode
+ crux owid.lifeExpectancy
 samplesTelescopesNode
  description A partial list of humankind's largest telescopes.
  string dataDescription
@@ -34818,6 +34937,46 @@ dateAddColumnsNode
     }
    })
   }
+genConstantNode
+ crux gen.constant
+ example
+  gen.range year -1000 2020 1
+   gen.constant birthRate number 0.035
+ cells tileKeywordCell columnNameCell primitiveTypeCell anyCell
+ description Add a column that contains a constant for each row.
+ extends abstractColumnAdderTileNode
+ javascript
+  getNewColumns() {
+   return [
+    {
+     name: this.columnNameCell,
+     type: this.primitiveTypeCell,
+     accessorFn: row => this.anyCell
+    }
+   ]
+  }
+genGrowthNode
+ crux gen.growth
+ example
+  gen.range year -1000 2020 1
+   gen.constant birthRate number 0.035
+    gen.growth population 4 0.01
+ cells tileKeywordCell columnNameCell minCell growthRateCell
+ description Add a column that contains a constant for each row.
+ extends abstractColumnAdderTileNode
+ javascript
+  getNewColumns() {
+   let total = this.minCell
+   return [
+    {
+     name: this.columnNameCell,
+     accessorFn: (row, rowIndex) => {
+      total = total * (1 + this.growthRateCell)
+      return total
+     }
+    }
+   ]
+  }
 mathLogNode
  description Add a column that is the natural log (base e) of another column.
  cells tileKeywordCell columnNameCell
@@ -34916,7 +35075,10 @@ textSplitNode
     return {
      source: sourceColumnName,
      name: destinationColumnName,
-     accessorFn: row => row[sourceColumnName].split(delimiter)[index]
+     accessorFn: row => {
+      const words = row[sourceColumnName].split(delimiter)
+      return this.reverseSplit ? words.reverse()[index] : words[index]
+     }
     }
    })
    return [
@@ -34929,6 +35091,11 @@ textSplitNode
   }
  extends abstractColumnAdderTileNode
  crux text.split
+reverseTextSplitNode
+ extends textSplitNode
+ crux text.reverseSplit
+ description Split one column into multiple by a string reversing the order.
+ boolean reverseSplit true 
 textToLowerCaseNode
  description Convert all cells in a column to LowerCase text
  cells tileKeywordCell columnNameCell
@@ -35444,7 +35611,10 @@ pcaNode
  crux bitanath.pca
  javascript
   get pcaLib() {
-   return this.isNodeJs() ? require("pca-js") : PCA
+   return this.isNodeJs() ? require(__dirname + "/packages/bitanath/pca.js") : PCA
+  }
+  get mathLib() {
+   return this.isNodeJs() ? require(__dirname + "/packages/mathjs/math.min.js") : math
   }
   _createOutputTable() {
    const table = this.getParentOrDummyTable()
@@ -35454,9 +35624,9 @@ pcaNode
    const rows = table.getRows().map((row, index) => {
     const obj = row.rowToObjectWithOnlyNativeJavascriptTypes()
     const vec = matrix[index]
-    obj.pc1 = math.dot(vec, pcaRows[0])
-    obj.pc2 = math.dot(vec, pcaRows[1])
-    obj.pc3 = math.dot(vec, pcaRows[2])
+    obj.pc1 = this.mathLib.dot(vec, pcaRows[0])
+    obj.pc2 = this.mathLib.dot(vec, pcaRows[1])
+    obj.pc3 = this.mathLib.dot(vec, pcaRows[2])
     return obj
    })
    return new Table(rows)
@@ -35594,6 +35764,28 @@ fillMissingNode
  javascript
   _createOutputTable() {
    return this.getParentOrDummyTable().fillMissing(this.getWord(1), this.getWord(2))
+  }
+genRangeNode
+ crux gen.range
+ example
+  gen.range year -1000 2020 1
+   tables.basic
+ description Generate a table with a column from a range
+ extends abstractTransformerNode
+ cells tileKeywordCell newColumnNameCell minCell maxCell stepCell
+ javascript
+  _createOutputTable() {
+   const rows = []
+   // todo: protect against infinite loops
+   let currentValue = this.minCell
+   if (!this.stepCell) throw new Error("Step cannot be zero.")
+   while (currentValue <= this.maxCell) {
+    const row = []
+    row[this.newColumnNameCell] = currentValue
+    rows.push(row)
+    currentValue += this.stepCell
+   }
+   return new Table(rows)
   }
 groupByNode
  frequency .01
@@ -36600,7 +36792,7 @@ schemaNode
         vegaEmojiNode: vegaEmojiNode,
         vegaHistogramNode: vegaHistogramNode,
         vegaExampleNode: vegaExampleNode,
-        dateHeatcalNode: dateHeatcalNode,
+        calendarHeatNode: calendarHeatNode,
         iconsIconNode: iconsIconNode,
         iconsHumanNode: iconsHumanNode,
         iconsCircleNode: iconsCircleNode,
@@ -36655,6 +36847,7 @@ schemaNode
         cancerCasesNode: cancerCasesNode,
         kaggleDatasetsHeartNode: kaggleDatasetsHeartNode,
         mozTop500Node: mozTop500Node,
+        lifeExpectancyNode: lifeExpectancyNode,
         samplesTelescopesNode: samplesTelescopesNode,
         samplesMtcarsNode: samplesMtcarsNode,
         samplesIrisNode: samplesIrisNode,
@@ -36683,11 +36876,14 @@ schemaNode
         abstractTransformerNode: abstractTransformerNode,
         abstractColumnAdderTileNode: abstractColumnAdderTileNode,
         dateAddColumnsNode: dateAddColumnsNode,
+        genConstantNode: genConstantNode,
+        genGrowthNode: genGrowthNode,
         mathLogNode: mathLogNode,
         rowsAddIndexColumnNode: rowsAddIndexColumnNode,
         rowsRunningTotalNode: rowsRunningTotalNode,
         textLengthNode: textLengthNode,
         textSplitNode: textSplitNode,
+        reverseTextSplitNode: reverseTextSplitNode,
         textToLowerCaseNode: textToLowerCaseNode,
         textSubstringNode: textSubstringNode,
         testFirstLetterNode: testFirstLetterNode,
@@ -36726,6 +36922,7 @@ schemaNode
         dataAboutNode: dataAboutNode,
         dataUsabilityScoreNode: dataUsabilityScoreNode,
         fillMissingNode: fillMissingNode,
+        genRangeNode: genRangeNode,
         groupByNode: groupByNode,
         rowsSortByNode: rowsSortByNode,
         rowsSortByReverseNode: rowsSortByReverseNode,
@@ -37287,7 +37484,7 @@ file templates/git-repo-dashboard.maia
   web.get http://localhost:2222/shell?command=gitlog
    date.addColumns
     group.by day
-     date.heatcal
+     calendar.heat
       count count
      show.median count Median Commits Per Coding Day
      show.rowCount # Coding Days
@@ -37328,6 +37525,31 @@ file templates/github-project-stats.maia
    show.value stargazers_count Stars
   doc.layout column
   doc.categories programming
+file templates/humanPopulation.maia
+ data
+  doc.title Human Population
+  doc.subtitle A chart of human population growth.
+  doc.categories history
+  gen.range when -1000 2020 1
+   gen.growth populationInMillions 4 0.0025
+    vega.line Estimated Human Popuation
+     yColumn populationInMillions
+     xColumn when
+     visible
+  doc.layout column
+  doc.defaultHidden
+file templates/life-expectancy.maia
+ data
+  doc.title Life Expectancy in the U.S.
+  doc.layout column
+  doc.categories medicine
+  owid.lifeExpectancy
+   hidden
+   filter.where Code = USA
+    hidden
+    vega.line Life Expectancy in the USA
+     xColumn Year
+     yColumn Lifeexpectancy(years)
 file templates/loc-with-bars.maia
  data
   doc.title Desktop Only: Analyze lines of code in a folder
@@ -37637,6 +37859,23 @@ file templates/subreddit.maia
     list.links
   doc.layout column
   doc.categories socialMedia
+file templates/tlds.maia
+ data
+  doc.title Most Popular Top Level Domains
+  doc.layout column
+  doc.categories web
+  doc.subtitle This script looks at the top 500 domain names. It then extracts the TLD and groups them. The conclusion is that .com is the most popular by about 10x.
+  moz.top500
+   hidden
+   text.reverseSplit RootDomain . tld
+    hidden
+    tables.basic
+    group.by tld
+     hidden
+     rows.sortByReverse count
+      hidden
+      tables.basic
+      vega.bar .com is the most popular TLD by nearly 10x.
 file templates/trends-in-baby-names.maia
  data
   doc.title Trends in Baby Names
@@ -43235,7 +43474,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "17.2.0"
+const Version = "17.3.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
@@ -43752,14 +43991,13 @@ class PanelTreeComponent extends AbstractTreeComponent {
   }
 
   toHakonCode() {
-    const _top = this.getParent().getMenuTreeComponent() ? "30" : "0"
-    const theme = this.getTheme()
+    const menuHeight = this.getParent().getMenuTreeComponent() ? "30" : "0"
     return `.PanelTreeComponent
- left 0
  position relative
+ left 0
  right 0
  bottom 0
- height calc(100% - ${_top}px)`
+ height calc(100% - ${menuHeight}px)`
   }
 
   getGutterWidth() {
@@ -45072,8 +45310,19 @@ ${OhayoConstants.panel} 400
     this.willowBrowser.toggleFullScreen()
   }
 
+  _hideMenuAndTabs() {
+    this.getNode(OhayoConstants.menu).unmount()
+    this.getNode(OhayoConstants.menu).replaceNode(() => OhayoConstants.menu + "PlaceHolder")
+  }
+
+  _showMenuAndTabs() {
+    // todo: make this hide tabs
+    this.getNode(OhayoConstants.menu + "PlaceHolder").replaceNode(() => OhayoConstants.menu)
+  }
+
   toggleFocusedModeCommand() {
-    this.toggle(OhayoConstants.menu)
+    this.has(OhayoConstants.menu) ? this._hideMenuAndTabs() : this._showMenuAndTabs()
+    this.makeAllDirty() // cleanup
     return this.toggleFullScreenCommand()
   }
 

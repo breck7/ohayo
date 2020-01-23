@@ -1,3 +1,13 @@
+17.3.0 2020-1-23
+----------------
+- New: gen tiles
+- New: human population, tld, life expectancy templates
+- New: text.reverseSplit tile
+- New: owid tile
+- Fix: toggling focused mode now puts menu back in correct place
+- Infra: changed fab.html to dev.html
+- Breaking: date.heatcal is now calendar.heat
+
 17.2.0 2020-1-3
 ---------------
 - New: pca tile

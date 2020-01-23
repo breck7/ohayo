@@ -1,0 +1,146 @@
+tooling onsave jtree build produceMaiaGrammar
+calendarHeatNode
+ description Shows which days have higher counts.
+ inScope countNode dayColumnNode
+ string tileSize 750 200
+ string columnPredictionHints
+  count getPrimitiveTypeName=number
+  dayColumn getPrimitiveTypeName=day
+ string dummyDataSetName waterBill
+ extends abstractHeaderlessChartTileNode
+ crux calendar.heat
+ string bodyStumpTemplate
+  div
+   class heatCal
+   bern
+    {svg}
+ string hakonTemplate
+  .heatCal
+   rect
+    fill {darkerBackground}
+    shape-rendering crispedges
+   text
+    font-size 10px
+    fill #ddd
+ javascript
+  _getLegend(quins, squareSideWithPadding, position) {
+   const theme = this.getTheme()
+   const quinSvgs = quins
+    .map((quin, index) => {
+     const left = position.left + squareSideWithPadding * index
+     const style = "fill: " + theme.getHeatColor(1 - quin.percent)
+     return `<rect style="${style}" width="10" height="10" x="${left}" y="${position.top}"></rect>`
+    })
+    .join("")
+   return `<g>
+  <text x="${position.left - 25}" y="${position.top + 10}">Less</text>
+  ${quinSvgs}
+  <text x="${position.left + 70}" y="${position.top + 10}">More</text>
+  </g>`
+  }
+  getTileBodyStumpCode() {
+    const svg = this._getSvg()
+    return this.qFormat(this.bodyStumpTemplate,{svg})
+  }
+  _getDayMap(quins, rows, dayColumnName, countColumnName) {
+   const getQuin = val => {
+    for (let index = 0; index < quins.length; index++) {
+     if (val <= quins[index].value) return quins[index].percent
+    }
+   }
+   const dayMap = {}
+   rows.forEach(row => {
+    dayMap[moment(row[dayColumnName]).format("MM/DD/YYYY")] = {
+     Quin: getQuin(row[countColumnName]),
+     count: row[countColumnName],
+     row: row
+    }
+   })
+   return dayMap
+  }
+  _getDaysArray(startDay, daysToShow) {
+   const days = []
+   const firstDay = parseInt(startDay.format("e"))
+   for (let dayIndex = 0; dayIndex <= daysToShow; dayIndex++) {
+    const day = startDay.clone().add(dayIndex, "days")
+    days.push({
+     day: day,
+     row: parseInt(day.format("e")),
+     col: Math.floor((firstDay + dayIndex) / 7)
+    })
+   }
+   return days
+  }
+  _getDayNamesG(squareSideWithPadding) {
+   const dayNames = [{ day: "Mon", row: 2 }, { day: "Wed", row: 4 }, { day: "Fri", row: 6 }]
+    .map(day => {
+     const _top = 20 + day.row * squareSideWithPadding - 3
+     return `<text x="0" y="${_top}">${day.day}</text>`
+    })
+    .join("")
+   return `<g>${dayNames}</g>`
+  }
+  _getMonthNamesG(daysArray, squareSideWithPadding) {
+   const _usedMonths = {}
+   const monthNames = daysArray
+    .map(day => {
+     const monthName = day.day.format("MMM")
+     const monthYear = day.day.format("MM/YYYY")
+     if (_usedMonths[monthYear]) return ""
+     _usedMonths[monthYear] = true
+     const left = 40 + day.col * squareSideWithPadding
+     return `<text x="${left}" y="10">${monthName}</text>`
+    })
+    .join("")
+   return `<g>${monthNames}</g>`
+  }
+  _getDataSquaresG(daysArray, squareSideWithPadding, dayMap) {
+   const dayFormat = "MM/DD/YYYY"
+   const today = moment(Date.now()).format(dayFormat)
+   const theme = this.getTheme()
+   const dataSquares = daysArray
+    .map(day => {
+     const dayKey = day.day.format(dayFormat)
+     const _top = 20 + day.row * squareSideWithPadding
+     const left = 40 + day.col * squareSideWithPadding
+     const value = dayMap[dayKey]
+     const todayStyle = dayKey === today ? "stroke-width:2;stroke:rgb(0,0,0);" : ""
+     const style = (value ? "fill: " + theme.getHeatColor(1 - value.Quin) : "") + ";" + todayStyle
+     const title = `${dayKey}: ${value ? value.count : 0}`
+     return `<rect style="${style}" data-day="${dayKey}" width="10" height="10" x="${left}" y="${_top}"><title>${title}</title></rect>`
+    })
+    .join("")
+   return `<g>${dataSquares}</g>`
+  }
+  _getSvg() {
+   const inputTable = this.getParentOrDummyTable()
+   const rows = inputTable.getJavascriptNativeTypedValues()
+   if (!rows.length) return ""
+   const tileStruct = this.getSettingsStruct()
+   const dayColumnName = tileStruct.dayColumn
+   const countColumnName = tileStruct.count
+   if (!dayColumnName || !countColumnName) return ""
+   const dayCol = inputTable.getTableColumnByName(dayColumnName)
+   const countCol = inputTable.getTableColumnByName(countColumnName)
+   let daysToShow = 365 * 1 // todo: make configurable
+   let endDay = moment(Date.now())
+   let startDay = endDay.clone().subtract(daysToShow, "days")
+   // todo: make configurable
+   // reductions = dayCol.getReductions()
+   //  startDay = moment(reductions.min)
+   // endDay = moment(reductions.max)
+   // daysToShow = endDay.diff(startDay, "days")
+   const squareSide = 10
+   const squarePadding = 2
+   const squareSideWithPadding = squareSide + squarePadding
+   const width = squareSideWithPadding * (daysToShow / 6)
+   const height = 7 * squareSideWithPadding + 100
+   const quins = countCol.getQuins()
+   const dayMap = this._getDayMap(quins, rows, dayColumnName, countColumnName)
+   const daysArray = this._getDaysArray(startDay, daysToShow)
+   const dayNamesG = this._getDayNamesG(squareSideWithPadding)
+   const monthNamesG = this._getMonthNamesG(daysArray, squareSideWithPadding)
+   const squaresG = this._getDataSquaresG(daysArray, squareSideWithPadding, dayMap)
+   const keyG = this._getLegend(quins, squareSideWithPadding, { top: 110, left: 60 })
+   return `<svg width="${width}" height="${height}">${dayNamesG + squaresG + monthNamesG + keyG}</svg>`
+  }

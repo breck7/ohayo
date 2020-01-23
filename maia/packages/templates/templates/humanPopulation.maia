@@ -1,0 +1,11 @@
+doc.title Human Population
+doc.subtitle A chart of human population growth.
+doc.categories history
+gen.range when -1000 2020 1
+ gen.growth populationInMillions 4 0.0025
+  vega.line Estimated Human Popuation
+   yColumn populationInMillions
+   xColumn when
+   visible
+doc.layout column
+doc.defaultHidden

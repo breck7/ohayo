@@ -1,6 +1,6 @@
 {
   "name": "ohayo",
-  "version": "17.2.0",
+  "version": "17.3.0",
   "description": "ohayo desktop version",
   "main": "OhayoServerApp.js",
   "directories": {

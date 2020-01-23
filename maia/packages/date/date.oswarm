@@ -11,7 +11,7 @@ test basics
        assertParagraphIs getMountedTilesProgram.childrenToString
         samples.presidents
        selectAllTilesCommand
-        appendTileCommand date.heatcal
+        appendTileCommand calendar.heat
          assertParagraphIs getMountedTilesProgram.childrenToString
           samples.presidents
-           date.heatcal
+           calendar.heat

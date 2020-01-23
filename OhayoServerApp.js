@@ -105,15 +105,15 @@ class OhayoServerApp {
   }
 }
 
-class FabServer extends OhayoServerApp {
+class DevServer extends OhayoServerApp {
   _onFileChange(event, filename) {
     return "todo: restore"
     const { Builder } = require("./builder.ts")
     // Note: if this ever becomes a load problem we can look for changes
     // Note: do we want this? What if it fails? What if its partial?
     if (filename.includes("node_modules/") || filename.includes("ignore/")) return true
-    console.log(`Changes to 'ohayoWebApp/${filename}' detected. Building fab.html...`)
-    new Builder().produceFabHtml()
+    console.log(`Changes to 'ohayoWebApp/${filename}' detected. Building dev.html...`)
+    new Builder().produceDevHtml()
   }
 
   listenForFileChanges() {
@@ -123,18 +123,18 @@ class FabServer extends OhayoServerApp {
   }
 
   _getHomePage() {
-    return "fab.html"
+    return "dev.html"
   }
 
   _addOtherRoutes() {
-    const sendFabMessage = (req, res) => res.send(`This is fab server. Visit ${this._getHomePage()} instead.`)
+    const sendDevMessage = (req, res) => res.send(`This is dev server. Visit ${this._getHomePage()} instead.`)
 
-    this.app.get("/fabWithLocalStorage.html", (req, res) => {
+    this.app.get("/devWithLocalStorage.html", (req, res) => {
       res.send(fs.readFileSync(__dirname + "/" + this._getHomePage(), "utf8"))
     })
 
-    this.app.get("/index.html", sendFabMessage)
-    this.app.get("/", sendFabMessage)
+    this.app.get("/index.html", sendDevMessage)
+    this.app.get("/", sendDevMessage)
 
     const { TypeScriptRewriter } = require("jtree/products/TypeScriptRewriter.js")
     // todo; cleanup
@@ -171,4 +171,4 @@ class FabServer extends OhayoServerApp {
   }
 }
 
-module.exports = { OhayoServerApp, FabServer }
+module.exports = { OhayoServerApp, DevServer }

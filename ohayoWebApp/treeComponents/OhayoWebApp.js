@@ -1172,8 +1172,19 @@ ${OhayoConstants.panel} 400
     this.willowBrowser.toggleFullScreen()
   }
 
+  _hideMenuAndTabs() {
+    this.getNode(OhayoConstants.menu).unmount()
+    this.getNode(OhayoConstants.menu).replaceNode(() => OhayoConstants.menu + "PlaceHolder")
+  }
+
+  _showMenuAndTabs() {
+    // todo: make this hide tabs
+    this.getNode(OhayoConstants.menu + "PlaceHolder").replaceNode(() => OhayoConstants.menu)
+  }
+
   toggleFocusedModeCommand() {
-    this.toggle(OhayoConstants.menu)
+    this.has(OhayoConstants.menu) ? this._hideMenuAndTabs() : this._showMenuAndTabs()
+    this.makeAllDirty() // cleanup
     return this.toggleFullScreenCommand()
   }
 

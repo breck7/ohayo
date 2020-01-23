@@ -1,0 +1,10 @@
+doc.title Life Expectancy in the U.S.
+doc.layout column
+doc.categories medicine
+owid.lifeExpectancy
+ hidden
+ filter.where Code = USA
+  hidden
+  vega.line Life Expectancy in the USA
+   xColumn Year
+   yColumn Lifeexpectancy(years)

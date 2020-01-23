@@ -27,14 +27,13 @@ class PanelTreeComponent extends AbstractTreeComponent {
   }
 
   toHakonCode() {
-    const _top = this.getParent().getMenuTreeComponent() ? "30" : "0"
-    const theme = this.getTheme()
+    const menuHeight = this.getParent().getMenuTreeComponent() ? "30" : "0"
     return `.PanelTreeComponent
- left 0
  position relative
+ left 0
  right 0
  bottom 0
- height calc(100% - ${_top}px)`
+ height calc(100% - ${menuHeight}px)`
   }
 
   getGutterWidth() {

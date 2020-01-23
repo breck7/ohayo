@@ -121,8 +121,8 @@ ${maiaPath}maia/maia.browser.js`.split("\n")
     return projectProgram.getScriptPathsInCorrectDependencyOrder()
   }
 
-  startFabServer(programFolder = rootDir) {
-    new (require("./OhayoServerApp.js")).FabServer(2222, programFolder).listenForFileChanges().start()
+  startDevServer(programFolder = rootDir) {
+    new (require("./OhayoServerApp.js")).DevServer(2222, programFolder).listenForFileChanges().start()
   }
 
   profile() {
@@ -333,8 +333,8 @@ ${common}`
     Disk.write(`${this._getOhayoFolder()}index.html`, this._makeOhayoHtmlPage(``, `<script src="${this._getCombinedPath()}?v=${this._getVersion()}"></script>`, "favicon.ico"))
   }
 
-  produceFabHtml() {
-    const htmlPath = `${rootDir}fab.html`
+  produceDevServerHtml() {
+    const htmlPath = `${rootDir}dev.html`
 
     const libs = this.makeScriptTags(this._getLibScripts())
     const treeScripts = this.makeScriptTags(this._getTreeScripts())
@@ -398,7 +398,7 @@ module.exports = SVGS
   }
 
   produceAll() {
-    const methods = `produceFabHtml
+    const methods = `produceDevServerHtml
 produceMaiaGrammar
 produceGopherGrammar
 produceProdHtml

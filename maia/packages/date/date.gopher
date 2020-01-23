@@ -20,7 +20,7 @@ testProgram commits.maia
    371cadd,Breck Yunits,Wed Aug 30 14:12:34 2017,focus fix in terminal
   date.addColumns
    group.by day
-    date.heatcal
+    calendar.heat
      count count
     show.median count Per day
     show.rowCount Days Worked

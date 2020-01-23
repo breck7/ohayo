@@ -1,0 +1,66 @@
+tooling onsave jtree build produceMaiaGrammar
+genRangeNode
+ crux gen.range
+ example
+  gen.range year -1000 2020 1
+   tables.basic
+ description Generate a table with a column from a range
+ extends abstractTransformerNode
+ cells tileKeywordCell newColumnNameCell minCell maxCell stepCell
+ javascript
+  _createOutputTable() {
+   const rows = []
+   // todo: protect against infinite loops
+   let currentValue = this.minCell
+   if (!this.stepCell)
+    throw new Error("Step cannot be zero.")
+   while (currentValue <= this.maxCell) {
+    const row = []
+    row[this.newColumnNameCell] = currentValue 
+    rows.push(row)
+    currentValue += this.stepCell
+   }
+   return new Table(rows)
+  }
+genConstantNode
+ crux gen.constant
+ example
+  gen.range year -1000 2020 1
+   gen.constant birthRate number 0.035
+ cells tileKeywordCell columnNameCell primitiveTypeCell anyCell
+ description Add a column that contains a constant for each row.
+ extends abstractColumnAdderTileNode
+ javascript
+  getNewColumns() {
+   return [
+    {
+     name: this.columnNameCell,
+     type: this.primitiveTypeCell,
+     accessorFn: row => this.anyCell
+    }
+   ]
+  }
+growthRateCell
+ extends numberCell
+genGrowthNode
+ crux gen.growth
+ example
+  gen.range year -1000 2020 1
+   gen.constant birthRate number 0.035
+    gen.growth population 4 0.01
+ cells tileKeywordCell columnNameCell minCell growthRateCell
+ description Add a column that contains a constant for each row.
+ extends abstractColumnAdderTileNode
+ javascript
+  getNewColumns() {
+   let total = this.minCell
+   return [
+    {
+     name: this.columnNameCell,
+     accessorFn: (row, rowIndex) => {
+      total = total * (1 + this.growthRateCell)
+      return total
+     }
+    }
+   ]
+  }

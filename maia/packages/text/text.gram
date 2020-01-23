@@ -105,7 +105,10 @@ textSplitNode
     return {
      source: sourceColumnName,
      name: destinationColumnName,
-     accessorFn: row => row[sourceColumnName].split(delimiter)[index]
+     accessorFn: row => {
+      const words = row[sourceColumnName].split(delimiter)
+      return this.reverseSplit ? words.reverse()[index] : words[index]
+    }
     }
    })
    return [
@@ -118,6 +121,11 @@ textSplitNode
   }
  extends abstractColumnAdderTileNode
  crux text.split
+reverseTextSplitNode
+ extends textSplitNode
+ crux text.reverseSplit
+ description Split one column into multiple by a string reversing the order.
+ boolean reverseSplit true 
 textToLowerCaseNode
  description Convert all cells in a column to LowerCase text
  cells tileKeywordCell columnNameCell

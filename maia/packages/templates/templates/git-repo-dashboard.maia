@@ -2,7 +2,7 @@ doc.title Desktop Only: Statistics for Local Git Repo
 web.get http://localhost:2222/shell?command=gitlog
  date.addColumns
   group.by day
-   date.heatcal
+   calendar.heat
     count count
    show.median count Median Commits Per Coding Day
    show.rowCount # Coding Days
