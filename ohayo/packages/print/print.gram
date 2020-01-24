@@ -1,0 +1,30 @@
+tooling onsave jtree build produceOhayoGrammar
+printNode
+ description Print input table to console as text.
+ extends abstractTileTreeComponentNode
+ crux print.text
+ example
+  data.inline
+   parser text
+   content
+    Hello world
+   print.text
+ javascript
+  execute() {
+   console.log(this._getMessage())
+  }
+  _getMessage() {
+    return this.getPipishInput()
+  }
+printCsvNode
+ description Print input table to console as csv.
+ extends printNode
+ crux print.csv
+ example
+  samples.presidents
+   filter.where HomeState = Illinois
+    print.csv
+ javascript
+  _getMessage() {
+    return this.getParentOrDummyTable().toDelimited(",")
+  }

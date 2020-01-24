@@ -1,6 +1,0 @@
-tooling onsave jtree build produceMaiaGrammar
-cancerCasesNode
- description Estimated new cancer cases in the U.S. in 2019 from https://cancerstatisticscenter.cancer.org/
- string url maia/packages/cancer/cases.csv
- extends abstractFixedDatasetFromMaiaCollectionNode
- crux cancer.cases

@@ -1,0 +1,31 @@
+doc.title Ohayo Product Stats
+doc.categories ohayo
+doc.layout column
+templates.list
+ hidden
+ show.rowCount Number of Templates
+debug.ohayoGrammar
+ hidden
+ text.matches string dataDomain
+  hidden
+  show.max count Number of Integrated Web Data Sources
+challenge.list
+ hidden
+ show.rowCount Number of Challenges
+debug.ohayoGrammarTree
+ hidden
+ text.lineCount
+  hidden
+  show.max lines Number of Ohayo Nodes
+doc.comment show.static 2 Number of 0 Included Datasets
+doc.comment show.static 2 Number of Datasets on Datasets.ohayo.computer
+debug.ohayoGrammar
+ hidden
+ text.lineCount
+  hidden
+  show.max lines Ohayo Grammar Lines of Code
+ text.wordCount
+  hidden
+  show.sum count Ohayo Total Grammar Words
+  show.rowCount Ohayo Unique Words
+doc.comment Todo: show.static 2 Ohayo Grammar Lines of Javascript Code

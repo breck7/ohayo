@@ -20,7 +20,7 @@ class Builder extends AbstractBuilder {
     newVersion = newVersion ? newVersion : [currentVersion[0], currentVersion[1], parseFloat(currentVersion[2]) + 1].join(".")
 
     Disk.write(
-      "ohayoWebApp/treeComponents/Version.js",
+      "studio/treeComponents/Version.js",
       `const Version = "${newVersion}"
 if (typeof exports !== "undefined") module.exports = Version
 `
@@ -70,12 +70,12 @@ ${currentReleaseNotes}`
   }
 
   _getTreeScripts() {
-    return `maia/packages/challenge/challenges.tree
-maia/packages/templates/Templates.stamp
-ohayoWebApp/treeComponents/Ohayo.drums`.split("\n")
+    return `ohayo/packages/challenge/challenges.tree
+ohayo/packages/templates/Templates.stamp
+studio/treeComponents/Studio.drums`.split("\n")
   }
 
-  _getLibScripts(jtreeProductsPath = `node_modules/jtree/products/`, maiaPath = "") {
+  _getLibScripts(jtreeProductsPath = `node_modules/jtree/products/`, ohayoPath = "") {
     return `node_modules/moment/min/moment.min.js
 node_modules/moment-parseformat/dist/moment-parseformat.js
 node_modules/marked/marked.min.js
@@ -96,7 +96,7 @@ ${jtreeProductsPath}stump.browser.js
 ${jtreeProductsPath}fire.browser.js
 ${jtreeProductsPath}hakon.browser.js
 ${jtreeProductsPath}TreeComponentFramework.browser.js
-${maiaPath}maia/maia.browser.js`.split("\n")
+${ohayoPath}ohayo/ohayo.browser.js`.split("\n")
   }
 
   makeScriptTags(scripts: string[]) {
@@ -115,14 +115,14 @@ ${maiaPath}maia/maia.browser.js`.split("\n")
   }
 
   _makeProjectFileAndGetClientScripts() {
-    const scripts = this._getBrowserScripts(__dirname + "/ohayoWebApp/")
+    const scripts = this._getBrowserScripts(__dirname + "/studio/")
     const projectProgram = new project(project.makeProjectProgramFromArrayOfScripts(scripts))
     Disk.write(rootDir + "ohayo.project", projectProgram.toString())
     return projectProgram.getScriptPathsInCorrectDependencyOrder()
   }
 
   startDevServer(programFolder = rootDir) {
-    new (require("./OhayoServerApp.js")).DevServer(2222, programFolder).listenForFileChanges().start()
+    new (require("./StudioServerApp.js")).DevServer(2222, programFolder).listenForFileChanges().start()
   }
 
   profile() {
@@ -146,12 +146,12 @@ ${maiaPath}maia/maia.browser.js`.split("\n")
 
   produceTemplatesFile() {
     // # todo: pipe without echoing a newline?
-    exec(`jtree stamp ${rootDir}maia/packages/templates/templates content > maia/packages/templates/Templates.stamp`)
+    exec(`jtree stamp ${rootDir}ohayo/packages/templates/templates content > ohayo/packages/templates/Templates.stamp`)
   }
 
-  _makeOhayoHtmlPage(header: string, footer: string, faviconPath: string) {
-    const OhayoConstants = require("./ohayoWebApp/treeComponents/OhayoConstants.js")
-    const slogan = `${OhayoConstants.productName} - ${OhayoConstants.slogan}`
+  _makeStudioHtmlPage(header: string, footer: string, faviconPath: string) {
+    const StudioConstants = require("./studio/treeComponents/StudioConstants.js")
+    const slogan = `${StudioConstants.productName} - ${StudioConstants.slogan}`
     const keywords = "dashboards, data science, r, python, jupyter, anaconda"
     return `<!doctype html>
 <html>
@@ -163,10 +163,10 @@ ${maiaPath}maia/maia.browser.js`.split("\n")
   <script>const DefaultServerCurrentWorkingDirectory = "/";</script>
 ${header}
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="${OhayoConstants.productName}">
+  <meta name="apple-mobile-web-app-title" content="${StudioConstants.productName}">
   <meta name="mobile-web-app-capable" content="yes">
   ${footer}
-  <script>window.app = new OhayoWebApp(OhayoWebApp.getDefaultStartState())
+  <script>window.app = new StudioApp(StudioApp.getDefaultStartState())
   window.app.startWhenReady()</script>
 </head>
 <body>
@@ -193,7 +193,7 @@ ${header}
 mkdir ${distFolder};
 cp ${__dirname}/index.html ${distFolder}/;
 cp ${__dirname}/ohayo.es6.browser.js ${distFolder}/;
-cp -r ${__dirname}/maia ${distFolder}/;
+cp -r ${__dirname}/ohayo ${distFolder}/;
 cp -r ${__dirname}/images ${distFolder}/;`
     )
   }
@@ -252,31 +252,31 @@ cp -r ${__dirname}/images ${distFolder}/;`
 
   _getAllSourceFiles(): string[] {
     const getFiles = (dir: string) => recursiveReadSync(dir).filter((file: string) => !file.includes("node_modules") && !file.includes("ignore/"))
-    return jtree.Utils.flatten([__dirname + "/maia/", __dirname + "/ohayoWebApp/"].map(getFiles))
+    return jtree.Utils.flatten([__dirname + "/ohayo/", __dirname + "/studio/"].map(getFiles))
   }
 
-  trainMaiaModel() {
-    const maiaNode = require(__dirname + "/maia/maia.nodejs.js")
-    const testBlankProgram = new maiaNode()
+  trainOhayoModel() {
+    const ohayoNode = require(__dirname + "/ohayo/ohayo.nodejs.js")
+    const testBlankProgram = new ohayoNode()
     const handGrammarProgram = testBlankProgram.getHandGrammarProgram()
     const examples: string[] = handGrammarProgram.getNodesByGlobPath("* example").map((node: any) => node.childrenToString())
-    const templates = new jtree.TreeNode(Disk.read(__dirname + "/maia/packages/templates/Templates.stamp"))
+    const templates = new jtree.TreeNode(Disk.read(__dirname + "/ohayo/packages/templates/Templates.stamp"))
       .getNodesByGlobPath("file data")
       .map((node: any) => node.childrenToString())
-    const model = handGrammarProgram.trainModel(examples.concat(templates), maiaNode)
-    Disk.writeJson(__dirname + "/maia/maia.model.js", model)
+    const model = handGrammarProgram.trainModel(examples.concat(templates), ohayoNode)
+    Disk.writeJson(__dirname + "/ohayo/ohayo.model.js", model)
   }
 
-  private _getMaiaExamplesTestTree() {
-    const maiaPath = `${__dirname}/maia/maia.nodejs.js`
-    const maiaNode = require(maiaPath)
-    const handGrammarProgram = new maiaNode().getHandGrammarProgram()
-    return handGrammarProgram.examplesToTestBlocks(maiaNode)
+  private _getOhayoExamplesTestTree() {
+    const ohayoPath = `${__dirname}/ohayo/ohayo.nodejs.js`
+    const ohayoNode = require(ohayoPath)
+    const handGrammarProgram = new ohayoNode().getHandGrammarProgram()
+    return handGrammarProgram.examplesToTestBlocks(ohayoNode)
   }
 
   async test() {
     const fileTree = this._makeTestTreeForFolder(this._getAllSourceFiles())
-    fileTree.maiaExamples = this._getMaiaExamplesTestTree()
+    fileTree.ohayoExamples = this._getOhayoExamplesTestTree()
 
     const runner = new jtree.TestRacer(fileTree)
     await runner.execute()
@@ -308,13 +308,7 @@ ${common}`
 
     new GrammarUpgrader()
       .upgradeManyInPlace(
-        [
-          __dirname + "/ohayoWebApp/**/*.grammar",
-          __dirname + "/ohayoWebApp/**/*.gram",
-          __dirname + "/maia/**/*.grammar",
-          __dirname + "/maia/**/*.gram",
-          __dirname + "/testing/*.grammar"
-        ],
+        [__dirname + "/studio/**/*.grammar", __dirname + "/studio/**/*.gram", __dirname + "/ohayo/**/*.grammar", __dirname + "/ohayo/**/*.gram", __dirname + "/testing/*.grammar"],
         "5.0.0",
         "6.0.0"
       )
@@ -325,12 +319,8 @@ ${common}`
     return "ohayo.es6.browser.js"
   }
 
-  _getOhayoFolder() {
-    return rootDir
-  }
-
   produceProdHtml() {
-    Disk.write(`${this._getOhayoFolder()}index.html`, this._makeOhayoHtmlPage(``, `<script src="${this._getCombinedPath()}?v=${this._getVersion()}"></script>`, "favicon.ico"))
+    Disk.write(`${rootDir}index.html`, this._makeStudioHtmlPage(``, `<script src="${this._getCombinedPath()}?v=${this._getVersion()}"></script>`, "favicon.ico"))
   }
 
   produceDevServerHtml() {
@@ -342,7 +332,7 @@ ${common}`
 
     const header = [libs, treeScripts, common].join("\n")
 
-    const html = this._makeOhayoHtmlPage(header, "", "favicon-dev.ico")
+    const html = this._makeStudioHtmlPage(header, "", "favicon-dev.ico")
     Disk.write(htmlPath, html)
   }
 
@@ -358,13 +348,8 @@ ${common}`
     console.log(jtree.compileGrammarForNodeJs(combinedGrammarFilePath, compiledOutputFolder, true))
   }
 
-  produceTilesGrammar() {
-    return this._buildGrammar(["ohayoWebApp/tiles/grams/*.gram"], "ohayoWebApp/tiles/tiles.grammar", "ohayoWebApp/tiles/")
-  }
-
-  produceMaiaGrammar() {
-    this.produceTilesGrammar()
-    return this._buildGrammar(["ohayoWebApp/tiles/tiles.grammar", "maia/grams/*.gram", "maia/packages/*/*.gram"], "maia/maia.grammar", __dirname + "/maia/")
+  produceOhayoGrammar() {
+    return this._buildGrammar(["ohayo/grams/*.gram", "ohayo/packages/*/*.gram"], "ohayo/ohayo.grammar", __dirname + "/ohayo/")
   }
 
   produceSVGFile() {
@@ -373,7 +358,7 @@ ${common}`
       return str.substr(index)
     }
 
-    const path = `${rootDir}/ohayoWebApp/themes/svg/`
+    const path = `${rootDir}/studio/themes/svg/`
     const files = fs
       .readdirSync(path)
       .filter((filename: string) => filename.includes(".svg"))
@@ -394,18 +379,17 @@ ${files.map(template).join("\n")}
 module.exports = SVGS
 `
 
-    fs.writeFileSync("ohayoWebApp/themes/SVGS.js", newFile, "utf8")
+    fs.writeFileSync("studio/themes/SVGS.js", newFile, "utf8")
   }
 
   produceAll() {
     const methods = `produceDevServerHtml
-produceMaiaGrammar
+produceOhayoGrammar
 produceGopherGrammar
 produceProdHtml
 produceProdJs
 produceSVGFile
 produceTemplatesFile
-produceTilesGrammar
 produceOSwarmGrammar`.split("\n")
     const results: string[] = []
     methods.forEach(name => {

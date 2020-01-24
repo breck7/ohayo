@@ -1,0 +1,68 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test deleteAllTabs
+ playFirstVisitCommand
+  assertLengthIs getDefaultDisk.readFilesSync 1
+  openDeleteAllTabsPromptCommand
+   assertLengthIs getDefaultDisk.readFilesSync 0
+test twoPrograms
+ createNewBlankProgramCommand
+  assertStringIs getMountedTab.getFileName untitled.ohayo
+  assertLengthIs getFocusedPanel.getTabs 1
+  createNewBlankProgramCommand
+   assertLengthIs getFocusedPanel.getTabs 2
+   openFullPathInNewTabAndFocusCommand localStorage/untitled.ohayo
+    assertLengthIs getFocusedPanel.getTabs 2
+test cloneTabCommand
+ createNewBlankProgramCommand
+  appendTileCommand samples.presidents
+   cloneTabCommand
+    assertStringIs getMountedTab.getFileName untitled-2.ohayo
+    assertLengthIs getMountedTilesProgram.getTiles 1
+    fetchAndReloadFocusedTabCommand
+     assertStringIs getMountedTab.getFileName untitled-2.ohayo
+test saveTab
+ createNewBlankProgramCommand
+  saveTabAndNotifyCommand
+test mountTab
+ createNewBlankProgramCommand
+  assertStringIs getMountedTab.getFileName untitled.ohayo
+  createNewBlankProgramCommand
+   assertStringIs getMountedTab.getFileName untitled-2.ohayo
+   mountTabByIndexCommand 0
+   assertStringIs getMountedTab.getFileName untitled.ohayo
+test nav
+ openUrlInNewTabCommand localStorage/new
+  openUrlInNewTabCommand localStorage/test1391
+   openUrlInNewTabCommand localStorage/staff
+    openUrlInNewTabCommand localStorage/staff/featured
+     openUrlInNewTabCommand localStorage/home
+      openUrlInNewTabCommand localStorage/s/brady
+test navigation
+ createNewBlankProgramCommand
+  assertStringIs getMountedTab.getFileName untitled.ohayo
+  createNewBlankProgramCommand
+   mountPreviousTabCommand
+    assertStringIs getMountedTab.getFileName untitled.ohayo
+    mountNextTabCommand
+     assertStringIs getMountedTab.getFileName untitled-2.ohayo
+     mountNextTabCommand
+      assertStringIs getMountedTab.getFileName untitled.ohayo
+      mountPreviousTabCommand
+       assertStringIs getMountedTab.getFileName untitled-2.ohayo
+       closeMountedProgramCommand
+        assertStringIs getMountedTab.getFileName untitled.ohayo
+        mountNextTabCommand
+         assertStringIs getMountedTab.getFileName untitled.ohayo
+         mountPreviousTabCommand
+          assertStringIs getMountedTab.getFileName untitled.ohayo
+          closeMountedProgramCommand
+           assertTypeIs getMountedTab undefined
+           createNewBlankProgramCommand
+            assertStringIs getMountedTab.getFileName untitled-3.ohayo
+            toggleGutterCommand
+             closeTabByIndexCommand 0
+              assertTypeIs getMountedTab undefined
+              toggleFullScreenCommand
+               toggleFullScreenCommand
+                toggleFocusedModeCommand
+                 toggleFocusedModeCommand

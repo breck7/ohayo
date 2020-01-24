@@ -1,0 +1,23 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test urlError
+ createNewBlankProgramCommand
+  assertStringExcludes getStumpNodeString Error:
+  toggleOfflineModeCommand
+   appendTileCommand
+    withParagraph
+     web.get http://localhost:2222/fake_url
+    assertStringIncludes getStumpNodeString Error:
+test presidents
+ createNewBlankProgramCommand
+  toggleOfflineModeCommand
+   appendTileCommand
+    withParagraph
+     web.get http://localhost:2222/ohayo/packages/samples/presidents.csv
+    assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 44
+    selectAllTilesCommand
+     appendTileCommand tables.basic
+      assertParagraphIs getMountedTilesProgram.childrenToString
+       web.get http://localhost:2222/ohayo/packages/samples/presidents.csv
+        tables.basic
+      assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 44
+      toggleOfflineModeCommand

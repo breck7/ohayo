@@ -1,0 +1,80 @@
+tooling onsave jtree build produceOhayoGrammar
+abstractPickerTileNode
+ extends abstractTileTreeComponentNode
+ string tileSize 480 420
+ boolean needsData false
+ abstract
+ string hakonTemplate
+  .PickerTileNode
+   .PickerCategory
+    width 100%
+    margin-top 20px
+    text-align center
+   .TileBody
+    display flex
+    flex-flow row wrap
+    a
+     &:hover
+      background-color {borderColor}
+     padding 10px
+     margin 5px
+     height 30px
+     background-color {backgroundColor}
+     border 1px solid {borderColor}
+     overflow hidden
+     text-align center
+     text-overflow ellipsis
+     font-size 14px
+     width 120px
+     span
+      font-size 70%
+ string itemStumpTemplate
+  {categoryBreak}
+  a {name}
+   br
+    span {description}
+   title {description}
+   tabindex -1
+   value {value}
+   clickCommand {command}
+ string categoryBreakStumpTemplate
+  div {category}
+   class PickerCategory
+ string tileHeader Gallery
+ javascript
+  async fetchTableInputs() {
+   return { rows: this.getChoices().map(obj => obj.toObject()) }
+  }
+  getTileBodyStumpCode() {
+   let lastCat = ""
+   return this.getChoices()
+    .map(choice => {
+     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+     lastCat = choice.category
+     return this.qFormat(this.itemStumpTemplate, choice)
+    })
+    .join("\n")
+  }
+  getTileHeaderBern() {
+   return this.tileHeader
+  }
+PickerTileNode
+ extends abstractPickerTileNode
+ description Displays list of available tiles.
+ crux doc.picker
+ string tileHeader Tile Gallery
+ javascript
+  getChoices() {
+   const allChoices = this.getRootNode()
+    .getHandGrammarProgram()
+    .getTopNodeTypeDefinitions()
+   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(OhayoConstants.noPicker))
+   const theChoices = filteredChoices.length ? filteredChoices : allChoices
+   return theChoices.map(nodeDefinition => {
+    const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
+    const name = nodeId.split(".")[1] || ""
+    const category = lodash.upperFirst(nodeId.split(".")[0])
+    const description = nodeDefinition.getDescription()
+    return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
+   })
+  }

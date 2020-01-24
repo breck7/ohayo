@@ -1,0 +1,15 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test help
+ toggleHelpCommand
+  executeCommandOnStumpWithIdCommand clickCommand welcomePageButton
+   assertStringIs getMountedTab.getFileName ohayo.ohayo
+   assertLengthIs getFocusedPanel.getTabs 1
+   executeCommandOnStumpWithIdCommand clickCommand welcomePageButton
+    assertLengthIs getFocusedPanel.getTabs 1
+test helpMore
+ createNewBlankProgramCommand
+  assertStringExcludes getWillowBrowser.getPageHtml ctrl+n
+  toggleHelpCommand
+   assertStringIncludes getWillowBrowser.getPageHtml ctrl+n
+   toggleShadowByIdCommand shortcutsHelp
+    executeCommandOnStumpWithIdCommand clickCommand closeModalX

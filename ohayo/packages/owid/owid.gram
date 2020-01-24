@@ -1,0 +1,6 @@
+tooling onsave jtree build produceOhayoGrammar
+lifeExpectancyNode
+ description Life expectancy data.
+ string url ohayo/packages/owid/life-expectancy.csv
+ extends abstractFixedDatasetFromOhayoCollectionNode
+ crux owid.lifeExpectancy

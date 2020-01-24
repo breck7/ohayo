@@ -1,0 +1,134 @@
+tooling onsave jtree build produceOhayoGrammar
+editorFilesNode
+ description Fetch your files in the current working folder.
+ example
+  editor.files
+   editor.gallery
+ string tileSize 140 120
+ javascript
+  getRowClass() {
+   class FileRow extends Row {
+    destroyRow(app) {
+     return app.deleteFileCommand(this.getRowOriginalValue("link"))
+    }
+   }
+   return FileRow
+  }
+  getTileHeaderBern() {
+   return this.getWebApp()
+    .getDefaultDisk()
+    .getPathBase()
+  }
+  async fetchTableInputs() {
+   const files = await this.getWebApp()
+    .getDefaultDisk()
+    .readFiles()
+   return { rows: files.map(file => file.toFileObject()) }
+  }
+ extends abstractProviderNode
+ crux editor.files
+editorCommandHistoryNode
+ description Outputs row for each command executed in this Ohayo Studio session.
+ example Show what you've done in this tab session.
+  editor.commandHistory
+   tables.basic
+ javascript
+  async fetchTableInputs() {
+   return { rows: this.getWebApp()[this.methodName]() }
+  }
+ string methodName getCommandsBuffer
+ extends abstractProviderNode
+ crux editor.commandHistory
+editorGalleryNode
+ description Show a thumbnail of all the Ohayo documents in the input table.
+ example
+  editor.files
+   editor.gallery
+ string tileSize 1080 600
+ string dummyDataSetName ohayoPrograms
+ extends abstractChartNode
+ crux editor.gallery
+ string hakonTemplate
+  .MiniMapTile
+   .miniMap
+    background {backgroundColor}
+    width 120px
+    height 90px
+    margin 6px
+    position relative
+    overflow hidden
+    box-sizing border-box
+    display inline-block
+    &:hover
+     border 1px solid {boxShadow}
+    &:active
+     border 2px solid {boxShadow}
+    .miniFooter
+     font-size 12px
+     position absolute
+     bottom 0
+     width 100%
+     height 15px
+     line-height 15px
+     white-space nowrap
+     text-align center
+    .miniPreview
+     position absolute
+     width 100%
+     height calc(100% - 15px)
+     top 0
+     overflow hidden
+     div
+      position absolute
+      background {linkColor}
+ string miniStumpTemplate
+  a
+   class miniMap
+   {onClick}
+   {value}
+   {href}
+   div
+    class miniPreview
+    {theTiles}
+   div {filename}
+    class miniFooter
+ string bodyStumpTemplate
+  div
+   class MiniMapTile
+   {minis}
+ string miniStyleTemplate
+  div
+   style {style}
+ javascript
+  async openFullPathInNewTabAndFocusCommand(url) {
+   return this.getTab().getRootNode().openFullPathInNewTabAndFocusCommand(url)
+  }
+  _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
+   const ohayoProgram = new ohayoNode(sourceCode)
+   const dimensions = ohayoProgram.getTileDimensionMap(width, height)
+   const theTiles = ohayoProgram
+    .getTiles()
+    .filter(tile => tile.isVisible())
+    .map(
+     tile => this.qFormat(this.miniStyleTemplate, {style: dimensions.get(tile).getScaledCss(0.1)})
+    )
+    .join("\n")
+   const onClick = permalink ? "clickCommand openFullPathInNewTabAndFocusCommand" : ""
+   const value = permalink ? `value ${permalink}` : ""
+   const href = permalink ? `href ${permalink}` : ""
+   return this.qFormat(this.miniStumpTemplate, {filename, theTiles, onClick, value, href})
+  }
+  getTileBodyStumpCode() {
+   // todo: cache.
+   const minis = this.getRowsWithRowDisplayLimit()
+    .map(row => this._getMiniStumpCode(row.getRowOriginalValue("bytes"), row.getRowOriginalValue("filename"), row.getRowOriginalValue("link")))
+    .join("\n")
+  return this.qFormat(this.bodyStumpTemplate, {minis})
+  }
+editorHelloWorldNode
+ description Prints hello world
+ example Say hello.
+  editor.helloWorld
+ string content Ohayo world!
+ extends abstractTextNode
+ crux editor.helloWorld

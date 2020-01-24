@@ -1,0 +1,26 @@
+tooling onsave jtree build produceOhayoGrammar
+markdownToHtmlNode
+ description Displays Markdown rendered as HTML.
+ example Show a text editor and some rendered Markdown.
+  data.inline
+   parser text
+   content
+    # My header
+    ## My subheader
+    
+    Hello world
+   markdown.toHtml
+ inScope contentNode
+ string bodyStumpTemplate
+  div
+   class TileSelectable
+   bern
+    {md}
+ javascript
+  getTileBodyStumpCode() {
+   return this.qFormat(this.bodyStumpTemplate, {md: marked(this.getPipishInput())})
+  }
+ string tileSize 400 400
+ string dummyDataSetName markdown
+ extends abstractHeaderlessChartTileNode
+ crux markdown.toHtml

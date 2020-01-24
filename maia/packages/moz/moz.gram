@@ -1,8 +1,0 @@
-tooling onsave jtree build produceMaiaGrammar
-mozTop500Node
- description Moz's list of the most popular 500 websites on the internet.
- string dataUrl https://moz.com/top500
- boolean isDataPublicDomain true
- string url maia/packages/moz/top500Domains.csv
- extends abstractFixedDatasetFromMaiaCollectionNode
- crux moz.top500

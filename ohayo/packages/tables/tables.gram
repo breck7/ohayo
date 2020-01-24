@@ -1,0 +1,139 @@
+tooling onsave jtree build produceOhayoGrammar
+tablesBasicNode
+ frequency .1
+ description Basic table with sorting.
+ example Basic table with Iris data
+  samples.iris
+   tables.basic
+ catchAllCellType titleCell
+ inScope columnLimitNode
+ int rowDisplayLimit 100
+ int columnLimit 20
+ string tileSize 750 300
+ todo added the below to allow custom body styling in tables
+ string customBodyStyle padding:0px;
+ string hakonTemplate
+  .tablesBasicNode
+   font-size 14px
+   box-sizing border-box
+   width 100%
+   height 100%
+   {enableTextSelect1}
+   top 34px
+   table
+    width 100%
+   tr
+    white-space nowrap
+    padding 0
+   td
+    border 1px solid {lineColor}
+   tr:nth-child(even)
+    background-color {veryLightGrey}
+   td,th
+    padding 2px 3px
+    text-align left
+    overflow hidden
+    text-overflow ellipsis
+    max-width 250px
+   td:hover,th:hover
+    overflow visible
+   td:first-child,th:first-child
+    padding-left 5px
+    color {greyish}
+    width 60px
+   th
+    cursor pointer
+    background-color {lightGrey}
+    border 1px solid {lineColor}
+    border-bottom-color {greyish}
+   input,textarea
+    border 0
+    font-size 14px
+    box-sizing border-box
+    padding 0
+    font-family {fonts}
+ string cellStumpTemplate
+  td
+   bern
+    {content}
+ string cellLinkStumpTemplate
+  td
+   a
+    href {content}
+    bern
+     {content}
+ string rowStumpTemplate
+  tr
+   class tableRow
+   value {value}
+   td {number}
+   {cols}
+ javascript
+  getTileHeaderBern() {
+   return this.getContent() || super.getTileHeaderBern()
+  }
+  _getTableRowsStumpCode(columns) {
+   return this.getRowsWithRowDisplayLimit()
+    .map((row, index) => {
+     const cols = columns
+      .map(column => {
+       return this.qFormat(column.isLink() ? this.cellLinkStumpTemplate : this.cellStumpTemplate, { content: row.getRowHtmlSafeValue(column.getColumnName()) })
+      })
+      .join("\n")
+     return this.qFormat(this.rowStumpTemplate, { number: index + 1, value: row.getPuid(), cols })
+    })
+    .join("\n")
+  }
+  getContextMenuStumpCode() {
+   return this.contextMenuStumpTemplate
+  }
+  _getHeaderRowsStumpCode(columns) {
+   // todo: can we get a copy column command?
+   return ["Row"]
+    .concat(columns)
+    .map(colName => this.qFormat(this.headerRowStumpTemplate, { colName }))
+    .join("\n")
+  }
+  getTileBodyStumpCode() {
+   const tileStruct = this.getSettingsStruct()
+   const table = this.getParentOrDummyTable()
+   if (table.isBlankTable()) return `div No data to show`
+   let columnDefs = tileStruct.columnOrder === "importance" ? table.getColumnsByImportance() : table.getColumnsArray()
+   columnDefs = columnDefs.slice(0, tileStruct.columnLimit || this.columnLimit)
+   const columnNames = columnDefs.map(col => col.getColumnName())
+   // todo: if the types for a column are all equal, add a total row to the bottom.
+   // todo: if the types for a row are all equal, add a total column to the right.
+   const headerRows = this._getHeaderRowsStumpCode(columnNames)
+   const bodyRows = this._getTableRowsStumpCode(columnDefs)
+   return this.qFormat(this.bodyStumpTemplate, { headerRows, bodyRows })
+  }
+ string contextMenuStumpTemplate
+  a Delete all rows
+   clickCommand deleteAllRowsInTargetTileCommand
+ string headerRowStumpTemplate
+  th
+   value {colName}
+   span {colName}
+   value {colName}
+ string bodyStumpTemplate
+  div
+   class tablesBasicNode
+   table
+    thead
+     {headerRows}
+    tbody
+     {bodyRows}
+ extends abstractChartNode
+ crux tables.basic
+tablesInterestingNode
+ frequency .01
+ description Prints most interesting columns.
+ string columnOrder importance
+ extends tablesBasicNode
+ crux tables.interesting
+tablesDumpNode
+ description Prints data with no formatting or column reordering.
+ frequency .01
+ string columnOrder default
+ extends tablesBasicNode
+ crux tables.dump

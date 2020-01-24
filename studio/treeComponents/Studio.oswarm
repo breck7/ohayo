@@ -1,0 +1,84 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test const
+ createNewBlankProgramCommand
+  appendTileCommand editor.helloWorld
+   assertStringIncludes getStumpNodeString Ohayo world!
+   confirmAndResetAppStateCommand
+test onlyInvisibleTiles
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    treenotation.outline
+     hidden
+test lastTabTest
+ createNewBlankProgramCommand
+  assertStringIncludes toString untitled
+  showDeleteFileConfirmDialogCommand
+   assertStringExcludes toString untitled
+test perfMode
+ createNewBlankProgramCommand
+  togglePerfModeCommand
+   togglePerfModeCommand
+test moreBasics
+ createNewBlankProgramCommand
+  assertLengthIs getCommandsBuffer 0
+  assertLengthIs getDefaultDisk.readFilesSync 1
+  assertStringIs getMountedTab.getFileName untitled.ohayo
+  createNewBlankProgramCommand
+   assertStringIs getMountedTab.getFileName untitled-2.ohayo
+   assertLengthIs getDefaultDisk.readFilesSync 2
+   createNewBlankProgramCommand
+    assertLengthIs getDefaultDisk.readFilesSync 3
+    moveFileCommand localStorage/untitled-3.ohayo localStorage/renamed
+     closeMountedProgramCommand
+      closeAllTabsCommand
+       assertTypeIs getMountedTab undefined
+test export
+ createNewBlankProgramCommand
+  appendTileCommand samples.presidents
+   selectAllTilesCommand
+    executeCommandOnFirstSelectedTileCommand exportTileDataCommand
+test allTiles
+ createNewBlankProgramCommand
+  appendTileCommand samples.presidents
+   selectAllTilesCommand
+    appendTileCommand tables.basic
+     appendTileCommand show.rowCount
+      appendTileCommand list.links
+       appendTileCommand debug.dump
+        appendTileCommand html.h1
+        appendTileCommand data.inline
+test fourProgramRegression
+ createNewBlankProgramCommand
+  createNewBlankProgramCommand
+   pasteCommand tables.basic
+    assertLengthIs getRenderedTilesDiagnostic 1
+    createNewBlankProgramCommand
+     createNewBlankProgramCommand
+      pasteCommand tables.basic
+       assertLengthIs getRenderedTilesDiagnostic 1
+       toggleGutterCommand
+        closeMountedProgramCommand
+         toggleGutterCommand
+test clearStore
+ playFirstVisitCommand
+  assertLengthIs getDefaultDisk.readFilesSync 1
+  clearStoreCommand
+   assertLengthIs getDefaultDisk.readFilesSync 0
+test mini
+ playFirstVisitCommand
+  assertLengthIs getFocusedPanel.getTabs 1
+  createMiniMapCommand
+   assertLengthIs getFocusedPanel.getTabs 2
+test ohayoPrograms
+ playFirstVisitCommand
+  assertLengthIs getFocusedPanel.getTabs 1
+  closeAllTabsCommand
+   assertLengthIs getFocusedPanel.getTabs 0
+   assertLengthIs getDefaultDisk.readFilesSync 1
+   openFolderCommand localStorage/
+    assertLengthIs getDefaultDisk.readFilesSync 1
+    assertLengthIs getFocusedPanel.getTabs 1
+    _runSpeedTestCommand
+test echoCommand
+ echoCommand hello world

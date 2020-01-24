@@ -1,0 +1,8 @@
+tooling onsave jtree build produceOhayoGrammar
+hashBangWordCell
+ highlightScope comment
+hashBangNode
+ crux #!
+ tags noPicker
+ description Standard bash hashBang line.
+ catchAllCellType hashBangWordCell

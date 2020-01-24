@@ -1,7 +1,0 @@
-tooling onsave jtree build produceTilesGrammar
-hashBangWordCell
- highlightScope comment
-hashBangNode
- crux #!
- description Standard bash hashBang line.
- catchAllCellType hashBangWordCell

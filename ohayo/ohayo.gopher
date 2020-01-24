@@ -1,0 +1,95 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+testAllNodeTypes all.ohayo ohayo/ohayo.grammar
+testProgram basic.ohayo 0
+ html.h1 hello world
+testProgram error.ohayo 1
+ oh.unknown
+testProgram error2.ohayo 1
+ html.h1 some title
+  oh.unknown
+testProgram error2.ohayo 1
+ html.h1 some title
+ badSetting foo
+testProgram layout.ohayo 0
+ html.h1 Hello world
+ html.h1 this is a test
+ html.text h2 of some stuff
+ html.text p and some more stuff
+ html.text p
+  content
+   some multiline strings
+    perpahs
+testProgram linecount.ohayo
+ data.inline
+  content
+   hello world
+   hello world
+  text.wordCount
+   tables.basic
+  text.lineCount
+   tables.basic
+testProgram twocolumn.ohayo
+ doc.layout column
+ html.h1 hello world
+ html.text h2 world
+testProgram wordcount.ohayo
+ data.inline
+  parser text
+  content
+   hello hello dog dog cat
+  text.wordCount
+testProgram outline.ohayo
+ data.inline
+  content
+   person
+    name breck
+    age 33
+  treenotation.outline
+  treenotation.dotline
+testProgram join.ohayo
+ data.inline
+  parser csv
+  content
+   email,name
+   breck7@gmail.com,Breck Yunits
+   cam@gmail.com,Cam
+  data.inline
+   parser csv
+   content
+    email,score
+    breck7@gmail.com,100
+    cam@gmail.com,800
+   join.by email
+    tables.basic
+testProgram joinnograndparent.ohayo
+ data.inline
+  parser csv
+  content
+   email,score
+   breck7@gmail.com,100
+   cam@gmail.com,800
+  join.by email
+   tables.basic
+testProgram joinnoparent.ohayo 1
+ join.by email
+  tables.basic
+testProgram jssource.ohayo
+ data.eval
+  content
+   rows => [{name: 2, age: 3}]
+testProgram reddit.ohayo
+ reddit.all
+  debug.dump
+   rowDisplayLimit 3
+testProgram urlbad.ohayo
+ web.get /some/badUrl
+testProgram simple.ohayo
+ data.inline
+  content
+   name,age,score
+   bob,23,12
+   mike,32,32
+   bobby,32,12
+  filter.with bob
+   group.by name
+    tables.basic

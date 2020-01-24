@@ -1,0 +1,68 @@
+tooling onsave jtree build produceOhayoGrammar
+diskBrowseNode
+ frequency .01
+ tags localVersion
+ catchAllCellType pathCell
+ description An interactive list of files and folders.
+ string hakonTemplate
+  .DiskTile
+   table
+    width 100%
+    td,th
+     overflow hidden
+     text-overflow ellipsis
+    tr
+     white-space nowrap
+ javascript
+  getUrl() {
+   return this.getContent() ? "/disk?path=" + this.getContent() : "/disk"
+  }
+  getTileBodyStumpCode() {
+   const labelCol = "name"
+   const path = this.getContent() || ""
+   const parentPath = path.replace(/\/[^\/]*$/, "")
+   const rowDisplayLimit = 1000 // todo: adjustable?
+   let rows = this.getOutputTable()
+    .getRows()
+    .slice(0, rowDisplayLimit)
+   rows = lodash.sortBy(rows, row => row.getRowOriginalValue("isDirectory") === "false")
+   return `input
+   placeholder Filepath
+   value ${path}
+   changeCommand changeTileContentAndRenderCommand
+   class LargeTileInput
+  table
+   tr
+    td
+     a ..
+      clickCommand changeTileContentAndRenderCommand
+      value ${parentPath}
+  ${rows
+  .map(row => {
+   const label = jtree.Utils.stripHtml(row.getRowOriginalValue(labelCol))
+   const isDir = row.getRowOriginalValue("isDirectory") === "true"
+   const size = row.getRowOriginalValue("bytes")
+   const mtime = row.getRowOriginalValue("mtime")
+   if (!isDir)
+    return ` tr
+    td ${label}
+    td ${numeral(size).format("0.0 b")}
+    td ${moment(parseFloat(mtime)).fromNow()}`
+   return ` tr
+    td
+     a ${label}
+      clickCommand changeTileContentAndRenderCommand
+      value ${path.replace(/\/$/, "") + "/" + label}`
+  })
+  .join("\n")}`
+  }
+ string tileSize 500 500
+ extends abstractUrlNode
+ crux disk.browse
+diskReadNode
+ frequency .01
+ tags localVersion
+ description Reads a file from disk.
+ string urlPrefix /disk.read?path=
+ extends abstractUrlNode
+ crux disk.read

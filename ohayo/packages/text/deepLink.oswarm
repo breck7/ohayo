@@ -1,0 +1,12 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test deepLinkGoToRegression
+ createAndOpenNewProgramFromDeepLinkCommand http://localhost:8000/index.html?filename=foo.ohayo&nodeBreakSymbol=%7E&edgeSymbol=_&data=samples.declaration
+  assertLengthIs getRenderedTilesDiagnostic 1
+  assertStringIs getMountedTab.getFileName foo.ohayo
+test deepLinkRegression
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    samples.declaration
+   assertLengthIs getRenderedTilesDiagnostic 1
+   assertStringIs getMountedTab.getDeepLink http://localhost:8000/index.html?filename=untitled.ohayo&nodeBreakSymbol=%7E&edgeSymbol=_&data=samples.declaration

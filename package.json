@@ -1,8 +1,8 @@
 {
   "name": "ohayo",
-  "version": "17.4.0",
+  "version": "18.0.0",
   "description": "ohayo desktop version",
-  "main": "OhayoServerApp.js",
+  "main": "StudioServerApp.js",
   "directories": {
     "lib": "lib"
   },

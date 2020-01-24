@@ -1,6 +1,6 @@
 tooling onsave jtree build produceOSwarmGrammar
 oswarmNode
- description The Swarm Language modified to specifically test Ohayo.
+ description The Swarm Language modified to specifically test Ohayo Studio.
  root
  extends swarmNode
  javascript
@@ -11,8 +11,8 @@ oswarmNode
    return {
     isAsync: () => true,
     arrange: () => {
-     const OhayoWebApp = require(this._getProjectRootDir() + "ohayoWebApp/treeComponents/OhayoWebApp.js")
-     const app = new OhayoWebApp(OhayoWebApp.getDefaultStartState())
+     const StudioApp = require(this._getProjectRootDir() + "studio/treeComponents/StudioApp.js")
+     const app = new StudioApp(StudioApp.getDefaultStartState())
      app.setVisitCount(2)
      app.renderApp()
      return app

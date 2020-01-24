@@ -1,8 +1,0 @@
-tooling onsave jtree build produceMaiaGrammar
-reductionTypeCell
- enum count sum mean min max median
- highlightScope constant
-reductionNode
- cells tileSettingKeywordCell reductionTypeCell
- extends abstractTileSettingTerminalNode
- crux reduction

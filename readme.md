@@ -2,21 +2,27 @@
 
 [![Build Status](https://travis-ci.org/treenotation/ohayo.svg?branch=master)](https://travis-ci.org/treenotation/ohayo)
 
-Ohayo is a fast and free data science studio. Imagine if you could do data science at the speed of voice.
-
-![Slides](slides.gif)
+Ohayo is a fast and free tool for data science. Ohayo consists of a very high level programming language and a visual web studio for that language.
 
 You can try ohayo at [https://ohayo.computer](https://ohayo.computer), [download Ohayo on GitHub](https://github.com/treenotation/ohayo), try Ohayo [hosted on GitHub](https://treenotation.github.io/ohayo/), or install it using `npm install ohayo`.
 
-## Ohayo, Tree Notation and Maia
+![Slides](slides.gif)
 
-This project includes a data science web application AND a new dataflow programming language for data science that I currently call Maia. Maia is a Tree Language, built using [Tree Notation](https://treenotation.org/).
+## Mission
+
+Let's make it faster to do data science. Much faster. So fast that you can do data science as fast as you can speak.
+
+The Ohayo strategy is to make an open source web based tool and crowdsource a collection of very high level words that fit together like lego blocks. [Ohayo the language](https://github.com/treenotation/ohayo/tree/master/ohayo) is a Tree Language, built using [Tree Notation](https://treenotation.org/).
+
+In data science you have 2 main kinds of things: datasets and data transformations. Datasets include everything from weather forecasts to emails to business transactions. There are millions of possible datasets and a couple of thousand common operations. 
 
 ## BETA!
 
-Ohayo is still beta, and we are still iterating quickly. We encourage you to post feedback here or on the [Ohayo subreddit](https://www.reddit.com/r/ohayocomputer), but it may not be stable until 2020.
+Ohayo is still beta and iterating frequently. Post feedback here or on the [Ohayo subreddit](https://www.reddit.com/r/ohayocomputer). Ohayo hopefully will be stable by July 2020.
 
-## Unbeatable Features
+## Marketing Jumbo
+
+If you are looking for some marketing-speak, here you go:
 
 1. The simplest syntax possible. No parentheses, no brackets, no semicolons. Just words you can speak.
 2. Write by hand or program visually. The first visual editor that generates perfectly clean code.
@@ -28,6 +34,8 @@ Ohayo is still beta, and we are still iterating quickly. We encourage you to pos
 8. Runs anywhere. Run it from our sites, host it yourself, or run it on your local machine.
 
 ## Other Tools For Data Scientists
+
+Ohayo is just one of my tools that are trying to make data science easier. Here's a list of related products:
 
 |Name|Website|Year|WikipediaPage|
 |-|-|-|-|

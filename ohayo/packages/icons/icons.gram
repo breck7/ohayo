@@ -1,0 +1,75 @@
+tooling onsave jtree build produceOhayoGrammar
+iconsIconNode
+ extends abstractHeaderlessChartTileNode
+ abstract
+iconsHumanNode
+ description Assuming each row in your data represents a human, creates a human icon.
+ example
+  samples.patients
+   icons.human
+ inScope genderColumnNode headSizeNode
+ string columnPredictionHints
+  headSize isString=false
+  genderColumn isString=true
+ string bodyStumpTemplate
+  div
+   bern
+    {bern}
+ javascript
+  getTileBodyStumpCode() {
+   // Now, what if there is no input table?
+   const table = this.getParentOrDummyTable()
+   const rows = table.getRows()
+   // Now, what if we are using dummy input table?
+   const headSizeColumn = this.getSettingsStruct().headSize
+   const genderColumn = this.getSettingsStruct().genderColumn
+   const reducts = table.getColumnByName(headSizeColumn).getReductions()
+   const headColMax = reducts.max
+   const bern = rows
+    .map(row => {
+     const typedRow = row.rowToObjectWithOnlyNativeJavascriptTypes()
+     const value = typedRow[headSizeColumn]
+     // TODO: ADD TYPINGS
+     const genderVal = typedRow[genderColumn].toLowerCase()
+     const gender = genderVal === "male" ? "blue" : "pink"
+     let character = "O"
+     let percent = value / headColMax
+     if (isNaN(value)) {
+      character = "x"
+      percent = reducts.median / headColMax
+     }
+     const title = row.getHoverTitle()
+     percent = Math.round(18 * percent)
+     return `<span title="${title}" style="font-size:${percent}px; color:${gender};">${character}</span>`
+    })
+    .join(" ")
+   return this.qFormat(this.bodyStumpTemplate, {bern: bern})
+  }
+ string dummyDataSetName patients
+ extends iconsIconNode
+ crux icons.human
+iconsCircleNode
+ description Displays a simple icon for each row of your data.
+ example
+  samples.iris
+   icons.circle
+    radius Petal.Length
+ inScope radiusNode
+ string columnPredictionHints
+  radius isString=false
+ string dummyDataSetName playerGoals
+ extends iconsIconNode
+ crux icons.circle
+ string bodyStumpTemplate
+  div
+   bern
+    {bern}
+ javascript
+  getTileBodyStumpCode() {
+   const column = this.getSettingsStruct().radius
+   const bern = this.getParentOrDummyTable()
+    .getRows()
+    .map(row => `<span style="font-size:${row.rowToObjectWithOnlyNativeJavascriptTypes()[column] / 3}em;">O</span>`)
+    .join(" ")
+   return this.qFormat(this.bodyStumpTemplate, {bern: bern})
+  }

@@ -1,7 +1,0 @@
-tooling onsave jtree build produceTilesGrammar
-emptyCell
-tileBlankLineNode
- boolean visible false
- pattern ^$
- tags doNotSynthesize
- cells emptyCell

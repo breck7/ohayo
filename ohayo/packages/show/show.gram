@@ -1,0 +1,111 @@
+tooling onsave jtree build produceOhayoGrammar
+abstractShowTileNode
+ cells tileKeywordCell columnNameCell
+ catchAllCellType titleCell
+ frequency .02
+ example A dashboard for a Seattle family's water bill.
+  samples.waterBill
+   hidden
+   vega.scatter
+   tables.basic
+   show.mean Amount
+   show.median Amount
+   show.sum Amount
+   show.min Amount
+   show.max Amount
+  doc.layout bin
+ string tileSize 140 120
+ string dummyDataSetName stockPrice
+ extends abstractEmptyFooterTileNode
+ abstract
+ string hakonTemplate
+  .abstractShowTileNode
+   h3
+    text-align center
+   h6
+    text-align center
+    height 40px
+    overflow hidden
+ string bodyStumpTemplate
+  h6 {title}
+  h3 {number}
+ javascript
+  getTileBodyStumpCode() {
+   const columnName = this.getWord(1)
+   if (!columnName) return `No data for ${this.getFirstWord()}`
+   const table = this.getParentOrDummyTable()
+   const col = table.getTableColumnByName(columnName)
+   if (!col) {
+    console.log(`No column named ${columnName}`)
+    return ""
+   }
+   const reductionName = this.reductionName || this.getWord(0).split(".")[1]
+   const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
+   const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
+   return this.qFormat(this.bodyStumpTemplate, {title, number})
+  }
+showRowCountNode
+ catchAllCellType titleCell
+ description Show the total number of rows
+ frequency .02
+ string tileSize 140 120
+ string dummyDataSetName stockPrice
+ cells tileKeywordCell
+ extends abstractShowTileNode
+ string defaultTitle Total rows
+ crux show.rowCount
+ javascript
+  getTileBodyStumpCode() {
+   const title = this.getWordsFrom(1).join(" ") || this.defaultTitle
+   return this.qFormat(this.bodyStumpTemplate, {title, number: this._getNumber()})
+  }
+  _getNumber() {
+    return this.getParentOrDummyTable().getRowCount()
+  }
+showColumnCountNode
+ extends showRowCountNode
+ string defaultTitle Total columns
+ description Show the total number of columns
+ crux show.columnCount
+ javascript
+  _getNumber() {
+    return this.getParentOrDummyTable().getColumnNames().length
+  }
+showStaticNode
+ description Show a hard coded number
+ extends abstractShowTileNode
+ example
+  show.static 20 Sales
+ cells tileKeywordCell numberCell
+ catchAllCellType titleCell
+ crux show.static
+ javascript
+  getTileBodyStumpCode() {
+   const title = this.getWordsFrom(2).join(" ")
+   return this.qFormat(this.bodyStumpTemplate, {title, number: this.getWord(1) || ""})
+  }
+showValueNode
+ description Show the value of a column with 1 row
+ extends abstractShowTileNode
+ crux show.value
+ string reductionName median
+showMedianNode
+ description Show the median value of a column
+ extends abstractShowTileNode
+ crux show.median
+showSumNode
+ description Show the sum of a column
+ extends abstractShowTileNode
+ crux show.sum
+showMeanNode
+ description Show the mean of a column
+ extends abstractShowTileNode
+ crux show.mean
+showMinNode
+ description Show the min value of a column
+ extends abstractShowTileNode
+ crux show.min
+showMaxNode
+ description Show the max value of a column
+ extends abstractShowTileNode
+ crux show.max

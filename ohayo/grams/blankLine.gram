@@ -1,0 +1,7 @@
+tooling onsave jtree build produceOhayoGrammar
+emptyCell
+tileBlankLineNode
+ boolean visible false
+ pattern ^$
+ tags doNotSynthesize
+ cells emptyCell

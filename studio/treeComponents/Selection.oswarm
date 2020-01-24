@@ -1,0 +1,45 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test clipboard
+ createNewBlankProgramCommand
+  pasteCommand tables.basic
+   selectAllTilesCommand
+    copySelectionCommand
+     assertLengthIs getMountedTilesProgram.getTiles 1
+     cutSelectionCommand
+      assertLengthIs getMountedTilesProgram.getTiles 0
+test selection
+ createNewBlankProgramCommand
+  appendTileCommand samples.presidents
+   selectAllTilesCommand
+    duplicateSelectionCommand
+     assertLengthIs getMountedTilesProgram.getTiles 2
+     clearSelectionCommand
+      selectAllTilesCommand
+       duplicateSelectionCommand
+        assertLengthIs getMountedTilesProgram.getTiles 4
+        selectAllTilesCommand
+         deleteSelectionCommand
+          assertLengthIs getMountedTilesProgram.getTiles 0
+          appendTileCommand tables.basic
+           appendTileCommand tables.basic
+            selectAllTilesCommand
+             selectNextTileCommand
+              selectPreviousTileCommand
+               executeCommandOnFirstSelectedTileCommand copyDataCommand
+                executeCommandOnFirstSelectedTileCommand copyTileCommand
+                 executeCommandOnFirstSelectedTileCommand changeTileSettingAndRenderCommand boom title
+                  executeCommandOnFirstSelectedTileCommand destroyTileCommand
+test undoRedo
+ createNewBlankProgramCommand
+  pasteCommand data.inline
+   assertLengthIs getMountedTilesProgram.getTiles 1
+   undoFocusedProgramCommand
+    assertLengthIs getMountedTilesProgram.getTiles 0
+    redoFocusedProgramCommand
+     assertLengthIs getMountedTilesProgram.getTiles 1
+test paste
+ pasteCommand samples.presidents
+  assertStringIs getMountedTab.getFileName untitled.ohayo
+  pasteCommand tables.basic
+   assertLengthIs getMountedTilesProgram.getTiles 2
+   selectAllTilesCommand

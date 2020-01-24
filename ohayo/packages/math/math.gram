@@ -1,0 +1,49 @@
+tooling onsave jtree build produceOhayoGrammar
+mathFunctionNameCell
+ enum sin cos tan log exp
+fromCell
+ extends numberCell
+toCell
+ extends numberCell
+incrementCell
+ extends numberCell
+mathGenNode
+ description Generate a stream of numbers from common mathematical functions
+ cells tileKeywordCell mathFunctionNameCell fromCell toCell incrementCell
+ extends abstractProviderNode
+ example
+  math.gen sin 0 10 .1
+   vega.scatter
+    xColumn input
+    yColumn output
+ crux math.gen
+ javascript
+  async fetchTableInputs() {
+   const rows = []
+   const fn = Math[this.getWord(1)]
+   for (let input = parseFloat(this.fromCell); input < parseFloat(this.toCell); input += parseFloat(this.incrementCell)) {
+    rows.push({input, output: fn(input)})
+   }
+   return {
+    rows
+   }
+  }
+mathLogNode
+ description Add a column that is the natural log (base e) of another column.
+ cells tileKeywordCell columnNameCell
+ extends abstractColumnAdderTileNode
+ crux math.log
+ javascript
+  getNewColumns() {
+   const inputColumnName = this.getWord(1)
+   if (!inputColumnName) return []
+   const inputCol = this.getParentOrDummyTable().getColumnByName(inputColumnName)
+   return [
+    {
+     source: inputColumnName,
+     name: inputColumnName + "Log",
+     type: inputCol.getPrimitiveTypeName(),
+     mathFn: Math.log
+    }
+   ]
+  }

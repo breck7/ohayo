@@ -8,7 +8,7 @@ intCell
 numberOfErrorsCell
  extends intCell
 stringCell
-maiaWordCell
+ohayoWordCell
  highlightScope string
  extends stringCell
 errorWordCell
@@ -18,7 +18,7 @@ topNodeWordCell
 hashBangWordCell
  highlightScope comment.line
 gopherNode
- description Gopher is a Tree language for testing complete tree programs in Ohayo for errors.
+ description Gopher is a Tree language for testing complete tree programs in Ohayo Studio for errors.
  root
  inScope hashBangNode testAllNodeTypesNode testProgramNode
  catchAllNodeType errorNode
@@ -41,14 +41,14 @@ hashBangNode
  crux #!
  cells hashBangWordCell filepathCell
  catchAllCellType hashBangWordCell
-maiaCodeNode
- catchAllCellType maiaWordCell
- catchAllNodeType maiaCodeNode
- cells maiaWordCell
+ohayoCodeNode
+ catchAllCellType ohayoWordCell
+ catchAllNodeType ohayoCodeNode
+ cells ohayoWordCell
 testProgramNode
  cells topNodeWordCell filenameCell
  catchAllCellType numberOfErrorsCell
- catchAllNodeType maiaCodeNode
+ catchAllNodeType ohayoCodeNode
  javascript
   getTestString() {
    return this.childrenToString()
@@ -68,9 +68,7 @@ testProgramNode
   ${new jtree.TreeNode(this.getTestString()).toString(4)}
      assertLengthIs getFocusedPanel.getTabs 1
      assertLengthIs getOpenModals 0
-     ${errorTest}
-     saveCompiledCommand
-      deleteFileCommand localStorage/${testName}`
+     ${errorTest}`
   }
  crux testProgram
 testAllNodeTypesNode

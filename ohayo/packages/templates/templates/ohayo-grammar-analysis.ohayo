@@ -1,0 +1,20 @@
+doc.title Ohayo Grammar Analysis
+doc.categories ohayo
+doc.layout column
+debug.ohayoGrammar
+ hidden
+ text.lineCount
+  hidden
+  show.max lines Ohayo Grammar Lines of Code
+ text.wordCount
+  hidden
+  show.sum count Ohayo Total Grammar Words
+  show.rowCount Ohayo Unique Words
+  text.wordcloud
+ text.wordCount
+  hidden
+  rows.sortByReverse count
+   hidden
+   rows.first 10
+    hidden
+    tables.basic Top 10 Words

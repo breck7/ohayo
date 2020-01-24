@@ -1,0 +1,8 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test basicList
+ createNewBlankProgramCommand
+  assertStringIncludes getTextContent untitled.ohayo
+  pasteCommand
+   withParagraph
+    random.float 76 0 1
+   assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 76

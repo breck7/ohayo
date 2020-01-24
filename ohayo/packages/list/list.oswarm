@@ -1,0 +1,9 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test basicList
+ createNewBlankProgramCommand
+  assertStringIncludes getTextContent untitled.ohayo
+  pasteCommand
+   withParagraph
+    samples.telescopes
+     list.links Name Url
+   assertStringIncludes getTextContent Hubble

@@ -1,3 +1,12 @@
+18.0.0 2020-1-24
+----------------
+- Breaking: Maia language is now simply named Ohayo. "maia" file extension is now "ohayo"
+- Breaking: removed support for Fire, Hakon, Stump and all other Tree Languages
+- Breaking: removed compilation and execution commands
+- Infra: Merged separate Tiles language into Ohayo
+- Infra: Renamed OhayoApp to StudioApp
+- Fix: fixed css race condition in "New" drop down menu
+
 17.4.0 2020-1-24
 ----------------
 - Fix: updated Jtree to fix windows return character bug

@@ -1,0 +1,12 @@
+tooling onsave jtree build produceOhayoGrammar
+publicApisNode
+ frequency .01
+ tags internetConnectionRequired
+ extends abstractUrlNode
+ string dataDomain publicapis.org
+ cells tileKeywordCell
+ description Get all public APIs
+ string url https://api.publicapis.org/entries
+ crux publicapis.entries
+ string parser json
+ string jsonPath entries

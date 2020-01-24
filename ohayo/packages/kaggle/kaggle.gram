@@ -1,0 +1,7 @@
+tooling onsave jtree build produceOhayoGrammar
+kaggleDatasetsHeartNode
+ tags internetConnectionRequired
+ description Heart Disease dataset from https://www.kaggle.com/ronitf/heart-disease-uci
+ string url ohayo/packages/kaggle/heart.csv
+ extends abstractFixedDatasetFromOhayoCollectionNode
+ crux kaggle.datasets.heart

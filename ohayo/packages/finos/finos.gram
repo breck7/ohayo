@@ -1,0 +1,5 @@
+tooling onsave jtree build produceOhayoGrammar
+finosPerspectiveComingSoonNode
+ string content We don't have support yet for https://perspective.finos.org/
+ extends abstractComingSoonNode
+ crux finos.perspective.comingSoon

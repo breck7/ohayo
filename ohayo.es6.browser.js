@@ -25400,877 +25400,20 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
 ;
 
 {
-  class abstractTileTreeComponentNode extends AbstractTreeComponent {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        catchAllErrorNode,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          hidden: hiddenNode,
-          visible: visibleNode,
-          maximized: maximizedNode,
-          left: leftNode,
-          top: topNode,
-          width: widthNode,
-          height: heightNode
-        }),
-        [{ regex: /^$/, nodeConstructor: tileBlankLineNode }]
-      )
-    }
-    get tileKeywordCell() {
+  class tileBlankLineNode extends jtree.GrammarBackedNode {
+    get emptyCell() {
       return this.getWord(0)
-    }
-    get tileStumpTemplate() {
-      return `div
- class {classes}
- id {id}
- contextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
- div {header}
-  class TileHeader
- div
-  style {bodyStyle}
-  class TileBody
-  {body}
- div
-  class TileFooter
-  {footer}
- div
-  class TileGrabber`
-    }
-    get errorStateStumpTemplate() {
-      return `div
- class {classes}
- id {id}
- contextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
- div ERROR
-  class TileHeader
- div
-  class TileBody
-  {content}
- div
-  class TileFooter
-  {footer}
- div
-  class TileGrabber`
-    }
-    get inspectionStumpTemplate() {
-      return `div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
-div Messages:
-ol
- {messages}
-div Tree:
-pre
- bern
-  {sourceCode}
-div All Tile Settings:
-pre
- bern
-  {settings}`
-    }
-    get pencilStumpTemplate() {
-      return `span {icon}
- class TilePencilButton
- clickCommand toggleToolbarCommand`
-    }
-    get errorLogMessageStumpTemplate() {
-      return `div Error occurred. See console.
- class OhayoError`
-    }
-    get visibleKey() {
-      return `visible`
-    }
-    get hiddenKey() {
-      return `hidden`
-    }
-    get footerHeight() {
-      return 30
-    }
-    get headerHeight() {
-      return 30
-    }
-    getProgramTemplate(id) {}
-    getSnippetTemplate(id) {}
-    getExampleTemplate(index) {
-      // todo: right now we only have 1 example per tile.
-      const exampleNode = this.getDefinition().getNode(jtree.GrammarConstants.example)
-      return exampleNode ? exampleNode.childrenToString() : ""
-    }
-    emitLogMessage(message) {
-      const tab = this.getTab()
-      if (tab) tab.addStumpCodeMessageToLog(message)
-      else if (this.isNodeJs()) console.log(message)
-    }
-    getTheme() {
-      return this.getTab().getTheme()
-    }
-    qFormat(str, obj) {
-      return new jtree.TreeNode(str).templateToString(obj)
-    }
-    scrollIntoView() {
-      const el = this.getStumpNode()
-        .getShadow()
-        .getShadowElement()
-      if (el) el.scrollIntoView()
-    }
-    async loadBrowserRequirements() {
-      const loadingMap = this.getTab()
-        .getRootNode()
-        .getDefinitionLoadingPromiseMap()
-      if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
-      await loadingMap.get(this.constructor)
-    }
-    async _makeBrowserLoadRequirementsPromise(loadingMap) {
-      const app = this.getWebApp()
-      const cssScript = this[TilesConstants.tileCssScript]
-      if (cssScript) this._loadTileCss(cssScript)
-      const def = this.getDefinition()
-      const scriptPaths = def.nodesThatStartWith("string " + TilesConstants.tileScript).map(node => node.getWord(2))
-      const thisScript = this[TilesConstants.tileScript]
-      if (thisScript && !scriptPaths.includes(thisScript)) scriptPaths.push(thisScript)
-      if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
-      loadingMap.set(this.constructor, true)
-    }
-    _loadTileCss(css) {
-      const app = this.getWebApp()
-      app
-        .getWillowBrowser()
-        .getBodyStumpNode()
-        .insertChildNode(
-          css
-            .split(" ")
-            .map(
-              url => `link
- rel stylesheet
- media screen
- href ${url}`
-            )
-            .join("\n")
-        )
-    }
-    _hasBrowserRequirements() {
-      return this.tileScript
-    }
-    _areBrowserRequirementsLoaded() {
-      if (this.isNodeJs()) return true
-      // todo: cleanup. assumes app is here in browser.
-      const loadingMap = app.getDefinitionLoadingPromiseMap()
-      return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
-    }
-    isLoaded() {
-      return this._areBrowserRequirementsLoaded()
-    }
-    getErrorMessageHtml() {
-      const errors = Object.values(this.getRunTimePhaseErrors())
-      return errors.length ? ` <span style="color: ${this.getTheme().errorColor};">${errors.join(" ")}</span>` : "" //todo: cleanup
-    }
-    toStumpErrorStateCode(err) {
-      return this.qFormat(this.errorStateStumpTemplate, {
-        classes: this.getCssClassNames().join(" "),
-        id: this.getTreeComponentId(),
-        content: `div ` + err,
-        footer: this.getTileToolbarButtonStumpCode()
-      })
-    }
-    // todo: delete this
-    makeDirty() {
-      delete this._cache_settingsObject
-      delete this._bodyStumpCodeCache // todo: cleanup
-      this._setLastRenderedTime(0)
-    }
-    toggleToolbar() {
-      if (!this._tileToolbar) {
-        const TileToolbarTreeComponent = this.require(
-          "TileToolbarTreeComponent",
-          this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileToolbarTreeComponent.js"
-        )
-        this._tileToolbar = new TileToolbarTreeComponent("", undefined, this)
-        this._tileToolbar.renderAndGetRenderReport(this.getStumpNode())
-      } else this._tileToolbar = this._tileToolbar.unmount()
-    }
-    getAllTileSettingsDefinitions() {
-      const def = this.getDefinition()
-      return Object.values(def.getFirstWordMapWithDefinitions()).filter(def => def.isOrExtendsANodeTypeInScope([TilesConstants.abstractTileSetting]))
-    }
-    getTab() {
-      return this.getRootNode().getTab()
-    }
-    getChildTiles() {
-      return this.getChildInstancesOfNodeTypeId("abstractTileTreeComponentNode")
-    }
-    selectTile() {
-      this.selectNode()
-      if (this.isMounted()) this.getStumpNode().addClassToStumpNode(TilesConstants.selectedClass)
-    }
-    unselectNode() {
-      super.unselectNode()
-      if (this.isMounted()) this.getStumpNode().removeClassFromStumpNode(TilesConstants.selectedClass)
-    }
-    getCssClassNames() {
-      const classNames = super.getCssClassNames()
-      if (this._isMaximized()) classNames.push("TileMaximized")
-      return classNames
-    }
-    toStumpCode() {
-      return this.qFormat(this.tileStumpTemplate, {
-        classes: this.getCssClassNames().join(" "),
-        id: this.getTreeComponentId(),
-        header: this.getTileHeaderBern(),
-        bodyStyle: this.customBodyStyle || "",
-        body: this._getBodyStumpCodeCache() || "",
-        footer: this.getTileFooterStumpCode()
-      })
-    }
-    _getBodyStumpCodeCache() {
-      if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
-      return this._bodyStumpCodeCache
-    }
-    getTileHeaderBern() {
-      return `${this.getFirstWord()}`
-    }
-    cloneAndOffset() {
-      const clone = this.duplicate()
-      const left = this.getLeft()
-      const _top = this.getTop()
-      if (left) clone.touchNode(TilesConstants.left).setContent(parseInt(left) + 1)
-      if (_top) clone.touchNode(TilesConstants.top).setContent(parseInt(_top) + 1)
-      return clone
-    }
-    getTileBodyStumpCode() {
-      return ``
-    }
-    _getCss() {
-      const selector = "#" + this.getTreeComponentId()
-      const theme = this.getTheme()
-      const visibleCss = this.isVisible() ? "" : "display: none"
-      const dimensions = this.getTileDimensionIfAny()
-      const dimensionCss = dimensions ? dimensions.toCss() : ""
-      const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
-      return `${selector} { ${visibleCss} ${dimensionCss} }
-      ${theme.hakonToCss(hakonCode)}`
-    }
-    getContextMenuStumpCode() {
-      return ""
-    }
-    handleTileError(err) {
-      if (!this._errorCount) this._errorCount = 0
-      this._errorCount++
-      this.getRootNode().goRed(err)
-    }
-    getWall() {
-      return this.getWebApp().getAppWall()
-    }
-    getWebApp() {
-      return this.getTab().getRootNode()
-    }
-    getTileDimensionIfAny() {
-      const dimensions = this.getWall().getWallViewPortDimensions()
-      return this.getRootNode()
-        .getTileDimensionMap(dimensions.width, dimensions.height)
-        .get(this)
-    }
-    getTileBodyDimension() {
-      const dimension = this.getTileDimensionIfAny()
-      dimension.height = dimension.height - this.headerHeight - this.footerHeight
-      return dimension
-    }
-    getDependencies() {
-      return []
-    }
-    async runAndrenderAndGetRenderReport() {
-      await this.execute()
-      return this.renderAndGetRenderReport()
-    }
-    getTimeToLoad() {
-      return this._timeToLoad || 0
-    }
-    toHakonCode() {
-      return ""
-    }
-    getTileFooterStumpCode() {
-      return this.getTileToolbarButtonStumpCode()
-    }
-    getTileToolbarButtonStumpCode() {
-      return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
-    }
-    getDefinedOrSuggestedSize() {
-      const size = this.getSuggestedSize()
-      const width = this.getWidth()
-      const height = this.getHeight()
-      return {
-        width: width ? width * 20 : size.width,
-        height: height ? height * 20 : size.height
-      }
-    }
-    getSuggestedSize() {
-      const tileSize = this.tileSize || "280 220"
-      const parts = tileSize.split(" ").map(tileSize => parseInt(tileSize))
-      return {
-        width: parts[0],
-        height: parts[1]
-      }
-    }
-    getRequiredDimensionsForTreeLayout(padding = 0) {
-      const size = {
-        width: 0,
-        height: 0
-      }
-      const children = this.getChildTiles()
-      const suggestedSize = this.getDefinedOrSuggestedSize()
-      children.forEach(child => {
-        const childSize = child.getRequiredDimensionsForTreeLayout(padding)
-        size.width += childSize.width
-        size.height = childSize.height > size.height ? childSize.height : size.height
-      })
-      size.width += children.length * padding
-      size.width = Math.max(size.width, suggestedSize.width)
-      size.height = suggestedSize.height + (children.length ? padding + size.height : 0)
-      return size
-    }
-    getLeft() {
-      return this.get(TilesConstants.left)
-    }
-    getTop() {
-      return this.get(TilesConstants.top)
-    }
-    getWidth() {
-      return this.get(TilesConstants.width)
-    }
-    getHeight() {
-      return this.get(TilesConstants.height)
-    }
-    // Tile child rendering is done at the wall flex level.
-    _getChildTreeComponents() {
-      return []
-    }
-    getStumpNodeForChildren() {
-      // We render all Tiles on the Wall.
-      return this.getStumpNode().getParent()
-    }
-    async treeComponentDidMount() {
-      super.treeComponentDidMount()
-      if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
-    }
-    toInspectionStumpCode() {
-      const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
-      const settingsDefinitions = this.getAllTileSettingsDefinitions()
-        .map(setting => `${setting.getFirstWord()} ${setting.getDescription()}`)
-        .join("\n")
-      const parentConstructorName = this.getParent().constructor.name
-      const constructorName = this.constructor.name
-      const sourceCode = this.toString()
-      const settings = settingsDefinitions
-      return this.qFormat(this.inspectionStumpTemplate, {
-        constructorName,
-        parentConstructorName,
-        sourceCode,
-        messages,
-        settings
-      })
-    }
-    isVisible() {
-      if (this.visible === false) return false
-      return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
-    }
-    _isMaximized() {
-      return this.has(TilesConstants.maximized)
-    }
-    async _executeChildNodes() {
-      await Promise.all(this.getChildTiles().map(tile => tile.execute()))
-    }
-    async _execute() {
-      await this._executeChildNodes()
-    }
-    async execute() {
-      try {
-        this.setRunTimePhaseError("execute")
-        await this._execute()
-      } catch (err) {
-        this.setRunTimePhaseError("execute", err)
-        console.error(err)
-        this.emitLogMessage(this.errorLogMessageStumpTemplate)
-      }
-      return this
-    }
-    cloneTileCommand() {
-      this.cloneAndOffset()
-      return this.getTab().autosaveAndRender()
-    }
-    async toggleTileMaximizeCommand() {
-      if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
-      else this.touchNode(TilesConstants.maximized)
-      await this._runAfterTileUpdate(this)
-    }
-    async triggerTileMethodCommand(value, methodName) {
-      await this[methodName](value)
-      await this._runAfterTileUpdate(this)
-    }
-    // todo: refactor.
-    async changeTileTypeCommand(newValue) {
-      this.setFirstWord(newValue)
-      const newNode = this.duplicate()
-      // todo: destroy or something? how do we reparse.
-      this.unmountAndDestroy()
-      const app = this.getTab().getRootNode()
-      await Promise.all(
-        this.getRootNode()
-          .getTiles()
-          .map(tile => tile.loadBrowserRequirements())
-      )
-      await this.getTab().autosaveAndRender()
-      newNode.runAndrenderAndGetRenderReport()
-    }
-    changeParentCommand(pathVector) {
-      // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
-      const program = this.getRootNode()
-      const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
-      const destinationTree = indexPath ? program.nodeAt(indexPath) : program
-      // todo: on jtree should we make copyTo second param optional?
-      this.copyTo(destinationTree, destinationTree.length)
-      this.unmountAndDestroy()
-      return this.getTab().autosaveAndRender()
-    }
-    async openTileContextMenuCommand() {
-      this.getTab()
-        .getRootNode()
-        .setTargetNode(this)
-        .toggleAndRender(OhayoConstants.tileContextMenu)
-    }
-    destroyTileCommand() {
-      this.unmountAndDestroy()
-      return this.getTab().autosaveAndRender()
-    }
-    getNewDataCommand() {
-      // todo: have some type of paging system to fetch new data.
-    }
-    async changeTileSettingAndRenderCommand(value, settingName) {
-      // note the unusual ordering of params.
-      this.touchNode(settingName).setContent(value.toString())
-      // todo: sometimes size needs to be redone (maximize, for example)
-      await this._runAfterTileUpdate(this)
-    }
-    // todo: remove
-    async changeTileSettingMultilineCommand(val, settingName) {
-      this.touchNode(settingName).setChildren(val)
-      await this._runAfterTileUpdate(this)
-    }
-    async changeTileSettingCommand(settingName, value) {
-      this.touchNode(settingName).setContent(value)
-    }
-    async changeWordAndRenderCommand(value, index) {
-      this.setWord(parseInt(index), value)
-      await this._runAfterTileUpdate(this)
-    }
-    async changeWordsAndRenderCommand(value, index) {
-      index = parseInt(index)
-      const edgeSymbol = this.getEdgeSymbol()
-      const words = this.getWords().slice(0, index)
-      this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
-      await this._runAfterTileUpdate(this)
-    }
-    async updateChildrenCommand(val) {
-      this.setChildren(val)
-      // reload the whole doc for now.
-      await this._runAfterTileUpdate(this)
-    }
-    async _runAfterTileUpdate(tile) {
-      tile.makeDirty() // ugly!
-      tile.getChildTiles().forEach(tile => {
-        tile.makeDirty() // todo: ugly!
-      })
-      // todo: what if you have a tile that has a contextare that allows editing of its children/
-      // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
-      await tile.getTab().autosaveTab()
-      await tile.runAndrenderAndGetRenderReport()
-      tile
-        .getTab()
-        .getRootNode()
-        .renderApp() // Need to render full app because of code editor
-    }
-    // todo: downstream data changes?
-    async changeTileContentAndRenderCommand(value) {
-      this.setContent(value)
-      await this._runAfterTileUpdate(this)
-    }
-    async copyTileCommand() {
-      // todo: remove cousin tiles?
-      this.getRootNode()
-        .getWillowBrowser()
-        .copyTextToClipboard(this.getFirstAncestor().toString())
-    }
-    async createProgramFromTileExampleCommand(index) {
-      const template = this.getExampleTemplate(index)
-      if (!template) return undefined
-      const fileExtension = "maia" // todo: generalize
-      const tab = await this.getTab()
-        .getRootNode()
-        ._createAndOpen(template, `help-for-${this.getFirstWord()}.${fileExtension}`)
-      tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-    }
-    async inspectTileCommand() {
-      if (!this.isNodeJs()) {
-        console.log("Tile available at window.tile")
-        window.tile = this
-        console.log(this)
-      }
-      this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
-      this.getTab()
-        .getRootNode()
-        .renderApp()
-    }
-    async toggleToolbarCommand() {
-      this.toggleToolbar()
-    }
-    async createProgramFromTemplateCommand(id) {
-      const programTemplate = this.getProgramTemplate(id)
-      if (!programTemplate) return undefined
-      const tab = await this.getTab()
-        .getRootNode()
-        ._createAndOpen(programTemplate.template, programTemplate.name)
-      tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-    }
-    async appendSnippetTemplateCommand(id) {
-      const snippet = this.getSnippetTemplate(id)
-      if (!snippet) return undefined
-      const tab = this.getTab()
-      const tabProgram = tab.getTabProgram()
-      const newNodes = tabProgram.concat(snippet)
-      const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
-      tab.autosaveTab()
-      tabProgram.clearSelection()
-      tab.getTabWall().unmount()
-      await tabProgram.loadAndIncrementalRender()
-      newTiles.forEach(tile => tile.selectTile())
-      newTiles[0].scrollIntoView()
-    }
-    async copyDataCommand(delimiter) {
-      this.getRootNode()
-        .getWillowBrowser()
-        .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
-    }
-    async copyDataAsJavascriptCommand() {
-      const table = this.getOutputOrInputTable()
-      this.getRootNode()
-        .getWillowBrowser()
-        .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
-    }
-    async copyDataAsTreeCommand() {
-      const text = this.getOutputOrInputTable()
-        .toTree()
-        .toString()
-      this.getRootNode()
-        .getWillowBrowser()
-        .copyTextToClipboard(text)
-    }
-    async exportTileDataCommand(format = "csv") {
-      // todo: figure this out. use the browsers filename? tile title? id?
-      let extension = "csv"
-      let type = "text/csv"
-      let str = this.getOutputOrInputTable().toDelimited(",")
-      if (format === "tree") {
-        extension = "tree"
-        type = "text"
-        str = this.getOutputOrInputTable()
-          .toTree()
-          .toString()
-      }
-      this.getRootNode()
-        .getWillowBrowser()
-        .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
-    }
-  }
-
-  class basicRecursiveTileNode extends abstractTileTreeComponentNode {
-    get hakonTemplate() {
-      return `.BasicRecursiveTile
- input
- textarea
-  border 0
-  font-size 14px
-  height 100%
-  width 100%`
-    }
-    getTileBodyStumpCode() {
-      const edgeSymbol = " "
-      const definition = this.getDefinition()
-      const requiredCellIds = definition.getRequiredCellTypeIds()
-      const catchAllIndex = requiredCellIds.length
-      const catchAllCellTypeId = definition.getCatchAllCellTypeId()
-      if (catchAllCellTypeId) requiredCellIds.push(catchAllCellTypeId)
-      const cellInputs = requiredCellIds.map((cellTypeId, index) => {
-        const isCatchAll = cellTypeId === catchAllCellTypeId && index === catchAllIndex
-        const value = isCatchAll ? this.getWordsFrom(index + 1).join(edgeSymbol) : this.getWord(index + 1)
-        return ` input
-  placeholder ${cellTypeId}
-  value ${value}
-  name ${index + 1}
-  changeCommand ${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}`
-      })
-      return `div ${definition.getDescription()}
-div
-${cellInputs.join("\n")}`
-    }
-  }
-
-  class DidYouMeanTileNode extends abstractTileTreeComponentNode {
-    get bodyStumpTemplate() {
-      return `div
- span No tile '{input}' found. Line {lineNo}. Did you mean
- a {closestTile}
-  collapse
-  tabindex -1
-  value {closestTile}
-  clickCommand changeTileTypeCommand
- span ?`
-    }
-    getTileBodyStumpCode() {
-      const input = this.getFirstWord()
-      const lineNo = this.getLineNumber()
-      const closestTile = jtree.Utils.didYouMean(
-        input,
-        this.getRootNode()
-          .getHandGrammarProgram()
-          .getTopNodeTypeDefinitions()
-          .map(def => def.get("crux"))
-      )
-      if (!closestTile) {
-        if (!input) return `div Your program has a blank line on line ${lineNo}.`
-        return `div No tile '${input}' found.`
-      }
-      return this.qFormat(this.bodyStumpTemplate, { input, lineNo, closestTile })
-    }
-    getErrors() {
-      return [new jtree.UnknownNodeTypeError(this)]
-    }
-    getTileHeaderBern() {
-      return ""
-    }
-  }
-
-  class abstractDocTileNode extends abstractTileTreeComponentNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get tileStumpTemplate() {
-      return `div
- class {classes}
- id {id}
- contextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
- div
-  class TileBody HeaderLess
-  {body}
- div
-  class TileFooter
-  {footer}
- div
-  class TileGrabber`
-    }
-    get bodyStumpTemplate() {
-      return `{tagName}
- bern
-  {content}`
-    }
-    get headerHeight() {
-      return 0
-    }
-    get footerHeight() {
-      return 0
-    }
-    _getBody() {
-      return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
-    }
-    toStumpCode() {
-      return this.qFormat(this.tileStumpTemplate, {
-        classes: this.getCssClassNames().join(" "),
-        footer: this.getTileToolbarButtonStumpCode(),
-        id: this.getTreeComponentId(),
-        body: this._getBody()
-      })
-    }
-  }
-
-  class docTitleNode extends abstractDocTileNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get stringCell() {
-      return this.getWordsFrom(1)
-    }
-    get tagName() {
-      return `h1`
-    }
-    get tileSize() {
-      return `600 75`
-    }
-  }
-
-  class docSubtitleNode extends docTitleNode {
-    get tagName() {
-      return `h2`
-    }
-  }
-
-  class docSectionNode extends abstractDocTileNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          subtitle: docSectionSubtitleNode,
-          paragraph: docSectionParagraphNode,
-          link: docSectionLinkNode,
-          code: docSectionCodeNode
-        }),
-        undefined
-      )
-    }
-    _getBody() {
-      return this.compile()
-    }
-    _getCompiledLine() {
-      return ""
-    }
-  }
-
-  class docReferenceNode extends abstractDocTileNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { url: docReferenceUrlNode }),
-        undefined
-      )
-    }
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get referenceIdCell() {
-      return this.getWord(1)
-    }
-    get tagName() {
-      return `p`
-    }
-  }
-
-  class docCommentNode extends abstractTileTreeComponentNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
-    }
-    get commentKeywordCell() {
-      return this.getWord(0)
-    }
-    get commentCell() {
-      return this.getWordsFrom(1)
     }
     get visible() {
       return false
     }
   }
 
-  class docToolingNode extends docCommentNode {}
-
-  class abstractPickerTileNode extends abstractTileTreeComponentNode {
-    get tileHeader() {
-      return `Gallery`
-    }
-    get categoryBreakStumpTemplate() {
-      return `div {category}
- class PickerCategory`
-    }
-    get itemStumpTemplate() {
-      return `{categoryBreak}
-a {name}
- br
-  span {description}
- title {description}
- tabindex -1
- value {value}
- clickCommand {command}`
-    }
-    get hakonTemplate() {
-      return `.PickerTileNode
- .PickerCategory
-  width 100%
-  margin-top 20px
-  text-align center
- .TileBody
-  display flex
-  flex-flow row wrap
-  a
-   &:hover
-    background-color {borderColor}
-   padding 10px
-   margin 5px
-   height 30px
-   background-color {backgroundColor}
-   border 1px solid {borderColor}
-   overflow hidden
-   text-align center
-   text-overflow ellipsis
-   font-size 14px
-   width 120px
-   span
-    font-size 70%`
-    }
-    get tileSize() {
-      return `480 420`
-    }
-    async fetchTableInputs() {
-      return { rows: this.getChoices().map(obj => obj.toObject()) }
-    }
-    getTileBodyStumpCode() {
-      let lastCat = ""
-      return this.getChoices()
-        .map(choice => {
-          choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
-          lastCat = choice.category
-          return this.qFormat(this.itemStumpTemplate, choice)
-        })
-        .join("\n")
-    }
-    getTileHeaderBern() {
-      return this.tileHeader
-    }
-  }
-
-  class PickerTileNode extends abstractPickerTileNode {
-    get tileHeader() {
-      return `Tile Gallery`
-    }
-    getChoices() {
-      const allChoices = this.getRootNode()
-        .getHandGrammarProgram()
-        .getTopNodeTypeDefinitions()
-      const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
-      const theChoices = filteredChoices.length ? filteredChoices : allChoices
-      return theChoices.map(nodeDefinition => {
-        const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
-        const name = nodeId.split(".")[1] || ""
-        const category = lodash.upperFirst(nodeId.split(".")[0])
-        const description = nodeDefinition.getDescription()
-        return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
-      })
-    }
-  }
-
-  class abstractMaiaTileNode extends abstractTileTreeComponentNode {
+  class abstractTileTreeComponentNode extends AbstractTreeComponent {
     createParser() {
       return new jtree.TreeNode.Parser(
-        undefined,
+        catchAllErrorNode,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          "tiles.didyoumean": DidYouMeanTileNode,
-          "doc.title": docTitleNode,
-          "doc.subtitle": docSubtitleNode,
-          "doc.section": docSectionNode,
-          "doc.ref": docReferenceNode,
-          "doc.comment": docCommentNode,
-          "doc.tooling": docToolingNode,
-          "doc.picker": PickerTileNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -26332,6 +25475,14 @@ a {name}
           "tables.dump": tablesDumpNode,
           "text.wordcloud": textWordcloudNode,
           "treenotation.3d": treenotation3dNode,
+          "tiles.didyoumean": DidYouMeanTileNode,
+          "doc.title": docTitleNode,
+          "doc.subtitle": docSubtitleNode,
+          "doc.section": docSectionNode,
+          "doc.ref": docReferenceNode,
+          "doc.comment": docCommentNode,
+          "doc.tooling": docToolingNode,
+          "doc.picker": PickerTileNode,
           "github.info": githubInfoNode,
           "disk.browse": diskBrowseNode,
           "disk.read": diskReadNode,
@@ -26425,8 +25576,8 @@ a {name}
           "data.inline": dataInlineNode,
           "data.localStorage": dataLocalStorageNode,
           "debug.parserTest": debugParserTestNode,
-          "debug.grammar": debugGrammarNode,
-          "debug.grammarTree": debugGrammarTreeNode,
+          "debug.ohayoGrammar": debugGrammarNode,
+          "debug.ohayoGrammarTree": debugGrammarTreeNode,
           "editor.files": editorFilesNode,
           "editor.commandHistory": editorCommandHistoryNode,
           "math.gen": mathGenNode,
@@ -26445,17 +25596,25 @@ a {name}
           width: widthNode,
           height: heightNode
         }),
-        undefined
+        [{ regex: /^$/, nodeConstructor: tileBlankLineNode }]
       )
     }
     get tileKeywordCell() {
       return this.getWord(0)
     }
-    get maiaStumpInspectionTemplate() {
-      return `div TileStruct:
- pre
-  bern
-   {settings}
+    get inspectionStumpTemplate() {
+      return `div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
+div Messages:
+ol
+ {messages}
+div Tree:
+pre
+ bern
+  {sourceCode}
+div All Tile Settings:
+pre
+ bern
+  {settings}
 div Input rows: {inputCount} Output rows: {outputCount}
 div Load time: {timeToLoad} Render time: {renderTime}
 div Input Columns:
@@ -26479,17 +25638,80 @@ pre
  bern
   {inputNumericValues}`
     }
+    get tileStumpTemplate() {
+      return `div
+ class {classes}
+ id {id}
+ contextMenuCommand openTileContextMenuCommand
+ div
+  class TileGrabber
+  doubleClickCommand toggleTileMaximizeCommand
+ div {header}
+  class TileHeader
+ div
+  style {bodyStyle}
+  class TileBody
+  {body}
+ div
+  class TileFooter
+  {footer}
+ div
+  class TileGrabber`
+    }
+    get errorStateStumpTemplate() {
+      return `div
+ class {classes}
+ id {id}
+ contextMenuCommand openTileContextMenuCommand
+ div
+  class TileGrabber
+  doubleClickCommand toggleTileMaximizeCommand
+ div ERROR
+  class TileHeader
+ div
+  class TileBody
+  {content}
+ div
+  class TileFooter
+  {footer}
+ div
+  class TileGrabber`
+    }
+    get pencilStumpTemplate() {
+      return `span {icon}
+ class TilePencilButton
+ clickCommand toggleToolbarCommand`
+    }
+    get errorLogMessageStumpTemplate() {
+      return `div Error occurred. See console.
+ class OhayoError`
+    }
+    get visibleKey() {
+      return `visible`
+    }
+    get hiddenKey() {
+      return `hidden`
+    }
+    get footerHeight() {
+      return 30
+    }
+    get headerHeight() {
+      return 30
+    }
     get yearKey() {
       return `year`
     }
     get monthKey() {
       return `month`
     }
+    get needsData() {
+      return true
+    }
     get dayKey() {
       return `day`
     }
-    get maiaFileExtensionKey() {
-      return `.maia`
+    get ohayoFileExtensionKey() {
+      return `.ohayo`
     }
     get columnPredictionHintsKey() {
       return `columnPredictionHints`
@@ -26571,17 +25793,10 @@ pre
       this.makeDirty() // todo: remove
       return this
     }
-    isLoaded() {
-      return super.isLoaded() && this._isDataLoaded
-    }
     getRowsAsDataTableArrayWithHeader(rows, header) {
       const data = rows.map(row => row.getAsArray(header))
       data.unshift(header)
       return data
-    }
-    async _execute() {
-      this.setIsDataLoaded(true)
-      await this._executeChildNodes()
     }
     getTileQualityCheck() {
       const definition = this.getDefinition()
@@ -26622,7 +25837,274 @@ pre
         )
       return settingsFromCache
     }
+    getProgramTemplate(id) {}
+    getSnippetTemplate(id) {}
+    getExampleTemplate(index) {
+      // todo: right now we only have 1 example per tile.
+      const exampleNode = this.getDefinition().getNode(jtree.GrammarConstants.example)
+      return exampleNode ? exampleNode.childrenToString() : ""
+    }
+    emitLogMessage(message) {
+      const tab = this.getTab()
+      if (tab) tab.addStumpCodeMessageToLog(message)
+      else if (this.isNodeJs()) console.log(message)
+    }
+    getTheme() {
+      return this.getTab().getTheme()
+    }
+    qFormat(str, obj) {
+      return new jtree.TreeNode(str).templateToString(obj)
+    }
+    scrollIntoView() {
+      const el = this.getStumpNode()
+        .getShadow()
+        .getShadowElement()
+      if (el) el.scrollIntoView()
+    }
+    async loadBrowserRequirements() {
+      const loadingMap = this.getTab()
+        .getRootNode()
+        .getDefinitionLoadingPromiseMap()
+      if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
+      await loadingMap.get(this.constructor)
+    }
+    async _makeBrowserLoadRequirementsPromise(loadingMap) {
+      const app = this.getWebApp()
+      const cssScript = this[OhayoConstants.tileCssScript]
+      if (cssScript) this._loadTileCss(cssScript)
+      const def = this.getDefinition()
+      const scriptPaths = def.nodesThatStartWith("string " + OhayoConstants.tileScript).map(node => node.getWord(2))
+      const thisScript = this[OhayoConstants.tileScript]
+      if (thisScript && !scriptPaths.includes(thisScript)) scriptPaths.push(thisScript)
+      if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
+      loadingMap.set(this.constructor, true)
+    }
+    _loadTileCss(css) {
+      const app = this.getWebApp()
+      app
+        .getWillowBrowser()
+        .getBodyStumpNode()
+        .insertChildNode(
+          css
+            .split(" ")
+            .map(
+              url => `link
+ rel stylesheet
+ media screen
+ href ${url}`
+            )
+            .join("\n")
+        )
+    }
+    _hasBrowserRequirements() {
+      return this.tileScript
+    }
+    _areBrowserRequirementsLoaded() {
+      if (this.isNodeJs()) return true
+      // todo: cleanup. assumes app is here in browser.
+      const loadingMap = app.getDefinitionLoadingPromiseMap()
+      return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
+    }
+    isLoaded() {
+      return this._areBrowserRequirementsLoaded() && (!this.needsData || this._isDataLoaded)
+    }
+    getErrorMessageHtml() {
+      const errors = Object.values(this.getRunTimePhaseErrors())
+      return errors.length ? ` <span style="color: ${this.getTheme().errorColor};">${errors.join(" ")}</span>` : "" //todo: cleanup
+    }
+    toStumpErrorStateCode(err) {
+      return this.qFormat(this.errorStateStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        id: this.getTreeComponentId(),
+        content: `div ` + err,
+        footer: this.getTileToolbarButtonStumpCode()
+      })
+    }
+    // todo: delete this
+    makeDirty() {
+      delete this._cache_settingsObject
+      delete this._bodyStumpCodeCache // todo: cleanup
+      this._setLastRenderedTime(0)
+    }
+    toggleToolbar() {
+      if (!this._tileToolbar) {
+        const TileToolbarTreeComponent = this.require(
+          "TileToolbarTreeComponent",
+          this._getProjectRootDir() + "studio/treeComponents/TileToolbarTreeComponent.js"
+        )
+        this._tileToolbar = new TileToolbarTreeComponent("", undefined, this)
+        this._tileToolbar.renderAndGetRenderReport(this.getStumpNode())
+      } else this._tileToolbar = this._tileToolbar.unmount()
+    }
+    getAllTileSettingsDefinitions() {
+      const def = this.getDefinition()
+      return Object.values(def.getFirstWordMapWithDefinitions()).filter(def => def.isOrExtendsANodeTypeInScope([OhayoConstants.abstractTileSetting]))
+    }
+    getTab() {
+      return this.getRootNode().getTab()
+    }
+    getChildTiles() {
+      return this.getChildInstancesOfNodeTypeId("abstractTileTreeComponentNode")
+    }
+    selectTile() {
+      this.selectNode()
+      if (this.isMounted()) this.getStumpNode().addClassToStumpNode(OhayoConstants.selectedClass)
+    }
+    unselectNode() {
+      super.unselectNode()
+      if (this.isMounted()) this.getStumpNode().removeClassFromStumpNode(OhayoConstants.selectedClass)
+    }
+    getCssClassNames() {
+      const classNames = super.getCssClassNames()
+      if (this._isMaximized()) classNames.push("TileMaximized")
+      return classNames
+    }
+    toStumpCode() {
+      return this.qFormat(this.tileStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        id: this.getTreeComponentId(),
+        header: this.getTileHeaderBern(),
+        bodyStyle: this.customBodyStyle || "",
+        body: this._getBodyStumpCodeCache() || "",
+        footer: this.getTileFooterStumpCode()
+      })
+    }
+    _getBodyStumpCodeCache() {
+      if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
+      return this._bodyStumpCodeCache
+    }
+    getTileHeaderBern() {
+      return `${this.getFirstWord()}`
+    }
+    cloneAndOffset() {
+      const clone = this.duplicate()
+      const left = this.getLeft()
+      const _top = this.getTop()
+      if (left) clone.touchNode(OhayoConstants.left).setContent(parseInt(left) + 1)
+      if (_top) clone.touchNode(OhayoConstants.top).setContent(parseInt(_top) + 1)
+      return clone
+    }
+    getTileBodyStumpCode() {
+      return ``
+    }
+    _getCss() {
+      const selector = "#" + this.getTreeComponentId()
+      const theme = this.getTheme()
+      const visibleCss = this.isVisible() ? "" : "display: none"
+      const dimensions = this.getTileDimensionIfAny()
+      const dimensionCss = dimensions ? dimensions.toCss() : ""
+      const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
+      return `${selector} { ${visibleCss} ${dimensionCss} }
+      ${theme.hakonToCss(hakonCode)}`
+    }
+    getContextMenuStumpCode() {
+      return ""
+    }
+    handleTileError(err) {
+      if (!this._errorCount) this._errorCount = 0
+      this._errorCount++
+      this.getRootNode().goRed(err)
+    }
+    getWall() {
+      return this.getWebApp().getAppWall()
+    }
+    getWebApp() {
+      return this.getTab().getRootNode()
+    }
+    getTileDimensionIfAny() {
+      const dimensions = this.getWall().getWallViewPortDimensions()
+      return this.getRootNode()
+        .getTileDimensionMap(dimensions.width, dimensions.height)
+        .get(this)
+    }
+    getTileBodyDimension() {
+      const dimension = this.getTileDimensionIfAny()
+      dimension.height = dimension.height - this.headerHeight - this.footerHeight
+      return dimension
+    }
+    async runAndrenderAndGetRenderReport() {
+      await this.execute()
+      return this.renderAndGetRenderReport()
+    }
+    getTimeToLoad() {
+      return this._timeToLoad || 0
+    }
+    toHakonCode() {
+      return ""
+    }
+    getTileFooterStumpCode() {
+      return this.getTileToolbarButtonStumpCode()
+    }
+    getTileToolbarButtonStumpCode() {
+      return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
+    }
+    getDefinedOrSuggestedSize() {
+      const size = this.getSuggestedSize()
+      const width = this.getWidth()
+      const height = this.getHeight()
+      return {
+        width: width ? width * 20 : size.width,
+        height: height ? height * 20 : size.height
+      }
+    }
+    getSuggestedSize() {
+      const tileSize = this.tileSize || "280 220"
+      const parts = tileSize.split(" ").map(tileSize => parseInt(tileSize))
+      return {
+        width: parts[0],
+        height: parts[1]
+      }
+    }
+    getRequiredDimensionsForTreeLayout(padding = 0) {
+      const size = {
+        width: 0,
+        height: 0
+      }
+      const children = this.getChildTiles()
+      const suggestedSize = this.getDefinedOrSuggestedSize()
+      children.forEach(child => {
+        const childSize = child.getRequiredDimensionsForTreeLayout(padding)
+        size.width += childSize.width
+        size.height = childSize.height > size.height ? childSize.height : size.height
+      })
+      size.width += children.length * padding
+      size.width = Math.max(size.width, suggestedSize.width)
+      size.height = suggestedSize.height + (children.length ? padding + size.height : 0)
+      return size
+    }
+    getLeft() {
+      return this.get(OhayoConstants.left)
+    }
+    getTop() {
+      return this.get(OhayoConstants.top)
+    }
+    getWidth() {
+      return this.get(OhayoConstants.width)
+    }
+    getHeight() {
+      return this.get(OhayoConstants.height)
+    }
+    // Tile child rendering is done at the wall flex level.
+    _getChildTreeComponents() {
+      return []
+    }
+    getStumpNodeForChildren() {
+      // We render all Tiles on the Wall.
+      return this.getStumpNode().getParent()
+    }
+    async treeComponentDidMount() {
+      super.treeComponentDidMount()
+      if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
+    }
     toInspectionStumpCode() {
+      const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
+      // const settings = this.getAllTileSettingsDefinitions()
+      // .map(setting => `${setting.getFirstWord()} ${setting.getDescription()}`)
+      // .join("\n")
+      const settings = JSON.stringify(this.getSettingsStruct(), null, 2)
+      const parentConstructorName = this.getParent().constructor.name
+      const constructorName = this.constructor.name
+      const sourceCode = this.toString()
       const inputTable = this.getParentOrDummyTable()
       const outputTable = this.getOutputOrInputTable()
       const outputColumns = outputTable.getColumnsArrayOfObjects()
@@ -26633,30 +26115,240 @@ pre
       const renderTime = this.getNewestTimeToRender()
       const inputColumnsAsTable = new jtree.TreeNode(inputCols).toTable()
       const outputColumnsAsTable = new jtree.TreeNode(outputColumns).toTable()
-      const settings = JSON.stringify(this.getSettingsStruct(), null, 2)
       const outputNumericValues = new jtree.TreeNode(outputTable.getJavascriptNativeTypedValues()).toTable()
       const typeScriptInterface = outputTable.toTypeScriptInterface()
       const inputNumericValues = new jtree.TreeNode(inputTable.getJavascriptNativeTypedValues()).toTable()
-      return (
-        super.toInspectionStumpCode() +
-        "\n" +
-        this.qFormat(this.maiaStumpInspectionTemplate, {
-          settings,
-          inputCount,
-          outputCount,
-          timeToLoad,
-          renderTime,
-          inputColumnsAsTable,
-          outputColumnsAsTable,
-          outputNumericValues,
-          typeScriptInterface,
-          inputNumericValues
-        })
+      return this.qFormat(this.ohayoStumpInspectionTemplate, {
+        settings,
+        inputCount,
+        outputCount,
+        timeToLoad,
+        renderTime,
+        inputColumnsAsTable,
+        outputColumnsAsTable,
+        outputNumericValues,
+        typeScriptInterface,
+        inputNumericValues,
+        constructorName,
+        parentConstructorName,
+        sourceCode,
+        messages
+      })
+    }
+    isVisible() {
+      if (this.visible === false) return false
+      return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
+    }
+    _isMaximized() {
+      return this.has(OhayoConstants.maximized)
+    }
+    async _executeChildNodes() {
+      await Promise.all(this.getChildTiles().map(tile => tile.execute()))
+    }
+    async _execute() {
+      this.setIsDataLoaded(true)
+      await this._executeChildNodes()
+    }
+    async execute() {
+      try {
+        this.setRunTimePhaseError("execute")
+        await this._execute()
+      } catch (err) {
+        this.setRunTimePhaseError("execute", err)
+        console.error(err)
+        this.emitLogMessage(this.errorLogMessageStumpTemplate)
+      }
+      return this
+    }
+    cloneTileCommand() {
+      this.cloneAndOffset()
+      return this.getTab().autosaveAndRender()
+    }
+    async toggleTileMaximizeCommand() {
+      if (this.has(OhayoConstants.maximized)) this.delete(OhayoConstants.maximized)
+      else this.touchNode(OhayoConstants.maximized)
+      await this._runAfterTileUpdate(this)
+    }
+    async triggerTileMethodCommand(value, methodName) {
+      await this[methodName](value)
+      await this._runAfterTileUpdate(this)
+    }
+    // todo: refactor.
+    async changeTileTypeCommand(newValue) {
+      this.setFirstWord(newValue)
+      const newNode = this.duplicate()
+      // todo: destroy or something? how do we reparse.
+      this.unmountAndDestroy()
+      const app = this.getTab().getRootNode()
+      await Promise.all(
+        this.getRootNode()
+          .getTiles()
+          .map(tile => tile.loadBrowserRequirements())
       )
+      await this.getTab().autosaveAndRender()
+      newNode.runAndrenderAndGetRenderReport()
+    }
+    changeParentCommand(pathVector) {
+      // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
+      const program = this.getRootNode()
+      const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
+      const destinationTree = indexPath ? program.nodeAt(indexPath) : program
+      // todo: on jtree should we make copyTo second param optional?
+      this.copyTo(destinationTree, destinationTree.length)
+      this.unmountAndDestroy()
+      return this.getTab().autosaveAndRender()
+    }
+    async openTileContextMenuCommand() {
+      this.getTab()
+        .getRootNode()
+        .setTargetNode(this)
+        .toggleAndRender(StudioConstants.tileContextMenu)
+    }
+    destroyTileCommand() {
+      this.unmountAndDestroy()
+      return this.getTab().autosaveAndRender()
+    }
+    getNewDataCommand() {
+      // todo: have some type of paging system to fetch new data.
+    }
+    async changeTileSettingAndRenderCommand(value, settingName) {
+      // note the unusual ordering of params.
+      this.touchNode(settingName).setContent(value.toString())
+      // todo: sometimes size needs to be redone (maximize, for example)
+      await this._runAfterTileUpdate(this)
+    }
+    // todo: remove
+    async changeTileSettingMultilineCommand(val, settingName) {
+      this.touchNode(settingName).setChildren(val)
+      await this._runAfterTileUpdate(this)
+    }
+    async changeTileSettingCommand(settingName, value) {
+      this.touchNode(settingName).setContent(value)
+    }
+    async changeWordAndRenderCommand(value, index) {
+      this.setWord(parseInt(index), value)
+      await this._runAfterTileUpdate(this)
+    }
+    async changeWordsAndRenderCommand(value, index) {
+      index = parseInt(index)
+      const edgeSymbol = this.getEdgeSymbol()
+      const words = this.getWords().slice(0, index)
+      this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
+      await this._runAfterTileUpdate(this)
+    }
+    async updateChildrenCommand(val) {
+      this.setChildren(val)
+      // reload the whole doc for now.
+      await this._runAfterTileUpdate(this)
+    }
+    async _runAfterTileUpdate(tile) {
+      tile.makeDirty() // ugly!
+      tile.getChildTiles().forEach(tile => {
+        tile.makeDirty() // todo: ugly!
+      })
+      // todo: what if you have a tile that has a contextare that allows editing of its children/
+      // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
+      await tile.getTab().autosaveTab()
+      await tile.runAndrenderAndGetRenderReport()
+      tile
+        .getTab()
+        .getRootNode()
+        .renderApp() // Need to render full app because of code editor
+    }
+    // todo: downstream data changes?
+    async changeTileContentAndRenderCommand(value) {
+      this.setContent(value)
+      await this._runAfterTileUpdate(this)
+    }
+    async copyTileCommand() {
+      // todo: remove cousin tiles?
+      this.getRootNode()
+        .getWillowBrowser()
+        .copyTextToClipboard(this.getFirstAncestor().toString())
+    }
+    async createProgramFromTileExampleCommand(index) {
+      const template = this.getExampleTemplate(index)
+      if (!template) return undefined
+      const fileExtension = "ohayo" // todo: generalize
+      const tab = await this.getTab()
+        .getRootNode()
+        ._createAndOpen(template, `help-for-${this.getFirstWord()}.${fileExtension}`)
+      tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+    }
+    async inspectTileCommand() {
+      if (!this.isNodeJs()) {
+        console.log("Tile available at window.tile")
+        window.tile = this
+        console.log(this)
+      }
+      this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
+      this.getTab()
+        .getRootNode()
+        .renderApp()
+    }
+    async toggleToolbarCommand() {
+      this.toggleToolbar()
+    }
+    async createProgramFromTemplateCommand(id) {
+      const programTemplate = this.getProgramTemplate(id)
+      if (!programTemplate) return undefined
+      const tab = await this.getTab()
+        .getRootNode()
+        ._createAndOpen(programTemplate.template, programTemplate.name)
+      tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
+    }
+    async appendSnippetTemplateCommand(id) {
+      const snippet = this.getSnippetTemplate(id)
+      if (!snippet) return undefined
+      const tab = this.getTab()
+      const tabProgram = tab.getTabProgram()
+      const newNodes = tabProgram.concat(snippet)
+      const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
+      tab.autosaveTab()
+      tabProgram.clearSelection()
+      tab.getTabWall().unmount()
+      await tabProgram.loadAndIncrementalRender()
+      newTiles.forEach(tile => tile.selectTile())
+      newTiles[0].scrollIntoView()
+    }
+    async copyDataCommand(delimiter) {
+      this.getRootNode()
+        .getWillowBrowser()
+        .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
+    }
+    async copyDataAsJavascriptCommand() {
+      const table = this.getOutputOrInputTable()
+      this.getRootNode()
+        .getWillowBrowser()
+        .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
+    }
+    async copyDataAsTreeCommand() {
+      const text = this.getOutputOrInputTable()
+        .toTree()
+        .toString()
+      this.getRootNode()
+        .getWillowBrowser()
+        .copyTextToClipboard(text)
+    }
+    async exportTileDataCommand(format = "csv") {
+      // todo: figure this out. use the browsers filename? tile title? id?
+      let extension = "csv"
+      let type = "text/csv"
+      let str = this.getOutputOrInputTable().toDelimited(",")
+      if (format === "tree") {
+        extension = "tree"
+        type = "text"
+        str = this.getOutputOrInputTable()
+          .toTree()
+          .toString()
+      }
+      this.getRootNode()
+        .getWillowBrowser()
+        .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
     }
   }
 
-  class abstractChartNode extends abstractMaiaTileNode {
+  class abstractChartNode extends abstractTileTreeComponentNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -26792,7 +26484,7 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
       return `Try a challenge:`
     }
     getGalleryNodes() {
-      return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
+      return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("ohayo/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
     }
     getSnippetTemplate(id) {
       return `challenge.play ${id}`
@@ -26811,8 +26503,8 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
     }
     getGalleryNodes() {
       // todo: cleanup.
-      const maia = this.getWebApp().getMaiaGrammarAsTree()
-      const hits = maia.getNodesByRegex(/^samples/).map(node => {
+      const ohayo = this.getWebApp().getOhayoGrammarAsTree()
+      const hits = ohayo.getNodesByRegex(/^samples/).map(node => {
         return {
           id: node.get("crux"),
           description: node.get("description")
@@ -26835,7 +26527,7 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
     getGalleryNodes() {
       // todo: cleanup this line.
       const node = this.getWebApp()
-        .getMaiaGrammarAsTree()
+        .getOhayoGrammarAsTree()
         .getNodesByRegex(/^vegaDataSetCell/)[0]
       return new jtree.TreeNode(
         node
@@ -26863,7 +26555,7 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
     getGalleryNodes() {
       // todo: cleanup this line.
       const node = this.getWebApp()
-        .getMaiaGrammarAsTree()
+        .getOhayoGrammarAsTree()
         .getNodesByRegex(/^vegaExampleNameCell/)[0]
       return new jtree.TreeNode(
         node
@@ -26898,12 +26590,12 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
       const challengeNode = this._getChallengeNode(parseInt(id))
       return {
         template: challengeNode.getNode("solution").childrenToString(),
-        name: "challenge-" + id + "-solution.maia"
+        name: "challenge-" + id + "-solution.ohayo"
       }
     }
     _getChallengeNode(challengeId) {
       const challenges =
-        typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
+        typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("ohayo/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
       return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
     }
     getTileBodyStumpCode() {
@@ -26957,10 +26649,10 @@ table
   {rows}`
     }
     get tileScript() {
-      return `maia/packages/dtjs/datatables.min.js`
+      return `ohayo/packages/dtjs/datatables.min.js`
     }
     get tileCssScript() {
-      return `maia/packages/dtjs/datatables.min.css`
+      return `ohayo/packages/dtjs/datatables.min.css`
     }
     get tileSize() {
       return `1200 500`
@@ -27303,7 +26995,7 @@ h3 {number}`
       return `stockPrice`
     }
     get tileScript() {
-      return `maia/packages/vega/vega.combined.min.js`
+      return `ohayo/packages/vega/vega.combined.min.js`
     }
     get tileSize() {
       return `800 300`
@@ -27563,7 +27255,7 @@ yColumn isString=false`
       // todo: localtesting.
       if (this.isNodeJs()) return undefined
       const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
-      const url = `maia/packages/vega/ignore/vega-lite/examples/compiled/${exampleName}.vg.json`
+      const url = `ohayo/packages/vega/ignore/vega-lite/examples/compiled/${exampleName}.vg.json`
       const res = await this.getWebApp()
         .getWillowBrowser()
         .httpGetUrl(url)
@@ -28175,7 +27867,7 @@ a Run Tile Quality Check
     background {linkColor}`
     }
     get dummyDataSetName() {
-      return `maiaPrograms`
+      return `ohayoPrograms`
     }
     get tileSize() {
       return `1080 600`
@@ -28186,9 +27878,9 @@ a Run Tile Quality Check
         .openFullPathInNewTabAndFocusCommand(url)
     }
     _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
-      const maiaProgram = new maiaNode(sourceCode)
-      const dimensions = maiaProgram.getTileDimensionMap(width, height)
-      const theTiles = maiaProgram
+      const ohayoProgram = new ohayoNode(sourceCode)
+      const dimensions = ohayoProgram.getTileDimensionMap(width, height)
+      const theTiles = ohayoProgram
         .getTiles()
         .filter(tile => tile.isVisible())
         .map(tile => this.qFormat(this.miniStyleTemplate, { style: dimensions.get(tile).getScaledCss(0.1) }))
@@ -28217,10 +27909,10 @@ a Run Tile Quality Check
  color black`
     }
     get tileScript() {
-      return `maia/packages/handsontable/handsontable.full.min.js`
+      return `ohayo/packages/handsontable/handsontable.full.min.js`
     }
     get tileCssScript() {
-      return `maia/packages/handsontable/handsontable.min.css`
+      return `ohayo/packages/handsontable/handsontable.min.css`
     }
     get tileSize() {
       return `1200 500`
@@ -28515,7 +28207,7 @@ count isString=false`
       return `wordCounts`
     }
     get tileScript() {
-      return `maia/packages/text/wordcloud2.min.js`
+      return `ohayo/packages/text/wordcloud2.min.js`
     }
     get bodyStumpTemplate() {
       return `div
@@ -28577,7 +28269,7 @@ count isString=false`
       return `treeProgram`
     }
     get tileScript() {
-      return `maia/packages/treenotation/vis.min.js`
+      return `ohayo/packages/treenotation/vis.min.js`
     }
     get tileSize() {
       return `800 500`
@@ -28605,8 +28297,7 @@ class visjs`
       const tileStruct = this.getSettingsStruct()
       const source = this.getPipishInput()
       const app = this.getWebApp()
-      const language = app.getLanguageBestGuess(source)
-      const program = app.generateProgram(source, language)
+      const program = new ohayoNode(source)
       const rows = this._treeTo3D(program)
       // Create and populate a data table.
       const data = new vis.DataSet()
@@ -28705,7 +28396,252 @@ class visjs`
     }
   }
 
-  class abstractProviderNode extends abstractMaiaTileNode {
+  class DidYouMeanTileNode extends abstractTileTreeComponentNode {
+    get bodyStumpTemplate() {
+      return `div
+ span No tile '{input}' found. Line {lineNo}. Did you mean
+ a {closestTile}
+  collapse
+  tabindex -1
+  value {closestTile}
+  clickCommand changeTileTypeCommand
+ span ?`
+    }
+    getTileBodyStumpCode() {
+      const input = this.getFirstWord()
+      const lineNo = this.getLineNumber()
+      const closestTile = jtree.Utils.didYouMean(
+        input,
+        this.getRootNode()
+          .getHandGrammarProgram()
+          .getTopNodeTypeDefinitions()
+          .map(def => def.get("crux"))
+      )
+      if (!closestTile) {
+        if (!input) return `div Your program has a blank line on line ${lineNo}.`
+        return `div No tile '${input}' found.`
+      }
+      return this.qFormat(this.bodyStumpTemplate, { input, lineNo, closestTile })
+    }
+    getErrors() {
+      return [new jtree.UnknownNodeTypeError(this)]
+    }
+    getTileHeaderBern() {
+      return ""
+    }
+  }
+
+  class abstractDocTileNode extends abstractTileTreeComponentNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get tileStumpTemplate() {
+      return `div
+ class {classes}
+ id {id}
+ contextMenuCommand openTileContextMenuCommand
+ div
+  class TileGrabber
+  doubleClickCommand toggleTileMaximizeCommand
+ div
+  class TileBody HeaderLess
+  {body}
+ div
+  class TileFooter
+  {footer}
+ div
+  class TileGrabber`
+    }
+    get bodyStumpTemplate() {
+      return `{tagName}
+ bern
+  {content}`
+    }
+    get headerHeight() {
+      return 0
+    }
+    get footerHeight() {
+      return 0
+    }
+    _getBody() {
+      return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
+    }
+    toStumpCode() {
+      return this.qFormat(this.tileStumpTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        footer: this.getTileToolbarButtonStumpCode(),
+        id: this.getTreeComponentId(),
+        body: this._getBody()
+      })
+    }
+  }
+
+  class docTitleNode extends abstractDocTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get stringCell() {
+      return this.getWordsFrom(1)
+    }
+    get tagName() {
+      return `h1`
+    }
+    get tileSize() {
+      return `600 75`
+    }
+  }
+
+  class docSubtitleNode extends docTitleNode {
+    get tagName() {
+      return `h2`
+    }
+  }
+
+  class docSectionNode extends abstractDocTileNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
+          subtitle: docSectionSubtitleNode,
+          paragraph: docSectionParagraphNode,
+          link: docSectionLinkNode,
+          code: docSectionCodeNode
+        }),
+        undefined
+      )
+    }
+    _getBody() {
+      return this.compile()
+    }
+    _getCompiledLine() {
+      return ""
+    }
+  }
+
+  class docReferenceNode extends abstractDocTileNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { url: docReferenceUrlNode }),
+        undefined
+      )
+    }
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get referenceIdCell() {
+      return this.getWord(1)
+    }
+    get tagName() {
+      return `p`
+    }
+  }
+
+  class docCommentNode extends abstractTileTreeComponentNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
+    }
+    get commentKeywordCell() {
+      return this.getWord(0)
+    }
+    get commentCell() {
+      return this.getWordsFrom(1)
+    }
+    get visible() {
+      return false
+    }
+  }
+
+  class docToolingNode extends docCommentNode {}
+
+  class abstractPickerTileNode extends abstractTileTreeComponentNode {
+    get tileHeader() {
+      return `Gallery`
+    }
+    get categoryBreakStumpTemplate() {
+      return `div {category}
+ class PickerCategory`
+    }
+    get itemStumpTemplate() {
+      return `{categoryBreak}
+a {name}
+ br
+  span {description}
+ title {description}
+ tabindex -1
+ value {value}
+ clickCommand {command}`
+    }
+    get hakonTemplate() {
+      return `.PickerTileNode
+ .PickerCategory
+  width 100%
+  margin-top 20px
+  text-align center
+ .TileBody
+  display flex
+  flex-flow row wrap
+  a
+   &:hover
+    background-color {borderColor}
+   padding 10px
+   margin 5px
+   height 30px
+   background-color {backgroundColor}
+   border 1px solid {borderColor}
+   overflow hidden
+   text-align center
+   text-overflow ellipsis
+   font-size 14px
+   width 120px
+   span
+    font-size 70%`
+    }
+    get needsData() {
+      return false
+    }
+    get tileSize() {
+      return `480 420`
+    }
+    async fetchTableInputs() {
+      return { rows: this.getChoices().map(obj => obj.toObject()) }
+    }
+    getTileBodyStumpCode() {
+      let lastCat = ""
+      return this.getChoices()
+        .map(choice => {
+          choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+          lastCat = choice.category
+          return this.qFormat(this.itemStumpTemplate, choice)
+        })
+        .join("\n")
+    }
+    getTileHeaderBern() {
+      return this.tileHeader
+    }
+  }
+
+  class PickerTileNode extends abstractPickerTileNode {
+    get tileHeader() {
+      return `Tile Gallery`
+    }
+    getChoices() {
+      const allChoices = this.getRootNode()
+        .getHandGrammarProgram()
+        .getTopNodeTypeDefinitions()
+      const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(OhayoConstants.noPicker))
+      const theChoices = filteredChoices.length ? filteredChoices : allChoices
+      return theChoices.map(nodeDefinition => {
+        const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
+        const name = nodeId.split(".")[1] || ""
+        const category = lodash.upperFirst(nodeId.split(".")[0])
+        const description = nodeDefinition.getDescription()
+        return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
+      })
+    }
+  }
+
+  class abstractProviderNode extends abstractTileTreeComponentNode {
     get tileStumpTemplate() {
       return `div
  class {classes}
@@ -28835,7 +28771,6 @@ bern
       try {
         const data = await this._getData(url)
         const parser = new TableParser()
-        debugger
         if (typeof data === "string") return parser.parseTableInputsFromString(data, parserId)
         if (this.jsonPath) return parser.parseTableInputsFromObject(data[this.jsonPath], parserId)
         return parser.parseTableInputsFromObject(data, parserId)
@@ -29133,7 +29068,7 @@ input
     }
   }
 
-  class abstractFixedDatasetFromMaiaCollectionNode extends abstractFixedDatasetFromUrlNode {
+  class abstractFixedDatasetFromOhayoCollectionNode extends abstractFixedDatasetFromUrlNode {
     get tileSize() {
       return `300 150`
     }
@@ -29145,13 +29080,13 @@ input
     }
   }
 
-  class cancerCasesNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class cancerCasesNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/cancer/cases.csv`
+      return `ohayo/packages/cancer/cases.csv`
     }
   }
 
-  class abstractCdcInfantPercentileNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class abstractCdcInfantPercentileNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get dataUrl() {
       return `https://www.cdc.gov/growthcharts/percentile_data_files.htm`
     }
@@ -29162,31 +29097,31 @@ input
 
   class weightPercentilesNode extends abstractCdcInfantPercentileNode {
     get url() {
-      return `maia/packages/cdc/wtageinf.csv`
+      return `ohayo/packages/cdc/wtageinf.csv`
     }
   }
 
   class lengthPercentilesNode extends abstractCdcInfantPercentileNode {
     get url() {
-      return `maia/packages/cdc/lenageinf.csv`
+      return `ohayo/packages/cdc/lenageinf.csv`
     }
   }
 
   class headPercentilesNode extends abstractCdcInfantPercentileNode {
     get url() {
-      return `maia/packages/cdc/hcageinf.csv`
+      return `ohayo/packages/cdc/hcageinf.csv`
     }
   }
 
-  class kaggleDatasetsHeartNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class kaggleDatasetsHeartNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/kaggle/heart.csv`
+      return `ohayo/packages/kaggle/heart.csv`
     }
   }
 
-  class mozTop500Node extends abstractFixedDatasetFromMaiaCollectionNode {
+  class mozTop500Node extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/moz/top500Domains.csv`
+      return `ohayo/packages/moz/top500Domains.csv`
     }
     get isDataPublicDomain() {
       return true
@@ -29196,18 +29131,18 @@ input
     }
   }
 
-  class lifeExpectancyNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class lifeExpectancyNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/owid/life-expectancy.csv`
+      return `ohayo/packages/owid/life-expectancy.csv`
     }
   }
 
-  class samplesTelescopesNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesTelescopesNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/telescopes.tsv`
+      return `ohayo/packages/samples/telescopes.tsv`
     }
     get dataUrl() {
-      return `https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/telescopes.tsv`
+      return `https://github.com/treenotation/ohayo/blob/master/ohayo/packages/samples/telescopes.tsv`
     }
     get isDataPublicDomain() {
       return true
@@ -29218,9 +29153,9 @@ This list was put together by a group of remote workers in a Google spreadsheet 
     }
   }
 
-  class samplesMtcarsNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesMtcarsNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/mtcars.tsv`
+      return `ohayo/packages/samples/mtcars.tsv`
     }
     get dataUrl() {
       return `https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html`
@@ -29230,9 +29165,9 @@ This list was put together by a group of remote workers in a Google spreadsheet 
     }
   }
 
-  class samplesIrisNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesIrisNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/iris.tsv`
+      return `ohayo/packages/samples/iris.tsv`
     }
     get isDataPublicDomain() {
       return true
@@ -29242,9 +29177,9 @@ This list was put together by a group of remote workers in a Google spreadsheet 
     }
   }
 
-  class samplesFlights14Node extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesFlights14Node extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/flights14-sample.csv`
+      return `ohayo/packages/samples/flights14-sample.csv`
     }
     get isDataPublicDomain() {
       return true
@@ -29254,36 +29189,36 @@ This list was put together by a group of remote workers in a Google spreadsheet 
     }
   }
 
-  class samplesSiNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesSiNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get parser() {
       return `text`
     }
     get url() {
-      return `maia/packages/samples/si.tree`
+      return `ohayo/packages/samples/si.tree`
     }
     get dataUrl() {
-      return `https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/si.tree`
+      return `https://github.com/treenotation/ohayo/blob/master/ohayo/packages/samples/si.tree`
     }
     get isDataPublicDomain() {
       return true
     }
   }
 
-  class samplesPortalNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesPortalNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/portals.ssv`
+      return `ohayo/packages/samples/portals.ssv`
     }
     get dataUrl() {
-      return `https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/portals.ssv`
+      return `https://github.com/treenotation/ohayo/blob/master/ohayo/packages/samples/portals.ssv`
     }
     get isDataPublicDomain() {
       return true
     }
   }
 
-  class samplesStarWarsNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesStarWarsNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/starwars.json`
+      return `ohayo/packages/samples/starwars.json`
     }
     get dataLicense() {
       return `BSD`
@@ -29293,58 +29228,58 @@ This list was put together by a group of remote workers in a Google spreadsheet 
     }
   }
 
-  class samplesPopulationsNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesPopulationsNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/populations.tsv`
+      return `ohayo/packages/samples/populations.tsv`
     }
   }
 
-  class samplesBabyNamesNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesBabyNamesNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/baby-names-sample.csv`
+      return `ohayo/packages/samples/baby-names-sample.csv`
     }
   }
 
-  class samplesDeclarationNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesDeclarationNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/declaration-of-independence.text`
+      return `ohayo/packages/samples/declaration-of-independence.text`
     }
     get isDataPublicDomain() {
       return true
     }
   }
 
-  class samplesPeriodicTableNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesPeriodicTableNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/periodic-table.csv`
+      return `ohayo/packages/samples/periodic-table.csv`
     }
     get dataUrl() {
       return `https://gist.github.com/GoodmanSciences/c2dd862cd38f21b0ad36b8f96b4bf1ee`
     }
   }
 
-  class samplesLettersNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesLettersNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/letters.tsv`
+      return `ohayo/packages/samples/letters.tsv`
     }
   }
 
-  class samplesPresidentsNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class samplesPresidentsNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/samples/presidents.csv`
+      return `ohayo/packages/samples/presidents.csv`
     }
     get isDataPublicDomain() {
       return true
     }
   }
 
-  class ucimlrDatasetsNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class ucimlrDatasetsNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
-      return `maia/packages/ucimlr/datasets.tsv`
+      return `ohayo/packages/ucimlr/datasets.tsv`
     }
   }
 
-  class vegaDataNode extends abstractFixedDatasetFromMaiaCollectionNode {
+  class vegaDataNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
@@ -29352,13 +29287,13 @@ This list was put together by a group of remote workers in a Google spreadsheet 
       return this.getWord(1)
     }
     get urlPrefix() {
-      return `maia/packages/vega/datasets/`
+      return `ohayo/packages/vega/datasets/`
     }
   }
 
   class redditAllNode extends abstractUrlNoCellsNode {
     get offlineDataSet() {
-      return `maia/packages/reddit/all.json`
+      return `ohayo/packages/reddit/all.json`
     }
     get url() {
       return `https://www.reddit.com/r/all/top/.json?sort=top`
@@ -29847,7 +29782,7 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
       return this.getWord(2)
     }
     get tileScript() {
-      return `maia/packages/match/fuse.min.js`
+      return `ohayo/packages/match/fuse.min.js`
     }
     makeNewRows() {
       // Todo: move some of this logic to table project?
@@ -29953,11 +29888,7 @@ span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: 
       return `treeProgram`
     }
     makeNewRows() {
-      const sourceCode = this.getPipishInput()
-      const app = this.getWebApp()
-      const language = app.getLanguageBestGuess(sourceCode) // todo: use treeLanguage setting
-      const program = app.generateProgram(sourceCode, language)
-      return [{ text: program.toCellTypeTree() }]
+      return [{ text: new ohayoNode(this.getPipishInput()).toCellTypeTree() }]
     }
   }
 
@@ -30181,7 +30112,7 @@ class LargeLabel`
 
   class pcaNode extends abstractTransformerNode {
     get tileScript() {
-      return `maia/packages/bitanath/pca.js`
+      return `ohayo/packages/bitanath/pca.js`
     }
     get github() {
       return `https://github.com/bitanath/pca`
@@ -30543,14 +30474,8 @@ class LargeLabel`
     get tileKeywordCell() {
       return this.getWord(0)
     }
-    get supportedTreeLanguageCell() {
-      return this.getWord(1)
-    }
     async fetchTableInputs() {
-      const fileExtension = this.getWord(1) || "maia"
-      const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
-      const tree = new programClass("").getHandGrammarProgram()
-      return { rows: [{ text: tree.toString() }] }
+      return { rows: [{ text: new ohayoNode("").getHandGrammarProgram().toString() }] }
     }
   }
 
@@ -30558,14 +30483,17 @@ class LargeLabel`
     get tileKeywordCell() {
       return this.getWord(0)
     }
-    get supportedTreeLanguageCell() {
-      return this.getWord(1)
-    }
     async fetchTableInputs() {
-      const fileExtension = this.getWord(1) || "maia"
-      const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
-      const tree = new programClass("").getHandGrammarProgram().getNodeTypeFamilyTree()
-      return { rows: [{ text: tree.toString() }] }
+      return {
+        rows: [
+          {
+            text: new ohayoNode("")
+              .getHandGrammarProgram()
+              .getNodeTypeFamilyTree()
+              .toString()
+          }
+        ]
+      }
     }
   }
 
@@ -30797,7 +30725,7 @@ a {name}
         const id = node
           .getWord(1)
           .replace("templates/", "")
-          .replace(this.maiaFileExtensionKey, "")
+          .replace(this.ohayoFileExtensionKey, "")
         return {
           command: "createProgramFromTemplateCommand",
           name: node.get("data doc.title"),
@@ -30811,19 +30739,19 @@ a {name}
     _getTheTemplates() {
       // todo: trim?
       return typeof TemplatesStamp === "undefined"
-        ? jtree.TreeNode.fromDisk("maia/packages/templates/Templates.stamp").trim()
+        ? jtree.TreeNode.fromDisk("ohayo/packages/templates/Templates.stamp").trim()
         : new jtree.TreeNode(TemplatesStamp).trim()
     }
     getProgramTemplate(id) {
-      const node = this._getTheTemplates().filter(node => node.getContent() === `templates/${id}${this.maiaFileExtensionKey}`)[0]
+      const node = this._getTheTemplates().filter(node => node.getContent() === `templates/${id}${this.ohayoFileExtensionKey}`)[0]
       return {
         template: node.getNode("data").childrenToString(),
-        name: id + this.maiaFileExtensionKey
+        name: id + this.ohayoFileExtensionKey
       }
     }
   }
 
-  class assertRowCountNode extends abstractMaiaTileNode {
+  class assertRowCountNode extends abstractTileTreeComponentNode {
     get tileKeywordCell() {
       return this.getWord(0)
     }
@@ -30843,7 +30771,7 @@ a {name}
     }
   }
 
-  class printNode extends abstractMaiaTileNode {
+  class printNode extends abstractTileTreeComponentNode {
     execute() {
       console.log(this._getMessage())
     }
@@ -30858,12 +30786,235 @@ a {name}
     }
   }
 
-  class tileBlankLineNode extends jtree.GrammarBackedNode {
-    get emptyCell() {
+  class abstractTileSettingNode extends jtree.GrammarBackedNode {
+    get tileSettingKeywordCell() {
       return this.getWord(0)
     }
-    get visible() {
-      return false
+  }
+
+  class abstractTileSettingTerminalNode extends abstractTileSettingNode {
+    getSettingValue() {
+      return this.getContent()
+    }
+  }
+
+  class abstractColumnNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    getRunTimeEnumOptions(cell) {
+      // todo: only works if codemirror === tab
+      try {
+        // todo: handle at static time.
+        const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
+        const mirrorParent = mirrorNode && mirrorNode.getParent()
+        if (cell.getCellTypeId() === "columnNameCell" && mirrorParent && mirrorParent.isLoaded()) {
+          const options = mirrorParent.getParentOrDummyTable().getColumnNames()
+          return options
+        }
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  }
+
+  class columnNode extends abstractColumnNode {}
+
+  class sourceColumnNode extends abstractColumnNode {}
+
+  class labelNode extends abstractColumnNode {}
+
+  class linkNode extends abstractColumnNode {}
+
+  class sizeColumnNode extends abstractColumnNode {}
+
+  class colorColumnNode extends abstractColumnNode {}
+
+  class shapeColumnNode extends abstractColumnNode {}
+
+  class valueNode extends abstractColumnNode {}
+
+  class countNode extends abstractColumnNode {}
+
+  class dayColumnNode extends abstractColumnNode {}
+
+  class xColumnNode extends abstractColumnNode {}
+
+  class yColumnNode extends abstractColumnNode {}
+
+  class genderColumnNode extends abstractColumnNode {}
+
+  class headSizeNode extends abstractColumnNode {}
+
+  class radiusNode extends abstractColumnNode {}
+
+  class emojiColumnNode extends abstractColumnNode {}
+
+  class parserNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get parserIdsCell() {
+      return this.getWord(1)
+    }
+  }
+
+  class useCacheNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get booleanCell() {
+      return this.getWord(1)
+    }
+  }
+
+  class reductionNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get reductionTypeCell() {
+      return this.getWord(1)
+    }
+  }
+
+  class abstractCoreTileSettingTerminalNode extends abstractTileSettingTerminalNode {}
+
+  class hiddenNode extends abstractCoreTileSettingTerminalNode {}
+
+  class visibleNode extends abstractCoreTileSettingTerminalNode {}
+
+  class maximizedNode extends abstractCoreTileSettingTerminalNode {}
+
+  class abstractPagePositionNode extends abstractCoreTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get intCell() {
+      return parseInt(this.getWord(1))
+    }
+  }
+
+  class leftNode extends abstractPagePositionNode {}
+
+  class topNode extends abstractPagePositionNode {}
+
+  class widthNode extends abstractPagePositionNode {}
+
+  class heightNode extends abstractPagePositionNode {}
+
+  class reduceNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    get reductionTypeCell() {
+      return this.getWord(2)
+    }
+    get newColumnNameCell() {
+      return this.getWord(3)
+    }
+  }
+
+  class styleNode extends abstractTileSettingTerminalNode {}
+
+  class columnLimitNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get intCell() {
+      return parseInt(this.getWord(1))
+    }
+  }
+
+  class howManyNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get quantityCell() {
+      return parseInt(this.getWord(1))
+    }
+  }
+
+  class sizeNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get numberCell() {
+      return parseFloat(this.getWord(1))
+    }
+  }
+
+  class rowDisplayLimitNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get intCell() {
+      return parseInt(this.getWord(1))
+    }
+  }
+
+  class srcNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get urlCell() {
+      return this.getWord(1)
+    }
+  }
+
+  class cameraPositionNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get cameraDistanceNumberCell() {
+      return parseFloat(this.getWord(1))
+    }
+    get horizontalNumberCell() {
+      return parseFloat(this.getWord(2))
+    }
+    get verticalNumberCell() {
+      return parseFloat(this.getWord(3))
+    }
+  }
+
+  class treeLanguageNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get supportedTreeLanguageCell() {
+      return this.getWord(1)
+    }
+  }
+
+  class abstractTileSettingNonTerminalNode extends abstractTileSettingNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(tileSettingNonTerminalContentNode, undefined, undefined)
+    }
+    getSettingValue() {
+      return this.childrenToString()
+    }
+  }
+
+  class contentNode extends abstractTileSettingNonTerminalNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(lineOfContentNode, undefined, undefined)
+    }
+  }
+
+  class catchAllNodesPostContentNode extends abstractTileSettingNonTerminalNode {
+    get anyCell() {
+      return this.getWordsFrom(0)
+    }
+  }
+
+  class postNode extends abstractTileSettingNonTerminalNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(catchAllNodesPostContentNode, undefined, undefined)
     }
   }
 
@@ -31042,107 +31193,11 @@ a {name}
     }
   }
 
-  class tilesNode extends AbstractTreeComponent {
-    createParser() {
-      return new jtree.TreeNode.Parser(DidYouMeanTileNode, undefined, undefined)
-    }
-    get wallType() {
-      return `wall`
-    }
-    getTileClosestToLine(lineIndex) {
-      let current = this.nodeAtLine(lineIndex)
-      while (current) {
-        if (current.doesExtend("abstractTileTreeComponentNode")) return current
-        current = current.getParent()
-      }
-    }
-    setTab(tab) {
-      this._tab = tab
-    }
-    getTheme() {
-      const tab = this.getTab()
-      return tab ? tab.getTheme() : super.getTheme()
-    }
-    getTab() {
-      return this._tab
-    }
-    tilesAreVisible() {
-      return !this.has(TilesConstants.defaultHidden)
-    }
-    canUseCustomLayout() {
-      const definedLayout = this.get(TilesConstants.layout)
-      if (definedLayout === TilesConstants.layouts.custom) return true
-      if (this.getTiles().some(tile => tile.has(TilesConstants.left) || tile.has(TilesConstants.top))) return true
-      return false
-    }
-    _getLayoutStrategy() {
-      const definedLayout = this.get(TilesConstants.layout)
-      return (
-        definedLayout ||
-        (this.wallType === OhayoConstants.flex
-          ? this.canUseCustomLayout()
-            ? TilesConstants.layouts.custom
-            : TilesConstants.layouts.tiled
-          : TilesConstants.layouts.tree)
-      )
-    }
-    getTileDimensionMap(width, height) {
-      // todo: cache?
-      return new Layout().getTileDimensionMap(this, this._getLayoutStrategy(), width, height)
-    }
-    async loadAndIncrementalRender() {
-      const app = this.getTab().getRootNode()
-      await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))
-      await Promise.all(
-        this.getRootLevelTiles().map(async tile => {
-          await tile.execute()
-          app.renderApp()
-        })
-      )
-      app.renderApp() // this one might be superfluous
-      return this
-    }
-    getTiles() {
-      return this.getTopDownArray().filter(node => node.doesExtend("abstractTileTreeComponentNode"))
-    }
-    getRootLevelTiles() {
-      return this.filter(node => node.doesExtend("abstractTileTreeComponentNode"))
-    }
-    _getProjectRootDir() {
-      return this.isNodeJs() ? jtree.Utils.findProjectRoot(__dirname, "ohayo") : ""
-    }
-    toRunTimeStats() {
-      const tiles = this.getTiles()
-      const stats = {
-        tiles: tiles.length,
-        treeLanguage: this.getHandGrammarProgram().getExtensionName(),
-        url: this.getTab().getFileName()
-      }
-      stats.timeToLoad = this.getTiles()
-        .map(tile => tile.getTimeToLoad())
-        .sort()
-        .reverse()[0]
-      stats.timeToRender = this.getTiles()
-        .map(tile => tile.getNewestTimeToRender())
-        .sort()
-        .reverse()[0]
-      return stats
-    }
-  }
-
-  class maiaNode extends tilesNode {
+  class ohayoNode extends AbstractTreeComponent {
     createParser() {
       return new jtree.TreeNode.Parser(
         DidYouMeanTileNode,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          "tiles.didyoumean": DidYouMeanTileNode,
-          "doc.title": docTitleNode,
-          "doc.subtitle": docSubtitleNode,
-          "doc.section": docSectionNode,
-          "doc.ref": docReferenceNode,
-          "doc.comment": docCommentNode,
-          "doc.tooling": docToolingNode,
-          "doc.picker": PickerTileNode,
           "challenge.list": challengeListNode,
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
@@ -31204,6 +31259,14 @@ a {name}
           "tables.dump": tablesDumpNode,
           "text.wordcloud": textWordcloudNode,
           "treenotation.3d": treenotation3dNode,
+          "tiles.didyoumean": DidYouMeanTileNode,
+          "doc.title": docTitleNode,
+          "doc.subtitle": docSubtitleNode,
+          "doc.section": docSectionNode,
+          "doc.ref": docReferenceNode,
+          "doc.comment": docCommentNode,
+          "doc.tooling": docToolingNode,
+          "doc.picker": PickerTileNode,
           "github.info": githubInfoNode,
           "disk.browse": diskBrowseNode,
           "disk.read": diskReadNode,
@@ -31297,8 +31360,8 @@ a {name}
           "data.inline": dataInlineNode,
           "data.localStorage": dataLocalStorageNode,
           "debug.parserTest": debugParserTestNode,
-          "debug.grammar": debugGrammarNode,
-          "debug.grammarTree": debugGrammarTreeNode,
+          "debug.ohayoGrammar": debugGrammarNode,
+          "debug.ohayoGrammarTree": debugGrammarTreeNode,
           "editor.files": editorFilesNode,
           "editor.commandHistory": editorCommandHistoryNode,
           "math.gen": mathGenNode,
@@ -31323,6 +31386,85 @@ a {name}
     get wallType() {
       return `flex`
     }
+    getTileClosestToLine(lineIndex) {
+      let current = this.nodeAtLine(lineIndex)
+      while (current) {
+        if (current.doesExtend("abstractTileTreeComponentNode")) return current
+        current = current.getParent()
+      }
+    }
+    setTab(tab) {
+      this._tab = tab
+    }
+    getTheme() {
+      const tab = this.getTab()
+      return tab ? tab.getTheme() : super.getTheme()
+    }
+    getTab() {
+      return this._tab
+    }
+    tilesAreVisible() {
+      return !this.has(OhayoConstants.defaultHidden)
+    }
+    canUseCustomLayout() {
+      const definedLayout = this.get(OhayoConstants.layout)
+      if (definedLayout === OhayoConstants.layouts.custom) return true
+      if (this.getTiles().some(tile => tile.has(OhayoConstants.left) || tile.has(OhayoConstants.top))) return true
+      return false
+    }
+    _getLayoutStrategy() {
+      const definedLayout = this.get(OhayoConstants.layout)
+      return (
+        definedLayout ||
+        (this.wallType === StudioConstants.flex
+          ? this.canUseCustomLayout()
+            ? OhayoConstants.layouts.custom
+            : OhayoConstants.layouts.tiled
+          : OhayoConstants.layouts.tree)
+      )
+    }
+    getTileDimensionMap(width, height) {
+      // todo: cache?
+      return new Layout().getTileDimensionMap(this, this._getLayoutStrategy(), width, height)
+    }
+    async loadAndIncrementalRender() {
+      const app = this.getTab().getRootNode()
+      await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))
+      await Promise.all(
+        this.getRootLevelTiles().map(async tile => {
+          await tile.execute()
+          app.renderApp()
+        })
+      )
+      app.renderApp() // this one might be superfluous
+      return this
+    }
+    getTiles() {
+      return this.getTopDownArray().filter(node => node.doesExtend("abstractTileTreeComponentNode"))
+    }
+    getRootLevelTiles() {
+      return this.filter(node => node.doesExtend("abstractTileTreeComponentNode"))
+    }
+    _getProjectRootDir() {
+      return this.isNodeJs() ? jtree.Utils.findProjectRoot(__dirname, "ohayo") : ""
+    }
+    toRunTimeStats() {
+      const tiles = this.getTiles()
+      const stats = {
+        tiles: tiles.length,
+        treeLanguage: this.getHandGrammarProgram().getExtensionName(),
+        url: this.getTab().getFileName()
+      }
+      stats.timeToLoad = this.getTiles()
+        .map(tile => tile.getTimeToLoad())
+        .sort()
+        .reverse()[0]
+      stats.timeToRender = this.getTiles()
+        .map(tile => tile.getNewestTimeToRender())
+        .sort()
+        .reverse()[0]
+      return stats
+    }
     async execute() {
       await Promise.all(this.map(node => node.execute()))
       // Use shell tiles to do any outputs
@@ -31335,12 +31477,9 @@ a {name}
       if (!this._outputTable) this._outputTable = new Table()
       return this._outputTable
     }
-    getMaiaTiles() {
-      return this.getTopDownArray().filter(node => node.doesExtend("abstractMaiaTileNode"))
-    }
     getAllRowsFromAllOutputTables() {
       return jtree.Utils.flatten(
-        this.getMaiaTiles()
+        this.getTiles()
           .map(tile => tile.getOutputTable())
           .filter(table => table)
           .map(table => table.getRows())
@@ -31349,44 +31488,6 @@ a {name}
     getHandGrammarProgram() {
       if (!this._cachedHandGrammarProgramRoot)
         this._cachedHandGrammarProgramRoot = new jtree.HandGrammarProgram(`emptyCell
-programmingLanguageNameCell
- enum javascript latex css html ruby rust python csv tsv xml php typescript lisp swift java c cpp markdown bash
- highlightScope constant
-codeCell
- highlightScope string
-documentCategoryCell
- highlightScope constant
- enum shopping biology chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
-zoomCell
- extends numberCell
-referenceIdCell
- highlightScope string
-docLayoutOptionCell
- enum custom bin tree column tiled
- highlightScope constant
-commentCell
- highlightScope comment
-commentKeywordCell
- highlightScope comment
-errorCell
- highlightScope invalid
-hashBangWordCell
- highlightScope comment
-stringCell
- highlightScope string
-urlCell
- highlightScope constant
-dateCell
- highlightScope string
-intCell
- regex \\-?[0-9]+
-numberCell
- regex \\-?[0-9]*\\.?[0-9]*
-tileKeywordCell
- highlightScope keyword
-intCell
-tileSettingKeywordCell
- highlightScope variable.language
 quantityCell
  extends intCell
 minCell
@@ -31412,6 +31513,29 @@ primitiveTypeCell
  highlightScope constant.numeric
  description In Ohayo, all columns have a primitive type chosen from one of these. The type affects how the values in the column are understood and displayed. For example, a 0 could be interpretted as a "false", the number 0, or a string "0". Ohayo attempts to choose the correct type, but you can override the default with the columns.setType tile.
  enum boolean code date day dir feet hour hourMinute html int millisecond minute month monthDay number numberString object path second string text url usd week year
+programmingLanguageNameCell
+ enum javascript latex css html ruby rust python csv tsv xml php typescript lisp swift java c cpp markdown bash
+ highlightScope constant
+codeCell
+ highlightScope string
+documentCategoryCell
+ highlightScope constant
+ enum shopping biology chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
+zoomCell
+ extends numberCell
+referenceIdCell
+ highlightScope string
+docLayoutOptionCell
+ enum custom bin tree column tiled
+ highlightScope constant
+commentCell
+ highlightScope comment
+commentKeywordCell
+ highlightScope comment
+errorCell
+ highlightScope invalid
+hashBangWordCell
+ highlightScope comment
 parserIdsCell
  description Ohayo has these parsers which convert your raw data to tables.
  enum csv tsv json treeRows tree ssv xml psv text spaced sections json list txt jsonMap jsonVector jsonCounts jsonDataTableWithHeader
@@ -31427,11 +31551,24 @@ alphanumericCell
 extraWordCell
  todo Remove this? It looks like its a standard cell type.
  highlightScope invalid
+stringCell
+ highlightScope string
+urlCell
+ highlightScope constant
+dateCell
+ highlightScope string
+intCell
+ regex \\-?[0-9]+
+numberCell
+ regex \\-?[0-9]*\\.?[0-9]*
 reductionTypeCell
  enum count sum mean min max median
  highlightScope constant
-supportedTreeLanguageCell
- enum maia stump hakon fire
+tileKeywordCell
+ highlightScope keyword
+intCell
+tileSettingKeywordCell
+ highlightScope variable.language
 challengeIdCell
  extends intCell
 challengeAnswerCell
@@ -31444,7 +31581,7 @@ dateColumnTypeCell
  enum day month year monthDay
  highlightScope constant
 dummyDataSetIdCell
- enum maiaPrograms waterBill gapMinder markdown webPages outerSpace wordCounts treeProgram poem playerGoals patients regionalMarkets stockPrice
+ enum ohayoPrograms waterBill gapMinder markdown webPages outerSpace wordCounts treeProgram poem playerGoals patients regionalMarkets stockPrice
 tileEventNameCell
  enum fetchTableInputs getTileBodyStumpCode treeComponentDidMount treeComponentDidUpdate
 scalarValueCell
@@ -31480,6 +31617,8 @@ startIndexCell
  extends intCell
 lengthCell
  extends intCell
+supportedTreeLanguageCell
+ enum ohayo
 cameraDistanceNumberCell
  extends numberCell
 horizontalNumberCell
@@ -31494,11 +31633,30 @@ vegaExampleNameCell
  enum airport_connections area area_cumulative_freq area_horizon area_overlay area_temperature_range area_vertical bar bar_1d bar_1d_rangestep_config bar_aggregate bar_aggregate_count bar_aggregate_format bar_aggregate_size bar_aggregate_sort_by_encoding bar_aggregate_sort_mean bar_aggregate_transform bar_aggregate_vertical bar_argmax bar_argmax_transform bar_array_aggregate bar_binned_data bar_color_disabled_scale bar_column_fold bar_custom_sort_full bar_custom_sort_partial bar_distinct bar_diverging_stack_transform bar_filter_calc bar_fit bar_gantt bar_grouped bar_grouped_horizontal bar_layered_transparent bar_layered_weather bar_month bar_month_temporal bar_size_default bar_size_explicit bar_size_explicit_bad bar_size_fit bar_size_rangestep_small bar_sort_by_count bar_swap_axes bar_swap_custom bar_title bar_title_start bar_tooltip bar_tooltip_multi bar_yearmonth bar_yearmonth_custom_format boxplot_1D_horizontal boxplot_1D_horizontal_custom_mark boxplot_1D_horizontal_explicit boxplot_1D_vertical boxplot_2D_horizontal boxplot_2D_horizontal_color_size boxplot_2D_vertical boxplot_minmax_2D_horizontal boxplot_minmax_2D_horizontal_custom_midtick_color boxplot_minmax_2D_vertical boxplot_tooltip_aggregate boxplot_tooltip_not_aggregate brush_table circle circle_binned circle_binned_maxbins_2 circle_binned_maxbins_20 circle_binned_maxbins_5 circle_bubble_health_income circle_flatten circle_github_punchcard circle_natural_disasters circle_opacity circle_scale_quantile circle_scale_quantize circle_scale_threshold concat_bar_layer_circle concat_bar_scales_discretize concat_bar_scales_discretize_2_cols concat_hover concat_hover_filter concat_layer_voyager_result_future concat_marginal_histograms concat_population_pyramid concat_weather connected_scatterplot embedded_csv errorband_2d_horizontal_color_encoding errorband_2d_vertical_borders errorbar_2d_vertical_ticks errorbar_aggregate errorbar_horizontal_aggregate facet_bullet facet_column_facet_column_point_future facet_column_facet_row_point_future facet_cross_independent_scale facet_custom facet_custom_header facet_independent_scale facet_independent_scale_layer_broken facet_row_facet_row_point_future geo_choropleth geo_circle geo_constant_value geo_custom_projection geo_graticule geo_graticule_object geo_layer geo_layer_line_london geo_layer_multi geo_line geo_point geo_repeat geo_rule geo_sphere geo_text geo_trellis hconcat_weather histogram histogram_bin_change histogram_bin_transform histogram_log histogram_no_spacing histogram_ordinal histogram_ordinal_sort interactive_area_brush interactive_bar_select_highlight interactive_brush interactive_concat_layer interactive_dashboard_europe_pop interactive_layered_crossfilter interactive_layered_crossfilter_discrete interactive_multi_line_label interactive_multi_line_tooltip interactive_overview_detail interactive_paintbrush interactive_paintbrush_color interactive_paintbrush_color_nearest interactive_paintbrush_interval interactive_paintbrush_simple_all interactive_paintbrush_simple_none interactive_panzoom_splom interactive_panzoom_vconcat_shared interactive_query_widgets interactive_seattle_weather interactive_splom interactive_stocks_nearest_index isotype_bar_chart isotype_bar_chart_emoji isotype_grid joinaggregate_mean_difference joinaggregate_mean_difference_by_year joinaggregate_percent_of_total joinaggregate_residual_graph layer_bar_annotations layer_bar_labels layer_bar_labels_style layer_bar_line layer_bar_line_union layer_bar_month layer_boxplot_circle layer_candlestick layer_circle_independent_color layer_color_legend_left layer_cumulative_histogram layer_dual_axis layer_falkensee layer_histogram layer_histogram_global_mean layer_line_co2_concentration layer_line_color_rule layer_line_errorband_2d_horizontal_borders_strokedash layer_line_errorband_ci layer_line_errorband_pre_aggregated layer_line_mean_point_raw layer_overlay layer_point_errorbar_1d_horizontal layer_point_errorbar_1d_vertical layer_point_errorbar_2d_horizontal layer_point_errorbar_2d_horizontal_ci layer_point_errorbar_2d_horizontal_color_encoding layer_point_errorbar_2d_horizontal_custom_ticks layer_point_errorbar_2d_horizontal_iqr layer_point_errorbar_2d_horizontal_stdev layer_point_errorbar_2d_vertical layer_point_errorbar_ci layer_point_errorbar_pre_aggregated_asymmetric_error layer_point_errorbar_pre_aggregated_symmetric_error layer_point_errorbar_pre_aggregated_upper_lower layer_point_errorbar_stdev layer_precipitation_mean layer_ranged_dot layer_rect_extent layer_scatter_errorband_1D_stdev_global_mean layer_scatter_errorband_1d_stdev layer_single_color layer_text_heatmap line line_calculate line_color line_color_binned line_detail line_encoding_impute_keyvals line_encoding_impute_keyvals_sequence line_impute_frame line_impute_keyvals line_impute_method line_impute_transform_frame line_impute_transform_value line_impute_value line_inside_domain_using_clip line_inside_domain_using_transform line_max_year line_mean_month line_mean_year line_monotone line_month line_outside_domain line_overlay line_overlay_stroked line_quarter_legend line_shape_overlay line_skip_invalid line_skip_invalid_mid line_skip_invalid_mid_cap_square line_skip_invalid_mid_overlay line_slope line_step line_timeunit_transform lookup parallel_coordinate point_1d point_1d_array point_2d point_2d_aggregate point_2d_array point_2d_array_named point_2d_tooltip_data point_aggregate_detail point_background point_binned_color point_binned_opacity point_binned_size point_bubble point_color point_color_custom point_color_ordinal point_color_quantitative point_color_shape_constant point_color_with_shape point_colorramp_size point_diverging_color point_dot_timeunit_color point_filled point_href point_invalid_color point_log point_no_axis_domain_grid point_ordinal_color point_overlap point_shape_custom point_tooltip rect_binned_heatmap rect_heatmap rect_heatmap_weather rect_lasagna_future rect_mosaic_labelled rect_mosaic_labelled_with_offset rect_mosaic_simple repeat_histogram repeat_histogram_flights repeat_independent_colors repeat_layer repeat_line_weather repeat_splom_cars repeat_splom_iris rule_color_mean rule_extent sample_scatterplot selection_bind_cylyr selection_bind_origin selection_brush_timeunit selection_clear_brush selection_composition_and selection_composition_or selection_concat selection_filter selection_filter_composition selection_heatmap selection_insert selection_interval_mark_style selection_layer_bar_month selection_multi_condition selection_project_binned_interval selection_project_interval selection_project_interval_x selection_project_interval_x_y selection_project_interval_y selection_project_multi selection_project_multi_cylinders selection_project_multi_cylinders_origin selection_project_multi_origin selection_project_single selection_project_single_cylinders selection_project_single_cylinders_origin selection_project_single_origin selection_resolution_global selection_resolution_intersect selection_resolution_union selection_toggle_altKey selection_toggle_altKey_shiftKey selection_toggle_shiftKey selection_translate_brush_drag selection_translate_brush_shift-drag selection_translate_scatterplot_drag selection_translate_scatterplot_shift-drag selection_type_interval selection_type_interval_invert selection_type_multi selection_type_single selection_type_single_dblclick selection_type_single_mouseover selection_zoom_brush_shift-wheel selection_zoom_brush_wheel selection_zoom_scatterplot_shift-wheel selection_zoom_scatterplot_wheel sequence_line square stacked_area stacked_area_normalize stacked_area_ordinal stacked_area_overlay stacked_area_stream stacked_bar_1d stacked_bar_count stacked_bar_h stacked_bar_h_order stacked_bar_h_order_custom stacked_bar_normalize stacked_bar_population stacked_bar_population_transform stacked_bar_size stacked_bar_sum_opacity stacked_bar_unaggregate stacked_bar_v stacked_bar_weather test_aggregate_nested test_field_with_spaces test_single_point_color test_subobject test_subobject_missing test_subobject_nested text_format text_scatterplot_colored tick_dot tick_dot_thickness tick_sort tick_strip time_output_utc_scale time_output_utc_timeunit time_parse_local time_parse_utc time_parse_utc_format trail_color trellis_anscombe trellis_area trellis_area_sort_array trellis_bar trellis_bar_histogram trellis_bar_histogram_label_rotated trellis_barley trellis_barley_independent trellis_barley_layer_median trellis_column_year trellis_cross_sort trellis_cross_sort_array trellis_line_quarter trellis_row_column trellis_scatter trellis_scatter_binned_row trellis_scatter_small trellis_selections trellis_stacked_bar vconcat_flatten vconcat_weather waterfall_chart wheat_wages window_cumulative_running_average window_percent_of_total window_rank window_top_k window_top_k_others
 wikipediaPermalinkCell
  extends anyCell
+tileBlankLineNode
+ boolean visible false
+ pattern ^$
+ tags doNotSynthesize
+ cells emptyCell
 abstractTileTreeComponentNode
  abstract
  cells tileKeywordCell
  _extendsJsClass AbstractTreeComponent
- inScope tileBlankLineNode abstractCoreTileSettingTerminalNode
+ inScope tileBlankLineNode abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode
+ string settingKey setting
+ string rowDisplayLimitKey rowDisplayLimit
+ string contentKey content
+ string xColumnKey xColumn
+ string yColumnKey yColumn
+ string colorColumnKey colorColumn
+ string shapeColumnKey shapeColumn
+ string sizeColumnKey sizeColumn
+ string columnPredictionHintsKey columnPredictionHints
+ string ohayoFileExtensionKey .ohayo
+ string dayKey day
+ boolean needsData true
+ string monthKey month
+ string yearKey year
  catchAllNodeType catchAllErrorNode
  int headerHeight 30
  int footerHeight 30
@@ -31511,19 +31669,6 @@ abstractTileTreeComponentNode
   span {icon}
    class TilePencilButton
    clickCommand toggleToolbarCommand
- string inspectionStumpTemplate
-  div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
-  div Messages:
-  ol
-   {messages}
-  div Tree:
-  pre
-   bern
-    {sourceCode}
-  div All Tile Settings:
-  pre
-   bern
-    {settings}
  string errorStateStumpTemplate
   div
    class {classes}
@@ -31561,753 +31706,19 @@ abstractTileTreeComponentNode
     {footer}
    div
     class TileGrabber
- javascript
-  getProgramTemplate(id) {}
-  getSnippetTemplate(id) {}
-  getExampleTemplate(index) {
-   // todo: right now we only have 1 example per tile.
-   const exampleNode = this.getDefinition().getNode(jtree.GrammarConstants.example)
-   return exampleNode ? exampleNode.childrenToString() : ""
-  }
-  emitLogMessage(message) {
-   const tab = this.getTab()
-   if (tab) tab.addStumpCodeMessageToLog(message)
-   else if (this.isNodeJs()) console.log(message)
-  }
-  getTheme() {
-   return this.getTab().getTheme()
-  }
-  qFormat(str, obj) {
-   return new jtree.TreeNode(str).templateToString(obj)
-  }
-  scrollIntoView() {
-   const el = this.getStumpNode()
-    .getShadow()
-    .getShadowElement()
-   if (el) el.scrollIntoView()
-  }
-  async loadBrowserRequirements() {
-   const loadingMap = this.getTab()
-    .getRootNode()
-    .getDefinitionLoadingPromiseMap()
-   if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
-   await loadingMap.get(this.constructor)
-  }
-  async _makeBrowserLoadRequirementsPromise(loadingMap) {
-   const app = this.getWebApp()
-   const cssScript = this[TilesConstants.tileCssScript]
-   if (cssScript) this._loadTileCss(cssScript)
-   const def = this.getDefinition()
-   const scriptPaths = def.nodesThatStartWith("string " + TilesConstants.tileScript).map(node => node.getWord(2))
-   const thisScript = this[TilesConstants.tileScript]
-   if (thisScript && !scriptPaths.includes(thisScript)) scriptPaths.push(thisScript)
-   if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
-   loadingMap.set(this.constructor, true)
-  }
-  _loadTileCss(css) {
-   const app = this.getWebApp()
-   app
-    .getWillowBrowser()
-    .getBodyStumpNode()
-    .insertChildNode(
-     css
-      .split(" ")
-      .map(
-       url => \`link
-   rel stylesheet
-   media screen
-   href \${url}\`
-      )
-      .join("\\n")
-    )
-  }
-  _hasBrowserRequirements() {
-   return this.tileScript
-  }
-  _areBrowserRequirementsLoaded() {
-   if (this.isNodeJs()) return true
-   // todo: cleanup. assumes app is here in browser.
-   const loadingMap = app.getDefinitionLoadingPromiseMap()
-   return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
-  }
-  isLoaded() {
-   return this._areBrowserRequirementsLoaded()
-  }
-  getErrorMessageHtml() {
-   const errors = Object.values(this.getRunTimePhaseErrors())
-   return errors.length ? \` <span style="color: \${this.getTheme().errorColor};">\${errors.join(" ")}</span>\` : "" //todo: cleanup
-  }
-  toStumpErrorStateCode(err) {
-   return this.qFormat(this.errorStateStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), content: \`div \` + err, footer: this.getTileToolbarButtonStumpCode() })
-  }
-  // todo: delete this
-  makeDirty() {
-   delete this._cache_settingsObject
-   delete this._bodyStumpCodeCache // todo: cleanup
-   this._setLastRenderedTime(0)
-  }
-  toggleToolbar() {
-   if (!this._tileToolbar) {
-    const TileToolbarTreeComponent = this.require("TileToolbarTreeComponent", this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileToolbarTreeComponent.js")
-    this._tileToolbar = new TileToolbarTreeComponent("", undefined, this)
-    this._tileToolbar.renderAndGetRenderReport(this.getStumpNode())
-   } else this._tileToolbar = this._tileToolbar.unmount()
-  }
-  getAllTileSettingsDefinitions() {
-   const def = this.getDefinition()
-   return Object.values(def.getFirstWordMapWithDefinitions()).filter(def => def.isOrExtendsANodeTypeInScope([TilesConstants.abstractTileSetting]))
-  }
-  getTab() {
-   return this.getRootNode().getTab()
-  }
-  getChildTiles() {
-   return this.getChildInstancesOfNodeTypeId("abstractTileTreeComponentNode")
-  }
-  selectTile() {
-   this.selectNode()
-   if (this.isMounted()) this.getStumpNode().addClassToStumpNode(TilesConstants.selectedClass)
-  }
-  unselectNode() {
-   super.unselectNode()
-   if (this.isMounted()) this.getStumpNode().removeClassFromStumpNode(TilesConstants.selectedClass)
-  }
-  getCssClassNames() {
-   const classNames = super.getCssClassNames()
-   if (this._isMaximized()) classNames.push("TileMaximized")
-   return classNames
-  }
-  toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, {
-    classes: this.getCssClassNames().join(" "),
-    id: this.getTreeComponentId(),
-    header: this.getTileHeaderBern(),
-    bodyStyle: this.customBodyStyle || "",
-    body: this._getBodyStumpCodeCache() || "",
-    footer: this.getTileFooterStumpCode()
-   })
-  }
-  _getBodyStumpCodeCache() {
-   if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
-   return this._bodyStumpCodeCache
-  }
-  getTileHeaderBern() {
-   return \`\${this.getFirstWord()}\`
-  }
-  cloneAndOffset() {
-   const clone = this.duplicate()
-   const left = this.getLeft()
-   const _top = this.getTop()
-   if (left) clone.touchNode(TilesConstants.left).setContent(parseInt(left) + 1)
-   if (_top) clone.touchNode(TilesConstants.top).setContent(parseInt(_top) + 1)
-   return clone
-  }
-  getTileBodyStumpCode() {
-   return \`\`
-  }
-  _getCss() {
-   const selector = "#" + this.getTreeComponentId()
-   const theme = this.getTheme()
-   const visibleCss = this.isVisible() ? "" : "display: none"
-   const dimensions = this.getTileDimensionIfAny()
-   const dimensionCss = dimensions ? dimensions.toCss() : ""
-   const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
-   return \`\${selector} { \${visibleCss} \${dimensionCss} }
-        \${theme.hakonToCss(hakonCode)}\`
-  }
-  getContextMenuStumpCode() {
-   return ""
-  }
-  handleTileError(err) {
-   if (!this._errorCount) this._errorCount = 0
-   this._errorCount++
-   this.getRootNode().goRed(err)
-  }
-  getWall() {
-   return this.getWebApp().getAppWall()
-  }
-  getWebApp() {
-   return this.getTab().getRootNode()
-  }
-  getTileDimensionIfAny() {
-   const dimensions = this.getWall().getWallViewPortDimensions()
-   return this.getRootNode()
-    .getTileDimensionMap(dimensions.width, dimensions.height)
-    .get(this)
-  }
-  getTileBodyDimension() {
-   const dimension = this.getTileDimensionIfAny()
-   dimension.height = dimension.height - this.headerHeight - this.footerHeight
-   return dimension
-  }
-  getDependencies() {
-   return []
-  }
-  async runAndrenderAndGetRenderReport() {
-   await this.execute()
-   return this.renderAndGetRenderReport()
-  }
-  getTimeToLoad() {
-   return this._timeToLoad || 0
-  }
-  toHakonCode() {
-   return ""
-  }
-  getTileFooterStumpCode() {
-   return this.getTileToolbarButtonStumpCode()
-  }
-  getTileToolbarButtonStumpCode() {
-   return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
-  }
-  getDefinedOrSuggestedSize() {
-   const size = this.getSuggestedSize()
-   const width = this.getWidth()
-   const height = this.getHeight()
-   return {
-    width: width ? width * 20 : size.width,
-    height: height ? height * 20 : size.height
-   }
-  }
-  getSuggestedSize() {
-   const tileSize = this.tileSize || "280 220"
-   const parts = tileSize.split(" ").map(tileSize => parseInt(tileSize))
-   return {
-    width: parts[0],
-    height: parts[1]
-   }
-  }
-  getRequiredDimensionsForTreeLayout(padding = 0) {
-   const size = {
-    width: 0,
-    height: 0
-   }
-   const children = this.getChildTiles()
-   const suggestedSize = this.getDefinedOrSuggestedSize()
-   children.forEach(child => {
-    const childSize = child.getRequiredDimensionsForTreeLayout(padding)
-    size.width += childSize.width
-    size.height = childSize.height > size.height ? childSize.height : size.height
-   })
-   size.width += children.length * padding
-   size.width = Math.max(size.width, suggestedSize.width)
-   size.height = suggestedSize.height + (children.length ? padding + size.height : 0)
-   return size
-  }
-  getLeft() {
-   return this.get(TilesConstants.left)
-  }
-  getTop() {
-   return this.get(TilesConstants.top)
-  }
-  getWidth() {
-   return this.get(TilesConstants.width)
-  }
-  getHeight() {
-   return this.get(TilesConstants.height)
-  }
-  // Tile child rendering is done at the wall flex level.
-  _getChildTreeComponents() {
-   return []
-  }
-  getStumpNodeForChildren() {
-   // We render all Tiles on the Wall.
-   return this.getStumpNode().getParent()
-  }
-  async treeComponentDidMount() {
-   super.treeComponentDidMount()
-   if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
-  }
-  toInspectionStumpCode() {
-   const messages = this.getMessageBuffer().map(message => \`li \${moment(message.getLineModifiedTime()).fromNow()} - \${message.childrenToString()}\`)
-   const settingsDefinitions = this.getAllTileSettingsDefinitions()
-    .map(setting => \`\${setting.getFirstWord()} \${setting.getDescription()}\`)
-    .join("\\n")
-   const parentConstructorName = this.getParent().constructor.name
-   const constructorName = this.constructor.name
-   const sourceCode = this.toString()
-   const settings = settingsDefinitions
-   return this.qFormat(this.inspectionStumpTemplate, {
-    constructorName,
-    parentConstructorName,
-    sourceCode,
-    messages,
-    settings
-   })
-  }
-  isVisible() {
-   if (this.visible === false) return false
-   return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
-  }
-  _isMaximized() {
-   return this.has(TilesConstants.maximized)
-  }
-  async _executeChildNodes() {
-   await Promise.all(this.getChildTiles().map(tile => tile.execute()))
-  }
-  async _execute() {
-   await this._executeChildNodes()
-  }
-  async execute() {
-   try {
-    this.setRunTimePhaseError("execute")
-    await this._execute()
-   } catch (err) {
-    this.setRunTimePhaseError("execute", err)
-    console.error(err)
-    this.emitLogMessage(this.errorLogMessageStumpTemplate)
-   }
-   return this
-  }
-  cloneTileCommand() {
-   this.cloneAndOffset()
-   return this.getTab().autosaveAndRender()
-  }
-  async toggleTileMaximizeCommand() {
-   if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
-   else this.touchNode(TilesConstants.maximized)
-   await this._runAfterTileUpdate(this)
-  }
-  async triggerTileMethodCommand(value, methodName) {
-   await this[methodName](value)
-   await this._runAfterTileUpdate(this)
-  }
-  // todo: refactor.
-  async changeTileTypeCommand(newValue) {
-   this.setFirstWord(newValue)
-   const newNode = this.duplicate()
-   // todo: destroy or something? how do we reparse.
-   this.unmountAndDestroy()
-   const app = this.getTab().getRootNode()
-   await Promise.all(
-    this.getRootNode()
-     .getTiles()
-     .map(tile => tile.loadBrowserRequirements())
-   )
-   await this.getTab().autosaveAndRender()
-   newNode.runAndrenderAndGetRenderReport()
-  }
-  changeParentCommand(pathVector) {
-   // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
-   const program = this.getRootNode()
-   const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
-   const destinationTree = indexPath ? program.nodeAt(indexPath) : program
-   // todo: on jtree should we make copyTo second param optional?
-   this.copyTo(destinationTree, destinationTree.length)
-   this.unmountAndDestroy()
-   return this.getTab().autosaveAndRender()
-  }
-  async openTileContextMenuCommand() {
-   this.getTab()
-    .getRootNode()
-    .setTargetNode(this)
-    .toggleAndRender(OhayoConstants.tileContextMenu)
-  }
-  destroyTileCommand() {
-   this.unmountAndDestroy()
-   return this.getTab().autosaveAndRender()
-  }
-  getNewDataCommand() {
-   // todo: have some type of paging system to fetch new data.
-  }
-  async changeTileSettingAndRenderCommand(value, settingName) {
-   // note the unusual ordering of params.
-   this.touchNode(settingName).setContent(value.toString())
-   // todo: sometimes size needs to be redone (maximize, for example)
-   await this._runAfterTileUpdate(this)
-  }
-  // todo: remove
-  async changeTileSettingMultilineCommand(val, settingName) {
-   this.touchNode(settingName).setChildren(val)
-   await this._runAfterTileUpdate(this)
-  }
-  async changeTileSettingCommand(settingName, value) {
-   this.touchNode(settingName).setContent(value)
-  }
-  async changeWordAndRenderCommand(value, index) {
-   this.setWord(parseInt(index), value)
-   await this._runAfterTileUpdate(this)
-  }
-  async changeWordsAndRenderCommand(value, index) {
-   index = parseInt(index)
-   const edgeSymbol = this.getEdgeSymbol()
-   const words = this.getWords().slice(0, index)
-   this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
-   await this._runAfterTileUpdate(this)
-  }
-  async updateChildrenCommand(val) {
-   this.setChildren(val)
-   // reload the whole doc for now.
-   await this._runAfterTileUpdate(this)
-  }
-  async _runAfterTileUpdate(tile) {
-   tile.makeDirty() // ugly!
-   tile.getChildTiles().forEach(tile => {
-    tile.makeDirty() // todo: ugly!
-   })
-   // todo: what if you have a tile that has a contextare that allows editing of its children/
-   // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
-   await tile.getTab().autosaveTab()
-   await tile.runAndrenderAndGetRenderReport()
-   tile
-    .getTab()
-    .getRootNode()
-    .renderApp() // Need to render full app because of code editor
-  }
-  // todo: downstream data changes?
-  async changeTileContentAndRenderCommand(value) {
-   this.setContent(value)
-   await this._runAfterTileUpdate(this)
-  }
-  async copyTileCommand() {
-   // todo: remove cousin tiles?
-   this.getRootNode()
-    .getWillowBrowser()
-    .copyTextToClipboard(this.getFirstAncestor().toString())
-  }
-  async createProgramFromTileExampleCommand(index) {
-   const template = this.getExampleTemplate(index)
-   if (!template) return undefined
-   const fileExtension = "maia" // todo: generalize
-   const tab = await this.getTab()
-    .getRootNode()
-    ._createAndOpen(template, \`help-for-\${this.getFirstWord()}.\${fileExtension}\`)
-   tab.addStumpCodeMessageToLog(\`div Created '\${tab.getFullTabFilePath()}'\`)
-  }
-  async inspectTileCommand() {
-   if (!this.isNodeJs()) {
-    console.log("Tile available at window.tile")
-    window.tile = this
-    console.log(this)
-   }
-   this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
-   this.getTab()
-    .getRootNode()
-    .renderApp()
-  }
-  async toggleToolbarCommand() {
-   this.toggleToolbar()
-  }
-  async createProgramFromTemplateCommand(id) {
-   const programTemplate = this.getProgramTemplate(id)
-   if (!programTemplate) return undefined
-   const tab = await this.getTab()
-    .getRootNode()
-    ._createAndOpen(programTemplate.template, programTemplate.name)
-   tab.addStumpCodeMessageToLog(\`div Created '\${tab.getFullTabFilePath()}'\`)
-  }
-  async appendSnippetTemplateCommand(id) {
-   const snippet = this.getSnippetTemplate(id)
-   if (!snippet) return undefined
-   const tab = this.getTab()
-   const tabProgram = tab.getTabProgram()
-   const newNodes = tabProgram.concat(snippet)
-   const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
-   tab.autosaveTab()
-   tabProgram.clearSelection()
-   tab.getTabWall().unmount()
-   await tabProgram.loadAndIncrementalRender()
-   newTiles.forEach(tile => tile.selectTile())
-   newTiles[0].scrollIntoView()
-  }
-  async copyDataCommand(delimiter) {
-   this.getRootNode()
-    .getWillowBrowser()
-    .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
-  }
-  async copyDataAsJavascriptCommand() {
-   const table = this.getOutputOrInputTable()
-   this.getRootNode()
-    .getWillowBrowser()
-    .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
-  }
-  async copyDataAsTreeCommand() {
-   const text = this.getOutputOrInputTable()
-    .toTree()
-    .toString()
-   this.getRootNode()
-    .getWillowBrowser()
-    .copyTextToClipboard(text)
-  }
-  async exportTileDataCommand(format = "csv") {
-   // todo: figure this out. use the browsers filename? tile title? id?
-   let extension = "csv"
-   let type = "text/csv"
-   let str = this.getOutputOrInputTable().toDelimited(",")
-   if (format === "tree") {
-    extension = "tree"
-    type = "text"
-    str = this.getOutputOrInputTable()
-     .toTree()
-     .toString()
-   }
-   this.getRootNode()
-    .getWillowBrowser()
-    .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
-  }
-basicRecursiveTileNode
- extends abstractTileTreeComponentNode
- string hakonTemplate
-  .BasicRecursiveTile
-   input
-   textarea
-    border 0
-    font-size 14px
-    height 100%
-    width 100%
- javascript
-  getTileBodyStumpCode() {
-   const edgeSymbol = " "
-   const definition = this.getDefinition()
-   const requiredCellIds = definition.getRequiredCellTypeIds()
-   const catchAllIndex = requiredCellIds.length
-   const catchAllCellTypeId = definition.getCatchAllCellTypeId()
-   if (catchAllCellTypeId) requiredCellIds.push(catchAllCellTypeId)
-   const cellInputs = requiredCellIds.map((cellTypeId, index) => {
-    const isCatchAll = cellTypeId === catchAllCellTypeId && index === catchAllIndex
-    const value = isCatchAll ? this.getWordsFrom(index + 1).join(edgeSymbol) : this.getWord(index + 1)
-    return \` input
-    placeholder \${cellTypeId}
-    value \${value}
-    name \${index + 1}
-    changeCommand \${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}\`
-   })
-   return \`div \${definition.getDescription()}
-  div
-  \${cellInputs.join("\\n")}\`
-  }
-DidYouMeanTileNode
- tags noPicker
- description Provides suggestions for misspelled tiles.
- extends abstractTileTreeComponentNode
- crux tiles.didyoumean
- string bodyStumpTemplate
-  div
-   span No tile '{input}' found. Line {lineNo}. Did you mean
-   a {closestTile}
-    collapse
-    tabindex -1
-    value {closestTile}
-    clickCommand changeTileTypeCommand
-   span ?
- javascript
-  getTileBodyStumpCode() {
-   const input = this.getFirstWord()
-   const lineNo = this.getLineNumber()
-   const closestTile = jtree.Utils.didYouMean(
-    input,
-    this.getRootNode()
-     .getHandGrammarProgram()
-     .getTopNodeTypeDefinitions()
-     .map(def => def.get("crux"))
-   )
-   if (!closestTile) {
-    if (!input) return \`div Your program has a blank line on line \${lineNo}.\`
-    return \`div No tile '\${input}' found.\`
-   }
-   return this.qFormat(this.bodyStumpTemplate, { input, lineNo, closestTile })
-  }
-  getErrors() {
-   return [new jtree.UnknownNodeTypeError(this)]
-  }
-  getTileHeaderBern() {
-   return ""
-  }
-abstractDocTileNode
- int footerHeight 0
- int headerHeight 0
- tags noPicker
- cells tileKeywordCell
- extends abstractTileTreeComponentNode
- abstract
- string bodyStumpTemplate
-  {tagName}
+ string inspectionStumpTemplate
+  div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
+  div Messages:
+  ol
+   {messages}
+  div Tree:
+  pre
    bern
-    {content}
- string tileStumpTemplate
-  div
-   class {classes}
-   id {id}
-   contextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
-   div
-    class TileBody HeaderLess
-    {body}
-   div
-    class TileFooter
-    {footer}
-   div
-    class TileGrabber
- javascript
-  _getBody() {
-   return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
-  }
-  toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
-  }
-docTitleNode
- catchAllCellType stringCell
- description A title
- example A doc
-  doc.title A Tale of Two Cities
- string tileSize 600 75
- extends abstractDocTileNode
- cells tileKeywordCell
- crux doc.title
- string tagName h1
-docSubtitleNode
- extends docTitleNode
- description A subheader
- string tagName h2
- crux doc.subtitle
-docSectionNode
- description A section containing subtitles, paragraphs, code blocks, etc.
- crux doc.section
- extends abstractDocTileNode
- inScope abstractDocSectionComponentNode
- javascript
-  _getBody() {
-   return this.compile()
-  }
-  _getCompiledLine() {
-   return ""
-  }
- example
-  doc.section
-   subtitle Subtitle
-   paragraph Paragraph
-   code python
-    # some code
-docReferenceNode
- extends abstractDocTileNode
- crux doc.ref
- cells tileKeywordCell referenceIdCell
- inScope docReferenceUrlNode
- string tagName p
- example
-  doc.ref someRefId
-   url https://en.wikipedia.org/wiki/Note_(typography)
- description A reference to an external source
-docCommentNode
- description A comment node
- cells commentKeywordCell
- extends abstractTileTreeComponentNode
- boolean visible false
- frequency 0
- example An example program with comments
-  doc.comment get iris data
-  samples.iris
-   doc.comment filter is
-   filter.where Species = virginica
-    doc.comment display results
-    tables.basic
- catchAllCellType commentCell
- catchAllNodeType commentLineNode
- crux doc.comment
-docToolingNode
- extends docCommentNode
- crux doc.tooling
-abstractPickerTileNode
- extends abstractTileTreeComponentNode
- string tileSize 480 420
- abstract
- string hakonTemplate
-  .PickerTileNode
-   .PickerCategory
-    width 100%
-    margin-top 20px
-    text-align center
-   .TileBody
-    display flex
-    flex-flow row wrap
-    a
-     &:hover
-      background-color {borderColor}
-     padding 10px
-     margin 5px
-     height 30px
-     background-color {backgroundColor}
-     border 1px solid {borderColor}
-     overflow hidden
-     text-align center
-     text-overflow ellipsis
-     font-size 14px
-     width 120px
-     span
-      font-size 70%
- string itemStumpTemplate
-  {categoryBreak}
-  a {name}
-   br
-    span {description}
-   title {description}
-   tabindex -1
-   value {value}
-   clickCommand {command}
- string categoryBreakStumpTemplate
-  div {category}
-   class PickerCategory
- string tileHeader Gallery
- javascript
-  async fetchTableInputs() {
-   return { rows: this.getChoices().map(obj => obj.toObject()) }
-  }
-  getTileBodyStumpCode() {
-   let lastCat = ""
-   return this.getChoices()
-    .map(choice => {
-     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
-     lastCat = choice.category
-     return this.qFormat(this.itemStumpTemplate, choice)
-    })
-    .join("\\n")
-  }
-  getTileHeaderBern() {
-   return this.tileHeader
-  }
-PickerTileNode
- extends abstractPickerTileNode
- description Displays list of available tiles.
- crux doc.picker
- string tileHeader Tile Gallery
- javascript
-  getChoices() {
-   const allChoices = this.getRootNode()
-    .getHandGrammarProgram()
-    .getTopNodeTypeDefinitions()
-   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
-   const theChoices = filteredChoices.length ? filteredChoices : allChoices
-   return theChoices.map(nodeDefinition => {
-    const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
-    const name = nodeId.split(".")[1] || ""
-    const category = lodash.upperFirst(nodeId.split(".")[0])
-    const description = nodeDefinition.getDescription()
-    return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
-   })
-  }
-abstractMaiaTileNode
- abstract
- extends abstractTileTreeComponentNode
- inScope abstractTileTreeComponentNode abstractCoreTileSettingTerminalNode
- cells tileKeywordCell
- string settingKey setting
- string rowDisplayLimitKey rowDisplayLimit
- string contentKey content
- string xColumnKey xColumn
- string yColumnKey yColumn
- string colorColumnKey colorColumn
- string shapeColumnKey shapeColumn
- string sizeColumnKey sizeColumn
- string columnPredictionHintsKey columnPredictionHints
- string maiaFileExtensionKey .maia
- string dayKey day
- string monthKey month
- string yearKey year
- string maiaStumpInspectionTemplate
-  div TileStruct:
-   pre
-    bern
-     {settings}
+    {sourceCode}
+  div All Tile Settings:
+  pre
+   bern
+    {settings}
   div Input rows: {inputCount} Output rows: {outputCount}
   div Load time: {timeToLoad} Render time: {renderTime}
   div Input Columns:
@@ -32384,17 +31795,10 @@ abstractMaiaTileNode
    this.makeDirty() // todo: remove
    return this
   }
-  isLoaded() {
-   return super.isLoaded() && this._isDataLoaded
-  }
   getRowsAsDataTableArrayWithHeader(rows, header) {
    const data = rows.map(row => row.getAsArray(header))
    data.unshift(header)
    return data
-  }
-  async _execute() {
-   this.setIsDataLoaded(true)
-   await this._executeChildNodes()
   }
   getTileQualityCheck() {
    const definition = this.getDefinition()
@@ -32431,7 +31835,266 @@ abstractMaiaTileNode
    if (hintsNode) Object.assign(settingsFromCache, this.getParentOrDummyTable().getPredictionsForAPropertyNameToColumnNameMapGivenHintsNode(new jtree.TreeNode(hintsNode), settingsFromCache))
    return settingsFromCache
   }
+  getProgramTemplate(id) {}
+  getSnippetTemplate(id) {}
+  getExampleTemplate(index) {
+   // todo: right now we only have 1 example per tile.
+   const exampleNode = this.getDefinition().getNode(jtree.GrammarConstants.example)
+   return exampleNode ? exampleNode.childrenToString() : ""
+  }
+  emitLogMessage(message) {
+   const tab = this.getTab()
+   if (tab) tab.addStumpCodeMessageToLog(message)
+   else if (this.isNodeJs()) console.log(message)
+  }
+  getTheme() {
+   return this.getTab().getTheme()
+  }
+  qFormat(str, obj) {
+   return new jtree.TreeNode(str).templateToString(obj)
+  }
+  scrollIntoView() {
+   const el = this.getStumpNode()
+    .getShadow()
+    .getShadowElement()
+   if (el) el.scrollIntoView()
+  }
+  async loadBrowserRequirements() {
+   const loadingMap = this.getTab()
+    .getRootNode()
+    .getDefinitionLoadingPromiseMap()
+   if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
+   await loadingMap.get(this.constructor)
+  }
+  async _makeBrowserLoadRequirementsPromise(loadingMap) {
+   const app = this.getWebApp()
+   const cssScript = this[OhayoConstants.tileCssScript]
+   if (cssScript) this._loadTileCss(cssScript)
+   const def = this.getDefinition()
+   const scriptPaths = def.nodesThatStartWith("string " + OhayoConstants.tileScript).map(node => node.getWord(2))
+   const thisScript = this[OhayoConstants.tileScript]
+   if (thisScript && !scriptPaths.includes(thisScript)) scriptPaths.push(thisScript)
+   if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
+   loadingMap.set(this.constructor, true)
+  }
+  _loadTileCss(css) {
+   const app = this.getWebApp()
+   app
+    .getWillowBrowser()
+    .getBodyStumpNode()
+    .insertChildNode(
+     css
+      .split(" ")
+      .map(
+       url => \`link
+   rel stylesheet
+   media screen
+   href \${url}\`
+      )
+      .join("\\n")
+    )
+  }
+  _hasBrowserRequirements() {
+   return this.tileScript
+  }
+  _areBrowserRequirementsLoaded() {
+   if (this.isNodeJs()) return true
+   // todo: cleanup. assumes app is here in browser.
+   const loadingMap = app.getDefinitionLoadingPromiseMap()
+   return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
+  }
+  isLoaded() {
+   return this._areBrowserRequirementsLoaded() && (!this.needsData || this._isDataLoaded)
+  }
+  getErrorMessageHtml() {
+   const errors = Object.values(this.getRunTimePhaseErrors())
+   return errors.length ? \` <span style="color: \${this.getTheme().errorColor};">\${errors.join(" ")}</span>\` : "" //todo: cleanup
+  }
+  toStumpErrorStateCode(err) {
+   return this.qFormat(this.errorStateStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), content: \`div \` + err, footer: this.getTileToolbarButtonStumpCode() })
+  }
+  // todo: delete this
+  makeDirty() {
+   delete this._cache_settingsObject
+   delete this._bodyStumpCodeCache // todo: cleanup
+   this._setLastRenderedTime(0)
+  }
+  toggleToolbar() {
+   if (!this._tileToolbar) {
+    const TileToolbarTreeComponent = this.require("TileToolbarTreeComponent", this._getProjectRootDir() + "studio/treeComponents/TileToolbarTreeComponent.js")
+    this._tileToolbar = new TileToolbarTreeComponent("", undefined, this)
+    this._tileToolbar.renderAndGetRenderReport(this.getStumpNode())
+   } else this._tileToolbar = this._tileToolbar.unmount()
+  }
+  getAllTileSettingsDefinitions() {
+   const def = this.getDefinition()
+   return Object.values(def.getFirstWordMapWithDefinitions()).filter(def => def.isOrExtendsANodeTypeInScope([OhayoConstants.abstractTileSetting]))
+  }
+  getTab() {
+   return this.getRootNode().getTab()
+  }
+  getChildTiles() {
+   return this.getChildInstancesOfNodeTypeId("abstractTileTreeComponentNode")
+  }
+  selectTile() {
+   this.selectNode()
+   if (this.isMounted()) this.getStumpNode().addClassToStumpNode(OhayoConstants.selectedClass)
+  }
+  unselectNode() {
+   super.unselectNode()
+   if (this.isMounted()) this.getStumpNode().removeClassFromStumpNode(OhayoConstants.selectedClass)
+  }
+  getCssClassNames() {
+   const classNames = super.getCssClassNames()
+   if (this._isMaximized()) classNames.push("TileMaximized")
+   return classNames
+  }
+  toStumpCode() {
+   return this.qFormat(this.tileStumpTemplate, {
+    classes: this.getCssClassNames().join(" "),
+    id: this.getTreeComponentId(),
+    header: this.getTileHeaderBern(),
+    bodyStyle: this.customBodyStyle || "",
+    body: this._getBodyStumpCodeCache() || "",
+    footer: this.getTileFooterStumpCode()
+   })
+  }
+  _getBodyStumpCodeCache() {
+   if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
+   return this._bodyStumpCodeCache
+  }
+  getTileHeaderBern() {
+   return \`\${this.getFirstWord()}\`
+  }
+  cloneAndOffset() {
+   const clone = this.duplicate()
+   const left = this.getLeft()
+   const _top = this.getTop()
+   if (left) clone.touchNode(OhayoConstants.left).setContent(parseInt(left) + 1)
+   if (_top) clone.touchNode(OhayoConstants.top).setContent(parseInt(_top) + 1)
+   return clone
+  }
+  getTileBodyStumpCode() {
+   return \`\`
+  }
+  _getCss() {
+   const selector = "#" + this.getTreeComponentId()
+   const theme = this.getTheme()
+   const visibleCss = this.isVisible() ? "" : "display: none"
+   const dimensions = this.getTileDimensionIfAny()
+   const dimensionCss = dimensions ? dimensions.toCss() : ""
+   const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
+   return \`\${selector} { \${visibleCss} \${dimensionCss} }
+        \${theme.hakonToCss(hakonCode)}\`
+  }
+  getContextMenuStumpCode() {
+   return ""
+  }
+  handleTileError(err) {
+   if (!this._errorCount) this._errorCount = 0
+   this._errorCount++
+   this.getRootNode().goRed(err)
+  }
+  getWall() {
+   return this.getWebApp().getAppWall()
+  }
+  getWebApp() {
+   return this.getTab().getRootNode()
+  }
+  getTileDimensionIfAny() {
+   const dimensions = this.getWall().getWallViewPortDimensions()
+   return this.getRootNode()
+    .getTileDimensionMap(dimensions.width, dimensions.height)
+    .get(this)
+  }
+  getTileBodyDimension() {
+   const dimension = this.getTileDimensionIfAny()
+   dimension.height = dimension.height - this.headerHeight - this.footerHeight
+   return dimension
+  }
+  async runAndrenderAndGetRenderReport() {
+   await this.execute()
+   return this.renderAndGetRenderReport()
+  }
+  getTimeToLoad() {
+   return this._timeToLoad || 0
+  }
+  toHakonCode() {
+   return ""
+  }
+  getTileFooterStumpCode() {
+   return this.getTileToolbarButtonStumpCode()
+  }
+  getTileToolbarButtonStumpCode() {
+   return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
+  }
+  getDefinedOrSuggestedSize() {
+   const size = this.getSuggestedSize()
+   const width = this.getWidth()
+   const height = this.getHeight()
+   return {
+    width: width ? width * 20 : size.width,
+    height: height ? height * 20 : size.height
+   }
+  }
+  getSuggestedSize() {
+   const tileSize = this.tileSize || "280 220"
+   const parts = tileSize.split(" ").map(tileSize => parseInt(tileSize))
+   return {
+    width: parts[0],
+    height: parts[1]
+   }
+  }
+  getRequiredDimensionsForTreeLayout(padding = 0) {
+   const size = {
+    width: 0,
+    height: 0
+   }
+   const children = this.getChildTiles()
+   const suggestedSize = this.getDefinedOrSuggestedSize()
+   children.forEach(child => {
+    const childSize = child.getRequiredDimensionsForTreeLayout(padding)
+    size.width += childSize.width
+    size.height = childSize.height > size.height ? childSize.height : size.height
+   })
+   size.width += children.length * padding
+   size.width = Math.max(size.width, suggestedSize.width)
+   size.height = suggestedSize.height + (children.length ? padding + size.height : 0)
+   return size
+  }
+  getLeft() {
+   return this.get(OhayoConstants.left)
+  }
+  getTop() {
+   return this.get(OhayoConstants.top)
+  }
+  getWidth() {
+   return this.get(OhayoConstants.width)
+  }
+  getHeight() {
+   return this.get(OhayoConstants.height)
+  }
+  // Tile child rendering is done at the wall flex level.
+  _getChildTreeComponents() {
+   return []
+  }
+  getStumpNodeForChildren() {
+   // We render all Tiles on the Wall.
+   return this.getStumpNode().getParent()
+  }
+  async treeComponentDidMount() {
+   super.treeComponentDidMount()
+   if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
+  }
   toInspectionStumpCode() {
+   const messages = this.getMessageBuffer().map(message => \`li \${moment(message.getLineModifiedTime()).fromNow()} - \${message.childrenToString()}\`)
+   // const settings = this.getAllTileSettingsDefinitions()
+   // .map(setting => \`\${setting.getFirstWord()} \${setting.getDescription()}\`)
+   // .join("\\n")
+   const settings = JSON.stringify(this.getSettingsStruct(), null, 2)
+   const parentConstructorName = this.getParent().constructor.name
+   const constructorName = this.constructor.name
+   const sourceCode = this.toString()
    const inputTable = this.getParentOrDummyTable()
    const outputTable = this.getOutputOrInputTable()
    const outputColumns = outputTable.getColumnsArrayOfObjects()
@@ -32442,31 +32105,241 @@ abstractMaiaTileNode
    const renderTime = this.getNewestTimeToRender()
    const inputColumnsAsTable = new jtree.TreeNode(inputCols).toTable()
    const outputColumnsAsTable = new jtree.TreeNode(outputColumns).toTable()
-   const settings = JSON.stringify(this.getSettingsStruct(), null, 2)
    const outputNumericValues = new jtree.TreeNode(outputTable.getJavascriptNativeTypedValues()).toTable()
    const typeScriptInterface = outputTable.toTypeScriptInterface()
    const inputNumericValues = new jtree.TreeNode(inputTable.getJavascriptNativeTypedValues()).toTable()
-   return (
-    super.toInspectionStumpCode() +
-    "\\n" +
-    this.qFormat(this.maiaStumpInspectionTemplate, {
-     settings,
-     inputCount,
-     outputCount,
-     timeToLoad,
-     renderTime,
-     inputColumnsAsTable,
-     outputColumnsAsTable,
-     outputNumericValues,
-     typeScriptInterface,
-     inputNumericValues
-    })
+   return this.qFormat(this.ohayoStumpInspectionTemplate, {
+    settings,
+    inputCount,
+    outputCount,
+    timeToLoad,
+    renderTime,
+    inputColumnsAsTable,
+    outputColumnsAsTable,
+    outputNumericValues,
+    typeScriptInterface,
+    inputNumericValues,
+    constructorName,
+    parentConstructorName,
+    sourceCode,
+    messages
+   })
+  }
+  isVisible() {
+   if (this.visible === false) return false
+   return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
+  }
+  _isMaximized() {
+   return this.has(OhayoConstants.maximized)
+  }
+  async _executeChildNodes() {
+   await Promise.all(this.getChildTiles().map(tile => tile.execute()))
+  }
+  async _execute() {
+   this.setIsDataLoaded(true)
+   await this._executeChildNodes()
+  }
+  async execute() {
+   try {
+    this.setRunTimePhaseError("execute")
+    await this._execute()
+   } catch (err) {
+    this.setRunTimePhaseError("execute", err)
+    console.error(err)
+    this.emitLogMessage(this.errorLogMessageStumpTemplate)
+   }
+   return this
+  }
+  cloneTileCommand() {
+   this.cloneAndOffset()
+   return this.getTab().autosaveAndRender()
+  }
+  async toggleTileMaximizeCommand() {
+   if (this.has(OhayoConstants.maximized)) this.delete(OhayoConstants.maximized)
+   else this.touchNode(OhayoConstants.maximized)
+   await this._runAfterTileUpdate(this)
+  }
+  async triggerTileMethodCommand(value, methodName) {
+   await this[methodName](value)
+   await this._runAfterTileUpdate(this)
+  }
+  // todo: refactor.
+  async changeTileTypeCommand(newValue) {
+   this.setFirstWord(newValue)
+   const newNode = this.duplicate()
+   // todo: destroy or something? how do we reparse.
+   this.unmountAndDestroy()
+   const app = this.getTab().getRootNode()
+   await Promise.all(
+    this.getRootNode()
+     .getTiles()
+     .map(tile => tile.loadBrowserRequirements())
    )
+   await this.getTab().autosaveAndRender()
+   newNode.runAndrenderAndGetRenderReport()
+  }
+  changeParentCommand(pathVector) {
+   // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
+   const program = this.getRootNode()
+   const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
+   const destinationTree = indexPath ? program.nodeAt(indexPath) : program
+   // todo: on jtree should we make copyTo second param optional?
+   this.copyTo(destinationTree, destinationTree.length)
+   this.unmountAndDestroy()
+   return this.getTab().autosaveAndRender()
+  }
+  async openTileContextMenuCommand() {
+   this.getTab()
+    .getRootNode()
+    .setTargetNode(this)
+    .toggleAndRender(StudioConstants.tileContextMenu)
+  }
+  destroyTileCommand() {
+   this.unmountAndDestroy()
+   return this.getTab().autosaveAndRender()
+  }
+  getNewDataCommand() {
+   // todo: have some type of paging system to fetch new data.
+  }
+  async changeTileSettingAndRenderCommand(value, settingName) {
+   // note the unusual ordering of params.
+   this.touchNode(settingName).setContent(value.toString())
+   // todo: sometimes size needs to be redone (maximize, for example)
+   await this._runAfterTileUpdate(this)
+  }
+  // todo: remove
+  async changeTileSettingMultilineCommand(val, settingName) {
+   this.touchNode(settingName).setChildren(val)
+   await this._runAfterTileUpdate(this)
+  }
+  async changeTileSettingCommand(settingName, value) {
+   this.touchNode(settingName).setContent(value)
+  }
+  async changeWordAndRenderCommand(value, index) {
+   this.setWord(parseInt(index), value)
+   await this._runAfterTileUpdate(this)
+  }
+  async changeWordsAndRenderCommand(value, index) {
+   index = parseInt(index)
+   const edgeSymbol = this.getEdgeSymbol()
+   const words = this.getWords().slice(0, index)
+   this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
+   await this._runAfterTileUpdate(this)
+  }
+  async updateChildrenCommand(val) {
+   this.setChildren(val)
+   // reload the whole doc for now.
+   await this._runAfterTileUpdate(this)
+  }
+  async _runAfterTileUpdate(tile) {
+   tile.makeDirty() // ugly!
+   tile.getChildTiles().forEach(tile => {
+    tile.makeDirty() // todo: ugly!
+   })
+   // todo: what if you have a tile that has a contextare that allows editing of its children/
+   // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
+   await tile.getTab().autosaveTab()
+   await tile.runAndrenderAndGetRenderReport()
+   tile
+    .getTab()
+    .getRootNode()
+    .renderApp() // Need to render full app because of code editor
+  }
+  // todo: downstream data changes?
+  async changeTileContentAndRenderCommand(value) {
+   this.setContent(value)
+   await this._runAfterTileUpdate(this)
+  }
+  async copyTileCommand() {
+   // todo: remove cousin tiles?
+   this.getRootNode()
+    .getWillowBrowser()
+    .copyTextToClipboard(this.getFirstAncestor().toString())
+  }
+  async createProgramFromTileExampleCommand(index) {
+   const template = this.getExampleTemplate(index)
+   if (!template) return undefined
+   const fileExtension = "ohayo" // todo: generalize
+   const tab = await this.getTab()
+    .getRootNode()
+    ._createAndOpen(template, \`help-for-\${this.getFirstWord()}.\${fileExtension}\`)
+   tab.addStumpCodeMessageToLog(\`div Created '\${tab.getFullTabFilePath()}'\`)
+  }
+  async inspectTileCommand() {
+   if (!this.isNodeJs()) {
+    console.log("Tile available at window.tile")
+    window.tile = this
+    console.log(this)
+   }
+   this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
+   this.getTab()
+    .getRootNode()
+    .renderApp()
+  }
+  async toggleToolbarCommand() {
+   this.toggleToolbar()
+  }
+  async createProgramFromTemplateCommand(id) {
+   const programTemplate = this.getProgramTemplate(id)
+   if (!programTemplate) return undefined
+   const tab = await this.getTab()
+    .getRootNode()
+    ._createAndOpen(programTemplate.template, programTemplate.name)
+   tab.addStumpCodeMessageToLog(\`div Created '\${tab.getFullTabFilePath()}'\`)
+  }
+  async appendSnippetTemplateCommand(id) {
+   const snippet = this.getSnippetTemplate(id)
+   if (!snippet) return undefined
+   const tab = this.getTab()
+   const tabProgram = tab.getTabProgram()
+   const newNodes = tabProgram.concat(snippet)
+   const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
+   tab.autosaveTab()
+   tabProgram.clearSelection()
+   tab.getTabWall().unmount()
+   await tabProgram.loadAndIncrementalRender()
+   newTiles.forEach(tile => tile.selectTile())
+   newTiles[0].scrollIntoView()
+  }
+  async copyDataCommand(delimiter) {
+   this.getRootNode()
+    .getWillowBrowser()
+    .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
+  }
+  async copyDataAsJavascriptCommand() {
+   const table = this.getOutputOrInputTable()
+   this.getRootNode()
+    .getWillowBrowser()
+    .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
+  }
+  async copyDataAsTreeCommand() {
+   const text = this.getOutputOrInputTable()
+    .toTree()
+    .toString()
+   this.getRootNode()
+    .getWillowBrowser()
+    .copyTextToClipboard(text)
+  }
+  async exportTileDataCommand(format = "csv") {
+   // todo: figure this out. use the browsers filename? tile title? id?
+   let extension = "csv"
+   let type = "text/csv"
+   let str = this.getOutputOrInputTable().toDelimited(",")
+   if (format === "tree") {
+    extension = "tree"
+    type = "text"
+    str = this.getOutputOrInputTable()
+     .toTree()
+     .toString()
+   }
+   this.getRootNode()
+    .getWillowBrowser()
+    .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
   }
 abstractChartNode
  inScope rowDisplayLimitNode
  int rowDisplayLimit 10000
- extends abstractMaiaTileNode
+ extends abstractTileTreeComponentNode
  abstract
  javascript
   getTileFooterStumpCode() {
@@ -32579,7 +32452,7 @@ challengeListNode
  crux challenge.list
  javascript
   getGalleryNodes() {
-   return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
+   return typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("ohayo/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
   }
   getSnippetTemplate(id) {
    return \`challenge.play \${id}\`
@@ -32594,8 +32467,8 @@ samplesListNode
  javascript
   getGalleryNodes() {
    // todo: cleanup.
-   const maia = this.getWebApp().getMaiaGrammarAsTree()
-   const hits = maia.getNodesByRegex(/^samples/).map(node => {
+   const ohayo = this.getWebApp().getOhayoGrammarAsTree()
+   const hits = ohayo.getNodesByRegex(/^samples/).map(node => {
     return {
      id: node.get("crux"),
      description: node.get("description")
@@ -32617,7 +32490,7 @@ vegaDataListNode
   getGalleryNodes() {
    // todo: cleanup this line.
    const node = this.getWebApp()
-    .getMaiaGrammarAsTree()
+    .getOhayoGrammarAsTree()
     .getNodesByRegex(/^vegaDataSetCell/)[0]
    return new jtree.TreeNode(
     node
@@ -32644,7 +32517,7 @@ vegaExampleListNode
   getGalleryNodes() {
    // todo: cleanup this line.
    const node = this.getWebApp()
-    .getMaiaGrammarAsTree()
+    .getOhayoGrammarAsTree()
     .getNodesByRegex(/^vegaExampleNameCell/)[0]
    return new jtree.TreeNode(
     node
@@ -32678,11 +32551,11 @@ challengePlayNode
    const challengeNode = this._getChallengeNode(parseInt(id))
    return {
     template: challengeNode.getNode("solution").childrenToString(),
-    name: "challenge-" + id + "-solution.maia"
+    name: "challenge-" + id + "-solution.ohayo"
    }
   }
   _getChallengeNode(challengeId) {
-   const challenges = typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
+   const challenges = typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("ohayo/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
    return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
   }
   getTileBodyStumpCode() {
@@ -32716,8 +32589,8 @@ challengePlayNode
 dtjsBasicNode
  description A spreadsheet-like table.
  string tileSize 1200 500
- string tileCssScript maia/packages/dtjs/datatables.min.css
- string tileScript maia/packages/dtjs/datatables.min.js
+ string tileCssScript ohayo/packages/dtjs/datatables.min.css
+ string tileScript ohayo/packages/dtjs/datatables.min.js
  extends abstractEmptyFooterTileNode
  crux dtjs.basic
  string bodyStumpTemplate
@@ -33026,7 +32899,7 @@ abstractVegaNode
  frequency .1
  catchAllCellType titleCell
  string tileSize 800 300
- string tileScript maia/packages/vega/vega.combined.min.js
+ string tileScript ohayo/packages/vega/vega.combined.min.js
  string dummyDataSetName stockPrice
  string markName bar
  extends abstractEmptyFooterTileNode
@@ -33256,7 +33129,7 @@ vegaExampleNode
    // todo: localtesting.
    if (this.isNodeJs()) return undefined
    const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
-   const url = \`maia/packages/vega/ignore/vega-lite/examples/compiled/\${exampleName}.vg.json\`
+   const url = \`ohayo/packages/vega/ignore/vega-lite/examples/compiled/\${exampleName}.vg.json\`
    const res = await this.getWebApp()
     .getWillowBrowser()
     .httpGetUrl(url)
@@ -33767,7 +33640,7 @@ editorGalleryNode
   editor.files
    editor.gallery
  string tileSize 1080 600
- string dummyDataSetName maiaPrograms
+ string dummyDataSetName ohayoPrograms
  extends abstractChartNode
  crux editor.gallery
  string hakonTemplate
@@ -33828,9 +33701,9 @@ editorGalleryNode
     .openFullPathInNewTabAndFocusCommand(url)
   }
   _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
-   const maiaProgram = new maiaNode(sourceCode)
-   const dimensions = maiaProgram.getTileDimensionMap(width, height)
-   const theTiles = maiaProgram
+   const ohayoProgram = new ohayoNode(sourceCode)
+   const dimensions = ohayoProgram.getTileDimensionMap(width, height)
+   const theTiles = ohayoProgram
     .getTiles()
     .filter(tile => tile.isVisible())
     .map(tile => this.qFormat(this.miniStyleTemplate, { style: dimensions.get(tile).getScaledCss(0.1) }))
@@ -33850,8 +33723,8 @@ editorGalleryNode
 handsontableBasicNode
  description A spreadsheet-like table.
  string tileSize 1200 500
- string tileCssScript maia/packages/handsontable/handsontable.min.css
- string tileScript maia/packages/handsontable/handsontable.full.min.js
+ string tileCssScript ohayo/packages/handsontable/handsontable.min.css
+ string tileScript ohayo/packages/handsontable/handsontable.full.min.js
  string hakonTemplate
   .hot
    color black
@@ -34147,7 +34020,7 @@ textWordcloudNode
     .getShadowElement()
    WordCloud(element, options)
   }
- string tileScript maia/packages/text/wordcloud2.min.js
+ string tileScript ohayo/packages/text/wordcloud2.min.js
  string dummyDataSetName wordCounts
  string columnPredictionHints
   name isString=true
@@ -34155,13 +34028,13 @@ textWordcloudNode
  extends abstractChartNode
  crux text.wordcloud
 treenotation3dNode
- description A 3D visualization of Tree Language source code.
- example 3D vis of a Tree Program.
+ description A 3D visualization of Ohayo source code.
+ example 3D vis of a Ohayo Program.
   samples.treeProgram
    treenotation.3d
  inScope contentNode sizeNode cameraPositionNode
  string tileSize 800 500
- string tileScript maia/packages/treenotation/vis.min.js
+ string tileScript ohayo/packages/treenotation/vis.min.js
  string dummyDataSetName treeProgram
  extends abstractChartNode
  crux treenotation.3d
@@ -34189,8 +34062,7 @@ treenotation3dNode
    const tileStruct = this.getSettingsStruct()
    const source = this.getPipishInput()
    const app = this.getWebApp()
-   const language = app.getLanguageBestGuess(source)
-   const program = app.generateProgram(source, language)
+   const program = new ohayoNode(source)
    const rows = this._treeTo3D(program)
    // Create and populate a data table.
    const data = new vis.DataSet()
@@ -34287,9 +34159,221 @@ treenotation3dNode
    program.getTopDownArray().forEach(nodeToPoint)
    return points
   }
+DidYouMeanTileNode
+ tags noPicker
+ description Provides suggestions for misspelled tiles.
+ extends abstractTileTreeComponentNode
+ crux tiles.didyoumean
+ string bodyStumpTemplate
+  div
+   span No tile '{input}' found. Line {lineNo}. Did you mean
+   a {closestTile}
+    collapse
+    tabindex -1
+    value {closestTile}
+    clickCommand changeTileTypeCommand
+   span ?
+ javascript
+  getTileBodyStumpCode() {
+   const input = this.getFirstWord()
+   const lineNo = this.getLineNumber()
+   const closestTile = jtree.Utils.didYouMean(
+    input,
+    this.getRootNode()
+     .getHandGrammarProgram()
+     .getTopNodeTypeDefinitions()
+     .map(def => def.get("crux"))
+   )
+   if (!closestTile) {
+    if (!input) return \`div Your program has a blank line on line \${lineNo}.\`
+    return \`div No tile '\${input}' found.\`
+   }
+   return this.qFormat(this.bodyStumpTemplate, { input, lineNo, closestTile })
+  }
+  getErrors() {
+   return [new jtree.UnknownNodeTypeError(this)]
+  }
+  getTileHeaderBern() {
+   return ""
+  }
+abstractDocTileNode
+ int footerHeight 0
+ int headerHeight 0
+ tags noPicker
+ cells tileKeywordCell
+ extends abstractTileTreeComponentNode
+ abstract
+ string bodyStumpTemplate
+  {tagName}
+   bern
+    {content}
+ string tileStumpTemplate
+  div
+   class {classes}
+   id {id}
+   contextMenuCommand openTileContextMenuCommand
+   div
+    class TileGrabber
+    doubleClickCommand toggleTileMaximizeCommand
+   div
+    class TileBody HeaderLess
+    {body}
+   div
+    class TileFooter
+    {footer}
+   div
+    class TileGrabber
+ javascript
+  _getBody() {
+   return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
+  }
+  toStumpCode() {
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
+  }
+docTitleNode
+ catchAllCellType stringCell
+ description A title
+ example A doc
+  doc.title A Tale of Two Cities
+ string tileSize 600 75
+ extends abstractDocTileNode
+ cells tileKeywordCell
+ crux doc.title
+ string tagName h1
+docSubtitleNode
+ extends docTitleNode
+ description A subheader
+ string tagName h2
+ crux doc.subtitle
+docSectionNode
+ description A section containing subtitles, paragraphs, code blocks, etc.
+ crux doc.section
+ extends abstractDocTileNode
+ inScope abstractDocSectionComponentNode
+ javascript
+  _getBody() {
+   return this.compile()
+  }
+  _getCompiledLine() {
+   return ""
+  }
+ example
+  doc.section
+   subtitle Subtitle
+   paragraph Paragraph
+   code python
+    # some code
+docReferenceNode
+ extends abstractDocTileNode
+ crux doc.ref
+ cells tileKeywordCell referenceIdCell
+ inScope docReferenceUrlNode
+ string tagName p
+ example
+  doc.ref someRefId
+   url https://en.wikipedia.org/wiki/Note_(typography)
+ description A reference to an external source
+docCommentNode
+ description A comment node
+ cells commentKeywordCell
+ extends abstractTileTreeComponentNode
+ boolean visible false
+ frequency 0
+ example An example program with comments
+  doc.comment get iris data
+  samples.iris
+   doc.comment filter is
+   filter.where Species = virginica
+    doc.comment display results
+    tables.basic
+ catchAllCellType commentCell
+ catchAllNodeType commentLineNode
+ crux doc.comment
+docToolingNode
+ extends docCommentNode
+ crux doc.tooling
+abstractPickerTileNode
+ extends abstractTileTreeComponentNode
+ string tileSize 480 420
+ boolean needsData false
+ abstract
+ string hakonTemplate
+  .PickerTileNode
+   .PickerCategory
+    width 100%
+    margin-top 20px
+    text-align center
+   .TileBody
+    display flex
+    flex-flow row wrap
+    a
+     &:hover
+      background-color {borderColor}
+     padding 10px
+     margin 5px
+     height 30px
+     background-color {backgroundColor}
+     border 1px solid {borderColor}
+     overflow hidden
+     text-align center
+     text-overflow ellipsis
+     font-size 14px
+     width 120px
+     span
+      font-size 70%
+ string itemStumpTemplate
+  {categoryBreak}
+  a {name}
+   br
+    span {description}
+   title {description}
+   tabindex -1
+   value {value}
+   clickCommand {command}
+ string categoryBreakStumpTemplate
+  div {category}
+   class PickerCategory
+ string tileHeader Gallery
+ javascript
+  async fetchTableInputs() {
+   return { rows: this.getChoices().map(obj => obj.toObject()) }
+  }
+  getTileBodyStumpCode() {
+   let lastCat = ""
+   return this.getChoices()
+    .map(choice => {
+     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+     lastCat = choice.category
+     return this.qFormat(this.itemStumpTemplate, choice)
+    })
+    .join("\\n")
+  }
+  getTileHeaderBern() {
+   return this.tileHeader
+  }
+PickerTileNode
+ extends abstractPickerTileNode
+ description Displays list of available tiles.
+ crux doc.picker
+ string tileHeader Tile Gallery
+ javascript
+  getChoices() {
+   const allChoices = this.getRootNode()
+    .getHandGrammarProgram()
+    .getTopNodeTypeDefinitions()
+   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(OhayoConstants.noPicker))
+   const theChoices = filteredChoices.length ? filteredChoices : allChoices
+   return theChoices.map(nodeDefinition => {
+    const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
+    const name = nodeId.split(".")[1] || ""
+    const category = lodash.upperFirst(nodeId.split(".")[0])
+    const description = nodeDefinition.getDescription()
+    return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
+   })
+  }
 abstractProviderNode
  string tileSize 140 60
- extends abstractMaiaTileNode
+ extends abstractTileTreeComponentNode
  abstract
  string tileStumpTemplate
   div
@@ -34403,7 +34487,6 @@ abstractUrlNoCellsNode
    try {
     const data = await this._getData(url)
     const parser = new TableParser()
-    debugger
     if (typeof data === "string") return parser.parseTableInputsFromString(data, parserId)
     if (this.jsonPath) return parser.parseTableInputsFromObject(data[this.jsonPath], parserId)
     return parser.parseTableInputsFromObject(data, parserId)
@@ -34603,7 +34686,7 @@ publicApisNode
 webGetNode
  description Get a URL and parse the fetched data.
  example Fetch a TSV from the web and show results
-  web.get https://raw.githubusercontent.com/treenotation/ohayo/master/maia/packages/samples/iris.tsv
+  web.get https://raw.githubusercontent.com/treenotation/ohayo/master/ohayo/packages/samples/iris.tsv
    tables.basic
  frequency .1
  string placeholderMessage Enter a url.
@@ -34684,7 +34767,7 @@ abstractFixedDatasetFromUrlNode
    if (this.dataUrl) return (desc ? desc + " from " : "") + this.dataUrl
    return desc
   }
-abstractFixedDatasetFromMaiaCollectionNode
+abstractFixedDatasetFromOhayoCollectionNode
  description A dataset that ships with Ohayo.
  string tileSize 300 150
  javascript
@@ -34698,46 +34781,46 @@ abstractFixedDatasetFromMaiaCollectionNode
  abstract
 cancerCasesNode
  description Estimated new cancer cases in the U.S. in 2019 from https://cancerstatisticscenter.cancer.org/
- string url maia/packages/cancer/cases.csv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/cancer/cases.csv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux cancer.cases
 abstractCdcInfantPercentileNode
  boolean isDataPublicDomain true
  string dataUrl https://www.cdc.gov/growthcharts/percentile_data_files.htm
  abstract
- extends abstractFixedDatasetFromMaiaCollectionNode
+ extends abstractFixedDatasetFromOhayoCollectionNode
 weightPercentilesNode
  description Weight percentiles for birth to 36 months in kilograms, by sex and age
- string url maia/packages/cdc/wtageinf.csv
+ string url ohayo/packages/cdc/wtageinf.csv
  extends abstractCdcInfantPercentileNode
  crux cdc.infants.weight
 lengthPercentilesNode
  description Length percentiles for birth to 36 months in centimeters, by sex and age
- string url maia/packages/cdc/lenageinf.csv
+ string url ohayo/packages/cdc/lenageinf.csv
  extends abstractCdcInfantPercentileNode
  crux cdc.infants.length
 headPercentilesNode
  description Head circumference percentiles for birth to 36 months in centimeters, by sex and age
- string url maia/packages/cdc/hcageinf.csv
+ string url ohayo/packages/cdc/hcageinf.csv
  extends abstractCdcInfantPercentileNode
  crux cdc.infants.headCircumference
 kaggleDatasetsHeartNode
  tags internetConnectionRequired
  description Heart Disease dataset from https://www.kaggle.com/ronitf/heart-disease-uci
- string url maia/packages/kaggle/heart.csv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/kaggle/heart.csv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux kaggle.datasets.heart
 mozTop500Node
  description Moz's list of the most popular 500 websites on the internet.
  string dataUrl https://moz.com/top500
  boolean isDataPublicDomain true
- string url maia/packages/moz/top500Domains.csv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/moz/top500Domains.csv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux moz.top500
 lifeExpectancyNode
  description Life expectancy data.
- string url maia/packages/owid/life-expectancy.csv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/owid/life-expectancy.csv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux owid.lifeExpectancy
 samplesTelescopesNode
  description A partial list of humankind's largest telescopes.
@@ -34745,104 +34828,104 @@ samplesTelescopesNode
   ## Provenance
   This list was put together by a group of remote workers in a Google spreadsheet in 2017 and hasn't been updated in a while.
  boolean isDataPublicDomain true
- string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/telescopes.tsv
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/ohayo/packages/samples/telescopes.tsv
  tags astronomy
  frequency .03
  example Display list of links to telescope websites.
   samples.telescopes
    list.links Name Url
- string url maia/packages/samples/telescopes.tsv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/samples/telescopes.tsv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.telescopes
 samplesMtcarsNode
  description Dataset from 1974 Motor Trend US magazine.
  boolean isDataPublicDomain true
  string dataUrl https://stat.ethz.ch/R-manual/R-devel/library/datasets/html/mtcars.html
  frequency .03
- string url maia/packages/samples/mtcars.tsv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/samples/mtcars.tsv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.mtcars
 samplesIrisNode
  description The famous Iris flower data set.
  string dataUrl https://archive.ics.uci.edu/ml/datasets/iris
  boolean isDataPublicDomain true
  frequency .15
- string url maia/packages/samples/iris.tsv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/samples/iris.tsv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.iris
 samplesFlights14Node
  description On-Time flights data from the Bureau of Transportation Statistics for all the flights that departed from New York City airports in 2014. The data is available only for Jan-Oct'14.
  string dataUrl https://github.com/Rdatatable/data.table/blob/master/vignettes/flights14.csv
  boolean isDataPublicDomain true
- string url maia/packages/samples/flights14-sample.csv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/samples/flights14-sample.csv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.flights14
 samplesSiNode
  description A description of The International System of Units (SI) aka the metric system.
  boolean isDataPublicDomain true
- string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/si.tree
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/ohayo/packages/samples/si.tree
  example View outline of SI system.
   samples.si
    treenotation.outline
  frequency .03
- string url maia/packages/samples/si.tree
+ string url ohayo/packages/samples/si.tree
  string parser text
- extends abstractFixedDatasetFromMaiaCollectionNode
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.si
 samplesPortalNode
  description A list of online data portals.
  boolean isDataPublicDomain true
- string dataUrl https://github.com/treenotation/ohayo/blob/master/maia/packages/samples/portals.ssv
+ string dataUrl https://github.com/treenotation/ohayo/blob/master/ohayo/packages/samples/portals.ssv
  frequency .03
- string url maia/packages/samples/portals.ssv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/samples/portals.ssv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.portals
 samplesStarWarsNode
  description All Star Wars characters. Data comes from https://swapi.co/
  frequency .03
  boolean isDataPublicDomain false
  string dataLicense BSD
- string url maia/packages/samples/starwars.json
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/samples/starwars.json
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.starWars
 samplesPopulationsNode
  description Countries of the world and their populations.
  frequency .15
- string url maia/packages/samples/populations.tsv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/samples/populations.tsv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.populations
 samplesBabyNamesNode
  description 30 rows of a much larger dataset of baby name popularity over time in the U.S.
  frequency .03
- string url maia/packages/samples/baby-names-sample.csv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/samples/baby-names-sample.csv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.babyNames
 samplesDeclarationNode
  description The 1776 Declaration of Independence
  boolean isDataPublicDomain true
  frequency .02
- string url maia/packages/samples/declaration-of-independence.text
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/samples/declaration-of-independence.text
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.declaration
 samplesPeriodicTableNode
  description Periodic table from https://gist.github.com/GoodmanSciences
  string dataUrl https://gist.github.com/GoodmanSciences/c2dd862cd38f21b0ad36b8f96b4bf1ee
  frequency .15
- extends abstractFixedDatasetFromMaiaCollectionNode
- string url maia/packages/samples/periodic-table.csv
+ extends abstractFixedDatasetFromOhayoCollectionNode
+ string url ohayo/packages/samples/periodic-table.csv
  crux samples.periodicTable
 samplesLettersNode
  description Letter usage frequency in English from mobostock.
  frequency .03
- extends abstractFixedDatasetFromMaiaCollectionNode
- string url maia/packages/samples/letters.tsv
+ extends abstractFixedDatasetFromOhayoCollectionNode
+ string url ohayo/packages/samples/letters.tsv
  crux samples.letters
 samplesPresidentsNode
  boolean isDataPublicDomain true
  description CSV of president's of United States.
  frequency .03
- string url maia/packages/samples/presidents.csv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/samples/presidents.csv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux samples.presidents
 ucimlrDatasetsNode
  description A list of datasets from the UC Irvine Machine Learning Repository at http://archive.ics.uci.edu/ml/index.php.
@@ -34850,15 +34933,15 @@ ucimlrDatasetsNode
  example Display list of datasets from UCIMLR
   ucimlr.datasets
    tables.basic
- string url maia/packages/ucimlr/datasets.tsv
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string url ohayo/packages/ucimlr/datasets.tsv
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux ucimlr.datasets
 vegaDataNode
  cells tileKeywordCell vegaDataSetCell
  frequency .001
  description Fetchs a Vega sample dataset
- string urlPrefix maia/packages/vega/datasets/
- extends abstractFixedDatasetFromMaiaCollectionNode
+ string urlPrefix ohayo/packages/vega/datasets/
+ extends abstractFixedDatasetFromOhayoCollectionNode
  crux vega.data
 redditAllNode
  tags internetConnectionRequired
@@ -34889,7 +34972,7 @@ redditAllNode
    return "json"
   }
  string url https://www.reddit.com/r/all/top/.json?sort=top
- string offlineDataSet maia/packages/reddit/all.json
+ string offlineDataSet ohayo/packages/reddit/all.json
  extends abstractUrlNoCellsNode
  crux reddit.all
 redditSubsNode
@@ -35309,7 +35392,7 @@ matchColumnsFuzzyNode
      rows.sortBy confidence
       rows.reverse
        tables.basic
- string tileScript maia/packages/match/fuse.min.js
+ string tileScript ohayo/packages/match/fuse.min.js
  extends abstractNewRowsTransformerTileNode
  crux match.columnsFuzzy
  javascript
@@ -35426,8 +35509,8 @@ textLineCountNode
   text.lineCount
    tables.basic
 treenotationWordTypesNode
- description Generates the word types for a Tree Language program.
- example See counts of word types in a Tree Language program.
+ description Generates the word types for a Ohayo Language program.
+ example See counts of word types in a Ohayo Language program.
   treenotation.wordTypes
    treenotation.outline
    text.wordCount
@@ -35437,11 +35520,7 @@ treenotationWordTypesNode
  crux treenotation.wordTypes
  javascript
   makeNewRows() {
-   const sourceCode = this.getPipishInput()
-   const app = this.getWebApp()
-   const language = app.getLanguageBestGuess(sourceCode) // todo: use treeLanguage setting
-   const program = app.generateProgram(sourceCode, language)
-   return [{ text: program.toCellTypeTree() }]
+   return [{ text: new ohayoNode(this.getPipishInput()).toCellTypeTree() }]
   }
 abstractColumnFilterTileNode
  abstract
@@ -35680,8 +35759,8 @@ pcaNode
   samples.iris
    bitanath.pca
     tables.basic
- string tileScript maia/packages/bitanath/pca.js
- string tileScript maia/packages/mathjs/math.min.js
+ string tileScript ohayo/packages/bitanath/pca.js
+ string tileScript ohayo/packages/mathjs/math.min.js
  extends abstractTransformerNode
  crux bitanath.pca
  javascript
@@ -36045,36 +36124,39 @@ debugParserTestNode
    return [{ rows: [] }]
   }
 debugGrammarNode
- description Get the grammar for an included language.
+ description Get the ohayo grammar
  tags noPicker
- cells tileKeywordCell supportedTreeLanguageCell
- crux debug.grammar
+ cells tileKeywordCell
+ crux debug.ohayoGrammar
  extends abstractProviderNode
- example Print the grammar
-  debug.grammar maia
+ example Print the ohayo grammar
+  debug.ohayoGrammar
    treenotation.outline
  javascript
   async fetchTableInputs() {
-   const fileExtension = this.getWord(1) || "maia"
-   const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
-   const tree = new programClass("").getHandGrammarProgram()
-   return { rows: [{ text: tree.toString() }] }
+   return { rows: [{ text: new ohayoNode("").getHandGrammarProgram().toString() }] }
   }
 debugGrammarTreeNode
- description Show the family tree for a grammar.
+ description Show the family tree for ohayo grammar.
  tags noPicker
- cells tileKeywordCell supportedTreeLanguageCell
- example Show the family tree for a grammar
-  debug.grammarTree maia
+ cells tileKeywordCell
+ example Show the family tree for ohayo grammar
+  debug.ohayoGrammarTree
    treenotation.outline
  extends abstractProviderNode
- crux debug.grammarTree
+ crux debug.ohayoGrammarTree
  javascript
   async fetchTableInputs() {
-   const fileExtension = this.getWord(1) || "maia"
-   const programClass = this.getWebApp().getProgramConstructorFromFileExtension(fileExtension)
-   const tree = new programClass("").getHandGrammarProgram().getNodeTypeFamilyTree()
-   return { rows: [{ text: tree.toString() }] }
+   return {
+    rows: [
+     {
+      text: new ohayoNode("")
+       .getHandGrammarProgram()
+       .getNodeTypeFamilyTree()
+       .toString()
+     }
+    ]
+   }
   }
 editorFilesNode
  description Fetch your files in the current working folder.
@@ -36105,7 +36187,7 @@ editorFilesNode
  extends abstractProviderNode
  crux editor.files
 editorCommandHistoryNode
- description Outputs row for each command executed in this Ohayo session.
+ description Outputs row for each command executed in this Ohayo Studio session.
  example Show what you've done in this tab session.
   editor.commandHistory
    tables.basic
@@ -36278,7 +36360,7 @@ templatesListNode
     const id = node
      .getWord(1)
      .replace("templates/", "")
-     .replace(this.maiaFileExtensionKey, "")
+     .replace(this.ohayoFileExtensionKey, "")
     return {
      command: "createProgramFromTemplateCommand",
      name: node.get("data doc.title"),
@@ -36291,13 +36373,13 @@ templatesListNode
   }
   _getTheTemplates() {
    // todo: trim?
-   return typeof TemplatesStamp === "undefined" ? jtree.TreeNode.fromDisk("maia/packages/templates/Templates.stamp").trim() : new jtree.TreeNode(TemplatesStamp).trim()
+   return typeof TemplatesStamp === "undefined" ? jtree.TreeNode.fromDisk("ohayo/packages/templates/Templates.stamp").trim() : new jtree.TreeNode(TemplatesStamp).trim()
   }
   getProgramTemplate(id) {
-   const node = this._getTheTemplates().filter(node => node.getContent() === \`templates/\${id}\${this.maiaFileExtensionKey}\`)[0]
+   const node = this._getTheTemplates().filter(node => node.getContent() === \`templates/\${id}\${this.ohayoFileExtensionKey}\`)[0]
    return {
     template: node.getNode("data").childrenToString(),
-    name: id + this.maiaFileExtensionKey
+    name: id + this.ohayoFileExtensionKey
    }
   }
 assertRowCountNode
@@ -36309,7 +36391,7 @@ assertRowCountNode
     country
     usa
    assert.rowCount 1
- extends abstractMaiaTileNode
+ extends abstractTileTreeComponentNode
  cells tileKeywordCell intCell
  crux assert.rowCount
  boolean visible false
@@ -36324,7 +36406,7 @@ assertRowCountNode
   }
 printNode
  description Print input table to console as text.
- extends abstractMaiaTileNode
+ extends abstractTileTreeComponentNode
  crux print.text
  example
   data.inline
@@ -36351,11 +36433,193 @@ printCsvNode
   _getMessage() {
    return this.getParentOrDummyTable().toDelimited(",")
   }
-tileBlankLineNode
- boolean visible false
- pattern ^$
- tags doNotSynthesize
- cells emptyCell
+abstractTileSettingNode
+ cells tileSettingKeywordCell
+ abstract
+abstractTileSettingTerminalNode
+ javascript
+  getSettingValue() {
+   return this.getContent()
+  }
+ extends abstractTileSettingNode
+ abstract
+abstractColumnNode
+ cells tileSettingKeywordCell columnNameCell
+ extends abstractTileSettingTerminalNode
+ abstract
+ javascript
+  getRunTimeEnumOptions(cell) {
+   // todo: only works if codemirror === tab
+   try {
+    // todo: handle at static time.
+    const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
+    const mirrorParent = mirrorNode && mirrorNode.getParent()
+    if (cell.getCellTypeId() === "columnNameCell" && mirrorParent && mirrorParent.isLoaded()) {
+     const options = mirrorParent.getParentOrDummyTable().getColumnNames()
+     return options
+    }
+   } catch (err) {
+    console.log(err)
+   }
+  }
+columnNode
+ extends abstractColumnNode
+ crux column
+sourceColumnNode
+ extends abstractColumnNode
+ crux sourceColumn
+labelNode
+ extends abstractColumnNode
+ crux label
+linkNode
+ extends abstractColumnNode
+ crux link
+sizeColumnNode
+ extends abstractColumnNode
+ crux sizeColumn
+colorColumnNode
+ extends abstractColumnNode
+ crux colorColumn
+shapeColumnNode
+ extends abstractColumnNode
+ crux shapeColumn
+valueNode
+ extends abstractColumnNode
+ crux value
+countNode
+ extends abstractColumnNode
+ crux count
+dayColumnNode
+ extends abstractColumnNode
+ crux dayColumn
+xColumnNode
+ extends abstractColumnNode
+ crux xColumn
+yColumnNode
+ extends abstractColumnNode
+ crux yColumn
+genderColumnNode
+ extends abstractColumnNode
+ crux genderColumn
+headSizeNode
+ extends abstractColumnNode
+ crux headSize
+radiusNode
+ extends abstractColumnNode
+ crux radius
+emojiColumnNode
+ extends abstractColumnNode
+ crux emojiColumn
+parserNode
+ cells tileSettingKeywordCell parserIdsCell
+ description Ohayo tries to pick the best parser for your data, but you can also specify it, like "csv" or "tsv".
+ extends abstractTileSettingTerminalNode
+ crux parser
+useCacheNode
+ cells tileSettingKeywordCell booleanCell
+ extends abstractTileSettingTerminalNode
+ crux useCache
+reductionNode
+ cells tileSettingKeywordCell reductionTypeCell
+ extends abstractTileSettingTerminalNode
+ crux reduction
+abstractCoreTileSettingTerminalNode
+ abstract
+ extends abstractTileSettingTerminalNode
+hiddenNode
+ extends abstractCoreTileSettingTerminalNode
+ crux hidden
+visibleNode
+ extends abstractCoreTileSettingTerminalNode
+ crux visible
+maximizedNode
+ extends abstractCoreTileSettingTerminalNode
+ crux maximized
+abstractPagePositionNode
+ frequency .2
+ cells tileSettingKeywordCell intCell
+ extends abstractCoreTileSettingTerminalNode
+ abstract
+leftNode
+ extends abstractPagePositionNode
+ crux left
+topNode
+ extends abstractPagePositionNode
+ crux top
+widthNode
+ extends abstractPagePositionNode
+ crux width
+heightNode
+ extends abstractPagePositionNode
+ crux height
+reduceNode
+ description Provide information to correctly parse a column.
+ example 4 years of seattle weather
+  vega.data seattle-weather.csv
+   date.addColumns
+    group.by year
+     reduce temp_max mean average_max
+     reduce temp_max max max_max
+     reduce temp_min min min_min
+     tables.basic
+ cells tileSettingKeywordCell columnNameCell reductionTypeCell newColumnNameCell
+ extends abstractTileSettingTerminalNode
+ crux reduce
+styleNode
+ extends abstractTileSettingTerminalNode
+ crux style
+columnLimitNode
+ description How many columns to show
+ cells tileSettingKeywordCell intCell
+ extends abstractTileSettingTerminalNode
+ crux columnLimit
+howManyNode
+ cells tileSettingKeywordCell quantityCell
+ extends abstractTileSettingTerminalNode
+ crux howMany
+sizeNode
+ cells tileSettingKeywordCell numberCell
+ description Size of mark.
+ extends abstractTileSettingTerminalNode
+ crux size
+rowDisplayLimitNode
+ cells tileSettingKeywordCell intCell
+ frequency .5
+ description Sets the maximum number of rows to show in a tile.
+ extends abstractTileSettingTerminalNode
+ crux rowDisplayLimit
+srcNode
+ cells tileSettingKeywordCell urlCell
+ extends abstractTileSettingTerminalNode
+ crux src
+cameraPositionNode
+ cells tileSettingKeywordCell cameraDistanceNumberCell horizontalNumberCell verticalNumberCell
+ extends abstractTileSettingTerminalNode
+ crux cameraPosition
+treeLanguageNode
+ cells tileSettingKeywordCell supportedTreeLanguageCell
+ extends abstractTileSettingTerminalNode
+ crux treeLanguage
+abstractTileSettingNonTerminalNode
+ javascript
+  getSettingValue() {
+   return this.childrenToString()
+  }
+ extends abstractTileSettingNode
+ catchAllNodeType tileSettingNonTerminalContentNode
+ abstract
+contentNode
+ catchAllNodeType lineOfContentNode
+ extends abstractTileSettingNonTerminalNode
+ crux content
+catchAllNodesPostContentNode
+ catchAllCellType anyCell
+ extends abstractTileSettingNonTerminalNode
+ crux catchAllNodesPostContent
+postNode
+ catchAllNodeType catchAllNodesPostContentNode
+ extends abstractTileSettingNonTerminalNode
+ crux post
 abstractDocSettingNode
  cells tileKeywordCell
  abstract
@@ -36471,22 +36735,34 @@ catchAllErrorNode
  baseNodeType errorNode
 hashBangNode
  crux #!
+ tags noPicker
  description Standard bash hashBang line.
  catchAllCellType hashBangWordCell
-tilesNode
+ohayoNode
  root
- todo skipBlankLines
+ _extendsJsClass AbstractTreeComponent
  _rootNodeJsHeader
   const projectRootDir = jtree.Utils.findProjectRoot(__dirname, "ohayo")
   const { AbstractTreeComponent } = require(projectRootDir + "node_modules/jtree/products/TreeComponentFramework.node.js")
-  const TilesConstants = require(projectRootDir + "ohayoWebApp/tiles/TilesConstants.js")
-  const OhayoConstants = require(projectRootDir + "ohayoWebApp/treeComponents/OhayoConstants.js")
-  const Layout = require(projectRootDir + "ohayoWebApp/tiles/Layout.js")
-  const Icons = require(projectRootDir + "ohayoWebApp/themes/Icons.js")
+  const OhayoConstants = require(projectRootDir + "studio/tiles/OhayoConstants.js")
+  const StudioConstants = require(projectRootDir + "studio/treeComponents/StudioConstants.js")
+  const Layout = require(projectRootDir + "studio/tiles/Layout.js")
+  const Icons = require(projectRootDir + "studio/themes/Icons.js")
   const lodash = require(projectRootDir + "node_modules/lodash")
- _extendsJsClass AbstractTreeComponent
+  const { Table, DummyDataSets, Row, TableParser } = require("jtree/products/jtable.node.js")
+  const marked = require("marked")
+  const moment = require("moment")
+  // https://github.com/gentooboontoo/js-quantities
+  // https://github.com/moment/moment/issues/2469
+  // todo: ugly. how do we ditch this or test?
+  moment.createFromInputFallback = function(momentConfig) {
+    momentConfig._d = new Date(momentConfig._i)
+  }
+  const numeral = require("numeral")
  catchAllNodeType DidYouMeanTileNode
- string wallType wall
+ string wallType flex
+ description Ohayo is a programming language for doing data science.
+ inScope abstractTileTreeComponentNode tileBlankLineNode abstractDocSettingNode hashBangNode
  javascript
   getTileClosestToLine(lineIndex) {
    let current = this.nodeAtLine(lineIndex)
@@ -36506,17 +36782,17 @@ tilesNode
    return this._tab
   }
   tilesAreVisible() {
-   return !this.has(TilesConstants.defaultHidden)
+   return !this.has(OhayoConstants.defaultHidden)
   }
   canUseCustomLayout() {
-   const definedLayout = this.get(TilesConstants.layout)
-   if (definedLayout === TilesConstants.layouts.custom) return true
-   if (this.getTiles().some(tile => tile.has(TilesConstants.left) || tile.has(TilesConstants.top))) return true
+   const definedLayout = this.get(OhayoConstants.layout)
+   if (definedLayout === OhayoConstants.layouts.custom) return true
+   if (this.getTiles().some(tile => tile.has(OhayoConstants.left) || tile.has(OhayoConstants.top))) return true
    return false
   }
   _getLayoutStrategy() {
-   const definedLayout = this.get(TilesConstants.layout)
-   return definedLayout || (this.wallType === OhayoConstants.flex ? (this.canUseCustomLayout() ? TilesConstants.layouts.custom : TilesConstants.layouts.tiled) : TilesConstants.layouts.tree)
+   const definedLayout = this.get(OhayoConstants.layout)
+   return definedLayout || (this.wallType === StudioConstants.flex ? (this.canUseCustomLayout() ? OhayoConstants.layouts.custom : OhayoConstants.layouts.tiled) : OhayoConstants.layouts.tree)
   }
   getTileDimensionMap(width, height) {
    // todo: cache?
@@ -36560,26 +36836,6 @@ tilesNode
     .reverse()[0]
    return stats
   }
-maiaNode
- compilesTo html
- root
- _rootNodeJsHeader
-  const { Table, DummyDataSets, Row, TableParser } = require("jtree/products/jtable.node.js")
-  const marked = require("marked")
-  const moment = require("moment")
-  // https://github.com/gentooboontoo/js-quantities
-  // https://github.com/moment/moment/issues/2469
-  // todo: ugly. how do we ditch this or test?
-  moment.createFromInputFallback = function(momentConfig) {
-    momentConfig._d = new Date(momentConfig._i)
-  }
-  const numeral = require("numeral")
- extends tilesNode
- catchAllNodeType DidYouMeanTileNode
- string wallType flex
- description Maia is a programming language for doing data science.
- inScope abstractTileTreeComponentNode tileBlankLineNode abstractDocSettingNode hashBangNode
- javascript
   async execute() {
    await Promise.all(this.map(node => node.execute()))
    // Use shell tiles to do any outputs
@@ -36592,204 +36848,14 @@ maiaNode
    if (!this._outputTable) this._outputTable = new Table()
    return this._outputTable
   }
-  getMaiaTiles() {
-   return this.getTopDownArray().filter(node => node.doesExtend("abstractMaiaTileNode"))
-  }
   getAllRowsFromAllOutputTables() {
    return jtree.Utils.flatten(
-    this.getMaiaTiles()
+    this.getTiles()
      .map(tile => tile.getOutputTable())
      .filter(table => table)
      .map(table => table.getRows())
    )
   }
-abstractTileSettingNode
- cells tileSettingKeywordCell
- abstract
-abstractTileSettingTerminalNode
- javascript
-  getSettingValue() {
-   return this.getContent()
-  }
- extends abstractTileSettingNode
- abstract
-abstractCoreTileSettingTerminalNode
- abstract
- extends abstractTileSettingTerminalNode
-hiddenNode
- extends abstractCoreTileSettingTerminalNode
- crux hidden
-visibleNode
- extends abstractCoreTileSettingTerminalNode
- crux visible
-maximizedNode
- extends abstractCoreTileSettingTerminalNode
- crux maximized
-abstractPagePositionNode
- frequency .2
- cells tileSettingKeywordCell intCell
- extends abstractCoreTileSettingTerminalNode
- abstract
-leftNode
- extends abstractPagePositionNode
- crux left
-topNode
- extends abstractPagePositionNode
- crux top
-widthNode
- extends abstractPagePositionNode
- crux width
-heightNode
- extends abstractPagePositionNode
- crux height
-abstractColumnNode
- cells tileSettingKeywordCell columnNameCell
- extends abstractTileSettingTerminalNode
- abstract
- javascript
-  getRunTimeEnumOptions(cell) {
-   // todo: only works if codemirror === tab
-   try {
-    // todo: handle at static time.
-    const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
-    const mirrorParent = mirrorNode && mirrorNode.getParent()
-    if (cell.getCellTypeId() === "columnNameCell" && mirrorParent && mirrorParent.isLoaded()) {
-     const options = mirrorParent.getParentOrDummyTable().getColumnNames()
-     return options
-    }
-   } catch (err) {
-    console.log(err)
-   }
-  }
-columnNode
- extends abstractColumnNode
- crux column
-sourceColumnNode
- extends abstractColumnNode
- crux sourceColumn
-labelNode
- extends abstractColumnNode
- crux label
-linkNode
- extends abstractColumnNode
- crux link
-sizeColumnNode
- extends abstractColumnNode
- crux sizeColumn
-colorColumnNode
- extends abstractColumnNode
- crux colorColumn
-shapeColumnNode
- extends abstractColumnNode
- crux shapeColumn
-valueNode
- extends abstractColumnNode
- crux value
-countNode
- extends abstractColumnNode
- crux count
-dayColumnNode
- extends abstractColumnNode
- crux dayColumn
-xColumnNode
- extends abstractColumnNode
- crux xColumn
-yColumnNode
- extends abstractColumnNode
- crux yColumn
-genderColumnNode
- extends abstractColumnNode
- crux genderColumn
-headSizeNode
- extends abstractColumnNode
- crux headSize
-radiusNode
- extends abstractColumnNode
- crux radius
-emojiColumnNode
- extends abstractColumnNode
- crux emojiColumn
-parserNode
- cells tileSettingKeywordCell parserIdsCell
- description Ohayo tries to pick the best parser for your data, but you can also specify it, like "csv" or "tsv".
- extends abstractTileSettingTerminalNode
- crux parser
-useCacheNode
- cells tileSettingKeywordCell booleanCell
- extends abstractTileSettingTerminalNode
- crux useCache
-reductionNode
- cells tileSettingKeywordCell reductionTypeCell
- extends abstractTileSettingTerminalNode
- crux reduction
-reduceNode
- description Provide information to correctly parse a column.
- example 4 years of seattle weather
-  vega.data seattle-weather.csv
-   date.addColumns
-    group.by year
-     reduce temp_max mean average_max
-     reduce temp_max max max_max
-     reduce temp_min min min_min
-     tables.basic
- cells tileSettingKeywordCell columnNameCell reductionTypeCell newColumnNameCell
- extends abstractTileSettingTerminalNode
- crux reduce
-styleNode
- extends abstractTileSettingTerminalNode
- crux style
-columnLimitNode
- description How many columns to show
- cells tileSettingKeywordCell intCell
- extends abstractTileSettingTerminalNode
- crux columnLimit
-howManyNode
- cells tileSettingKeywordCell quantityCell
- extends abstractTileSettingTerminalNode
- crux howMany
-sizeNode
- cells tileSettingKeywordCell numberCell
- description Size of mark.
- extends abstractTileSettingTerminalNode
- crux size
-rowDisplayLimitNode
- cells tileSettingKeywordCell intCell
- frequency .5
- description Sets the maximum number of rows to show in a tile.
- extends abstractTileSettingTerminalNode
- crux rowDisplayLimit
-srcNode
- cells tileSettingKeywordCell urlCell
- extends abstractTileSettingTerminalNode
- crux src
-cameraPositionNode
- cells tileSettingKeywordCell cameraDistanceNumberCell horizontalNumberCell verticalNumberCell
- extends abstractTileSettingTerminalNode
- crux cameraPosition
-treeLanguageNode
- cells tileSettingKeywordCell supportedTreeLanguageCell
- extends abstractTileSettingTerminalNode
- crux treeLanguage
-abstractTileSettingNonTerminalNode
- javascript
-  getSettingValue() {
-   return this.childrenToString()
-  }
- extends abstractTileSettingNode
- catchAllNodeType tileSettingNonTerminalContentNode
- abstract
-contentNode
- catchAllNodeType lineOfContentNode
- extends abstractTileSettingNonTerminalNode
- crux content
-catchAllNodesPostContentNode
- catchAllCellType anyCell
- extends abstractTileSettingNonTerminalNode
- crux catchAllNodesPostContent
-postNode
- catchAllNodeType catchAllNodesPostContentNode
- extends abstractTileSettingNonTerminalNode
- crux post
 tileSettingNonTerminalContentNode
  baseNodeType blobNode
 lineOfContentNode
@@ -36815,19 +36881,8 @@ schemaNode
     }
     static getNodeTypeMap() {
       return {
+        tileBlankLineNode: tileBlankLineNode,
         abstractTileTreeComponentNode: abstractTileTreeComponentNode,
-        basicRecursiveTileNode: basicRecursiveTileNode,
-        DidYouMeanTileNode: DidYouMeanTileNode,
-        abstractDocTileNode: abstractDocTileNode,
-        docTitleNode: docTitleNode,
-        docSubtitleNode: docSubtitleNode,
-        docSectionNode: docSectionNode,
-        docReferenceNode: docReferenceNode,
-        docCommentNode: docCommentNode,
-        docToolingNode: docToolingNode,
-        abstractPickerTileNode: abstractPickerTileNode,
-        PickerTileNode: PickerTileNode,
-        abstractMaiaTileNode: abstractMaiaTileNode,
         abstractChartNode: abstractChartNode,
         abstractHeaderlessChartTileNode: abstractHeaderlessChartTileNode,
         abstractEmptyFooterTileNode: abstractEmptyFooterTileNode,
@@ -36903,6 +36958,16 @@ schemaNode
         tablesDumpNode: tablesDumpNode,
         textWordcloudNode: textWordcloudNode,
         treenotation3dNode: treenotation3dNode,
+        DidYouMeanTileNode: DidYouMeanTileNode,
+        abstractDocTileNode: abstractDocTileNode,
+        docTitleNode: docTitleNode,
+        docSubtitleNode: docSubtitleNode,
+        docSectionNode: docSectionNode,
+        docReferenceNode: docReferenceNode,
+        docCommentNode: docCommentNode,
+        docToolingNode: docToolingNode,
+        abstractPickerTileNode: abstractPickerTileNode,
+        PickerTileNode: PickerTileNode,
         abstractProviderNode: abstractProviderNode,
         abstractUrlNoCellsNode: abstractUrlNoCellsNode,
         abstractUrlNode: abstractUrlNode,
@@ -36918,7 +36983,7 @@ schemaNode
         webPostNode: webPostNode,
         wikipediaContentNode: wikipediaContentNode,
         abstractFixedDatasetFromUrlNode: abstractFixedDatasetFromUrlNode,
-        abstractFixedDatasetFromMaiaCollectionNode: abstractFixedDatasetFromMaiaCollectionNode,
+        abstractFixedDatasetFromOhayoCollectionNode: abstractFixedDatasetFromOhayoCollectionNode,
         cancerCasesNode: cancerCasesNode,
         abstractCdcInfantPercentileNode: abstractCdcInfantPercentileNode,
         weightPercentilesNode: weightPercentilesNode,
@@ -37025,38 +37090,8 @@ schemaNode
         assertRowCountNode: assertRowCountNode,
         printNode: printNode,
         printCsvNode: printCsvNode,
-        tileBlankLineNode: tileBlankLineNode,
-        abstractDocSettingNode: abstractDocSettingNode,
-        docCategoriesNode: docCategoriesNode,
-        docAuthorNode: docAuthorNode,
-        docDefaultHiddenNode: docDefaultHiddenNode,
-        docDateNode: docDateNode,
-        docZoomNode: docZoomNode,
-        docLayoutNode: docLayoutNode,
-        abstractDocSectionComponentNode: abstractDocSectionComponentNode,
-        docSectionSubtitleNode: docSectionSubtitleNode,
-        docSectionParagraphNode: docSectionParagraphNode,
-        docSectionLinkNode: docSectionLinkNode,
-        docSectionCodeNode: docSectionCodeNode,
-        docLineOfCodeNode: docLineOfCodeNode,
-        docParagraphLineNode: docParagraphLineNode,
-        commentLineNode: commentLineNode,
-        docReferenceUrlNode: docReferenceUrlNode,
-        catchAllErrorNode: catchAllErrorNode,
-        hashBangNode: hashBangNode,
-        tilesNode: tilesNode,
-        maiaNode: maiaNode,
         abstractTileSettingNode: abstractTileSettingNode,
         abstractTileSettingTerminalNode: abstractTileSettingTerminalNode,
-        abstractCoreTileSettingTerminalNode: abstractCoreTileSettingTerminalNode,
-        hiddenNode: hiddenNode,
-        visibleNode: visibleNode,
-        maximizedNode: maximizedNode,
-        abstractPagePositionNode: abstractPagePositionNode,
-        leftNode: leftNode,
-        topNode: topNode,
-        widthNode: widthNode,
-        heightNode: heightNode,
         abstractColumnNode: abstractColumnNode,
         columnNode: columnNode,
         sourceColumnNode: sourceColumnNode,
@@ -37077,6 +37112,15 @@ schemaNode
         parserNode: parserNode,
         useCacheNode: useCacheNode,
         reductionNode: reductionNode,
+        abstractCoreTileSettingTerminalNode: abstractCoreTileSettingTerminalNode,
+        hiddenNode: hiddenNode,
+        visibleNode: visibleNode,
+        maximizedNode: maximizedNode,
+        abstractPagePositionNode: abstractPagePositionNode,
+        leftNode: leftNode,
+        topNode: topNode,
+        widthNode: widthNode,
+        heightNode: heightNode,
         reduceNode: reduceNode,
         styleNode: styleNode,
         columnLimitNode: columnLimitNode,
@@ -37090,243 +37134,30 @@ schemaNode
         contentNode: contentNode,
         catchAllNodesPostContentNode: catchAllNodesPostContentNode,
         postNode: postNode,
+        abstractDocSettingNode: abstractDocSettingNode,
+        docCategoriesNode: docCategoriesNode,
+        docAuthorNode: docAuthorNode,
+        docDefaultHiddenNode: docDefaultHiddenNode,
+        docDateNode: docDateNode,
+        docZoomNode: docZoomNode,
+        docLayoutNode: docLayoutNode,
+        abstractDocSectionComponentNode: abstractDocSectionComponentNode,
+        docSectionSubtitleNode: docSectionSubtitleNode,
+        docSectionParagraphNode: docSectionParagraphNode,
+        docSectionLinkNode: docSectionLinkNode,
+        docSectionCodeNode: docSectionCodeNode,
+        docLineOfCodeNode: docLineOfCodeNode,
+        docParagraphLineNode: docParagraphLineNode,
+        commentLineNode: commentLineNode,
+        docReferenceUrlNode: docReferenceUrlNode,
+        catchAllErrorNode: catchAllErrorNode,
+        hashBangNode: hashBangNode,
+        ohayoNode: ohayoNode,
         tileSettingNonTerminalContentNode: tileSettingNonTerminalContentNode,
         lineOfContentNode: lineOfContentNode,
         columnDefinitionNode: columnDefinitionNode,
         schemaNode: schemaNode
       }
-    }
-  }
-
-  class abstractTileSettingNode extends jtree.GrammarBackedNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-  }
-
-  class abstractTileSettingTerminalNode extends abstractTileSettingNode {
-    getSettingValue() {
-      return this.getContent()
-    }
-  }
-
-  class abstractCoreTileSettingTerminalNode extends abstractTileSettingTerminalNode {}
-
-  class hiddenNode extends abstractCoreTileSettingTerminalNode {}
-
-  class visibleNode extends abstractCoreTileSettingTerminalNode {}
-
-  class maximizedNode extends abstractCoreTileSettingTerminalNode {}
-
-  class abstractPagePositionNode extends abstractCoreTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get intCell() {
-      return parseInt(this.getWord(1))
-    }
-  }
-
-  class leftNode extends abstractPagePositionNode {}
-
-  class topNode extends abstractPagePositionNode {}
-
-  class widthNode extends abstractPagePositionNode {}
-
-  class heightNode extends abstractPagePositionNode {}
-
-  class abstractColumnNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get columnNameCell() {
-      return this.getWord(1)
-    }
-    getRunTimeEnumOptions(cell) {
-      // todo: only works if codemirror === tab
-      try {
-        // todo: handle at static time.
-        const mirrorNode = typeof app === "undefined" ? this : app.mountedProgram.nodeAtLine(this.getLineNumber() - 1)
-        const mirrorParent = mirrorNode && mirrorNode.getParent()
-        if (cell.getCellTypeId() === "columnNameCell" && mirrorParent && mirrorParent.isLoaded()) {
-          const options = mirrorParent.getParentOrDummyTable().getColumnNames()
-          return options
-        }
-      } catch (err) {
-        console.log(err)
-      }
-    }
-  }
-
-  class columnNode extends abstractColumnNode {}
-
-  class sourceColumnNode extends abstractColumnNode {}
-
-  class labelNode extends abstractColumnNode {}
-
-  class linkNode extends abstractColumnNode {}
-
-  class sizeColumnNode extends abstractColumnNode {}
-
-  class colorColumnNode extends abstractColumnNode {}
-
-  class shapeColumnNode extends abstractColumnNode {}
-
-  class valueNode extends abstractColumnNode {}
-
-  class countNode extends abstractColumnNode {}
-
-  class dayColumnNode extends abstractColumnNode {}
-
-  class xColumnNode extends abstractColumnNode {}
-
-  class yColumnNode extends abstractColumnNode {}
-
-  class genderColumnNode extends abstractColumnNode {}
-
-  class headSizeNode extends abstractColumnNode {}
-
-  class radiusNode extends abstractColumnNode {}
-
-  class emojiColumnNode extends abstractColumnNode {}
-
-  class parserNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get parserIdsCell() {
-      return this.getWord(1)
-    }
-  }
-
-  class useCacheNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get booleanCell() {
-      return this.getWord(1)
-    }
-  }
-
-  class reductionNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get reductionTypeCell() {
-      return this.getWord(1)
-    }
-  }
-
-  class reduceNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get columnNameCell() {
-      return this.getWord(1)
-    }
-    get reductionTypeCell() {
-      return this.getWord(2)
-    }
-    get newColumnNameCell() {
-      return this.getWord(3)
-    }
-  }
-
-  class styleNode extends abstractTileSettingTerminalNode {}
-
-  class columnLimitNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get intCell() {
-      return parseInt(this.getWord(1))
-    }
-  }
-
-  class howManyNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get quantityCell() {
-      return parseInt(this.getWord(1))
-    }
-  }
-
-  class sizeNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get numberCell() {
-      return parseFloat(this.getWord(1))
-    }
-  }
-
-  class rowDisplayLimitNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get intCell() {
-      return parseInt(this.getWord(1))
-    }
-  }
-
-  class srcNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get urlCell() {
-      return this.getWord(1)
-    }
-  }
-
-  class cameraPositionNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get cameraDistanceNumberCell() {
-      return parseFloat(this.getWord(1))
-    }
-    get horizontalNumberCell() {
-      return parseFloat(this.getWord(2))
-    }
-    get verticalNumberCell() {
-      return parseFloat(this.getWord(3))
-    }
-  }
-
-  class treeLanguageNode extends abstractTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get supportedTreeLanguageCell() {
-      return this.getWord(1)
-    }
-  }
-
-  class abstractTileSettingNonTerminalNode extends abstractTileSettingNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(tileSettingNonTerminalContentNode, undefined, undefined)
-    }
-    getSettingValue() {
-      return this.childrenToString()
-    }
-  }
-
-  class contentNode extends abstractTileSettingNonTerminalNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(lineOfContentNode, undefined, undefined)
-    }
-  }
-
-  class catchAllNodesPostContentNode extends abstractTileSettingNonTerminalNode {
-    get anyCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class postNode extends abstractTileSettingNonTerminalNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(catchAllNodesPostContentNode, undefined, undefined)
     }
   }
 
@@ -37374,7 +37205,7 @@ schemaNode
     }
   }
 
-  window.maiaNode = maiaNode
+  window.ohayoNode = ohayoNode
 }
 
 "use strict";
@@ -37431,7 +37262,7 @@ challenge
      filter.where word = people
       show.max count Count`
 "use strict";
-window.TemplatesStamp = `file templates/amazon-purchase-history.maia
+window.TemplatesStamp = `file templates/amazon-purchase-history.ohayo
  data
   doc.title Amazon Purchase History
   doc.comment Delete the below line and replace with your data
@@ -37454,7 +37285,7 @@ window.TemplatesStamp = `file templates/amazon-purchase-history.maia
        xColumn year
   doc.layout column
   doc.categories shopping
-file templates/boiling-points.maia
+file templates/boiling-points.ohayo
  data
   doc.title Boiling Points
   samples.periodicTable
@@ -37464,7 +37295,7 @@ file templates/boiling-points.maia
     colorColumn Phase
   doc.layout column
   doc.categories chemistry
-file templates/cancer-rates-in-the-us.maia
+file templates/cancer-rates-in-the-us.ohayo
  data
   doc.title Cancer Rates in the U.S.
   cancer.cases
@@ -37480,7 +37311,7 @@ file templates/cancer-rates-in-the-us.maia
      yColumn Male
   doc.layout column
   doc.categories medicine
-file templates/country-names.maia
+file templates/country-names.ohayo
  data
   doc.title Exploring Country Names
   samples.populations
@@ -37496,7 +37327,7 @@ file templates/country-names.maia
      doc.subtitle No countries have a name starting with X.
   doc.layout column
   doc.categories geography
-file templates/country-populations.maia
+file templates/country-populations.ohayo
  data
   doc.title Largest Countries by Population
    visible
@@ -37514,7 +37345,7 @@ file templates/country-populations.maia
   doc.layout column
   doc.defaultHidden
   doc.categories geography
-file templates/declaration-of-independence.maia
+file templates/declaration-of-independence.ohayo
  data
   doc.title Declaration of Independence
   doc.layout column
@@ -37526,7 +37357,7 @@ file templates/declaration-of-independence.maia
     hidden
     show.sum count Words
     text.wordcloud
-file templates/discovery-of-elements.maia
+file templates/discovery-of-elements.ohayo
  data
   doc.title Discovery of the Elements
    visible
@@ -37557,7 +37388,7 @@ file templates/discovery-of-elements.maia
   doc.layout column
   doc.categories chemistry
   doc.defaultHidden
-file templates/git-repo-dashboard.maia
+file templates/git-repo-dashboard.ohayo
  data
   doc.title Desktop Only: Statistics for Local Git Repo
   web.get http://localhost:2222/shell?command=gitlog
@@ -37579,7 +37410,7 @@ file templates/git-repo-dashboard.maia
    show.min time First Commit
   doc.layout column
   doc.categories programming
-file templates/github-comparison.maia
+file templates/github-comparison.ohayo
  data
   doc.title GitHub Comparison
   doc.subtitle A comparison of Ohayo with RStudio and Jupyter Notebook.
@@ -37592,7 +37423,7 @@ file templates/github-comparison.maia
     yColumn stargazers_count
   doc.layout column
   doc.categories programming
-file templates/github-project-stats.maia
+file templates/github-project-stats.ohayo
  data
   doc.title GitHub Project Stats
   github.info treenotation/ohayo
@@ -37604,7 +37435,7 @@ file templates/github-project-stats.maia
    show.value stargazers_count Stars
   doc.layout column
   doc.categories programming
-file templates/humanPopulation.maia
+file templates/humanPopulation.ohayo
  data
   doc.title Human Population
   doc.subtitle A chart of human population growth.
@@ -37617,7 +37448,7 @@ file templates/humanPopulation.maia
      visible
   doc.layout column
   doc.defaultHidden
-file templates/life-expectancy.maia
+file templates/life-expectancy.ohayo
  data
   doc.title Life Expectancy in the U.S.
   doc.layout column
@@ -37629,10 +37460,10 @@ file templates/life-expectancy.maia
     vega.line Life Expectancy in the USA
      xColumn Year
      yColumn Lifeexpectancy(years)
-file templates/loc-with-bars.maia
+file templates/loc-with-bars.ohayo
  data
   doc.title Desktop Only: Analyze lines of code in a folder
-  web.get /disk?path=/ohayo/ohayoWebApp&lineStats=true&recursive=true
+  web.get /disk?path=/ohayo/studio&lineStats=true&recursive=true
    filter.without .DS_Store min.js node_modules ignore package-lock.json
     show.sum lines Total LoC
     columns.keep name extension lines words bytes wordsPerLine
@@ -37649,7 +37480,7 @@ file templates/loc-with-bars.maia
      tables.basic Top Extensions
   doc.layout column
   doc.categories programming
-file templates/logs.maia
+file templates/logs.ohayo
  data
   doc.title Exponents
    visible
@@ -37671,20 +37502,33 @@ file templates/logs.maia
   doc.layout column
   doc.categories math
   doc.defaultHidden
-file templates/maia-grammar-analysis.maia
+file templates/most-popular-websites.ohayo
  data
-  doc.title Maia Grammar Analysis
+  doc.title 500 Most Popular Websites
+  doc.layout column
+  doc.categories web
+  moz.top500
+   hidden
+   columns.setType LinkingRootDomains numberString
+    hidden
+    tables.basic
+    vega.bar Number of Inbound Links
+     xColumn Rank
+     yColumn LinkingRootDomains
+file templates/ohayo-grammar-analysis.ohayo
+ data
+  doc.title Ohayo Grammar Analysis
   doc.categories ohayo
   doc.layout column
-  debug.grammar maia
+  debug.ohayoGrammar
    hidden
    text.lineCount
     hidden
-    show.max lines Maia Grammar Lines of Code
+    show.max lines Ohayo Grammar Lines of Code
    text.wordCount
     hidden
-    show.sum count Maia Total Grammar Words
-    show.rowCount Maia Unique Words
+    show.sum count Ohayo Total Grammar Words
+    show.rowCount Ohayo Unique Words
     text.wordcloud
    text.wordCount
     hidden
@@ -37693,19 +37537,65 @@ file templates/maia-grammar-analysis.maia
      rows.first 10
       hidden
       tables.basic Top 10 Words
-file templates/maia-reference.maia
+file templates/ohayo-product-stats.ohayo
  data
-  doc.title Maia Reference
+  doc.title Ohayo Product Stats
+  doc.categories ohayo
+  doc.layout column
+  templates.list
+   hidden
+   show.rowCount Number of Templates
+  debug.ohayoGrammar
+   hidden
+   text.matches string dataDomain
+    hidden
+    show.max count Number of Integrated Web Data Sources
+  challenge.list
+   hidden
+   show.rowCount Number of Challenges
+  debug.ohayoGrammarTree
+   hidden
+   text.lineCount
+    hidden
+    show.max lines Number of Ohayo Nodes
+  doc.comment show.static 2 Number of 0 Included Datasets
+  doc.comment show.static 2 Number of Datasets on Datasets.ohayo.computer
+  debug.ohayoGrammar
+   hidden
+   text.lineCount
+    hidden
+    show.max lines Ohayo Grammar Lines of Code
+   text.wordCount
+    hidden
+    show.sum count Ohayo Total Grammar Words
+    show.rowCount Ohayo Unique Words
+  doc.comment Todo: show.static 2 Ohayo Grammar Lines of Javascript Code
+file templates/ohayo-readme.ohayo
+ data
+  doc.title Ohayo Readme & Release Notes
+  web.get readme.md
+   parser text
+   hidden
+   markdown.toHtml
+  web.get releasenotes.md
+   parser text
+   hidden
+   markdown.toHtml
+  doc.layout column
+  doc.categories ohayo
+file templates/ohayo-reference.ohayo
+ data
+  doc.title Ohayo Reference
   doc.author Breck Yunits
   doc.date 12/05/2019
   doc.categories ohayo
   doc.layout column
   
-  doc.subtitle Maia is a language for data powered documents.
+  doc.subtitle Ohayo is a language for data powered documents.
   
   doc.section
    subtitle Overview
-   paragraph Maia is a combination of a Markdown-like language coupled with a collaboratively designed dataflow language for doing data science right in the browser.
+   paragraph Ohayo is a combination of a Markdown-like language coupled with a collaboratively designed dataflow language for doing data science right in the browser.
   
   
   doc.section
@@ -37717,7 +37607,7 @@ file templates/maia-reference.maia
   
   doc.section
    subtitle Mixing data with content
-   paragraph You can mix and match doc tiles with any other Maia tile.
+   paragraph You can mix and match doc tiles with any other Ohayo tile.
   
   data.inline
    parser ssv
@@ -37729,7 +37619,7 @@ file templates/maia-reference.maia
   
   
   doc.subtitle A List of All Tiles
-  debug.grammarTree maia
+  debug.ohayoGrammarTree
    hidden
    treenotation.outline
   
@@ -37746,14 +37636,14 @@ file templates/maia-reference.maia
   doc.section
    subtitle Layout
    paragraph Layout changes the layout strategy of the tiles
-   code maia
+   code ohayo
     doc.layout column
   
   
   doc.section
    subtitle Zoom
    paragraph Zoom let's you adjust the zoom level of the doc.
-   code maia
+   code ohayo
     doc.zoom .5
   
   
@@ -37761,10 +37651,10 @@ file templates/maia-reference.maia
    subtitle Default visibilitiy
    paragraph You can change the default visibility of a tile
    paragraph The line below will hide all tiles by default.
-   code maia
+   code ohayo
     doc.tiles hidden
    paragraph When you hide all tiles, you'll need to opt-in to visible to show tiles.
-   code maia
+   code ohayo
     samples.portals
      vega.bar
       visible
@@ -37776,7 +37666,7 @@ file templates/maia-reference.maia
   doc.section
    subtitle Categories
    paragraph You might want to add some tags categorizing your document.
-   code maia
+   code ohayo
     doc.categories programming
   
   doc.section
@@ -37794,53 +37684,7 @@ file templates/maia-reference.maia
   
   doc.ref someRefId
    url https://en.wikipedia.org/wiki/Note_(typography)
-file templates/most-popular-websites.maia
- data
-  doc.title 500 Most Popular Websites
-  doc.layout column
-  doc.categories web
-  moz.top500
-   hidden
-   columns.setType LinkingRootDomains numberString
-    hidden
-    tables.basic
-    vega.bar Number of Inbound Links
-     xColumn Rank
-     yColumn LinkingRootDomains
-file templates/ohayo-product-stats.maia
- data
-  doc.title Ohayo Product Stats
-  doc.categories ohayo
-  doc.layout column
-  templates.list
-   hidden
-   show.rowCount Number of Templates
-  debug.grammar maia
-   hidden
-   text.matches string dataDomain
-    hidden
-    show.max count Number of Integrated Web Data Sources
-  challenge.list
-   hidden
-   show.rowCount Number of Challenges
-  debug.grammarTree maia
-   hidden
-   text.lineCount
-    hidden
-    show.max lines Number of Maia Nodes
-  doc.comment show.static 2 Number of 0 Included Datasets
-  doc.comment show.static 2 Number of Datasets on Datasets.ohayo.computer
-  debug.grammar maia
-   hidden
-   text.lineCount
-    hidden
-    show.max lines Maia Grammar Lines of Code
-   text.wordCount
-    hidden
-    show.sum count Maia Total Grammar Words
-    show.rowCount Maia Unique Words
-  doc.comment Todo: show.static 2 Maia Grammar Lines of Javascript Code
-file templates/pca-of-flowers.maia
+file templates/pca-of-flowers.ohayo
  data
   doc.title PCA Demonstration
   samples.iris
@@ -37854,7 +37698,7 @@ file templates/pca-of-flowers.maia
   doc.layout column
   doc.categories math
   doc.subtitle This demonstration uses the PCA library from <a href="https://github.com/bitanath/pca">bitanath</a>. 
-file templates/planets-on-wikipedia.maia
+file templates/planets-on-wikipedia.ohayo
  data
   doc.title The Planets on Wikipedia
   wikipedia.page Venus Mercury_(planet) Earth Mars Neptune Saturn Jupiter Uranus
@@ -37869,7 +37713,7 @@ file templates/planets-on-wikipedia.maia
       text.wordcloud
   doc.categories wikipedia
   doc.layout column
-file templates/portals.maia
+file templates/portals.ohayo
  data
   doc.title Data Portals
   samples.portals
@@ -37879,7 +37723,7 @@ file templates/portals.maia
     tables.basic
   doc.categories dataScience
   doc.layout column
-file templates/public-apis.maia
+file templates/public-apis.ohayo
  data
   doc.title Public APIs
   doc.subtitle An overview of the Public API project to build a list of free APIs for use in software and web development. 
@@ -37896,7 +37740,7 @@ file templates/public-apis.maia
    tables.basic All APIS
   doc.layout column
   doc.categories programming
-file templates/random.maia
+file templates/random.ohayo
  data
   doc.title Random Numbers
   random.int 1000 0 1000
@@ -37911,7 +37755,7 @@ file templates/random.maia
      yColumn number
   doc.categories math
   doc.layout column
-file templates/reddit.maia
+file templates/reddit.ohayo
  data
   doc.title Top Stories on Reddit
   reddit.all
@@ -37927,7 +37771,7 @@ file templates/reddit.maia
      yColumn score
   doc.layout column
   doc.categories socialMedia
-file templates/subreddit.maia
+file templates/subreddit.ohayo
  data
   doc.title Top stories in a subreddit
   reddit.sub Astronomy
@@ -37938,7 +37782,7 @@ file templates/subreddit.maia
     list.links
   doc.layout column
   doc.categories socialMedia
-file templates/tlds.maia
+file templates/tlds.ohayo
  data
   doc.title Most Popular Top Level Domains
   doc.layout column
@@ -37955,7 +37799,7 @@ file templates/tlds.maia
       hidden
       tables.basic
       vega.bar .com is the most popular TLD by nearly 10x.
-file templates/trends-in-baby-names.maia
+file templates/trends-in-baby-names.ohayo
  data
   doc.title Trends in Baby Names
   doc.comment Uncomment the below line, and delete the following line, to use the full dataset
@@ -37968,7 +37812,7 @@ file templates/trends-in-baby-names.maia
       yColumn percent
   doc.layout column
   doc.categories parenting
-file templates/trigonometry.maia
+file templates/trigonometry.ohayo
  data
   doc.title Trigonometric Functions
    visible
@@ -37990,7 +37834,7 @@ file templates/trigonometry.maia
   doc.layout column
   doc.categories math
   doc.defaultHidden
-file templates/typescript-interface-generator.maia
+file templates/typescript-interface-generator.ohayo
  data
   doc.title TypeScript Interface Generator
   data.inline
@@ -38002,7 +37846,7 @@ file templates/typescript-interface-generator.maia
     html.printAs code
   doc.layout column
   doc.categories programming
-file templates/ucimlr-overview.maia
+file templates/ucimlr-overview.ohayo
  data
   doc.title The Datasets in UCIMLR
   doc.layout column
@@ -38018,7 +37862,7 @@ file templates/ucimlr-overview.maia
        xColumn Year
        yColumn count
   doc.categories dataScience
-file templates/word-cloud.maia
+file templates/word-cloud.ohayo
  data
   doc.title Word Cloud
   doc.layout column
@@ -38033,7 +37877,7 @@ file templates/word-cloud.maia
   doc.categories writing
 `
 "use strict";
-window.OhayoDrums = `panel new createNewBlankProgramCommand ctrl+n New file
+window.StudioDrums = `panel new createNewBlankProgramCommand ctrl+n New file
 mounted new cloneTabCommand ctrl+shift+n Clone file
 panel new createMiniMapCommand shift+m Browse files
 mounted new createNewSourceCodeVisualizationProgramCommand  Visualize Source Code
@@ -38067,7 +37911,7 @@ mounted edit undoFocusedProgramCommand command+z Undo
 mounted edit redoFocusedProgramCommand command+shift+z Redo
 mounted edit insertAdjacentTileCommand shift+i Insert Tile
 panel ohayo toggleHelpCommand ? Help
-panel ohayo confirmAndResetAppStateCommand  Reset Ohayo
+panel ohayo confirmAndResetAppStateCommand  Reset Ohayo Studio
 panel ohayo toggleTreeComponentFrameworkDebuggerCommand shift+d Toggle TCF Debugger`
 class AbstractPath {
   constructor(path) {
@@ -38219,8 +38063,8 @@ window.AbstractDisk
 // File. then we can have diskFile, remoteFile, folderFile, templateFile, localstorageFile, et cetera.,
 // each with it's own storage strategy. they can extend tree notation. they can implment fetch. they can
 // handle readonly, et cetera. google docs file. dropbox file. derivative file (for example, from a png).
-// then the bytes of the file get turned into a program. there are Tree Languages maia/fire caddoes and then there
-// are non-treeLanguage files like pngs and JS, et cetera, that we can build maia in-memory templates for.
+// then the bytes of the file get turned into a program. there are Tree Languages ohayo/fire caddoes and then there
+// are non-treeLanguage files like pngs and JS, et cetera, that we can build ohayo in-memory templates for.
 
 // folders and files =>
 
@@ -38386,13 +38230,13 @@ window.LocalStorageDisk
  = LocalStorageDisk
 ;
 
-const DemoTemplates = `faq.maia
- web.get maia/packages/samples/faq.md
+const DemoTemplates = `faq.ohayo
+ web.get ohayo/packages/samples/faq.md
   parser text
   hidden
   markdown.toHtml
-ohayo.maia
- web.get maia/packages/samples/welcome.md
+ohayo.ohayo
+ web.get ohayo/packages/samples/welcome.md
   parser text
   hidden
   markdown.toHtml
@@ -38404,9 +38248,20 @@ window.DemoTemplates
  = DemoTemplates
 ;
 
+// todo: title should be folder name?
+const MiniTemplate = `editor.files
+ hidden
+ rows.sortBy link
+  hidden
+  editor.gallery`
+
+window.MiniTemplate
+ = MiniTemplate
+;
 
 
-const MaiaCodeEditorTemplate = (source, fileName, treeLanguage) =>
+
+const OhayoCodeEditorTemplate = (source, fileName, treeLanguage) =>
   new jtree.TreeNode(`doc.title Source code visualization of {fileName}
 data.inline
  parser text
@@ -38426,34 +38281,34 @@ data.inline
   {source}
 doc.layout column`).templateToString({ source, fileName, treeLanguage })
 
-window.MaiaCodeEditorTemplate
- = MaiaCodeEditorTemplate
+window.OhayoCodeEditorTemplate
+ = OhayoCodeEditorTemplate
 ;
 
-const MaiaTemplates = {}
+const OhayoTemplates = {}
 
-MaiaTemplates._fromDelimited = (filename, data, app) => {
+OhayoTemplates._fromDelimited = (filename, data, app) => {
   const key = app.initLocalDataStorage(filename, data)
   return `data.localStorage ${key}
  tables.basic`
 }
 
-MaiaTemplates.tsv = MaiaTemplates._fromDelimited
+OhayoTemplates.tsv = OhayoTemplates._fromDelimited
 
-MaiaTemplates.json = (filename, data, app) => {
+OhayoTemplates.json = (filename, data, app) => {
   const key = app.initLocalDataStorage(filename, data)
   return `data.localStorage ${key}`
 }
 
-MaiaTemplates.csv = (filename, data, app) => {
+OhayoTemplates.csv = (filename, data, app) => {
   // todo: remove \r?
   // check csv subtypes
   const isMultiCsv = data.split("\n\n").length > 3
-  if (isMultiCsv) return MaiaTemplates._multiCsv(filename, data, app)
-  return MaiaTemplates._fromDelimited(filename, data, app)
+  if (isMultiCsv) return OhayoTemplates._multiCsv(filename, data, app)
+  return OhayoTemplates._fromDelimited(filename, data, app)
 }
 
-MaiaTemplates._multiCsv = (filename, data, app) => {
+OhayoTemplates._multiCsv = (filename, data, app) => {
   return data
     .split("\n\n")
     .map(t => t.trim())
@@ -38468,19 +38323,8 @@ MaiaTemplates._multiCsv = (filename, data, app) => {
     .join("\n")
 }
 
-window.MaiaTemplates
- = MaiaTemplates
-;
-
-// todo: title should be folder name?
-const MiniTemplate = `editor.files
- hidden
- rows.sortBy link
-  hidden
-  editor.gallery`
-
-window.MiniTemplate
- = MiniTemplate
+window.OhayoTemplates
+ = OhayoTemplates
 ;
 
 const SpeedTestTemplate = (title, rows) =>
@@ -39869,2369 +39713,37 @@ window.Layout
  = Layout
 ;
 
-const TilesConstants = {}
-TilesConstants.left = "left"
-TilesConstants.top = "top"
-TilesConstants.width = "width"
-TilesConstants.height = "height"
-TilesConstants.tileCssScript = "tileCssScript"
-TilesConstants.tileScript = "tileScript"
-TilesConstants.tileSize = "tileSize"
-TilesConstants.abstractTileSetting = "abstractTileSetting"
+const OhayoConstants = {}
+OhayoConstants.left = "left"
+OhayoConstants.top = "top"
+OhayoConstants.width = "width"
+OhayoConstants.height = "height"
+OhayoConstants.tileCssScript = "tileCssScript"
+OhayoConstants.tileScript = "tileScript"
+OhayoConstants.tileSize = "tileSize"
+OhayoConstants.abstractTileSetting = "abstractTileSetting"
 
+OhayoConstants.defaultHidden = "doc.defaultHidden"
 
-TilesConstants.defaultHidden = "doc.defaultHidden"
+OhayoConstants.layout = "doc.layout"
+OhayoConstants.layouts = {}
+OhayoConstants.layouts.custom = "custom"
+OhayoConstants.layouts.tiled = "tiled"
+OhayoConstants.layouts.tree = "tree"
+OhayoConstants.layouts.bin = "bin"
+OhayoConstants.layouts.column = "column"
+OhayoConstants.noPicker = "noPicker"
 
-TilesConstants.layout = "doc.layout"
-TilesConstants.layouts = {}
-TilesConstants.layouts.custom = "custom"
-TilesConstants.layouts.tiled = "tiled"
-TilesConstants.layouts.tree = "tree"
-TilesConstants.layouts.bin = "bin"
-TilesConstants.layouts.column = "column"
-TilesConstants.noPicker = "noPicker"
+OhayoConstants.selectedClass = "ui-selected"
+OhayoConstants.staySelectedClass = "staySelected"
 
-TilesConstants.selectedClass = "ui-selected"
-TilesConstants.staySelectedClass = "staySelected"
+OhayoConstants.maximized = "maximized"
+OhayoConstants.pickerTile = "doc.picker"
 
-TilesConstants.maximized = "maximized"
-TilesConstants.pickerTile = "doc.picker"
+OhayoConstants.abstractTileTreeComponentNode = "abstractTileTreeComponentNode"
 
-TilesConstants.abstractTileTreeComponentNode = "abstractTileTreeComponentNode"
-
-window.TilesConstants
- = TilesConstants
-;
-
-{
-  class abstractTileTreeComponentNode extends AbstractTreeComponent {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        catchAllErrorNode,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          hidden: hiddenNode,
-          visible: visibleNode,
-          maximized: maximizedNode,
-          left: leftNode,
-          top: topNode,
-          width: widthNode,
-          height: heightNode
-        }),
-        [{ regex: /^$/, nodeConstructor: tileBlankLineNode }]
-      )
-    }
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get tileStumpTemplate() {
-      return `div
- class {classes}
- id {id}
- contextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
- div {header}
-  class TileHeader
- div
-  style {bodyStyle}
-  class TileBody
-  {body}
- div
-  class TileFooter
-  {footer}
- div
-  class TileGrabber`
-    }
-    get errorStateStumpTemplate() {
-      return `div
- class {classes}
- id {id}
- contextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
- div ERROR
-  class TileHeader
- div
-  class TileBody
-  {content}
- div
-  class TileFooter
-  {footer}
- div
-  class TileGrabber`
-    }
-    get inspectionStumpTemplate() {
-      return `div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
-div Messages:
-ol
- {messages}
-div Tree:
-pre
- bern
-  {sourceCode}
-div All Tile Settings:
-pre
- bern
-  {settings}`
-    }
-    get pencilStumpTemplate() {
-      return `span {icon}
- class TilePencilButton
- clickCommand toggleToolbarCommand`
-    }
-    get errorLogMessageStumpTemplate() {
-      return `div Error occurred. See console.
- class OhayoError`
-    }
-    get visibleKey() {
-      return `visible`
-    }
-    get hiddenKey() {
-      return `hidden`
-    }
-    get footerHeight() {
-      return 30
-    }
-    get headerHeight() {
-      return 30
-    }
-    getProgramTemplate(id) {}
-    getSnippetTemplate(id) {}
-    getExampleTemplate(index) {
-      // todo: right now we only have 1 example per tile.
-      const exampleNode = this.getDefinition().getNode(jtree.GrammarConstants.example)
-      return exampleNode ? exampleNode.childrenToString() : ""
-    }
-    emitLogMessage(message) {
-      const tab = this.getTab()
-      if (tab) tab.addStumpCodeMessageToLog(message)
-      else if (this.isNodeJs()) console.log(message)
-    }
-    getTheme() {
-      return this.getTab().getTheme()
-    }
-    qFormat(str, obj) {
-      return new jtree.TreeNode(str).templateToString(obj)
-    }
-    scrollIntoView() {
-      const el = this.getStumpNode()
-        .getShadow()
-        .getShadowElement()
-      if (el) el.scrollIntoView()
-    }
-    async loadBrowserRequirements() {
-      const loadingMap = this.getTab()
-        .getRootNode()
-        .getDefinitionLoadingPromiseMap()
-      if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
-      await loadingMap.get(this.constructor)
-    }
-    async _makeBrowserLoadRequirementsPromise(loadingMap) {
-      const app = this.getWebApp()
-      const cssScript = this[TilesConstants.tileCssScript]
-      if (cssScript) this._loadTileCss(cssScript)
-      const def = this.getDefinition()
-      const scriptPaths = def.nodesThatStartWith("string " + TilesConstants.tileScript).map(node => node.getWord(2))
-      const thisScript = this[TilesConstants.tileScript]
-      if (thisScript && !scriptPaths.includes(thisScript)) scriptPaths.push(thisScript)
-      if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
-      loadingMap.set(this.constructor, true)
-    }
-    _loadTileCss(css) {
-      const app = this.getWebApp()
-      app
-        .getWillowBrowser()
-        .getBodyStumpNode()
-        .insertChildNode(
-          css
-            .split(" ")
-            .map(
-              url => `link
- rel stylesheet
- media screen
- href ${url}`
-            )
-            .join("\n")
-        )
-    }
-    _hasBrowserRequirements() {
-      return this.tileScript
-    }
-    _areBrowserRequirementsLoaded() {
-      if (this.isNodeJs()) return true
-      // todo: cleanup. assumes app is here in browser.
-      const loadingMap = app.getDefinitionLoadingPromiseMap()
-      return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
-    }
-    isLoaded() {
-      return this._areBrowserRequirementsLoaded()
-    }
-    getErrorMessageHtml() {
-      const errors = Object.values(this.getRunTimePhaseErrors())
-      return errors.length ? ` <span style="color: ${this.getTheme().errorColor};">${errors.join(" ")}</span>` : "" //todo: cleanup
-    }
-    toStumpErrorStateCode(err) {
-      return this.qFormat(this.errorStateStumpTemplate, {
-        classes: this.getCssClassNames().join(" "),
-        id: this.getTreeComponentId(),
-        content: `div ` + err,
-        footer: this.getTileToolbarButtonStumpCode()
-      })
-    }
-    // todo: delete this
-    makeDirty() {
-      delete this._cache_settingsObject
-      delete this._bodyStumpCodeCache // todo: cleanup
-      this._setLastRenderedTime(0)
-    }
-    toggleToolbar() {
-      if (!this._tileToolbar) {
-        const TileToolbarTreeComponent = this.require(
-          "TileToolbarTreeComponent",
-          this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileToolbarTreeComponent.js"
-        )
-        this._tileToolbar = new TileToolbarTreeComponent("", undefined, this)
-        this._tileToolbar.renderAndGetRenderReport(this.getStumpNode())
-      } else this._tileToolbar = this._tileToolbar.unmount()
-    }
-    getAllTileSettingsDefinitions() {
-      const def = this.getDefinition()
-      return Object.values(def.getFirstWordMapWithDefinitions()).filter(def => def.isOrExtendsANodeTypeInScope([TilesConstants.abstractTileSetting]))
-    }
-    getTab() {
-      return this.getRootNode().getTab()
-    }
-    getChildTiles() {
-      return this.getChildInstancesOfNodeTypeId("abstractTileTreeComponentNode")
-    }
-    selectTile() {
-      this.selectNode()
-      if (this.isMounted()) this.getStumpNode().addClassToStumpNode(TilesConstants.selectedClass)
-    }
-    unselectNode() {
-      super.unselectNode()
-      if (this.isMounted()) this.getStumpNode().removeClassFromStumpNode(TilesConstants.selectedClass)
-    }
-    getCssClassNames() {
-      const classNames = super.getCssClassNames()
-      if (this._isMaximized()) classNames.push("TileMaximized")
-      return classNames
-    }
-    toStumpCode() {
-      return this.qFormat(this.tileStumpTemplate, {
-        classes: this.getCssClassNames().join(" "),
-        id: this.getTreeComponentId(),
-        header: this.getTileHeaderBern(),
-        bodyStyle: this.customBodyStyle || "",
-        body: this._getBodyStumpCodeCache() || "",
-        footer: this.getTileFooterStumpCode()
-      })
-    }
-    _getBodyStumpCodeCache() {
-      if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
-      return this._bodyStumpCodeCache
-    }
-    getTileHeaderBern() {
-      return `${this.getFirstWord()}`
-    }
-    cloneAndOffset() {
-      const clone = this.duplicate()
-      const left = this.getLeft()
-      const _top = this.getTop()
-      if (left) clone.touchNode(TilesConstants.left).setContent(parseInt(left) + 1)
-      if (_top) clone.touchNode(TilesConstants.top).setContent(parseInt(_top) + 1)
-      return clone
-    }
-    getTileBodyStumpCode() {
-      return ``
-    }
-    _getCss() {
-      const selector = "#" + this.getTreeComponentId()
-      const theme = this.getTheme()
-      const visibleCss = this.isVisible() ? "" : "display: none"
-      const dimensions = this.getTileDimensionIfAny()
-      const dimensionCss = dimensions ? dimensions.toCss() : ""
-      const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
-      return `${selector} { ${visibleCss} ${dimensionCss} }
-      ${theme.hakonToCss(hakonCode)}`
-    }
-    getContextMenuStumpCode() {
-      return ""
-    }
-    handleTileError(err) {
-      if (!this._errorCount) this._errorCount = 0
-      this._errorCount++
-      this.getRootNode().goRed(err)
-    }
-    getWall() {
-      return this.getWebApp().getAppWall()
-    }
-    getWebApp() {
-      return this.getTab().getRootNode()
-    }
-    getTileDimensionIfAny() {
-      const dimensions = this.getWall().getWallViewPortDimensions()
-      return this.getRootNode()
-        .getTileDimensionMap(dimensions.width, dimensions.height)
-        .get(this)
-    }
-    getTileBodyDimension() {
-      const dimension = this.getTileDimensionIfAny()
-      dimension.height = dimension.height - this.headerHeight - this.footerHeight
-      return dimension
-    }
-    getDependencies() {
-      return []
-    }
-    async runAndrenderAndGetRenderReport() {
-      await this.execute()
-      return this.renderAndGetRenderReport()
-    }
-    getTimeToLoad() {
-      return this._timeToLoad || 0
-    }
-    toHakonCode() {
-      return ""
-    }
-    getTileFooterStumpCode() {
-      return this.getTileToolbarButtonStumpCode()
-    }
-    getTileToolbarButtonStumpCode() {
-      return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
-    }
-    getDefinedOrSuggestedSize() {
-      const size = this.getSuggestedSize()
-      const width = this.getWidth()
-      const height = this.getHeight()
-      return {
-        width: width ? width * 20 : size.width,
-        height: height ? height * 20 : size.height
-      }
-    }
-    getSuggestedSize() {
-      const tileSize = this.tileSize || "280 220"
-      const parts = tileSize.split(" ").map(tileSize => parseInt(tileSize))
-      return {
-        width: parts[0],
-        height: parts[1]
-      }
-    }
-    getRequiredDimensionsForTreeLayout(padding = 0) {
-      const size = {
-        width: 0,
-        height: 0
-      }
-      const children = this.getChildTiles()
-      const suggestedSize = this.getDefinedOrSuggestedSize()
-      children.forEach(child => {
-        const childSize = child.getRequiredDimensionsForTreeLayout(padding)
-        size.width += childSize.width
-        size.height = childSize.height > size.height ? childSize.height : size.height
-      })
-      size.width += children.length * padding
-      size.width = Math.max(size.width, suggestedSize.width)
-      size.height = suggestedSize.height + (children.length ? padding + size.height : 0)
-      return size
-    }
-    getLeft() {
-      return this.get(TilesConstants.left)
-    }
-    getTop() {
-      return this.get(TilesConstants.top)
-    }
-    getWidth() {
-      return this.get(TilesConstants.width)
-    }
-    getHeight() {
-      return this.get(TilesConstants.height)
-    }
-    // Tile child rendering is done at the wall flex level.
-    _getChildTreeComponents() {
-      return []
-    }
-    getStumpNodeForChildren() {
-      // We render all Tiles on the Wall.
-      return this.getStumpNode().getParent()
-    }
-    async treeComponentDidMount() {
-      super.treeComponentDidMount()
-      if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
-    }
-    toInspectionStumpCode() {
-      const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
-      const settingsDefinitions = this.getAllTileSettingsDefinitions()
-        .map(setting => `${setting.getFirstWord()} ${setting.getDescription()}`)
-        .join("\n")
-      const parentConstructorName = this.getParent().constructor.name
-      const constructorName = this.constructor.name
-      const sourceCode = this.toString()
-      const settings = settingsDefinitions
-      return this.qFormat(this.inspectionStumpTemplate, {
-        constructorName,
-        parentConstructorName,
-        sourceCode,
-        messages,
-        settings
-      })
-    }
-    isVisible() {
-      if (this.visible === false) return false
-      return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
-    }
-    _isMaximized() {
-      return this.has(TilesConstants.maximized)
-    }
-    async _executeChildNodes() {
-      await Promise.all(this.getChildTiles().map(tile => tile.execute()))
-    }
-    async _execute() {
-      await this._executeChildNodes()
-    }
-    async execute() {
-      try {
-        this.setRunTimePhaseError("execute")
-        await this._execute()
-      } catch (err) {
-        this.setRunTimePhaseError("execute", err)
-        console.error(err)
-        this.emitLogMessage(this.errorLogMessageStumpTemplate)
-      }
-      return this
-    }
-    cloneTileCommand() {
-      this.cloneAndOffset()
-      return this.getTab().autosaveAndRender()
-    }
-    async toggleTileMaximizeCommand() {
-      if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
-      else this.touchNode(TilesConstants.maximized)
-      await this._runAfterTileUpdate(this)
-    }
-    async triggerTileMethodCommand(value, methodName) {
-      await this[methodName](value)
-      await this._runAfterTileUpdate(this)
-    }
-    // todo: refactor.
-    async changeTileTypeCommand(newValue) {
-      this.setFirstWord(newValue)
-      const newNode = this.duplicate()
-      // todo: destroy or something? how do we reparse.
-      this.unmountAndDestroy()
-      const app = this.getTab().getRootNode()
-      await Promise.all(
-        this.getRootNode()
-          .getTiles()
-          .map(tile => tile.loadBrowserRequirements())
-      )
-      await this.getTab().autosaveAndRender()
-      newNode.runAndrenderAndGetRenderReport()
-    }
-    changeParentCommand(pathVector) {
-      // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
-      const program = this.getRootNode()
-      const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
-      const destinationTree = indexPath ? program.nodeAt(indexPath) : program
-      // todo: on jtree should we make copyTo second param optional?
-      this.copyTo(destinationTree, destinationTree.length)
-      this.unmountAndDestroy()
-      return this.getTab().autosaveAndRender()
-    }
-    async openTileContextMenuCommand() {
-      this.getTab()
-        .getRootNode()
-        .setTargetNode(this)
-        .toggleAndRender(OhayoConstants.tileContextMenu)
-    }
-    destroyTileCommand() {
-      this.unmountAndDestroy()
-      return this.getTab().autosaveAndRender()
-    }
-    getNewDataCommand() {
-      // todo: have some type of paging system to fetch new data.
-    }
-    async changeTileSettingAndRenderCommand(value, settingName) {
-      // note the unusual ordering of params.
-      this.touchNode(settingName).setContent(value.toString())
-      // todo: sometimes size needs to be redone (maximize, for example)
-      await this._runAfterTileUpdate(this)
-    }
-    // todo: remove
-    async changeTileSettingMultilineCommand(val, settingName) {
-      this.touchNode(settingName).setChildren(val)
-      await this._runAfterTileUpdate(this)
-    }
-    async changeTileSettingCommand(settingName, value) {
-      this.touchNode(settingName).setContent(value)
-    }
-    async changeWordAndRenderCommand(value, index) {
-      this.setWord(parseInt(index), value)
-      await this._runAfterTileUpdate(this)
-    }
-    async changeWordsAndRenderCommand(value, index) {
-      index = parseInt(index)
-      const edgeSymbol = this.getEdgeSymbol()
-      const words = this.getWords().slice(0, index)
-      this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
-      await this._runAfterTileUpdate(this)
-    }
-    async updateChildrenCommand(val) {
-      this.setChildren(val)
-      // reload the whole doc for now.
-      await this._runAfterTileUpdate(this)
-    }
-    async _runAfterTileUpdate(tile) {
-      tile.makeDirty() // ugly!
-      tile.getChildTiles().forEach(tile => {
-        tile.makeDirty() // todo: ugly!
-      })
-      // todo: what if you have a tile that has a contextare that allows editing of its children/
-      // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
-      await tile.getTab().autosaveTab()
-      await tile.runAndrenderAndGetRenderReport()
-      tile
-        .getTab()
-        .getRootNode()
-        .renderApp() // Need to render full app because of code editor
-    }
-    // todo: downstream data changes?
-    async changeTileContentAndRenderCommand(value) {
-      this.setContent(value)
-      await this._runAfterTileUpdate(this)
-    }
-    async copyTileCommand() {
-      // todo: remove cousin tiles?
-      this.getRootNode()
-        .getWillowBrowser()
-        .copyTextToClipboard(this.getFirstAncestor().toString())
-    }
-    async createProgramFromTileExampleCommand(index) {
-      const template = this.getExampleTemplate(index)
-      if (!template) return undefined
-      const fileExtension = "maia" // todo: generalize
-      const tab = await this.getTab()
-        .getRootNode()
-        ._createAndOpen(template, `help-for-${this.getFirstWord()}.${fileExtension}`)
-      tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-    }
-    async inspectTileCommand() {
-      if (!this.isNodeJs()) {
-        console.log("Tile available at window.tile")
-        window.tile = this
-        console.log(this)
-      }
-      this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
-      this.getTab()
-        .getRootNode()
-        .renderApp()
-    }
-    async toggleToolbarCommand() {
-      this.toggleToolbar()
-    }
-    async createProgramFromTemplateCommand(id) {
-      const programTemplate = this.getProgramTemplate(id)
-      if (!programTemplate) return undefined
-      const tab = await this.getTab()
-        .getRootNode()
-        ._createAndOpen(programTemplate.template, programTemplate.name)
-      tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
-    }
-    async appendSnippetTemplateCommand(id) {
-      const snippet = this.getSnippetTemplate(id)
-      if (!snippet) return undefined
-      const tab = this.getTab()
-      const tabProgram = tab.getTabProgram()
-      const newNodes = tabProgram.concat(snippet)
-      const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
-      tab.autosaveTab()
-      tabProgram.clearSelection()
-      tab.getTabWall().unmount()
-      await tabProgram.loadAndIncrementalRender()
-      newTiles.forEach(tile => tile.selectTile())
-      newTiles[0].scrollIntoView()
-    }
-    async copyDataCommand(delimiter) {
-      this.getRootNode()
-        .getWillowBrowser()
-        .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
-    }
-    async copyDataAsJavascriptCommand() {
-      const table = this.getOutputOrInputTable()
-      this.getRootNode()
-        .getWillowBrowser()
-        .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
-    }
-    async copyDataAsTreeCommand() {
-      const text = this.getOutputOrInputTable()
-        .toTree()
-        .toString()
-      this.getRootNode()
-        .getWillowBrowser()
-        .copyTextToClipboard(text)
-    }
-    async exportTileDataCommand(format = "csv") {
-      // todo: figure this out. use the browsers filename? tile title? id?
-      let extension = "csv"
-      let type = "text/csv"
-      let str = this.getOutputOrInputTable().toDelimited(",")
-      if (format === "tree") {
-        extension = "tree"
-        type = "text"
-        str = this.getOutputOrInputTable()
-          .toTree()
-          .toString()
-      }
-      this.getRootNode()
-        .getWillowBrowser()
-        .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
-    }
-  }
-
-  class basicRecursiveTileNode extends abstractTileTreeComponentNode {
-    get hakonTemplate() {
-      return `.BasicRecursiveTile
- input
- textarea
-  border 0
-  font-size 14px
-  height 100%
-  width 100%`
-    }
-    getTileBodyStumpCode() {
-      const edgeSymbol = " "
-      const definition = this.getDefinition()
-      const requiredCellIds = definition.getRequiredCellTypeIds()
-      const catchAllIndex = requiredCellIds.length
-      const catchAllCellTypeId = definition.getCatchAllCellTypeId()
-      if (catchAllCellTypeId) requiredCellIds.push(catchAllCellTypeId)
-      const cellInputs = requiredCellIds.map((cellTypeId, index) => {
-        const isCatchAll = cellTypeId === catchAllCellTypeId && index === catchAllIndex
-        const value = isCatchAll ? this.getWordsFrom(index + 1).join(edgeSymbol) : this.getWord(index + 1)
-        return ` input
-  placeholder ${cellTypeId}
-  value ${value}
-  name ${index + 1}
-  changeCommand ${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}`
-      })
-      return `div ${definition.getDescription()}
-div
-${cellInputs.join("\n")}`
-    }
-  }
-
-  class DidYouMeanTileNode extends abstractTileTreeComponentNode {
-    get bodyStumpTemplate() {
-      return `div
- span No tile '{input}' found. Line {lineNo}. Did you mean
- a {closestTile}
-  collapse
-  tabindex -1
-  value {closestTile}
-  clickCommand changeTileTypeCommand
- span ?`
-    }
-    getTileBodyStumpCode() {
-      const input = this.getFirstWord()
-      const lineNo = this.getLineNumber()
-      const closestTile = jtree.Utils.didYouMean(
-        input,
-        this.getRootNode()
-          .getHandGrammarProgram()
-          .getTopNodeTypeDefinitions()
-          .map(def => def.get("crux"))
-      )
-      if (!closestTile) {
-        if (!input) return `div Your program has a blank line on line ${lineNo}.`
-        return `div No tile '${input}' found.`
-      }
-      return this.qFormat(this.bodyStumpTemplate, { input, lineNo, closestTile })
-    }
-    getErrors() {
-      return [new jtree.UnknownNodeTypeError(this)]
-    }
-    getTileHeaderBern() {
-      return ""
-    }
-  }
-
-  class abstractDocTileNode extends abstractTileTreeComponentNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get tileStumpTemplate() {
-      return `div
- class {classes}
- id {id}
- contextMenuCommand openTileContextMenuCommand
- div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
- div
-  class TileBody HeaderLess
-  {body}
- div
-  class TileFooter
-  {footer}
- div
-  class TileGrabber`
-    }
-    get bodyStumpTemplate() {
-      return `{tagName}
- bern
-  {content}`
-    }
-    get headerHeight() {
-      return 0
-    }
-    get footerHeight() {
-      return 0
-    }
-    _getBody() {
-      return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
-    }
-    toStumpCode() {
-      return this.qFormat(this.tileStumpTemplate, {
-        classes: this.getCssClassNames().join(" "),
-        footer: this.getTileToolbarButtonStumpCode(),
-        id: this.getTreeComponentId(),
-        body: this._getBody()
-      })
-    }
-  }
-
-  class docTitleNode extends abstractDocTileNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get stringCell() {
-      return this.getWordsFrom(1)
-    }
-    get tagName() {
-      return `h1`
-    }
-    get tileSize() {
-      return `600 75`
-    }
-  }
-
-  class docSubtitleNode extends docTitleNode {
-    get tagName() {
-      return `h2`
-    }
-  }
-
-  class docSectionNode extends abstractDocTileNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          subtitle: docSectionSubtitleNode,
-          paragraph: docSectionParagraphNode,
-          link: docSectionLinkNode,
-          code: docSectionCodeNode
-        }),
-        undefined
-      )
-    }
-    _getBody() {
-      return this.compile()
-    }
-    _getCompiledLine() {
-      return ""
-    }
-  }
-
-  class docReferenceNode extends abstractDocTileNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { url: docReferenceUrlNode }),
-        undefined
-      )
-    }
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get referenceIdCell() {
-      return this.getWord(1)
-    }
-    get tagName() {
-      return `p`
-    }
-  }
-
-  class docCommentNode extends abstractTileTreeComponentNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
-    }
-    get commentKeywordCell() {
-      return this.getWord(0)
-    }
-    get commentCell() {
-      return this.getWordsFrom(1)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docToolingNode extends docCommentNode {}
-
-  class abstractPickerTileNode extends abstractTileTreeComponentNode {
-    get tileHeader() {
-      return `Gallery`
-    }
-    get categoryBreakStumpTemplate() {
-      return `div {category}
- class PickerCategory`
-    }
-    get itemStumpTemplate() {
-      return `{categoryBreak}
-a {name}
- br
-  span {description}
- title {description}
- tabindex -1
- value {value}
- clickCommand {command}`
-    }
-    get hakonTemplate() {
-      return `.PickerTileNode
- .PickerCategory
-  width 100%
-  margin-top 20px
-  text-align center
- .TileBody
-  display flex
-  flex-flow row wrap
-  a
-   &:hover
-    background-color {borderColor}
-   padding 10px
-   margin 5px
-   height 30px
-   background-color {backgroundColor}
-   border 1px solid {borderColor}
-   overflow hidden
-   text-align center
-   text-overflow ellipsis
-   font-size 14px
-   width 120px
-   span
-    font-size 70%`
-    }
-    get tileSize() {
-      return `480 420`
-    }
-    async fetchTableInputs() {
-      return { rows: this.getChoices().map(obj => obj.toObject()) }
-    }
-    getTileBodyStumpCode() {
-      let lastCat = ""
-      return this.getChoices()
-        .map(choice => {
-          choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
-          lastCat = choice.category
-          return this.qFormat(this.itemStumpTemplate, choice)
-        })
-        .join("\n")
-    }
-    getTileHeaderBern() {
-      return this.tileHeader
-    }
-  }
-
-  class PickerTileNode extends abstractPickerTileNode {
-    get tileHeader() {
-      return `Tile Gallery`
-    }
-    getChoices() {
-      const allChoices = this.getRootNode()
-        .getHandGrammarProgram()
-        .getTopNodeTypeDefinitions()
-      const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
-      const theChoices = filteredChoices.length ? filteredChoices : allChoices
-      return theChoices.map(nodeDefinition => {
-        const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
-        const name = nodeId.split(".")[1] || ""
-        const category = lodash.upperFirst(nodeId.split(".")[0])
-        const description = nodeDefinition.getDescription()
-        return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
-      })
-    }
-  }
-
-  class tileBlankLineNode extends jtree.GrammarBackedNode {
-    get emptyCell() {
-      return this.getWord(0)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class abstractDocSettingNode extends jtree.GrammarBackedNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get visible() {
-      return false
-    }
-  }
-
-  class docCategoriesNode extends abstractDocSettingNode {
-    get documentCategoryCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class docAuthorNode extends abstractDocSettingNode {
-    get stringCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class docDefaultHiddenNode extends abstractDocSettingNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-  }
-
-  class docDateNode extends abstractDocSettingNode {
-    get dateCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class docZoomNode extends abstractDocSettingNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get zoomCell() {
-      return parseFloat(this.getWord(1))
-    }
-  }
-
-  class docLayoutNode extends abstractDocSettingNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get docLayoutOptionCell() {
-      return this.getWord(1)
-    }
-  }
-
-  class abstractDocSectionComponentNode extends jtree.GrammarBackedNode {}
-
-  class docSectionSubtitleNode extends abstractDocSectionComponentNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get stringCell() {
-      return this.getWordsFrom(1)
-    }
-    compile() {
-      return `h2 ${this.getContent()}`
-    }
-  }
-
-  class docSectionParagraphNode extends abstractDocSectionComponentNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(docParagraphLineNode, undefined, undefined)
-    }
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get stringCell() {
-      return this.getWordsFrom(1)
-    }
-    get stumpTemplate() {
-      return `p
- bern
-  {content}`
-    }
-    compile() {
-      return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getContentWithChildren() })
-    }
-  }
-
-  class docSectionLinkNode extends abstractDocSectionComponentNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get urlCell() {
-      return this.getWord(1)
-    }
-    get stringCell() {
-      return this.getWordsFrom(2)
-    }
-    get stumpTemplate() {
-      return `a {content}
- href {url}`
-    }
-    compile() {
-      return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getWordsFrom(2).join(" "), url: this.getWord(1) })
-    }
-  }
-
-  class docSectionCodeNode extends abstractDocSectionComponentNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(docLineOfCodeNode, undefined, undefined)
-    }
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get programmingLanguageNameCell() {
-      return this.getWord(1)
-    }
-    get stumpTemplate() {
-      return `code
- bern
-  {content}`
-    }
-    compile() {
-      return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.childrenToString().replace(/</g, "&lt;") })
-    }
-  }
-
-  class docLineOfCodeNode extends jtree.GrammarBackedNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(docLineOfCodeNode, undefined, undefined)
-    }
-    get codeCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class docParagraphLineNode extends jtree.GrammarBackedNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(docParagraphLineNode, undefined, undefined)
-    }
-    get stringCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class commentLineNode extends jtree.GrammarBackedNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(commentLineNode, undefined, undefined)
-    }
-    get commentCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class docReferenceUrlNode extends jtree.GrammarBackedNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get urlCell() {
-      return this.getWord(1)
-    }
-  }
-
-  class catchAllErrorNode extends jtree.GrammarBackedNode {
-    getErrors() {
-      return this._getErrorNodeErrors()
-    }
-    get errorCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class hashBangNode extends jtree.GrammarBackedNode {
-    get hashBangWordCell() {
-      return this.getWordsFrom(0)
-    }
-  }
-
-  class tilesNode extends AbstractTreeComponent {
-    createParser() {
-      return new jtree.TreeNode.Parser(DidYouMeanTileNode, undefined, undefined)
-    }
-    get wallType() {
-      return `wall`
-    }
-    getTileClosestToLine(lineIndex) {
-      let current = this.nodeAtLine(lineIndex)
-      while (current) {
-        if (current.doesExtend("abstractTileTreeComponentNode")) return current
-        current = current.getParent()
-      }
-    }
-    setTab(tab) {
-      this._tab = tab
-    }
-    getTheme() {
-      const tab = this.getTab()
-      return tab ? tab.getTheme() : super.getTheme()
-    }
-    getTab() {
-      return this._tab
-    }
-    tilesAreVisible() {
-      return !this.has(TilesConstants.defaultHidden)
-    }
-    canUseCustomLayout() {
-      const definedLayout = this.get(TilesConstants.layout)
-      if (definedLayout === TilesConstants.layouts.custom) return true
-      if (this.getTiles().some(tile => tile.has(TilesConstants.left) || tile.has(TilesConstants.top))) return true
-      return false
-    }
-    _getLayoutStrategy() {
-      const definedLayout = this.get(TilesConstants.layout)
-      return (
-        definedLayout ||
-        (this.wallType === OhayoConstants.flex
-          ? this.canUseCustomLayout()
-            ? TilesConstants.layouts.custom
-            : TilesConstants.layouts.tiled
-          : TilesConstants.layouts.tree)
-      )
-    }
-    getTileDimensionMap(width, height) {
-      // todo: cache?
-      return new Layout().getTileDimensionMap(this, this._getLayoutStrategy(), width, height)
-    }
-    async loadAndIncrementalRender() {
-      const app = this.getTab().getRootNode()
-      await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))
-      await Promise.all(
-        this.getRootLevelTiles().map(async tile => {
-          await tile.execute()
-          app.renderApp()
-        })
-      )
-      app.renderApp() // this one might be superfluous
-      return this
-    }
-    getTiles() {
-      return this.getTopDownArray().filter(node => node.doesExtend("abstractTileTreeComponentNode"))
-    }
-    getRootLevelTiles() {
-      return this.filter(node => node.doesExtend("abstractTileTreeComponentNode"))
-    }
-    _getProjectRootDir() {
-      return this.isNodeJs() ? jtree.Utils.findProjectRoot(__dirname, "ohayo") : ""
-    }
-    toRunTimeStats() {
-      const tiles = this.getTiles()
-      const stats = {
-        tiles: tiles.length,
-        treeLanguage: this.getHandGrammarProgram().getExtensionName(),
-        url: this.getTab().getFileName()
-      }
-      stats.timeToLoad = this.getTiles()
-        .map(tile => tile.getTimeToLoad())
-        .sort()
-        .reverse()[0]
-      stats.timeToRender = this.getTiles()
-        .map(tile => tile.getNewestTimeToRender())
-        .sort()
-        .reverse()[0]
-      return stats
-    }
-    getHandGrammarProgram() {
-      if (!this._cachedHandGrammarProgramRoot)
-        this._cachedHandGrammarProgramRoot = new jtree.HandGrammarProgram(`emptyCell
-programmingLanguageNameCell
- enum javascript latex css html ruby rust python csv tsv xml php typescript lisp swift java c cpp markdown bash
- highlightScope constant
-codeCell
- highlightScope string
-documentCategoryCell
- highlightScope constant
- enum shopping biology chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
-zoomCell
- extends numberCell
-referenceIdCell
- highlightScope string
-docLayoutOptionCell
- enum custom bin tree column tiled
- highlightScope constant
-commentCell
- highlightScope comment
-commentKeywordCell
- highlightScope comment
-errorCell
- highlightScope invalid
-hashBangWordCell
- highlightScope comment
-stringCell
- highlightScope string
-urlCell
- highlightScope constant
-dateCell
- highlightScope string
-intCell
- regex \\-?[0-9]+
-numberCell
- regex \\-?[0-9]*\\.?[0-9]*
-tileKeywordCell
- highlightScope keyword
-intCell
-tileSettingKeywordCell
- highlightScope variable.language
-abstractTileTreeComponentNode
- abstract
- cells tileKeywordCell
- _extendsJsClass AbstractTreeComponent
- inScope tileBlankLineNode abstractCoreTileSettingTerminalNode
- catchAllNodeType catchAllErrorNode
- int headerHeight 30
- int footerHeight 30
- string hiddenKey hidden
- string visibleKey visible
- string errorLogMessageStumpTemplate
-  div Error occurred. See console.
-   class OhayoError
- string pencilStumpTemplate
-  span {icon}
-   class TilePencilButton
-   clickCommand toggleToolbarCommand
- string inspectionStumpTemplate
-  div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
-  div Messages:
-  ol
-   {messages}
-  div Tree:
-  pre
-   bern
-    {sourceCode}
-  div All Tile Settings:
-  pre
-   bern
-    {settings}
- string errorStateStumpTemplate
-  div
-   class {classes}
-   id {id}
-   contextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
-   div ERROR
-    class TileHeader
-   div
-    class TileBody
-    {content}
-   div
-    class TileFooter
-    {footer}
-   div
-    class TileGrabber
- string tileStumpTemplate
-  div
-   class {classes}
-   id {id}
-   contextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
-   div {header}
-    class TileHeader
-   div
-    style {bodyStyle}
-    class TileBody
-    {body}
-   div
-    class TileFooter
-    {footer}
-   div
-    class TileGrabber
- javascript
-  getProgramTemplate(id) {}
-  getSnippetTemplate(id) {}
-  getExampleTemplate(index) {
-   // todo: right now we only have 1 example per tile.
-   const exampleNode = this.getDefinition().getNode(jtree.GrammarConstants.example)
-   return exampleNode ? exampleNode.childrenToString() : ""
-  }
-  emitLogMessage(message) {
-   const tab = this.getTab()
-   if (tab) tab.addStumpCodeMessageToLog(message)
-   else if (this.isNodeJs()) console.log(message)
-  }
-  getTheme() {
-   return this.getTab().getTheme()
-  }
-  qFormat(str, obj) {
-   return new jtree.TreeNode(str).templateToString(obj)
-  }
-  scrollIntoView() {
-   const el = this.getStumpNode()
-    .getShadow()
-    .getShadowElement()
-   if (el) el.scrollIntoView()
-  }
-  async loadBrowserRequirements() {
-   const loadingMap = this.getTab()
-    .getRootNode()
-    .getDefinitionLoadingPromiseMap()
-   if (!loadingMap.has(this.constructor)) loadingMap.set(this.constructor, this._makeBrowserLoadRequirementsPromise(loadingMap))
-   await loadingMap.get(this.constructor)
-  }
-  async _makeBrowserLoadRequirementsPromise(loadingMap) {
-   const app = this.getWebApp()
-   const cssScript = this[TilesConstants.tileCssScript]
-   if (cssScript) this._loadTileCss(cssScript)
-   const def = this.getDefinition()
-   const scriptPaths = def.nodesThatStartWith("string " + TilesConstants.tileScript).map(node => node.getWord(2))
-   const thisScript = this[TilesConstants.tileScript]
-   if (thisScript && !scriptPaths.includes(thisScript)) scriptPaths.push(thisScript)
-   if (scriptPaths.length) await Promise.all(scriptPaths.map(scriptPath => app.getWillowBrowser().appendScript(scriptPath)))
-   loadingMap.set(this.constructor, true)
-  }
-  _loadTileCss(css) {
-   const app = this.getWebApp()
-   app
-    .getWillowBrowser()
-    .getBodyStumpNode()
-    .insertChildNode(
-     css
-      .split(" ")
-      .map(
-       url => \`link
-   rel stylesheet
-   media screen
-   href \${url}\`
-      )
-      .join("\\n")
-    )
-  }
-  _hasBrowserRequirements() {
-   return this.tileScript
-  }
-  _areBrowserRequirementsLoaded() {
-   if (this.isNodeJs()) return true
-   // todo: cleanup. assumes app is here in browser.
-   const loadingMap = app.getDefinitionLoadingPromiseMap()
-   return !this._hasBrowserRequirements() || loadingMap.get(this.constructor) === true
-  }
-  isLoaded() {
-   return this._areBrowserRequirementsLoaded()
-  }
-  getErrorMessageHtml() {
-   const errors = Object.values(this.getRunTimePhaseErrors())
-   return errors.length ? \` <span style="color: \${this.getTheme().errorColor};">\${errors.join(" ")}</span>\` : "" //todo: cleanup
-  }
-  toStumpErrorStateCode(err) {
-   return this.qFormat(this.errorStateStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), content: \`div \` + err, footer: this.getTileToolbarButtonStumpCode() })
-  }
-  // todo: delete this
-  makeDirty() {
-   delete this._cache_settingsObject
-   delete this._bodyStumpCodeCache // todo: cleanup
-   this._setLastRenderedTime(0)
-  }
-  toggleToolbar() {
-   if (!this._tileToolbar) {
-    const TileToolbarTreeComponent = this.require("TileToolbarTreeComponent", this._getProjectRootDir() + "ohayoWebApp/treeComponents/TileToolbarTreeComponent.js")
-    this._tileToolbar = new TileToolbarTreeComponent("", undefined, this)
-    this._tileToolbar.renderAndGetRenderReport(this.getStumpNode())
-   } else this._tileToolbar = this._tileToolbar.unmount()
-  }
-  getAllTileSettingsDefinitions() {
-   const def = this.getDefinition()
-   return Object.values(def.getFirstWordMapWithDefinitions()).filter(def => def.isOrExtendsANodeTypeInScope([TilesConstants.abstractTileSetting]))
-  }
-  getTab() {
-   return this.getRootNode().getTab()
-  }
-  getChildTiles() {
-   return this.getChildInstancesOfNodeTypeId("abstractTileTreeComponentNode")
-  }
-  selectTile() {
-   this.selectNode()
-   if (this.isMounted()) this.getStumpNode().addClassToStumpNode(TilesConstants.selectedClass)
-  }
-  unselectNode() {
-   super.unselectNode()
-   if (this.isMounted()) this.getStumpNode().removeClassFromStumpNode(TilesConstants.selectedClass)
-  }
-  getCssClassNames() {
-   const classNames = super.getCssClassNames()
-   if (this._isMaximized()) classNames.push("TileMaximized")
-   return classNames
-  }
-  toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, {
-    classes: this.getCssClassNames().join(" "),
-    id: this.getTreeComponentId(),
-    header: this.getTileHeaderBern(),
-    bodyStyle: this.customBodyStyle || "",
-    body: this._getBodyStumpCodeCache() || "",
-    footer: this.getTileFooterStumpCode()
-   })
-  }
-  _getBodyStumpCodeCache() {
-   if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
-   return this._bodyStumpCodeCache
-  }
-  getTileHeaderBern() {
-   return \`\${this.getFirstWord()}\`
-  }
-  cloneAndOffset() {
-   const clone = this.duplicate()
-   const left = this.getLeft()
-   const _top = this.getTop()
-   if (left) clone.touchNode(TilesConstants.left).setContent(parseInt(left) + 1)
-   if (_top) clone.touchNode(TilesConstants.top).setContent(parseInt(_top) + 1)
-   return clone
-  }
-  getTileBodyStumpCode() {
-   return \`\`
-  }
-  _getCss() {
-   const selector = "#" + this.getTreeComponentId()
-   const theme = this.getTheme()
-   const visibleCss = this.isVisible() ? "" : "display: none"
-   const dimensions = this.getTileDimensionIfAny()
-   const dimensionCss = dimensions ? dimensions.toCss() : ""
-   const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
-   return \`\${selector} { \${visibleCss} \${dimensionCss} }
-        \${theme.hakonToCss(hakonCode)}\`
-  }
-  getContextMenuStumpCode() {
-   return ""
-  }
-  handleTileError(err) {
-   if (!this._errorCount) this._errorCount = 0
-   this._errorCount++
-   this.getRootNode().goRed(err)
-  }
-  getWall() {
-   return this.getWebApp().getAppWall()
-  }
-  getWebApp() {
-   return this.getTab().getRootNode()
-  }
-  getTileDimensionIfAny() {
-   const dimensions = this.getWall().getWallViewPortDimensions()
-   return this.getRootNode()
-    .getTileDimensionMap(dimensions.width, dimensions.height)
-    .get(this)
-  }
-  getTileBodyDimension() {
-   const dimension = this.getTileDimensionIfAny()
-   dimension.height = dimension.height - this.headerHeight - this.footerHeight
-   return dimension
-  }
-  getDependencies() {
-   return []
-  }
-  async runAndrenderAndGetRenderReport() {
-   await this.execute()
-   return this.renderAndGetRenderReport()
-  }
-  getTimeToLoad() {
-   return this._timeToLoad || 0
-  }
-  toHakonCode() {
-   return ""
-  }
-  getTileFooterStumpCode() {
-   return this.getTileToolbarButtonStumpCode()
-  }
-  getTileToolbarButtonStumpCode() {
-   return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
-  }
-  getDefinedOrSuggestedSize() {
-   const size = this.getSuggestedSize()
-   const width = this.getWidth()
-   const height = this.getHeight()
-   return {
-    width: width ? width * 20 : size.width,
-    height: height ? height * 20 : size.height
-   }
-  }
-  getSuggestedSize() {
-   const tileSize = this.tileSize || "280 220"
-   const parts = tileSize.split(" ").map(tileSize => parseInt(tileSize))
-   return {
-    width: parts[0],
-    height: parts[1]
-   }
-  }
-  getRequiredDimensionsForTreeLayout(padding = 0) {
-   const size = {
-    width: 0,
-    height: 0
-   }
-   const children = this.getChildTiles()
-   const suggestedSize = this.getDefinedOrSuggestedSize()
-   children.forEach(child => {
-    const childSize = child.getRequiredDimensionsForTreeLayout(padding)
-    size.width += childSize.width
-    size.height = childSize.height > size.height ? childSize.height : size.height
-   })
-   size.width += children.length * padding
-   size.width = Math.max(size.width, suggestedSize.width)
-   size.height = suggestedSize.height + (children.length ? padding + size.height : 0)
-   return size
-  }
-  getLeft() {
-   return this.get(TilesConstants.left)
-  }
-  getTop() {
-   return this.get(TilesConstants.top)
-  }
-  getWidth() {
-   return this.get(TilesConstants.width)
-  }
-  getHeight() {
-   return this.get(TilesConstants.height)
-  }
-  // Tile child rendering is done at the wall flex level.
-  _getChildTreeComponents() {
-   return []
-  }
-  getStumpNodeForChildren() {
-   // We render all Tiles on the Wall.
-   return this.getStumpNode().getParent()
-  }
-  async treeComponentDidMount() {
-   super.treeComponentDidMount()
-   if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
-  }
-  toInspectionStumpCode() {
-   const messages = this.getMessageBuffer().map(message => \`li \${moment(message.getLineModifiedTime()).fromNow()} - \${message.childrenToString()}\`)
-   const settingsDefinitions = this.getAllTileSettingsDefinitions()
-    .map(setting => \`\${setting.getFirstWord()} \${setting.getDescription()}\`)
-    .join("\\n")
-   const parentConstructorName = this.getParent().constructor.name
-   const constructorName = this.constructor.name
-   const sourceCode = this.toString()
-   const settings = settingsDefinitions
-   return this.qFormat(this.inspectionStumpTemplate, {
-    constructorName,
-    parentConstructorName,
-    sourceCode,
-    messages,
-    settings
-   })
-  }
-  isVisible() {
-   if (this.visible === false) return false
-   return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
-  }
-  _isMaximized() {
-   return this.has(TilesConstants.maximized)
-  }
-  async _executeChildNodes() {
-   await Promise.all(this.getChildTiles().map(tile => tile.execute()))
-  }
-  async _execute() {
-   await this._executeChildNodes()
-  }
-  async execute() {
-   try {
-    this.setRunTimePhaseError("execute")
-    await this._execute()
-   } catch (err) {
-    this.setRunTimePhaseError("execute", err)
-    console.error(err)
-    this.emitLogMessage(this.errorLogMessageStumpTemplate)
-   }
-   return this
-  }
-  cloneTileCommand() {
-   this.cloneAndOffset()
-   return this.getTab().autosaveAndRender()
-  }
-  async toggleTileMaximizeCommand() {
-   if (this.has(TilesConstants.maximized)) this.delete(TilesConstants.maximized)
-   else this.touchNode(TilesConstants.maximized)
-   await this._runAfterTileUpdate(this)
-  }
-  async triggerTileMethodCommand(value, methodName) {
-   await this[methodName](value)
-   await this._runAfterTileUpdate(this)
-  }
-  // todo: refactor.
-  async changeTileTypeCommand(newValue) {
-   this.setFirstWord(newValue)
-   const newNode = this.duplicate()
-   // todo: destroy or something? how do we reparse.
-   this.unmountAndDestroy()
-   const app = this.getTab().getRootNode()
-   await Promise.all(
-    this.getRootNode()
-     .getTiles()
-     .map(tile => tile.loadBrowserRequirements())
-   )
-   await this.getTab().autosaveAndRender()
-   newNode.runAndrenderAndGetRenderReport()
-  }
-  changeParentCommand(pathVector) {
-   // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
-   const program = this.getRootNode()
-   const indexPath = pathVector ? pathVector.split(" ").map(num => parseInt(num)) : ""
-   const destinationTree = indexPath ? program.nodeAt(indexPath) : program
-   // todo: on jtree should we make copyTo second param optional?
-   this.copyTo(destinationTree, destinationTree.length)
-   this.unmountAndDestroy()
-   return this.getTab().autosaveAndRender()
-  }
-  async openTileContextMenuCommand() {
-   this.getTab()
-    .getRootNode()
-    .setTargetNode(this)
-    .toggleAndRender(OhayoConstants.tileContextMenu)
-  }
-  destroyTileCommand() {
-   this.unmountAndDestroy()
-   return this.getTab().autosaveAndRender()
-  }
-  getNewDataCommand() {
-   // todo: have some type of paging system to fetch new data.
-  }
-  async changeTileSettingAndRenderCommand(value, settingName) {
-   // note the unusual ordering of params.
-   this.touchNode(settingName).setContent(value.toString())
-   // todo: sometimes size needs to be redone (maximize, for example)
-   await this._runAfterTileUpdate(this)
-  }
-  // todo: remove
-  async changeTileSettingMultilineCommand(val, settingName) {
-   this.touchNode(settingName).setChildren(val)
-   await this._runAfterTileUpdate(this)
-  }
-  async changeTileSettingCommand(settingName, value) {
-   this.touchNode(settingName).setContent(value)
-  }
-  async changeWordAndRenderCommand(value, index) {
-   this.setWord(parseInt(index), value)
-   await this._runAfterTileUpdate(this)
-  }
-  async changeWordsAndRenderCommand(value, index) {
-   index = parseInt(index)
-   const edgeSymbol = this.getEdgeSymbol()
-   const words = this.getWords().slice(0, index)
-   this.setLine(words.concat(value.split(edgeSymbol)).join(edgeSymbol))
-   await this._runAfterTileUpdate(this)
-  }
-  async updateChildrenCommand(val) {
-   this.setChildren(val)
-   // reload the whole doc for now.
-   await this._runAfterTileUpdate(this)
-  }
-  async _runAfterTileUpdate(tile) {
-   tile.makeDirty() // ugly!
-   tile.getChildTiles().forEach(tile => {
-    tile.makeDirty() // todo: ugly!
-   })
-   // todo: what if you have a tile that has a contextare that allows editing of its children/
-   // if you edit a child, then that parent tile needs to update to...should we allow that or ban that?
-   await tile.getTab().autosaveTab()
-   await tile.runAndrenderAndGetRenderReport()
-   tile
-    .getTab()
-    .getRootNode()
-    .renderApp() // Need to render full app because of code editor
-  }
-  // todo: downstream data changes?
-  async changeTileContentAndRenderCommand(value) {
-   this.setContent(value)
-   await this._runAfterTileUpdate(this)
-  }
-  async copyTileCommand() {
-   // todo: remove cousin tiles?
-   this.getRootNode()
-    .getWillowBrowser()
-    .copyTextToClipboard(this.getFirstAncestor().toString())
-  }
-  async createProgramFromTileExampleCommand(index) {
-   const template = this.getExampleTemplate(index)
-   if (!template) return undefined
-   const fileExtension = "maia" // todo: generalize
-   const tab = await this.getTab()
-    .getRootNode()
-    ._createAndOpen(template, \`help-for-\${this.getFirstWord()}.\${fileExtension}\`)
-   tab.addStumpCodeMessageToLog(\`div Created '\${tab.getFullTabFilePath()}'\`)
-  }
-  async inspectTileCommand() {
-   if (!this.isNodeJs()) {
-    console.log("Tile available at window.tile")
-    window.tile = this
-    console.log(this)
-   }
-   this.getTab().addStumpCodeMessageToLog(this.toInspectionStumpCode())
-   this.getTab()
-    .getRootNode()
-    .renderApp()
-  }
-  async toggleToolbarCommand() {
-   this.toggleToolbar()
-  }
-  async createProgramFromTemplateCommand(id) {
-   const programTemplate = this.getProgramTemplate(id)
-   if (!programTemplate) return undefined
-   const tab = await this.getTab()
-    .getRootNode()
-    ._createAndOpen(programTemplate.template, programTemplate.name)
-   tab.addStumpCodeMessageToLog(\`div Created '\${tab.getFullTabFilePath()}'\`)
-  }
-  async appendSnippetTemplateCommand(id) {
-   const snippet = this.getSnippetTemplate(id)
-   if (!snippet) return undefined
-   const tab = this.getTab()
-   const tabProgram = tab.getTabProgram()
-   const newNodes = tabProgram.concat(snippet)
-   const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
-   tab.autosaveTab()
-   tabProgram.clearSelection()
-   tab.getTabWall().unmount()
-   await tabProgram.loadAndIncrementalRender()
-   newTiles.forEach(tile => tile.selectTile())
-   newTiles[0].scrollIntoView()
-  }
-  async copyDataCommand(delimiter) {
-   this.getRootNode()
-    .getWillowBrowser()
-    .copyTextToClipboard(this.getOutputOrInputTable().toDelimited(delimiter))
-  }
-  async copyDataAsJavascriptCommand() {
-   const table = this.getOutputOrInputTable()
-   this.getRootNode()
-    .getWillowBrowser()
-    .copyTextToClipboard(JSON.stringify(table.toTree().toDataTable(table.getColumnNames()), null, 2))
-  }
-  async copyDataAsTreeCommand() {
-   const text = this.getOutputOrInputTable()
-    .toTree()
-    .toString()
-   this.getRootNode()
-    .getWillowBrowser()
-    .copyTextToClipboard(text)
-  }
-  async exportTileDataCommand(format = "csv") {
-   // todo: figure this out. use the browsers filename? tile title? id?
-   let extension = "csv"
-   let type = "text/csv"
-   let str = this.getOutputOrInputTable().toDelimited(",")
-   if (format === "tree") {
-    extension = "tree"
-    type = "text"
-    str = this.getOutputOrInputTable()
-     .toTree()
-     .toString()
-   }
-   this.getRootNode()
-    .getWillowBrowser()
-    .downloadFile(str, this.getTab().getFileName() + "." + extension, type)
-  }
-basicRecursiveTileNode
- extends abstractTileTreeComponentNode
- string hakonTemplate
-  .BasicRecursiveTile
-   input
-   textarea
-    border 0
-    font-size 14px
-    height 100%
-    width 100%
- javascript
-  getTileBodyStumpCode() {
-   const edgeSymbol = " "
-   const definition = this.getDefinition()
-   const requiredCellIds = definition.getRequiredCellTypeIds()
-   const catchAllIndex = requiredCellIds.length
-   const catchAllCellTypeId = definition.getCatchAllCellTypeId()
-   if (catchAllCellTypeId) requiredCellIds.push(catchAllCellTypeId)
-   const cellInputs = requiredCellIds.map((cellTypeId, index) => {
-    const isCatchAll = cellTypeId === catchAllCellTypeId && index === catchAllIndex
-    const value = isCatchAll ? this.getWordsFrom(index + 1).join(edgeSymbol) : this.getWord(index + 1)
-    return \` input
-    placeholder \${cellTypeId}
-    value \${value}
-    name \${index + 1}
-    changeCommand \${isCatchAll ? "changeWordsAndRenderCommand" : "changeWordAndRenderCommand"}\`
-   })
-   return \`div \${definition.getDescription()}
-  div
-  \${cellInputs.join("\\n")}\`
-  }
-DidYouMeanTileNode
- tags noPicker
- description Provides suggestions for misspelled tiles.
- extends abstractTileTreeComponentNode
- crux tiles.didyoumean
- string bodyStumpTemplate
-  div
-   span No tile '{input}' found. Line {lineNo}. Did you mean
-   a {closestTile}
-    collapse
-    tabindex -1
-    value {closestTile}
-    clickCommand changeTileTypeCommand
-   span ?
- javascript
-  getTileBodyStumpCode() {
-   const input = this.getFirstWord()
-   const lineNo = this.getLineNumber()
-   const closestTile = jtree.Utils.didYouMean(
-    input,
-    this.getRootNode()
-     .getHandGrammarProgram()
-     .getTopNodeTypeDefinitions()
-     .map(def => def.get("crux"))
-   )
-   if (!closestTile) {
-    if (!input) return \`div Your program has a blank line on line \${lineNo}.\`
-    return \`div No tile '\${input}' found.\`
-   }
-   return this.qFormat(this.bodyStumpTemplate, { input, lineNo, closestTile })
-  }
-  getErrors() {
-   return [new jtree.UnknownNodeTypeError(this)]
-  }
-  getTileHeaderBern() {
-   return ""
-  }
-abstractDocTileNode
- int footerHeight 0
- int headerHeight 0
- tags noPicker
- cells tileKeywordCell
- extends abstractTileTreeComponentNode
- abstract
- string bodyStumpTemplate
-  {tagName}
-   bern
-    {content}
- string tileStumpTemplate
-  div
-   class {classes}
-   id {id}
-   contextMenuCommand openTileContextMenuCommand
-   div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
-   div
-    class TileBody HeaderLess
-    {body}
-   div
-    class TileFooter
-    {footer}
-   div
-    class TileGrabber
- javascript
-  _getBody() {
-   return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
-  }
-  toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
-  }
-docTitleNode
- catchAllCellType stringCell
- description A title
- example A doc
-  doc.title A Tale of Two Cities
- string tileSize 600 75
- extends abstractDocTileNode
- cells tileKeywordCell
- crux doc.title
- string tagName h1
-docSubtitleNode
- extends docTitleNode
- description A subheader
- string tagName h2
- crux doc.subtitle
-docSectionNode
- description A section containing subtitles, paragraphs, code blocks, etc.
- crux doc.section
- extends abstractDocTileNode
- inScope abstractDocSectionComponentNode
- javascript
-  _getBody() {
-   return this.compile()
-  }
-  _getCompiledLine() {
-   return ""
-  }
- example
-  doc.section
-   subtitle Subtitle
-   paragraph Paragraph
-   code python
-    # some code
-docReferenceNode
- extends abstractDocTileNode
- crux doc.ref
- cells tileKeywordCell referenceIdCell
- inScope docReferenceUrlNode
- string tagName p
- example
-  doc.ref someRefId
-   url https://en.wikipedia.org/wiki/Note_(typography)
- description A reference to an external source
-docCommentNode
- description A comment node
- cells commentKeywordCell
- extends abstractTileTreeComponentNode
- boolean visible false
- frequency 0
- example An example program with comments
-  doc.comment get iris data
-  samples.iris
-   doc.comment filter is
-   filter.where Species = virginica
-    doc.comment display results
-    tables.basic
- catchAllCellType commentCell
- catchAllNodeType commentLineNode
- crux doc.comment
-docToolingNode
- extends docCommentNode
- crux doc.tooling
-abstractPickerTileNode
- extends abstractTileTreeComponentNode
- string tileSize 480 420
- abstract
- string hakonTemplate
-  .PickerTileNode
-   .PickerCategory
-    width 100%
-    margin-top 20px
-    text-align center
-   .TileBody
-    display flex
-    flex-flow row wrap
-    a
-     &:hover
-      background-color {borderColor}
-     padding 10px
-     margin 5px
-     height 30px
-     background-color {backgroundColor}
-     border 1px solid {borderColor}
-     overflow hidden
-     text-align center
-     text-overflow ellipsis
-     font-size 14px
-     width 120px
-     span
-      font-size 70%
- string itemStumpTemplate
-  {categoryBreak}
-  a {name}
-   br
-    span {description}
-   title {description}
-   tabindex -1
-   value {value}
-   clickCommand {command}
- string categoryBreakStumpTemplate
-  div {category}
-   class PickerCategory
- string tileHeader Gallery
- javascript
-  async fetchTableInputs() {
-   return { rows: this.getChoices().map(obj => obj.toObject()) }
-  }
-  getTileBodyStumpCode() {
-   let lastCat = ""
-   return this.getChoices()
-    .map(choice => {
-     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
-     lastCat = choice.category
-     return this.qFormat(this.itemStumpTemplate, choice)
-    })
-    .join("\\n")
-  }
-  getTileHeaderBern() {
-   return this.tileHeader
-  }
-PickerTileNode
- extends abstractPickerTileNode
- description Displays list of available tiles.
- crux doc.picker
- string tileHeader Tile Gallery
- javascript
-  getChoices() {
-   const allChoices = this.getRootNode()
-    .getHandGrammarProgram()
-    .getTopNodeTypeDefinitions()
-   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(TilesConstants.noPicker))
-   const theChoices = filteredChoices.length ? filteredChoices : allChoices
-   return theChoices.map(nodeDefinition => {
-    const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
-    const name = nodeId.split(".")[1] || ""
-    const category = lodash.upperFirst(nodeId.split(".")[0])
-    const description = nodeDefinition.getDescription()
-    return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
-   })
-  }
-tileBlankLineNode
- boolean visible false
- pattern ^$
- tags doNotSynthesize
- cells emptyCell
-abstractDocSettingNode
- cells tileKeywordCell
- abstract
- boolean visible false
-docCategoriesNode
- extends abstractDocSettingNode
- crux doc.categories
- description Add some categories to the document for organization.
- catchAllCellType documentCategoryCell
-docAuthorNode
- extends abstractDocSettingNode
- catchAllCellType stringCell
- crux doc.author
- description Add one author per line.
-docDefaultHiddenNode
- crux doc.defaultHidden
- example
-  doc.defaultHidden
-  samples.portals
-   tables.basic
-    visible
- description Change default tile visibility to hidden.
- cells tileKeywordCell
- extends abstractDocSettingNode
-docDateNode
- description Date published.
- extends abstractDocSettingNode
- crux doc.date
- catchAllCellType dateCell
-docZoomNode
- crux doc.zoom
- description Enlarge or shrink all tiles
- cells tileKeywordCell zoomCell
- extends abstractDocSettingNode
-docLayoutNode
- cells tileKeywordCell docLayoutOptionCell
- extends abstractDocSettingNode
- crux doc.layout
-abstractDocSectionComponentNode
- abstract
-docSectionSubtitleNode
- extends abstractDocSectionComponentNode
- crux subtitle
- cells tileKeywordCell
- catchAllCellType stringCell
- javascript
-  compile() {
-   return \`h2 \${this.getContent()}\`
-  }
-docSectionParagraphNode
- extends abstractDocSectionComponentNode
- crux paragraph
- cells tileKeywordCell
- catchAllCellType stringCell
- catchAllNodeType docParagraphLineNode
- string stumpTemplate
-  p
-   bern
-    {content}
- javascript
-  compile() {
-   return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getContentWithChildren() })
-  }
-docSectionLinkNode
- extends abstractDocSectionComponentNode
- crux link
- cells tileKeywordCell urlCell
- catchAllCellType stringCell
- string stumpTemplate
-  a {content}
-   href {url}
- javascript
-  compile() {
-   return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.getWordsFrom(2).join(" "), url: this.getWord(1) })
-  }
- example
-  doc.section
-   link http://ohayo.computer Ohayo
-docSectionCodeNode
- extends abstractDocSectionComponentNode
- crux code
- cells tileKeywordCell programmingLanguageNameCell
- catchAllNodeType docLineOfCodeNode
- string stumpTemplate
-  code
-   bern
-    {content}
- javascript
-  compile() {
-   return new jtree.TreeNode(this.stumpTemplate).templateToString({ content: this.childrenToString().replace(/</g, "&lt;") })
-  }
- example
-  doc.section
-   subtitle Some Code
-   code latex
-    E_0 &= mc^2
-    E &= \\frac{mc^2}{\\sqrt{1-\\frac{v^2}{c^2}}}
-docLineOfCodeNode
- catchAllCellType codeCell
- catchAllNodeType docLineOfCodeNode
-docParagraphLineNode
- catchAllCellType stringCell
- catchAllNodeType docParagraphLineNode
-commentLineNode
- catchAllCellType commentCell
- catchAllNodeType commentLineNode
-docReferenceUrlNode
- crux url
- cells tileSettingKeywordCell urlCell
- description URL for the reference
-catchAllErrorNode
- catchAllCellType errorCell
- baseNodeType errorNode
-hashBangNode
- crux #!
- description Standard bash hashBang line.
- catchAllCellType hashBangWordCell
-tilesNode
- root
- todo skipBlankLines
- _rootNodeJsHeader
-  const projectRootDir = jtree.Utils.findProjectRoot(__dirname, "ohayo")
-  const { AbstractTreeComponent } = require(projectRootDir + "node_modules/jtree/products/TreeComponentFramework.node.js")
-  const TilesConstants = require(projectRootDir + "ohayoWebApp/tiles/TilesConstants.js")
-  const OhayoConstants = require(projectRootDir + "ohayoWebApp/treeComponents/OhayoConstants.js")
-  const Layout = require(projectRootDir + "ohayoWebApp/tiles/Layout.js")
-  const Icons = require(projectRootDir + "ohayoWebApp/themes/Icons.js")
-  const lodash = require(projectRootDir + "node_modules/lodash")
- _extendsJsClass AbstractTreeComponent
- catchAllNodeType DidYouMeanTileNode
- string wallType wall
- javascript
-  getTileClosestToLine(lineIndex) {
-   let current = this.nodeAtLine(lineIndex)
-   while (current) {
-    if (current.doesExtend("abstractTileTreeComponentNode")) return current
-    current = current.getParent()
-   }
-  }
-  setTab(tab) {
-   this._tab = tab
-  }
-  getTheme() {
-   const tab = this.getTab()
-   return tab ? tab.getTheme() : super.getTheme()
-  }
-  getTab() {
-   return this._tab
-  }
-  tilesAreVisible() {
-   return !this.has(TilesConstants.defaultHidden)
-  }
-  canUseCustomLayout() {
-   const definedLayout = this.get(TilesConstants.layout)
-   if (definedLayout === TilesConstants.layouts.custom) return true
-   if (this.getTiles().some(tile => tile.has(TilesConstants.left) || tile.has(TilesConstants.top))) return true
-   return false
-  }
-  _getLayoutStrategy() {
-   const definedLayout = this.get(TilesConstants.layout)
-   return definedLayout || (this.wallType === OhayoConstants.flex ? (this.canUseCustomLayout() ? TilesConstants.layouts.custom : TilesConstants.layouts.tiled) : TilesConstants.layouts.tree)
-  }
-  getTileDimensionMap(width, height) {
-   // todo: cache?
-   return new Layout().getTileDimensionMap(this, this._getLayoutStrategy(), width, height)
-  }
-  async loadAndIncrementalRender() {
-   const app = this.getTab().getRootNode()
-   await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))
-   await Promise.all(
-    this.getRootLevelTiles().map(async tile => {
-     await tile.execute()
-     app.renderApp()
-    })
-   )
-   app.renderApp() // this one might be superfluous
-   return this
-  }
-  getTiles() {
-   return this.getTopDownArray().filter(node => node.doesExtend("abstractTileTreeComponentNode"))
-  }
-  getRootLevelTiles() {
-   return this.filter(node => node.doesExtend("abstractTileTreeComponentNode"))
-  }
-  _getProjectRootDir() {
-   return this.isNodeJs() ? jtree.Utils.findProjectRoot(__dirname, "ohayo") : ""
-  }
-  toRunTimeStats() {
-   const tiles = this.getTiles()
-   const stats = {
-    tiles: tiles.length,
-    treeLanguage: this.getHandGrammarProgram().getExtensionName(),
-    url: this.getTab().getFileName()
-   }
-   stats.timeToLoad = this.getTiles()
-    .map(tile => tile.getTimeToLoad())
-    .sort()
-    .reverse()[0]
-   stats.timeToRender = this.getTiles()
-    .map(tile => tile.getNewestTimeToRender())
-    .sort()
-    .reverse()[0]
-   return stats
-  }
-abstractTileSettingNode
- cells tileSettingKeywordCell
- abstract
-abstractTileSettingTerminalNode
- javascript
-  getSettingValue() {
-   return this.getContent()
-  }
- extends abstractTileSettingNode
- abstract
-abstractCoreTileSettingTerminalNode
- abstract
- extends abstractTileSettingTerminalNode
-hiddenNode
- extends abstractCoreTileSettingTerminalNode
- crux hidden
-visibleNode
- extends abstractCoreTileSettingTerminalNode
- crux visible
-maximizedNode
- extends abstractCoreTileSettingTerminalNode
- crux maximized
-abstractPagePositionNode
- frequency .2
- cells tileSettingKeywordCell intCell
- extends abstractCoreTileSettingTerminalNode
- abstract
-leftNode
- extends abstractPagePositionNode
- crux left
-topNode
- extends abstractPagePositionNode
- crux top
-widthNode
- extends abstractPagePositionNode
- crux width
-heightNode
- extends abstractPagePositionNode
- crux height
-abstractTileSettingNonTerminalNode
- javascript
-  getSettingValue() {
-   return this.childrenToString()
-  }
- extends abstractTileSettingNode
- catchAllNodeType tileSettingNonTerminalContentNode
- abstract
-tileSettingNonTerminalContentNode
- baseNodeType blobNode`)
-      return this._cachedHandGrammarProgramRoot
-    }
-    static getNodeTypeMap() {
-      return {
-        abstractTileTreeComponentNode: abstractTileTreeComponentNode,
-        basicRecursiveTileNode: basicRecursiveTileNode,
-        DidYouMeanTileNode: DidYouMeanTileNode,
-        abstractDocTileNode: abstractDocTileNode,
-        docTitleNode: docTitleNode,
-        docSubtitleNode: docSubtitleNode,
-        docSectionNode: docSectionNode,
-        docReferenceNode: docReferenceNode,
-        docCommentNode: docCommentNode,
-        docToolingNode: docToolingNode,
-        abstractPickerTileNode: abstractPickerTileNode,
-        PickerTileNode: PickerTileNode,
-        tileBlankLineNode: tileBlankLineNode,
-        abstractDocSettingNode: abstractDocSettingNode,
-        docCategoriesNode: docCategoriesNode,
-        docAuthorNode: docAuthorNode,
-        docDefaultHiddenNode: docDefaultHiddenNode,
-        docDateNode: docDateNode,
-        docZoomNode: docZoomNode,
-        docLayoutNode: docLayoutNode,
-        abstractDocSectionComponentNode: abstractDocSectionComponentNode,
-        docSectionSubtitleNode: docSectionSubtitleNode,
-        docSectionParagraphNode: docSectionParagraphNode,
-        docSectionLinkNode: docSectionLinkNode,
-        docSectionCodeNode: docSectionCodeNode,
-        docLineOfCodeNode: docLineOfCodeNode,
-        docParagraphLineNode: docParagraphLineNode,
-        commentLineNode: commentLineNode,
-        docReferenceUrlNode: docReferenceUrlNode,
-        catchAllErrorNode: catchAllErrorNode,
-        hashBangNode: hashBangNode,
-        tilesNode: tilesNode,
-        abstractTileSettingNode: abstractTileSettingNode,
-        abstractTileSettingTerminalNode: abstractTileSettingTerminalNode,
-        abstractCoreTileSettingTerminalNode: abstractCoreTileSettingTerminalNode,
-        hiddenNode: hiddenNode,
-        visibleNode: visibleNode,
-        maximizedNode: maximizedNode,
-        abstractPagePositionNode: abstractPagePositionNode,
-        leftNode: leftNode,
-        topNode: topNode,
-        widthNode: widthNode,
-        heightNode: heightNode,
-        abstractTileSettingNonTerminalNode: abstractTileSettingNonTerminalNode,
-        tileSettingNonTerminalContentNode: tileSettingNonTerminalContentNode
-      }
-    }
-  }
-
-  class abstractTileSettingNode extends jtree.GrammarBackedNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-  }
-
-  class abstractTileSettingTerminalNode extends abstractTileSettingNode {
-    getSettingValue() {
-      return this.getContent()
-    }
-  }
-
-  class abstractCoreTileSettingTerminalNode extends abstractTileSettingTerminalNode {}
-
-  class hiddenNode extends abstractCoreTileSettingTerminalNode {}
-
-  class visibleNode extends abstractCoreTileSettingTerminalNode {}
-
-  class maximizedNode extends abstractCoreTileSettingTerminalNode {}
-
-  class abstractPagePositionNode extends abstractCoreTileSettingTerminalNode {
-    get tileSettingKeywordCell() {
-      return this.getWord(0)
-    }
-    get intCell() {
-      return parseInt(this.getWord(1))
-    }
-  }
-
-  class leftNode extends abstractPagePositionNode {}
-
-  class topNode extends abstractPagePositionNode {}
-
-  class widthNode extends abstractPagePositionNode {}
-
-  class heightNode extends abstractPagePositionNode {}
-
-  class abstractTileSettingNonTerminalNode extends abstractTileSettingNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(tileSettingNonTerminalContentNode, undefined, undefined)
-    }
-    getSettingValue() {
-      return this.childrenToString()
-    }
-  }
-
-  class tileSettingNonTerminalContentNode extends jtree.GrammarBackedNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(this._getBlobNodeCatchAllNodeType())
-    }
-    getErrors() {
-      return []
-    }
-  }
-
-  window.tilesNode = tilesNode
-}
+window.OhayoConstants
+ = OhayoConstants
 ;
 
 
@@ -42320,27 +39832,28 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
 .subdued
  color ${theme.midGray}
 
-.dropdownMenu
- min-width 200px
- position absolute
- top 0
- left 0
- z-index 100
- padding 7px 0
- background ${theme.contextMenuBackground}
- border 1px solid ${theme.borderColor}
- box-shadow 0 1px 3px 0 ${theme.boxShadow}
- .message
-  line-height 30px
-  padding 0 10px
- a
-  color ${theme.foregroundColor}
-  display block
-  line-height 30px
-  padding 0 10px
-  &:hover
-   background ${theme.hoverBackground}
-   color ${theme.white}`
+.MenuTreeComponent
+ .dropdownMenu
+  min-width 200px
+  position absolute
+  top 0
+  left 0
+  z-index 100
+  padding 7px 0
+  background ${theme.contextMenuBackground}
+  border 1px solid ${theme.borderColor}
+  box-shadow 0 1px 3px 0 ${theme.boxShadow}
+  .message
+   line-height 30px
+   padding 0 10px
+  a
+   color ${theme.foregroundColor}
+   display block
+   line-height 30px
+   padding 0 10px
+   &:hover
+    background ${theme.hoverBackground}
+    color ${theme.white}`
   }
 
   treeComponentDidMount() {
@@ -42460,34 +39973,6 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
     if (this.hasChanges()) await this._getTab().autosaveAndReloadWith(this.getCode())
   }
 
-  async executeLineCommand(lineNumber) {
-    const program = this._makeProgramFromLineNumber(lineNumber)
-    let result = await program.execute(this.getRootNode())
-
-    if (Array.isArray(result)) result = result.join("\n")
-    if (result === undefined) result = "undefined"
-
-    this._getTab().logMessageText(encodeURIComponent(result))
-    this.getRootNode().renderApp()
-  }
-
-  async executeFirstLineCommand() {
-    return this.executeLineCommand(0)
-  }
-
-  async compileFirstLineCommand() {
-    return this.compileLineCommand(0)
-  }
-
-  _compileLine(lineNumber) {
-    return this._makeProgramFromLineNumber(lineNumber).compile()
-  }
-
-  async compileLineCommand(lineNumber) {
-    this._getTab().logMessageText(this._compileLine(lineNumber))
-    this.getRootNode().renderApp()
-  }
-
   _getHeight() {
     return Math.floor((this.getRootNode().getBodyShadowDimensions().height - 60) * 0.7)
   }
@@ -42513,8 +39998,6 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
  textarea
   class sourceTextarea
   blurCommand saveChangesCommand
-  lineClickCommand executeFirstLineCommand
-  lineShiftClickCommand compileFirstLineCommand
   bern
    {lines}`).templateToString({ lines: this._getProgramSource() })
   }
@@ -42523,13 +40006,6 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
     return this.getStumpNode()
       .getNode("textarea")
       .getShadow()
-  }
-
-  _makeProgramFromLineNumber(lineNumber) {
-    this._updateTA() // todo: cleanup
-    const programClass = this._getProgram().constructor
-    const code = this.getCode()
-    return new programClass(new jtree.TreeNode(code).nodeAtLine(lineNumber).toString())
   }
 
   _updateTA() {
@@ -42585,6 +40061,8 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
 window.BasicTerminalTreeComponent
  = BasicTerminalTreeComponent
 ;
+
+
 
 
 
@@ -42652,16 +40130,6 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
     const cm = this._getCMEditorInstance()
     const keyMap = {}
 
-    keyMap[CodeMirrorConstants.keyMap.cmdEnter] = () => {
-      const range = cm.listSelections()[0]
-      const line = range.head.line
-      this.executeLineCommand(line)
-    }
-    keyMap[CodeMirrorConstants.keyMap.shiftCmdEnter] = () => {
-      const range = cm.listSelections()[0]
-      const line = range.head.line
-      this.compileLineCommand(line)
-    }
     keyMap[CodeMirrorConstants.keyMap.cmdBackSlash] = () => {
       this.getRootNode().clearTabMessagesCommand()
     }
@@ -42700,10 +40168,7 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
 
       CodeMirrorTerminalTreeComponent._cMMode = new jtree.TreeNotationCodeMirrorMode(
         "tree",
-        () => {
-          const tab = app.getMountedTab()
-          return tab ? tab.getProgramConstructorForTab() : app.getProgramConstructorFromFileExtension() // get default
-        },
+        () => ohayoNode,
         () => (app.getMountedTab() ? this.getCode() : undefined),
         CodeMirror
       ).register()
@@ -42716,10 +40181,6 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
     this._CMEditorInstance = cmInstance
 
     cmInstance.setSize(undefined, this._getHeight())
-
-    cmInstance.on(CodeMirrorConstants.events.gutterClick, (instance, line, gutter, clickEvent) => {
-      this.executeLineCommand(line)
-    })
 
     cmInstance.on(CodeMirrorConstants.events.blur, () => {
       // note: if you have changes in terminal/gutter, they will be saved. no cancel yet.
@@ -42738,9 +40199,7 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
   _updateHints(codeInstance, codeWidgets) {
     const app = this.getRootNode()
     const tab = app.getMountedTab()
-    const programConstructor = tab ? tab.getProgramConstructorForTab() : app.getProgramConstructorFromFileExtension() // get default
-
-    const program = new programConstructor(this.getCode())
+    const program = new ohayoNode(this.getCode())
     const errs = program.getAllErrors()
     const cursor = codeInstance.getCursor()
 
@@ -42830,7 +40289,7 @@ class NewDropDownMenuTreeComponent extends AbstractDropDownMenuTreeComponent {
   getDropDownStumpCode() {
     const newProgram = `a New File
  clickCommand createNewBlankProgramCommand
- value untitled.maia
+ value untitled.ohayo
 a New From Url
  clickCommand openCreateNewProgramFromUrlDialogCommand`
     const program = this.getRootNode().getMountedTab()
@@ -42852,40 +40311,52 @@ window.NewDropDownMenuTreeComponent
  = NewDropDownMenuTreeComponent
 ;
 
-const OhayoConstants = {}
+// rename lodash
+if (!window.lodash) window.lodash = _
 
-OhayoConstants.gutter = "gutter"
-OhayoConstants.terminal = "terminal"
-OhayoConstants.console = "console"
-OhayoConstants.theme = "theme"
-OhayoConstants.menu = "menu"
-OhayoConstants.wall = "wall"
-OhayoConstants.flex = "flex"
-OhayoConstants.newDropDownMenu = "newDropDownMenu"
-OhayoConstants.windowSize = "windowSize"
-OhayoConstants.panel = "panel"
-OhayoConstants.tabs = "tabs"
-OhayoConstants.helpModal = "helpModal"
-OhayoConstants.tileContextMenu = "tileContextMenu"
-OhayoConstants.tabContextMenu = "tabContextMenu"
-OhayoConstants.DropDownMenuSubstring = "DropDownMenu"
+// Shim window.console for IE.
+if (!window.console) window.console = { log: () => {}, time: () => {}, error: () => {}, debug: () => {} }
 
-OhayoConstants.productName = "ohayo"
-OhayoConstants.githubLink = "https://github.com/treenotation/ohayo"
-OhayoConstants.subredditLink = "https://www.reddit.com/r/ohayocomputer"
-OhayoConstants.slogan = "a fast and free data science studio"
+// Safari polyfill:
+if (!Object.values) Object.values = obj => Object.keys(obj).map(key => obj[key])
 
-OhayoConstants.fileExtensions = {}
-OhayoConstants.fileExtensions.maia = ".maia"
+const d3format = {}
+d3format.format = d3.format
+;
 
-OhayoConstants.deepLinks = {}
-OhayoConstants.deepLinks.filename = "filename"
-OhayoConstants.deepLinks.data = "data"
-OhayoConstants.deepLinks.edgeSymbol = "edgeSymbol"
-OhayoConstants.deepLinks.nodeBreakSymbol = "nodeBreakSymbol"
+const StudioConstants = {}
 
-window.OhayoConstants
- = OhayoConstants
+StudioConstants.gutter = "gutter"
+StudioConstants.terminal = "terminal"
+StudioConstants.console = "console"
+StudioConstants.theme = "theme"
+StudioConstants.menu = "menu"
+StudioConstants.wall = "wall"
+StudioConstants.flex = "flex"
+StudioConstants.newDropDownMenu = "newDropDownMenu"
+StudioConstants.windowSize = "windowSize"
+StudioConstants.panel = "panel"
+StudioConstants.tabs = "tabs"
+StudioConstants.helpModal = "helpModal"
+StudioConstants.tileContextMenu = "tileContextMenu"
+StudioConstants.tabContextMenu = "tabContextMenu"
+StudioConstants.DropDownMenuSubstring = "DropDownMenu"
+
+StudioConstants.productName = "ohayo"
+StudioConstants.githubLink = "https://github.com/treenotation/ohayo"
+StudioConstants.subredditLink = "https://www.reddit.com/r/ohayocomputer"
+StudioConstants.slogan = "a fast and free data science studio"
+
+StudioConstants.ohayoExtension = ".ohayo"
+
+StudioConstants.deepLinks = {}
+StudioConstants.deepLinks.filename = "filename"
+StudioConstants.deepLinks.data = "data"
+StudioConstants.deepLinks.edgeSymbol = "edgeSymbol"
+StudioConstants.deepLinks.nodeBreakSymbol = "nodeBreakSymbol"
+
+window.StudioConstants
+ = StudioConstants
 ;
 
 
@@ -42937,7 +40408,7 @@ class GutterTreeComponent extends AbstractTreeComponent {
 
   getDependencies() {
     // todo: cleanup
-    return [this.getParent().getNode(OhayoConstants.tabs), this.getParent()]
+    return [this.getParent().getNode(StudioConstants.tabs), this.getParent()]
   }
 
   toStumpCode() {
@@ -43038,22 +40509,22 @@ ${shortcutRows}`
 
   getModalStumpCode() {
     const app = this.getRootNode()
-    return `h4 About ${OhayoConstants.productName}
-p ${OhayoConstants.productName} is ${OhayoConstants.slogan}.
+    return `h4 About ${StudioConstants.productName}
+p ${StudioConstants.productName} is ${StudioConstants.slogan}.
 p
- span ${OhayoConstants.productName} is on
+ span ${StudioConstants.productName} is on
  a GitHub
-  href ${OhayoConstants.githubLink}
+  href ${StudioConstants.githubLink}
  span and
  a Reddit
-  href ${OhayoConstants.subredditLink}
+  href ${StudioConstants.subredditLink}
 p Current working folder: ${app.getDefaultDisk().getPathBase()}
 p Version ${app.getVersion()} ${app.constructor.name}
 p
  a Welcome Page
   id welcomePageButton
   clickCommand openOhayoProgramCommand
-  value ohayo.maia
+  value ohayo.ohayo
 a Keyboard Shortcuts
  class helpToggle
  clickCommand toggleShadowByIdCommand
@@ -43109,7 +40580,7 @@ class MenuTreeComponent extends AbstractTreeComponent {
   toStumpCode() {
     return `div
  class MenuTreeComponent ${this.constructor.name}
- a ${OhayoConstants.productName}
+ a ${StudioConstants.productName}
   clickCommand toggleHelpCommand
  a New ▾
   id newToggle
@@ -43119,19 +40590,6 @@ class MenuTreeComponent extends AbstractTreeComponent {
 
 window.MenuTreeComponent
  = MenuTreeComponent
-;
-
-// rename lodash
-if (!window.lodash) window.lodash = _
-
-// Shim window.console for IE.
-if (!window.console) window.console = { log: () => {}, time: () => {}, error: () => {}, debug: () => {} }
-
-// Safari polyfill:
-if (!Object.values) Object.values = obj => Object.keys(obj).map(key => obj[key])
-
-const d3format = {}
-d3format.format = d3.format
 ;
 
 
@@ -43147,6 +40605,7 @@ class TabContextMenuTreeComponent extends AbstractContextMenuTreeComponent {
 window.TabContextMenuTreeComponent
  = TabContextMenuTreeComponent
 ;
+
 
 
 
@@ -43183,7 +40642,7 @@ class TabTreeComponent extends AbstractTreeComponent {
 
   getDeepLink() {
     const obj = {}
-    obj[OhayoConstants.deepLinks.filename] = this.getFileName()
+    obj[StudioConstants.deepLinks.filename] = this.getFileName()
     return this.getRootNode()
       .getWillowBrowser()
       .toPrettyDeepLink(this.getTabProgram().childrenToString(), obj)
@@ -43207,10 +40666,7 @@ a Copy program as link
 a Log program stats
  clickCommand printProgramStatsCommand
 a Close all other files
- clickCommand closeAllTabsExceptFocusedTabCommand
-a Save compiled '${handGrammarProgram.getTargetExtension()}' file
- tabindex -1
- clickCommand saveCompiledCommand`
+ clickCommand closeAllTabsExceptFocusedTabCommand`
   }
 
   autosaveAndRender() {
@@ -43232,8 +40688,7 @@ a Save compiled '${handGrammarProgram.getTargetExtension()}' file
   }
 
   async _initProgramRenderAndRun(source, shouldMount) {
-    const programConstructor = this.getProgramConstructorForTab()
-    this._program = new programConstructor(source)
+    this._program = new ohayoNode(source)
     this._program.saveVersion()
     this._program.setTab(this)
 
@@ -43278,10 +40733,6 @@ a Save compiled '${handGrammarProgram.getTargetExtension()}' file
     return jtree.Utils.getFileName(this.getFullTabFilePath())
   }
 
-  getProgramConstructorForTab() {
-    return this.getRootNode().getProgramConstructorFromFileExtension(jtree.Utils.getFileExtension(this.getFullTabFilePath()))
-  }
-
   getTabWall() {
     return this.getParent().getWall()
   }
@@ -43289,7 +40740,7 @@ a Save compiled '${handGrammarProgram.getTargetExtension()}' file
   async appendFromPaste(pastedText) {
     const tabProgram = this.getTabProgram()
     const newNodes = tabProgram.concat(pastedText)
-    const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend("abstractTileTreeComponentNode"))
+    const newTiles = newNodes.filter(tile => tile.doesExtend && tile.doesExtend(OhayoConstants.abstractTileTreeComponentNode))
     this.addStumpCodeMessageToLog(`div Pasted ${newTiles.length} nodes`)
     await this.autosaveTab()
     tabProgram.clearSelection()
@@ -43553,7 +41004,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "17.4.0"
+const Version = "18.0.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
@@ -43581,7 +41032,7 @@ class WallTreeComponent extends AbstractTreeComponent {
  border-radius 2px
  background ${theme.selectionBackground}
 
-.ui-selecting,.${TilesConstants.selectedClass},.${TilesConstants.staySelectedClass}
+.ui-selecting,.${OhayoConstants.selectedClass},.${OhayoConstants.staySelectedClass}
  outline 3px solid ${theme.selectedOutline}`
   }
 
@@ -43598,7 +41049,7 @@ class WallTreeComponent extends AbstractTreeComponent {
     const newTiles = app
       .getNodeCursors()
       .slice(0, 1)
-      .map(cursor => cursor.appendLine(TilesConstants.pickerTile))
+      .map(cursor => cursor.appendLine(OhayoConstants.pickerTile))
     const promise = await app.getMountedTab().autosaveAndRender()
     tilesProgram.clearSelection()
     newTiles.forEach(tile => tile.selectTile())
@@ -43617,7 +41068,7 @@ class WallTreeComponent extends AbstractTreeComponent {
     const newTiles = app
       .getNodeCursors()
       .slice(0, 1)
-      .map(cursor => cursor.appendLineAndChildren(TilesConstants.pickerTile, this.getPickerBlock(evt)))
+      .map(cursor => cursor.appendLineAndChildren(OhayoConstants.pickerTile, this.getPickerBlock(evt)))
     await app.getMountedTab().autosaveAndRender()
     tilesProgram.clearSelection()
     newTiles.forEach(tile => {
@@ -43629,7 +41080,7 @@ class WallTreeComponent extends AbstractTreeComponent {
     return [{ getLineModifiedTime: () => this.getRootNode().getWindowSizeMTime() }]
   }
 
-  selectTilesByShadowClass(className = TilesConstants.selectedClass) {
+  selectTilesByShadowClass(className = OhayoConstants.selectedClass) {
     this.getRootNode()
       .getWillowBrowser()
       .findStumpNodesByShadowClass(className)
@@ -43671,14 +41122,14 @@ class WallTreeComponent extends AbstractTreeComponent {
     return this.getRootNode()
       .getWillowBrowser()
       .getBodyStumpNode()
-      .findStumpNodesWithClass(TilesConstants.selectedClass) // todo: also filter by .abstractTileTreeComponentNode?
+      .findStumpNodesWithClass(OhayoConstants.selectedClass) // todo: also filter by .abstractTileTreeComponentNode?
   }
 
   _makeSelectable() {
     const app = this.getRootNode()
     const stumpNode = this.getStumpNode()
     const willowBrowser = app.getWillowBrowser()
-    const selector = "." + TilesConstants.abstractTileTreeComponentNode
+    const selector = "." + OhayoConstants.abstractTileTreeComponentNode
     const shadow = stumpNode.getShadow()
 
     // I think we need this because jquery selectable breaks click behavior otherwise?
@@ -43708,19 +41159,19 @@ class WallTreeComponent extends AbstractTreeComponent {
             if (evt.shiftKey)
               willowBrowser
                 .getBodyStumpNode()
-                .findStumpNodesWithClass(TilesConstants.selectedClass)
+                .findStumpNodesWithClass(OhayoConstants.selectedClass)
                 .forEach(stumpNode => {
-                  stumpNode.addClassToStumpNode(TilesConstants.staySelectedClass)
+                  stumpNode.addClassToStumpNode(OhayoConstants.staySelectedClass)
                 })
             else app.clearSelectionCommand()
           },
           stop: function() {
             willowBrowser
               .getBodyStumpNode()
-              .findStumpNodesWithClass(TilesConstants.staySelectedClass)
+              .findStumpNodesWithClass(OhayoConstants.staySelectedClass)
               .forEach(stumpNode => {
-                stumpNode.removeClassFromStumpNode(TilesConstants.staySelectedClass)
-                stumpNode.addClassToStumpNode(TilesConstants.selectedClass)
+                stumpNode.removeClassFromStumpNode(OhayoConstants.staySelectedClass)
+                stumpNode.addClassToStumpNode(OhayoConstants.selectedClass)
               })
             app.selectTilesByShadowClassCommand()
             return true
@@ -43751,7 +41202,7 @@ class WallFlexTreeComponent extends WallTreeComponent {
     const app = this.getRootNode()
     const tab = app.getMountedTab()
     const tabProgram = tab.getTabProgram()
-    tabProgram.touchNode(TilesConstants.layout).setContent(TilesConstants.custom)
+    tabProgram.touchNode(OhayoConstants.layout).setContent(OhayoConstants.custom)
     return tab.autosaveAndRender()
   }
 
@@ -43761,7 +41212,7 @@ class WallFlexTreeComponent extends WallTreeComponent {
     app
       .getWillowBrowser()
       .getBodyStumpNode()
-      .findStumpNodesWithClass(TilesConstants.abstractTileTreeComponentNode)
+      .findStumpNodesWithClass(OhayoConstants.abstractTileTreeComponentNode)
       .filter(stumpNode => stumpNode.getStumpNodeTreeComponent().isVisible())
       .forEach(stumpNode => this._moveStumpNode(stumpNode))
     return this.setLayoutToCustomCommand()
@@ -43769,15 +41220,15 @@ class WallFlexTreeComponent extends WallTreeComponent {
 
   _getLayoutOptions(mountedProgram) {
     // only include custom IF there are custom properties.
-    const toggleOptions = Object.keys(TilesConstants.layouts).filter(key => key !== TilesConstants.layouts.custom)
-    if (mountedProgram.canUseCustomLayout()) toggleOptions.push(TilesConstants.layouts.custom)
+    const toggleOptions = Object.keys(OhayoConstants.layouts).filter(key => key !== OhayoConstants.layouts.custom)
+    if (mountedProgram.canUseCustomLayout()) toggleOptions.push(OhayoConstants.layouts.custom)
     return toggleOptions
   }
 
   async toggleLayoutCommand() {
     const mountedProgram = this.getRootNode().getMountedTilesProgram()
-    const currentLayoutNode = mountedProgram.touchNode(TilesConstants.layout)
-    const currentLayout = currentLayoutNode.getContent() || TilesConstants.layouts.tiled
+    const currentLayoutNode = mountedProgram.touchNode(OhayoConstants.layout)
+    const currentLayout = currentLayoutNode.getContent() || OhayoConstants.layouts.tiled
     const newLayout = jtree.Utils.toggle(currentLayout, this._getLayoutOptions(mountedProgram))
     currentLayoutNode.setContent(newLayout)
     mountedProgram.getTiles().forEach(tile => tile.makeDirty()) // todo: delete this
@@ -43791,8 +41242,8 @@ class WallFlexTreeComponent extends WallTreeComponent {
     const shadow = stumpNode.getShadow()
     const gridSize = this.getGridSize()
     const position = shadow.getPositionAndDimensions(gridSize)
-    tile.changeTileSettingCommand(TilesConstants.width, position.width)
-    tile.changeTileSettingCommand(TilesConstants.height, position.height)
+    tile.changeTileSettingCommand(OhayoConstants.width, position.width)
+    tile.changeTileSettingCommand(OhayoConstants.height, position.height)
   }
 
   getPickerBlock(event) {
@@ -43800,8 +41251,8 @@ class WallFlexTreeComponent extends WallTreeComponent {
     const gridSize = 20
     const left = Math.floor((event.offsetX - offset) / gridSize)
     const _top = Math.floor(event.offsetY / gridSize)
-    return `${TilesConstants.left} ${left}
-${TilesConstants.top} ${_top}`
+    return `${OhayoConstants.left} ${left}
+${OhayoConstants.top} ${_top}`
   }
 
   _moveStumpNode(stumpNode) {
@@ -43809,8 +41260,8 @@ ${TilesConstants.top} ${_top}`
     const shadow = stumpNode.getShadow()
     const gridSize = this.getGridSize()
     const position = shadow.getPositionAndDimensions(gridSize)
-    tile.changeTileSettingCommand(TilesConstants.left, position.left)
-    tile.changeTileSettingCommand(TilesConstants.top, position.top)
+    tile.changeTileSettingCommand(OhayoConstants.left, position.left)
+    tile.changeTileSettingCommand(OhayoConstants.top, position.top)
   }
 
   getGridSize() {
@@ -43851,7 +41302,7 @@ ${TilesConstants.top} ${_top}`
     const that = this
     this.getStumpNode()
       .getShadow()
-      .onShadowEvent("mouseover", "." + TilesConstants.abstractTileTreeComponentNode, function() {
+      .onShadowEvent("mouseover", "." + OhayoConstants.abstractTileTreeComponentNode, function() {
         const tileStumpNode = app.getWillowBrowser().getStumpNodeFromElement(this)
         that._tileMouseOverHandler(tileStumpNode)
       })
@@ -43904,7 +41355,7 @@ ${TilesConstants.top} ${_top}`
       grid: [gridSize, gridSize],
       handle: ".TileGrabber",
       drag: function(event, ui) {
-        if (!shadow.shadowHasClass(TilesConstants.selectedClass)) return
+        if (!shadow.shadowHasClass(OhayoConstants.selectedClass)) return
         // move entire selection
         const change = that._getElementChangeInPixels(ui, offset)
         that
@@ -43968,10 +41419,10 @@ class TabsTreeComponent extends AbstractTreeComponent {
   }
 
   getWall() {
-    return this.getNode(OhayoConstants.wall) || this.getNode(OhayoConstants.flex)
+    return this.getNode(StudioConstants.wall) || this.getNode(StudioConstants.flex)
   }
 
-  addWall(type = OhayoConstants.wall) {
+  addWall(type = StudioConstants.wall) {
     this.removeWall()
     return this.appendLine(type)
   }
@@ -44060,12 +41511,12 @@ class PanelTreeComponent extends AbstractTreeComponent {
 
   toggleGutter() {
     // todo: this is UI buggy! toggling resets scroll states
-    const gutter = this.getNode(OhayoConstants.gutter)
+    const gutter = this.getNode(StudioConstants.gutter)
     if (gutter) gutter.unmountAndDestroy()
     else {
-      const node = this.touchNode(OhayoConstants.gutter)
-      node.appendLine(OhayoConstants.terminal)
-      node.appendLine(OhayoConstants.console)
+      const node = this.touchNode(StudioConstants.gutter)
+      node.appendLine(StudioConstants.terminal)
+      node.appendLine(StudioConstants.console)
     }
   }
 
@@ -44250,10 +41701,6 @@ window.PanelTreeComponent
 
 
 
-
-
-
-
 class GlobalShortcutNode extends jtree.TreeNode {
   getKeyCombo() {
     return this.getWord(3)
@@ -44298,7 +41745,7 @@ class DrumsProgram extends jtree.TreeNode {
   }
 }
 
-class OhayoWebApp extends AbstractTreeComponent {
+class StudioApp extends AbstractTreeComponent {
   treeComponentWillMount() {
     this._startVisitCounter()
     const state = this.getFromStore(StorageKeys.appState)
@@ -44328,7 +41775,7 @@ class OhayoWebApp extends AbstractTreeComponent {
 
   _getDeepLink() {
     if (this.isNodeJs()) return false
-    return window.location.href.includes(OhayoConstants.deepLinks.filename) ? window.location.href : ""
+    return window.location.href.includes(StudioConstants.deepLinks.filename) ? window.location.href : ""
   }
 
   async _onPasteEvent(event) {
@@ -44338,7 +41785,7 @@ class OhayoWebApp extends AbstractTreeComponent {
   }
 
   _onResizeEndEvent(event) {
-    this.touchNode(OhayoConstants.windowSize).setContent(`${event.width} ${event.height}`)
+    this.touchNode(StudioConstants.windowSize).setContent(`${event.width} ${event.height}`)
     delete this._bodyShadowDimensionsCache
     this.renderApp()
   }
@@ -44367,7 +41814,7 @@ class OhayoWebApp extends AbstractTreeComponent {
   }
 
   terminalHasFocus() {
-    const terminalNode = this.getFocusedPanel().getNode(`${OhayoConstants.gutter} ${OhayoConstants.terminal}`)
+    const terminalNode = this.getFocusedPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.terminal}`)
     return terminalNode && terminalNode.hasFocus()
   }
 
@@ -44396,18 +41843,18 @@ class OhayoWebApp extends AbstractTreeComponent {
   }
 
   getWindowSizeMTime() {
-    const node = this.getNode(OhayoConstants.windowSize)
+    const node = this.getNode(StudioConstants.windowSize)
     return node ? node.getLineModifiedTime() : 0
   }
 
   static getDefaultStartState() {
-    return `${OhayoConstants.theme} ${ThemeTreeComponent.defaultTheme}
-${OhayoConstants.menu}
-${OhayoConstants.panel} 400
- ${OhayoConstants.tabs}
- ${OhayoConstants.gutter}
-  ${OhayoConstants.terminal}
-  ${OhayoConstants.console}`
+    return `${StudioConstants.theme} ${ThemeTreeComponent.defaultTheme}
+${StudioConstants.menu}
+${StudioConstants.panel} 400
+ ${StudioConstants.tabs}
+ ${StudioConstants.gutter}
+  ${StudioConstants.terminal}
+  ${StudioConstants.console}`
   }
 
   saveAppState() {
@@ -44424,49 +41871,9 @@ ${OhayoConstants.panel} 400
     return this[args[0]].apply(this, args.slice(1))
   }
 
-  getProgramConstructorFromFileExtension(treeLanguageName) {
-    const grammars = this.getGrammars()
-    return grammars[treeLanguageName] || grammars.maia
-  }
-
-  getMaiaGrammarAsTree() {
-    if (!this._maiaGrammarTree) this._maiaGrammarTree = new maiaNode().getHandGrammarProgram()
-    return this._maiaGrammarTree
-  }
-
-  getGrammars() {
-    if (!this._grammars) {
-      this._grammars = {}
-      this._grammars["maia"] = maiaNode // todo: do the same as the others?
-      this._grammars["tiles"] = tilesNode
-      // todo: do the below on demand? is this slow?
-      this._combineWithTilesAndRegisterGrammar("fire", new fireNode().getHandGrammarProgram().toTreeNode())
-      this._combineWithTilesAndRegisterGrammar("hakon", new hakonNode().getHandGrammarProgram().toTreeNode())
-      this._combineWithTilesAndRegisterGrammar("stump", new stumpNode().getHandGrammarProgram().toTreeNode())
-    }
-    return this._grammars
-  }
-
-  _combineWithTilesAndRegisterGrammar(extension, grammarCode) {
-    const rootNode = grammarCode.getNode(extension + "Node")
-    rootNode.set("extends", "tilesNode")
-    grammarCode
-      .filter(node => node.getLine().endsWith("Node") && !node.has("extends"))
-      .forEach(node => {
-        // todo: probably a better way
-        if (node.toString().includes("boolean isTileAttribute true")) node.set("extends", "abstractTileSettingTerminalNode")
-        else node.set("extends", "abstractTileTreeComponentNode")
-      })
-    const handGrammarProgram = new jtree.HandGrammarProgram(
-      new tilesNode()
-        .getHandGrammarProgram()
-        .toString()
-        .trim() +
-        "\n" +
-        grammarCode.toString()
-    )
-    if (this.isNodeJs()) handGrammarProgram._setDirName(__dirname) // todo: hacky, remove
-    this._grammars[extension] = handGrammarProgram.compileAndReturnRootConstructor()
+  getOhayoGrammarAsTree() {
+    if (!this._ohayoGrammarTree) this._ohayoGrammarTree = new ohayoNode().getHandGrammarProgram()
+    return this._ohayoGrammarTree
   }
 
   getTargetNode() {
@@ -44506,12 +41913,12 @@ ${OhayoConstants.panel} 400
 
   createParser() {
     const map = {}
-    map[OhayoConstants.tileContextMenu] = TileContextMenuTreeComponent
-    map[OhayoConstants.tabContextMenu] = TabContextMenuTreeComponent
-    map[OhayoConstants.panel] = PanelTreeComponent
-    map[OhayoConstants.menu] = MenuTreeComponent
-    map[OhayoConstants.theme] = ThemeTreeComponent
-    map[OhayoConstants.helpModal] = HelpModal
+    map[StudioConstants.tileContextMenu] = TileContextMenuTreeComponent
+    map[StudioConstants.tabContextMenu] = TabContextMenuTreeComponent
+    map[StudioConstants.panel] = PanelTreeComponent
+    map[StudioConstants.menu] = MenuTreeComponent
+    map[StudioConstants.theme] = ThemeTreeComponent
+    map[StudioConstants.helpModal] = HelpModal
     map["TreeComponentFrameworkDebuggerComponent"] = TreeComponentFrameworkDebuggerComponent
 
     return new jtree.TreeNode.Parser(jtree.TreeNode, map)
@@ -44519,19 +41926,19 @@ ${OhayoConstants.panel} 400
 
   toHakonCode() {
     const theme = this.getTheme()
-    return `.OhayoWebApp
+    return `.StudioApp
  height 100%
  width 100%
 .OhayoError
  color ${theme.errorColor}`
   }
 
-  isConnectedToOhayoServerApp() {
-    return typeof isConnectedToOhayoServerApp !== "undefined"
+  isConnectedToStudioServerApp() {
+    return typeof isConnectedToStudioServerApp !== "undefined"
   }
 
   isUrlGetProxyAvailable() {
-    return this.isConnectedToOhayoServerApp()
+    return this.isConnectedToStudioServerApp()
   }
 
   goRed(err) {
@@ -44622,7 +42029,7 @@ ${OhayoConstants.panel} 400
   }
 
   getFocusedPanel() {
-    return this.getNode(OhayoConstants.panel)
+    return this.getNode(StudioConstants.panel)
   }
 
   getMountedTab() {
@@ -44635,7 +42042,7 @@ ${OhayoConstants.panel} 400
   }
 
   getMenuTreeComponent() {
-    return this.getNode(OhayoConstants.menu)
+    return this.getNode(StudioConstants.menu)
   }
 
   async _openFullDiskFilePathInNewTab(fullDiskFilePath) {
@@ -44652,29 +42059,8 @@ ${OhayoConstants.panel} 400
     return this.getFromStore(StorageKeys.autoSave) !== "false"
   }
 
-  getLanguageBestGuess(sourceCode) {
-    const grammars = this.getGrammars()
-
-    const getErrorCount = (extension, rootConstructor) => {
-      const program = new rootConstructor(sourceCode)
-      return {
-        name: extension,
-        errorCount: program.getAllErrors().length
-      }
-    }
-
-    const guesses = lodash.sortBy(Object.keys(grammars).map(extension => getErrorCount(extension, grammars[extension])), ["errorCount"])
-    const bestGuess = guesses[0].name
-    return bestGuess
-  }
-
-  generateProgram(sourceCode, treeLanguage) {
-    const programConstructor = this.getProgramConstructorFromFileExtension(treeLanguage)
-    return new programConstructor(sourceCode)
-  }
-
   getThemeName() {
-    return this.get(OhayoConstants.theme)
+    return this.get(StudioConstants.theme)
   }
 
   isGlassTheme() {
@@ -44689,7 +42075,7 @@ ${OhayoConstants.panel} 400
   _toggleTheme() {
     const newThemeName = jtree.Utils.toggle(this.getThemeName(), Object.keys(ThemeTreeComponent.Themes))
     this.addStumpCodeMessageToLog(`div Switched to ${newThemeName} theme`)
-    this.set(OhayoConstants.theme, newThemeName)
+    this.set(StudioConstants.theme, newThemeName)
     this.saveAppState()
     this.makeAllDirty() // todo:remove
     this.renderApp()
@@ -44721,7 +42107,7 @@ ${OhayoConstants.panel} 400
   getKeyboardShortcuts() {
     if (!this._shortcuts)
       this._shortcuts = new DrumsProgram(
-        typeof OhayoDrums === "undefined" ? jtree.TreeNode.fromDisk(this._getProjectRootDir() + "ohayoWebApp/treeComponents/Ohayo.drums") : new jtree.TreeNode(OhayoDrums)
+        typeof StudioDrums === "undefined" ? jtree.TreeNode.fromDisk(this._getProjectRootDir() + "studio/treeComponents/Studio.drums") : new jtree.TreeNode(StudioDrums)
       )
     return this._shortcuts
   }
@@ -44839,7 +42225,7 @@ ${OhayoConstants.panel} 400
 
   getAppWall() {
     return this.getFocusedPanel()
-      .getNode(OhayoConstants.tabs)
+      .getNode(StudioConstants.tabs)
       .getWall()
   }
 
@@ -44854,7 +42240,7 @@ ${OhayoConstants.panel} 400
   getMountedTilesDiagnostic() {
     return jtree.Utils.flatten(
       this.getFocusedPanel()
-        .getNode(OhayoConstants.tabs)
+        .getNode(StudioConstants.tabs)
         .getOpenTabs()
         .map(tab =>
           tab
@@ -44866,11 +42252,11 @@ ${OhayoConstants.panel} 400
   }
 
   async _createProgramFromPaste(pastedText) {
-    await this._createAndOpen(pastedText, `untitled${OhayoConstants.fileExtensions.maia}`) // todo: guess language!
+    await this._createAndOpen(pastedText, `untitled${StudioConstants.ohayoExtension}`) // todo: guess language!
   }
 
   // for tests and debugging
-  // todo: only relevant for MaiaTiles with tables
+  // todo: only relevant for OhayoTiles with tables
   dumpTablesDiagnostic() {
     return this.getRenderedTilesDiagnostic().forEach(tile => {
       console.log(tile.getLine())
@@ -44909,7 +42295,7 @@ ${OhayoConstants.panel} 400
     const localDisk = new LocalStorageDisk(this)
     this._defaultDisk = localDisk
     this._disks[localDisk.getDisplayName()] = localDisk
-    const addServerDisk = this.isNodeJs() ? false : this.isConnectedToOhayoServerApp()
+    const addServerDisk = this.isNodeJs() ? false : this.isConnectedToStudioServerApp()
     let serverDisk
     if (addServerDisk) {
       serverDisk = new ServerStorageDisk(this)
@@ -44971,9 +42357,9 @@ ${OhayoConstants.panel} 400
   }
 
   async playFirstVisitCommand() {
-    // await this.openOhayoProgramCommand("faq.maia")
+    // await this.openOhayoProgramCommand("faq.ohayo")
     // todo: make this create in memory?
-    await this.openOhayoProgramCommand(OhayoConstants.productName + OhayoConstants.fileExtensions.maia)
+    await this.openOhayoProgramCommand(StudioConstants.productName + StudioConstants.ohayoExtension)
   }
 
   copyTargetTileCommand(uno, dos) {
@@ -45040,11 +42426,11 @@ ${OhayoConstants.panel} 400
     // todo: how do we handle multi-table-csv?
     // there are multiple types of CSVs.
     const extension = jtree.Utils.getFileExtension(filename)
-    if (this.getGrammars()[extension]) return this._createAndOpen(data, filename)
+    if (extension === StudioConstants.ohayoExtension) return this._createAndOpen(data, filename)
 
-    const templateFn = MaiaTemplates[extension]
+    const templateFn = OhayoTemplates[extension]
     const program = templateFn ? templateFn(filename, data, this) : `html.h1 No visualization templates for ${filename}`
-    return this._createAndOpen(program, filename + OhayoConstants.fileExtensions.maia)
+    return this._createAndOpen(program, filename + StudioConstants.ohayoExtension)
   }
 
   async toggleShadowByIdCommand(id) {
@@ -45073,12 +42459,12 @@ ${OhayoConstants.panel} 400
   }
 
   async toggleAndRenderNewDropDownCommand() {
-    this.getNode(OhayoConstants.menu).toggleAndRender(OhayoConstants.newDropDownMenu)
+    this.getNode(StudioConstants.menu).toggleAndRender(StudioConstants.newDropDownMenu)
   }
 
   async closeAllDropDownMenusCommand() {
     this.getTopDownArray().forEach(treeComponent => {
-      if (treeComponent.getLine().includes(OhayoConstants.DropDownMenuSubstring)) treeComponent.unmountAndDestroy()
+      if (treeComponent.getLine().includes(StudioConstants.DropDownMenuSubstring)) treeComponent.unmountAndDestroy()
     })
   }
 
@@ -45133,7 +42519,7 @@ ${OhayoConstants.panel} 400
       .join(" ")
   }
 
-  async createNewBlankProgramCommand(filename = "untitled" + OhayoConstants.fileExtensions.maia) {
+  async createNewBlankProgramCommand(filename = "untitled" + StudioConstants.ohayoExtension) {
     const tab = await this._createAndOpen("", filename)
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
@@ -45144,10 +42530,10 @@ ${OhayoConstants.panel} 400
 
   async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
     const uri = new URLSearchParams(new URL(deepLink).search)
-    const fileName = decodeURIComponent(uri.get(OhayoConstants.deepLinks.filename))
-    let sourceCode = decodeURIComponent(uri.get(OhayoConstants.deepLinks.data))
-    if (uri.get(OhayoConstants.deepLinks.edgeSymbol)) sourceCode = sourceCode.replace(new RegExp(uri.get(OhayoConstants.deepLinks.edgeSymbol), "g"), " ")
-    if (uri.get(OhayoConstants.deepLinks.nodeBreakSymbol)) sourceCode = sourceCode.replace(new RegExp(uri.get(OhayoConstants.deepLinks.nodeBreakSymbol), "g"), "\n")
+    const fileName = decodeURIComponent(uri.get(StudioConstants.deepLinks.filename))
+    let sourceCode = decodeURIComponent(uri.get(StudioConstants.deepLinks.data))
+    if (uri.get(StudioConstants.deepLinks.edgeSymbol)) sourceCode = sourceCode.replace(new RegExp(uri.get(StudioConstants.deepLinks.edgeSymbol), "g"), " ")
+    if (uri.get(StudioConstants.deepLinks.nodeBreakSymbol)) sourceCode = sourceCode.replace(new RegExp(uri.get(StudioConstants.deepLinks.nodeBreakSymbol), "g"), "\n")
 
     // todo: sec scan
 
@@ -45164,7 +42550,7 @@ ${OhayoConstants.panel} 400
 
     const res = await this.willowBrowser.httpGetUrl(url)
 
-    const tab = await this._createAndOpen(res.text, "untitled" + OhayoConstants.fileExtensions.maia)
+    const tab = await this._createAndOpen(res.text, "untitled" + StudioConstants.ohayoExtension)
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
@@ -45202,7 +42588,7 @@ ${OhayoConstants.panel} 400
   }
 
   async confirmAndResetAppStateCommand() {
-    const result = await this.willowBrowser.confirmThen(`Are you sure you want to reset the Ohayo UI? Your files will not be lost.`)
+    const result = await this.willowBrowser.confirmThen(`Are you sure you want to reset the Ohayo Studio UI? Your files will not be lost.`)
     if (!result) return undefined
     this.resetAppState()
     this.willowBrowser.reload()
@@ -45226,22 +42612,6 @@ ${OhayoConstants.panel} 400
     if (!newSetting) this.storeValue(StorageKeys.autoSave, "false")
     else this.removeValue(StorageKeys.autoSave)
     this.addStumpCodeMessageToLog(`div Autosave is ${newSetting}`)
-  }
-
-  async saveCompiledCommand() {
-    const handGrammarProgram = this.mountedProgram.getHandGrammarProgram()
-    const outputExtension = handGrammarProgram.getTargetExtension()
-    const filename = jtree.Utils.stringToPermalink(jtree.Utils.removeFileExtension(this.mountedTab.getFileName())) + "." + outputExtension
-    this.willowBrowser.downloadFile(this.mountedProgram.compile(), filename, "text/" + outputExtension)
-  }
-
-  async executeProgramCommand() {
-    // todo: sec considerations? prevent someone from triggering this command w/o user input.
-    let result = await this.mountedTab.getTabProgram().execute()
-    if (Array.isArray(result)) result = result.join("\n")
-    if (result === undefined) result = "undefined"
-    this.mountedTab.logMessageText(encodeURIComponent(result.toString()))
-    this.renderApp()
   }
 
   get focusedPanel() {
@@ -45295,7 +42665,7 @@ ${OhayoConstants.panel} 400
   }
 
   async toggleHelpCommand() {
-    this.toggleAndRender(OhayoConstants.helpModal)
+    this.toggleAndRender(StudioConstants.helpModal)
   }
 
   async closeMountedProgramCommand() {
@@ -45335,7 +42705,7 @@ ${OhayoConstants.panel} 400
     tiles.forEach(tile => {
       // New behavior is: shift children left 1. Dont delete them along with parent.
       tile
-        .filter(tile => tile.doesExtend("abstractTileTreeComponentNode") && !tile.isSelected())
+        .filter(tile => tile.doesExtend(OhayoConstants.abstractTileTreeComponentNode) && !tile.isSelected())
         .forEach(child => {
           child.unmount()
           child.shiftLeft()
@@ -45390,17 +42760,17 @@ ${OhayoConstants.panel} 400
   }
 
   _hideMenuAndTabs() {
-    this.getNode(OhayoConstants.menu).unmount()
-    this.getNode(OhayoConstants.menu).replaceNode(() => OhayoConstants.menu + "PlaceHolder")
+    this.getNode(StudioConstants.menu).unmount()
+    this.getNode(StudioConstants.menu).replaceNode(() => StudioConstants.menu + "PlaceHolder")
   }
 
   _showMenuAndTabs() {
     // todo: make this hide tabs
-    this.getNode(OhayoConstants.menu + "PlaceHolder").replaceNode(() => OhayoConstants.menu)
+    this.getNode(StudioConstants.menu + "PlaceHolder").replaceNode(() => StudioConstants.menu)
   }
 
   toggleFocusedModeCommand() {
-    this.has(OhayoConstants.menu) ? this._hideMenuAndTabs() : this._showMenuAndTabs()
+    this.has(StudioConstants.menu) ? this._hideMenuAndTabs() : this._showMenuAndTabs()
     this.makeAllDirty() // cleanup
     return this.toggleFullScreenCommand()
   }
@@ -45442,15 +42812,15 @@ ${OhayoConstants.panel} 400
   async createNewSourceCodeVisualizationProgramCommand() {
     // todo: make this create in memory? but then a refresh will end it.
     const sourceCode = this.mountedProgram.childrenToString()
-    const template = MaiaCodeEditorTemplate(sourceCode, this.mountedTab.getFileName(), OhayoConstants.fileExtensions.maia.substr(1))
-    const tab = await this._createAndOpen(template, this.mountedTab.getFileName() + "-source-code-vis.maia")
+    const template = OhayoCodeEditorTemplate(sourceCode, this.mountedTab.getFileName(), StudioConstants.ohayoExtension.substr(1))
+    const tab = await this._createAndOpen(template, this.mountedTab.getFileName() + "-source-code-vis.ohayo")
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
   async createMiniMapCommand() {
     // todo: make this create in memory? but then a refresh will end it.
-    const tab = await this._createAndOpen(MiniTemplate, "myPrograms" + OhayoConstants.fileExtensions.maia)
+    const tab = await this._createAndOpen(MiniTemplate, "myPrograms" + StudioConstants.ohayoExtension)
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
@@ -45559,19 +42929,19 @@ ${OhayoConstants.panel} 400
     const handGrammarProgram = this.mountedProgram.getHandGrammarProgram()
     const topNodeTypes = handGrammarProgram.getTopNodeTypeDefinitions().map(def => def.get("crux"))
 
-    const sourceCode = topNodeTypes.join("\n") + `\n${TilesConstants.layout} ${TilesConstants.layouts.column}`
-    const tab = await this._createAndOpen(sourceCode, "all-tiles" + OhayoConstants.fileExtensions.maia)
+    const sourceCode = topNodeTypes.join("\n") + `\n${OhayoConstants.layout} ${OhayoConstants.layouts.column}`
+    const tab = await this._createAndOpen(sourceCode, "all-tiles" + StudioConstants.ohayoExtension)
     const data = tab
       .getTabProgram()
       .getTiles()
-      .filter(tile => tile.getTileQualityCheck) // only check Maia tiles
+      .filter(tile => tile.getTileQualityCheck) // only check Ohayo tiles
       .map(tile => tile.getTileQualityCheck())
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
     const sourceCode2 = new jtree.TreeNode(`data.inline
  tables.basic Quality Check Results`)
     sourceCode2.getNode("data.inline").appendLineAndChildren("content", new jtree.TreeNode(data).toCsv())
-    const tab2 = await this._createAndOpen(sourceCode2.toString(), "tiles-quality-check-results" + OhayoConstants.fileExtensions.maia)
+    const tab2 = await this._createAndOpen(sourceCode2.toString(), "tiles-quality-check-results" + StudioConstants.ohayoExtension)
 
     tab2.addStumpCodeMessageToLog(`div Created '${tab2.getFullTabFilePath()}'`)
   }
@@ -45597,9 +42967,9 @@ ${OhayoConstants.panel} 400
     const rowsAsCsv = new jtree.TreeNode(times)
     const runTime = Date.now() - startTime
     const title = `Program Load Times ${moment().format("MM/DD/YYYY")} version ${this.getVersion()}. Run time: ${runTime}`
-    return this._createAndOpen(SpeedTestTemplate(title, rowsAsCsv.toCsv()), "program-load-times" + OhayoConstants.fileExtensions.maia)
+    return this._createAndOpen(SpeedTestTemplate(title, rowsAsCsv.toCsv()), "program-load-times" + StudioConstants.ohayoExtension)
   }
 }
 
-window.OhayoWebApp
- = OhayoWebApp
+window.StudioApp
+ = StudioApp

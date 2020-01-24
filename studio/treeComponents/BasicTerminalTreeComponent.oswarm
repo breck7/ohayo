@@ -1,0 +1,13 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test consoleTerminalCommand
+ createNewBlankProgramCommand
+  executeCommandOnStumpWithClassCommand blurCommand sourceTextarea
+   assertStringExcludes getStumpNodeString Saved
+   assertStringExcludes getStumpNodeString iris
+   fillShadowInputOrTextAreaByClassNameCommand sourceTextarea samples.iris
+    executeCommandOnStumpWithClassCommand blurCommand sourceTextarea
+     assertLengthIs getMountedTilesDiagnostic 1
+     assertStringIncludes getStumpNodeString Iris
+     assertStringIncludes getStumpNodeString Saved
+     clearTabMessagesCommand
+      assertStringExcludes getStumpNodeString Saved

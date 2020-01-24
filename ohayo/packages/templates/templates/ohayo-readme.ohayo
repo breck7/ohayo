@@ -1,0 +1,15 @@
+doc.title Ohayo Readme & Release Notes
+web.get readme.md
+ parser text
+ hidden
+ markdown.toHtml
+web.get releasenotes.md
+ parser text
+ hidden
+ markdown.toHtml
+web.get ohayo/readme.md
+ parser text
+ hidden
+ markdown.toHtml
+doc.layout column
+doc.categories ohayo
