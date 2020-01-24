@@ -1,3 +1,8 @@
+17.4.0 2020-1-24
+----------------
+- Fix: updated Jtree to fix windows return character bug
+- New: cdc tiles
+
 17.3.0 2020-1-23
 ----------------
 - New: gen tiles

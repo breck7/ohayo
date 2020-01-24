@@ -1,6 +1,6 @@
 {
   "name": "ohayo",
-  "version": "17.3.0",
+  "version": "17.4.0",
   "description": "ohayo desktop version",
   "main": "OhayoServerApp.js",
   "directories": {
@@ -20,7 +20,7 @@
     "fuse.js": "^3.2.0",
     "glob": "^7.1.4",
     "jquery-ui-dist": "^1.12.1",
-    "jtree": "^49.5.0",
+    "jtree": "^49.6.0",
     "lodash": "^4.17.13",
     "marked": "^0.6.3",
     "mathjs": "^6.3.0",

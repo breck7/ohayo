@@ -31,8 +31,11 @@ abstractProviderNode
    return Row
   }
   getTileBodyStumpCode() {
-   const description = this.getDefinition().get("description")
+   const description = this._getDescription()
    return "div " + (description ? jtree.Utils.linkify(description) : "")
+  }
+  _getDescription() {
+    return this.getDefinition().get("description")
   }
   toStumpCode() {
    return this.qFormat(this.tileStumpTemplate, {classes:this.getCssClassNames().join(" "), id : this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer : this.getTileFooterStumpCode()})
@@ -117,6 +120,7 @@ abstractUrlNoCellsNode
    try {
     const data = await this._getData(url)
     const parser = new TableParser()
+    debugger
     if (typeof data === "string")
       return parser.parseTableInputsFromString(data, parserId)
     if (this.jsonPath)
@@ -159,6 +163,13 @@ abstractFixedDatasetFromUrlNode
  description A dataset that generally is fixed and will never change.
  extends abstractUrlNoCellsNode
  abstract
+ javascript
+  _getDescription() {
+   const desc = super._getDescription()
+   if (this.dataUrl)
+     return (desc ? desc + " from " : "" ) + this.dataUrl
+   return desc
+  }
 abstractDummyNode
  javascript
   async _execute() {

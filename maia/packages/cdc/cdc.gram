@@ -1,0 +1,21 @@
+tooling onsave jtree build produceMaiaGrammar
+abstractCdcInfantPercentileNode
+ boolean isDataPublicDomain true
+ string dataUrl https://www.cdc.gov/growthcharts/percentile_data_files.htm
+ abstract
+ extends abstractFixedDatasetFromMaiaCollectionNode
+weightPercentilesNode
+ description Weight percentiles for birth to 36 months in kilograms, by sex and age
+ string url maia/packages/cdc/wtageinf.csv
+ extends abstractCdcInfantPercentileNode
+ crux cdc.infants.weight
+lengthPercentilesNode
+ description Length percentiles for birth to 36 months in centimeters, by sex and age
+ string url maia/packages/cdc/lenageinf.csv
+ extends abstractCdcInfantPercentileNode
+ crux cdc.infants.length
+headPercentilesNode
+ description Head circumference percentiles for birth to 36 months in centimeters, by sex and age
+ string url maia/packages/cdc/hcageinf.csv
+ extends abstractCdcInfantPercentileNode
+ crux cdc.infants.headCircumference

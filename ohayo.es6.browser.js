@@ -16257,6 +16257,7 @@ class TreeNode extends AbstractNode {
     return this.fromDelimited(str, "\t", '"')
   }
   static fromDelimited(str, delimiter, quoteChar = '"') {
+    str = str.replace(/\r/g, "") // remove windows newlines if present
     const rows = this._getEscapedRows(str, delimiter, quoteChar)
     return this._rowsToTreeNode(rows, delimiter, true)
   }
@@ -16264,6 +16265,7 @@ class TreeNode extends AbstractNode {
     return str.includes(quoteChar) ? this._strToRows(str, delimiter, quoteChar) : str.split("\n").map(line => line.split(delimiter))
   }
   static fromDelimitedNoHeaders(str, delimiter, quoteChar) {
+    str = str.replace(/\r/g, "") // remove windows newlines if present
     const rows = this._getEscapedRows(str, delimiter, quoteChar)
     return this._rowsToTreeNode(rows, delimiter, false)
   }
@@ -16476,7 +16478,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "49.5.0"
+TreeNode.getVersion = () => "49.6.0"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -26340,6 +26342,9 @@ a {name}
           "web.post": webPostNode,
           "wikipedia.page": wikipediaContentNode,
           "cancer.cases": cancerCasesNode,
+          "cdc.infants.weight": weightPercentilesNode,
+          "cdc.infants.length": lengthPercentilesNode,
+          "cdc.infants.headCircumference": headPercentilesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "moz.top500": mozTop500Node,
           "owid.lifeExpectancy": lifeExpectancyNode,
@@ -28732,8 +28737,11 @@ span Rows Out: ${table.getRowCount()} Columns Out: ${table.getColumnCount()} Tim
       return Row
     }
     getTileBodyStumpCode() {
-      const description = this.getDefinition().get("description")
+      const description = this._getDescription()
       return "div " + (description ? jtree.Utils.linkify(description) : "")
+    }
+    _getDescription() {
+      return this.getDefinition().get("description")
     }
     toStumpCode() {
       return this.qFormat(this.tileStumpTemplate, {
@@ -28827,6 +28835,7 @@ bern
       try {
         const data = await this._getData(url)
         const parser = new TableParser()
+        debugger
         if (typeof data === "string") return parser.parseTableInputsFromString(data, parserId)
         if (this.jsonPath) return parser.parseTableInputsFromObject(data[this.jsonPath], parserId)
         return parser.parseTableInputsFromObject(data, parserId)
@@ -29116,7 +29125,13 @@ input
     }
   }
 
-  class abstractFixedDatasetFromUrlNode extends abstractUrlNoCellsNode {}
+  class abstractFixedDatasetFromUrlNode extends abstractUrlNoCellsNode {
+    _getDescription() {
+      const desc = super._getDescription()
+      if (this.dataUrl) return (desc ? desc + " from " : "") + this.dataUrl
+      return desc
+    }
+  }
 
   class abstractFixedDatasetFromMaiaCollectionNode extends abstractFixedDatasetFromUrlNode {
     get tileSize() {
@@ -29133,6 +29148,33 @@ input
   class cancerCasesNode extends abstractFixedDatasetFromMaiaCollectionNode {
     get url() {
       return `maia/packages/cancer/cases.csv`
+    }
+  }
+
+  class abstractCdcInfantPercentileNode extends abstractFixedDatasetFromMaiaCollectionNode {
+    get dataUrl() {
+      return `https://www.cdc.gov/growthcharts/percentile_data_files.htm`
+    }
+    get isDataPublicDomain() {
+      return true
+    }
+  }
+
+  class weightPercentilesNode extends abstractCdcInfantPercentileNode {
+    get url() {
+      return `maia/packages/cdc/wtageinf.csv`
+    }
+  }
+
+  class lengthPercentilesNode extends abstractCdcInfantPercentileNode {
+    get url() {
+      return `maia/packages/cdc/lenageinf.csv`
+    }
+  }
+
+  class headPercentilesNode extends abstractCdcInfantPercentileNode {
+    get url() {
+      return `maia/packages/cdc/hcageinf.csv`
     }
   }
 
@@ -31172,6 +31214,9 @@ a {name}
           "web.post": webPostNode,
           "wikipedia.page": wikipediaContentNode,
           "cancer.cases": cancerCasesNode,
+          "cdc.infants.weight": weightPercentilesNode,
+          "cdc.infants.length": lengthPercentilesNode,
+          "cdc.infants.headCircumference": headPercentilesNode,
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "moz.top500": mozTop500Node,
           "owid.lifeExpectancy": lifeExpectancyNode,
@@ -34274,8 +34319,11 @@ abstractProviderNode
    return Row
   }
   getTileBodyStumpCode() {
-   const description = this.getDefinition().get("description")
+   const description = this._getDescription()
    return "div " + (description ? jtree.Utils.linkify(description) : "")
+  }
+  _getDescription() {
+   return this.getDefinition().get("description")
   }
   toStumpCode() {
    return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileFooterStumpCode() })
@@ -34355,6 +34403,7 @@ abstractUrlNoCellsNode
    try {
     const data = await this._getData(url)
     const parser = new TableParser()
+    debugger
     if (typeof data === "string") return parser.parseTableInputsFromString(data, parserId)
     if (this.jsonPath) return parser.parseTableInputsFromObject(data[this.jsonPath], parserId)
     return parser.parseTableInputsFromObject(data, parserId)
@@ -34629,6 +34678,12 @@ abstractFixedDatasetFromUrlNode
  description A dataset that generally is fixed and will never change.
  extends abstractUrlNoCellsNode
  abstract
+ javascript
+  _getDescription() {
+   const desc = super._getDescription()
+   if (this.dataUrl) return (desc ? desc + " from " : "") + this.dataUrl
+   return desc
+  }
 abstractFixedDatasetFromMaiaCollectionNode
  description A dataset that ships with Ohayo.
  string tileSize 300 150
@@ -34646,6 +34701,26 @@ cancerCasesNode
  string url maia/packages/cancer/cases.csv
  extends abstractFixedDatasetFromMaiaCollectionNode
  crux cancer.cases
+abstractCdcInfantPercentileNode
+ boolean isDataPublicDomain true
+ string dataUrl https://www.cdc.gov/growthcharts/percentile_data_files.htm
+ abstract
+ extends abstractFixedDatasetFromMaiaCollectionNode
+weightPercentilesNode
+ description Weight percentiles for birth to 36 months in kilograms, by sex and age
+ string url maia/packages/cdc/wtageinf.csv
+ extends abstractCdcInfantPercentileNode
+ crux cdc.infants.weight
+lengthPercentilesNode
+ description Length percentiles for birth to 36 months in centimeters, by sex and age
+ string url maia/packages/cdc/lenageinf.csv
+ extends abstractCdcInfantPercentileNode
+ crux cdc.infants.length
+headPercentilesNode
+ description Head circumference percentiles for birth to 36 months in centimeters, by sex and age
+ string url maia/packages/cdc/hcageinf.csv
+ extends abstractCdcInfantPercentileNode
+ crux cdc.infants.headCircumference
 kaggleDatasetsHeartNode
  tags internetConnectionRequired
  description Heart Disease dataset from https://www.kaggle.com/ronitf/heart-disease-uci
@@ -36845,6 +36920,10 @@ schemaNode
         abstractFixedDatasetFromUrlNode: abstractFixedDatasetFromUrlNode,
         abstractFixedDatasetFromMaiaCollectionNode: abstractFixedDatasetFromMaiaCollectionNode,
         cancerCasesNode: cancerCasesNode,
+        abstractCdcInfantPercentileNode: abstractCdcInfantPercentileNode,
+        weightPercentilesNode: weightPercentilesNode,
+        lengthPercentilesNode: lengthPercentilesNode,
+        headPercentilesNode: headPercentilesNode,
         kaggleDatasetsHeartNode: kaggleDatasetsHeartNode,
         mozTop500Node: mozTop500Node,
         lifeExpectancyNode: lifeExpectancyNode,
@@ -43474,7 +43553,7 @@ window.TileToolbarTreeComponent
  = TileToolbarTreeComponent
 ;
 
-const Version = "17.3.0"
+const Version = "17.4.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
