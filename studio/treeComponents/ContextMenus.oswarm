@@ -3,4 +3,3 @@ test wallContextMenu
  createNewBlankProgramCommand
   executeCommandOnStumpWithClassCommand contextMenuCommand WallTreeComponent
    assertStringIncludes getStumpNodeString Save File
-   moveTilesFromShadowsCommand

@@ -6,7 +6,6 @@ const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework
 
 const CodeMirrorCss = require("./CodeMirrorCss.js")
 
-
 const ThemeConstants = {}
 ThemeConstants.dark = "dark"
 ThemeConstants.workshop = "workshop"
@@ -22,7 +21,7 @@ class Theme {
     this.backgroundColor = backgroundColor
     this.solidBackgroundColorOrTransparent = options.hasSolidBackground ? backgroundColor : "transparent"
     this.menuBackground = backgroundColor
-    this.tabBackground = backgroundColor
+    this.tabBackground = "transparent"
     this.programsBackground = backgroundColor
     this.bodyBackground = backgroundColor
     this.wallBackground = backgroundColor
@@ -136,7 +135,7 @@ Themes[ThemeConstants.workshop] = new Theme({
   wallBackground: "rgba(244,216,105,.4)",
   menuBackground: "#3B539A",
   tileOpacity: 0.95,
-  tileShadow: "0 3px 5px rgba(33,33,33,.3)",
+  tileShadow: "0 2px 4px rgba(33,33,33,.2)",
   menuTreeComponentColor: "white"
 })
 
@@ -169,7 +168,6 @@ Themes[ThemeConstants.glass] = new Theme(glassColors)
 
 glassColors.tileBackgroundColor = "transparent"
 Themes[ThemeConstants.clearGlass] = new Theme(glassColors)
-
 
 class ThemeTreeComponent extends AbstractTreeComponent {
   toStumpCode() {
@@ -212,21 +210,6 @@ a
 
 ::-webkit-scrollbar
  display none
-
-.ui-resizable-handle
- position absolute
- font-size 0.1px
- display block
- -ms-touch-action none
- touch-action none
-
-.ui-resizable-disabled
- .ui-resizable-handle
-  display none
-
-.ui-resizable-autohide
- .ui-resizable-handle
-  display none
 
 .leftButton,.rightButton
  background transparent
@@ -293,9 +276,6 @@ a
  top 0
  left 0
 
-.noTransition
- transition none
-
 .SVGIcon
  fill ${theme.foregroundColor}
  cursor pointer
@@ -322,11 +302,11 @@ input,textarea
  color ${theme.foregroundColor}
 
 .abstractTileTreeComponentNode
- position absolute
- box-shadow ${theme.tileShadow}
+ position relative
  opacity ${theme.tileOpacity}
  background ${theme.tileBackgroundColor}
- border 1px solid ${theme.borderColor}
+ margin 10px 15px
+ box-shadow ${theme.tileShadow}
  ol
   height 100%
   width 100%
@@ -337,33 +317,16 @@ input,textarea
  ${theme.disableTextSelect(1)}
  &.TileMaximized
   z-index 2
- .TilePencilButton
-  svg
-   opacity 0
- .ui-resizable-se
-  cursor se-resize
-  width 36px
-  height 36px
-  box-sizing border-box
-  right 1px
-  bottom 1px
-  opacity 0
-  border-right 4px solid ${theme.darkerBackground}
-  border-bottom 4px solid ${theme.darkerBackground}
-  &:hover
-   opacity 1
+ .TileDropDownButton
+  opacity .3
+  cursor pointer
  &:hover
-  background ${theme.backgroundColor}
   z-index 2
-  .ui-resizable-se
-   opacity .5
-  .TilePencilButton
-   svg
-    opacity 1
-    cursor pointer
-    fill ${theme.greyish}
-    &:hover
-     fill ${theme.foregroundColor}
+  .TileDropDownButton
+   opacity 1
+   color ${theme.greyish}
+   &:hover
+    color ${theme.foregroundColor}
  .TileHeader,.TileFooter
   height 30px
   line-height 30px
@@ -373,15 +336,12 @@ ${theme.enableTextSelect2}
  .TileBody
   padding 5px
   width 100%
-  height calc(100% - 50px)
+  max-height 400px
   box-sizing border-box
   overflow scroll
-  &.HeaderLess
-   height calc(100% - 20px)
- .TileGrabber
+ .TileHeaderGrabber,.TileFooterGrabber
   width 100%
   height 10px
-  cursor move
  .TileHeader
   font-size 14px
   text-transform uppercase
@@ -399,7 +359,7 @@ ${theme.enableTextSelect2}
   max-width 100%
   box-sizing border-box
   bottom 0
-  left 0
+  right 0
  iframe
   width 100%
   height 100%

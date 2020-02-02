@@ -99,10 +99,7 @@ p
   id welcomePageButton
   clickCommand openOhayoProgramCommand
   value ohayo.ohayo
-a Keyboard Shortcuts
- class helpToggle
- clickCommand toggleShadowByIdCommand
- value shortcutsHelp
+div Keyboard Shortcuts:
 ${this._getShortcutsHelpStumpCode()}`
   }
 }

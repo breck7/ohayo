@@ -7,6 +7,5 @@ samples.iris
    xColumn pc1
    yColumn pc2
    colorColumn Species
-doc.layout column
 doc.categories math
 doc.subtitle This demonstration uses the PCA library from <a href="https://github.com/bitanath/pca">bitanath</a>. 

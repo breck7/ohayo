@@ -1,18 +1,32 @@
 const { jtree } = require("jtree")
 const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework.node.js")
 
-const NewDropDownMenuTreeComponent = require("./NewDropDownMenuTreeComponent.js")
 const StudioConstants = require("./StudioConstants.js")
+const TabsTreeComponent = require("./TabsTreeComponent.js")
+
+class LogoTreeComponent extends AbstractTreeComponent {
+  toStumpCode() {
+    return `a ${StudioConstants.productName}
+ clickCommand toggleHelpCommand`
+  }
+}
+
+class NewButtonTreeComponent extends AbstractTreeComponent {
+  toStumpCode() {
+    return `a &nbsp;+
+ id newButton
+ clickCommand createNewBlankProgramCommand
+ value untitled.ohayo`
+  }
+}
 
 class MenuTreeComponent extends AbstractTreeComponent {
   createParser() {
     return new jtree.TreeNode.Parser(undefined, {
-      newDropDownMenu: NewDropDownMenuTreeComponent
+      logo: LogoTreeComponent,
+      tabs: TabsTreeComponent,
+      newButton: NewButtonTreeComponent
     })
-  }
-
-  getDependencies() {
-    return [{ getLineModifiedTime: () => this.getParent().getWindowSizeMTime() }]
   }
 
   toHakonCode() {
@@ -36,16 +50,6 @@ class MenuTreeComponent extends AbstractTreeComponent {
   line-height 30px
   display inline-block
   color ${theme.menuTreeComponentColor}`
-  }
-
-  toStumpCode() {
-    return `div
- class MenuTreeComponent ${this.constructor.name}
- a ${StudioConstants.productName}
-  clickCommand toggleHelpCommand
- a New ▾
-  id newToggle
-  clickCommand toggleAndRenderNewDropDownCommand`
   }
 }
 

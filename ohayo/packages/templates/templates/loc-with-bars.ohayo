@@ -14,5 +14,4 @@ web.get /disk?path=/ohayo/studio&lineStats=true&recursive=true
    vega.bar Words
     yColumn words
    tables.basic Top Extensions
-doc.layout column
 doc.categories programming

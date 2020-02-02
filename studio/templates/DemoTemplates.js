@@ -9,7 +9,6 @@ ohayo.ohayo
   hidden
   markdown.toHtml
  templates.list
- challenge.list
- doc.layout column`
+ challenge.list`
 
 module.exports = DemoTemplates

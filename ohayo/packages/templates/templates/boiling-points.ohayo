@@ -4,5 +4,4 @@ samples.periodicTable
   xColumn AtomicNumber
   yColumn BoilingPoint
   colorColumn Phase
-doc.layout column
 doc.categories chemistry

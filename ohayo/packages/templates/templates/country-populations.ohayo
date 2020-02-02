@@ -11,6 +11,5 @@ samples.populations
    vega.bar Population by Region
     visible
     yColumn Population2016
-doc.layout column
 doc.defaultHidden
 doc.categories geography

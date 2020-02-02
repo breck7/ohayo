@@ -14,7 +14,7 @@ textWordcloudNode
  string bodyStumpTemplate
   div
    class divWhereWordCloudWillGo
-   style width: 100%; height: 100%;
+   style height: 300px;
  javascript
   getTileBodyStumpCode() {
    return this.bodyStumpTemplate

@@ -4,47 +4,18 @@ const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework
 /*NODE_JS_ONLY*/ const ohayoNode = require("../../ohayo/ohayo.nodejs.js")
 
 const StudioConstants = require("./StudioConstants.js")
-const OhayoConstants = require("../tiles/OhayoConstants.js")
+const OhayoConstants = require("../treeComponents/OhayoConstants.js")
 
-class TabTreeComponent extends AbstractTreeComponent {
-  toStumpCode() {
-    const index = this.getIndex()
-    const fullPath = this.getFullTabFilePath()
-    const filename = this.getFileName()
-    const isMounted =
-      this.getParent()
-        .getParent()
-        .getMountedTabName() === fullPath
-    return `a ${filename}
- clickCommand mountTabByIndexCommand
- collapse
- value ${index}
- title ${fullPath}
- class TabStub ${isMounted ? "mountedTab" : ""}
- span x
-  collapse
-  clickCommand closeTabByIndexCommand
-  value ${index}
-  class closeTabButton`
-  }
+const AbstractContextMenuTreeComponent = require("./AbstractContextMenuTreeComponent.js")
 
-  getDependencies() {
-    return [this.getParent().getParent()]
-  }
-
-  getDeepLink() {
-    const obj = {}
-    obj[StudioConstants.deepLinks.filename] = this.getFileName()
-    return this.getRootNode()
-      .getWillowBrowser()
-      .toPrettyDeepLink(this.getTabProgram().childrenToString(), obj)
-  }
-
-  getContextMenuCommandsStumpCode() {
-    const handGrammarProgram = this.getTabProgram().getHandGrammarProgram()
-
+class TabMenuTreeComponent extends AbstractContextMenuTreeComponent {
+  getContextMenuBodyStumpCode() {
+    const index = this.getWord(1)
     return `a Save File
  clickCommand saveTabAndNotifyCommand
+a Close File
+ clickCommand closeTabByIndexCommand
+ value ${index}
 a Rename File
  clickCommand showTabRenameFilePromptCommand
 a Move File
@@ -59,6 +30,54 @@ a Log program stats
  clickCommand printProgramStatsCommand
 a Close all other files
  clickCommand closeAllTabsExceptFocusedTabCommand`
+  }
+}
+
+class TabTreeComponent extends AbstractTreeComponent {
+  toStumpCode() {
+    const app = this.getRootNode()
+    const index = this.getIndex()
+    const fullPath = this.getFullTabFilePath()
+    const filename = this.getFileName()
+    const isMounted = app.getMountedTabName() === fullPath
+    return `a ${filename}
+ clickCommand mountTabByIndexCommand
+ collapse
+ value ${index}
+ title ${fullPath}
+ id tab${index}
+ class TabStub ${isMounted ? "mountedTab" : ""}
+ span ▾
+  collapse
+  clickCommand openTabMenuCommand
+  value ${index}
+  class tabDropDownButton`
+  }
+
+  toHakonCode() {
+    return `.TabStub
+ .tabDropDownButton
+  opacity 0
+ &:hover
+  .tabDropDownButton
+   cursor pointer
+   opacity 1
+.TabStub.mountedTab
+ .tabDropDownButton
+  opacity 1`
+  }
+
+  async openTabMenuCommand() {
+    const index = this.getIndex()
+    this.getRootNode().toggleAndRender(`${StudioConstants.tabMenu} ${index}`)
+  }
+
+  getDeepLink() {
+    const obj = {}
+    obj[StudioConstants.deepLinks.filename] = this.getFileName()
+    return this.getRootNode()
+      .getWillowBrowser()
+      .toPrettyDeepLink(this.getTabProgram().childrenToString(), obj)
   }
 
   autosaveAndRender() {
@@ -75,18 +94,15 @@ a Close all other files
     this.getRootNode().renderApp()
   }
 
-  _getPanel() {
-    return this.getParent().getParent()
-  }
-
   async _initProgramRenderAndRun(source, shouldMount) {
     this._program = new ohayoNode(source)
     this._program.saveVersion()
     this._program.setTab(this)
+    const app = this.getRootNode()
 
-    if (shouldMount) this._getPanel().setMountedTab(this)
+    if (shouldMount) app.setMountedTab(this)
 
-    this.getRootNode().renderApp()
+    app.renderApp()
     await this._program.loadAndIncrementalRender()
     return this
   }
@@ -126,7 +142,7 @@ a Close all other files
   }
 
   getTabWall() {
-    return this.getParent().getWall()
+    return this.getRootNode().getAppWall()
   }
 
   async appendFromPaste(pastedText) {
@@ -152,4 +168,4 @@ a Close all other files
   }
 }
 
-module.exports = TabTreeComponent
+module.exports = { TabTreeComponent, TabMenuTreeComponent }

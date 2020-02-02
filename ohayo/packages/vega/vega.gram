@@ -59,12 +59,6 @@ abstractVegaNode
    if (this.isNodeJs()) return undefined
    this._drawVega()
   }
-  _getTileWidth() {
-   return this.getTileDimensionIfAny().width - 120
-  }
-  _getTileHeight() {
-   return this.getTileDimensionIfAny().height - 90
-  }
   treeComponentDidMount() {
    this.treeComponentDidUpdate()
   }
@@ -82,8 +76,8 @@ abstractVegaNode
    return {
     description: "A simple bar chart with embedded data.",
     data: this._getVegaData(),
-    width: this._getTileWidth(),
-    height: this._getTileHeight(),
+    width: this._tileWidth,
+    height: this._tileHeight,
     mark: this._getVegaMarkObj(),
     encoding: this._getEncodingMap(),
     transform: this._getVegaTransform(),

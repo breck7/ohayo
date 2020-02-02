@@ -16,7 +16,10 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
  z-index 991
  min-width 300px
  top 100%
- left 0
+ right 0
+ .TileCommandsDropDown
+  a
+   display block
  cursor pointer
  .TableInspection
   margin-top 5px
@@ -64,19 +67,35 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
     const tile = this.getTargetTile()
     const suggestions = this._getSuggestionsStumpCode()
     const exampleTile = tile.getExampleTemplate()
-    let tileHelp = ""
+    let exampleTileButton = ""
     if (exampleTile) {
-      tileHelp = `
- span ${Icons("function", 20)}
-  title See an example program with '${tile.getFirstWord()}'
-  clickCommand createProgramFromTileExampleCommand`
+      exampleTileButton = `span ${Icons("function", 20)}
+ title See an example program with '${tile.getFirstWord()}'
+ clickCommand createProgramFromTileExampleCommand`
     }
-    const hints = tile.getDefinition().getLineHints()
 
-    // todo: cleanup
+    const links = `a Reload
+ clickCommand fetchAndReloadFocusedTabCommand
+a Copy tile with inputs
+ tabindex -1
+ clickCommand copyTargetTileCommand
+a Copy data as tree
+ clickCommand copyTargetTileDataAsTreeCommand
+a Copy data as javascript
+ clickCommand copyTargetTileDataAsJavascriptCommand
+a Copy data as tsv
+ clickCommand copyTargetTileDataCommand
+ value \t
+a Copy data as csv
+ clickCommand copyTargetTileDataCommand
+ value ,
+a Export data to csv file
+ clickCommand exportTargetTileDataCommand
+a Export data to tree file
+ clickCommand exportTargetTileDataCommand
+ value tree`
 
-    return (
-      `div
+    return new jtree.TreeNode(`div
  class TileToolbarTreeComponent
  span ${Icons("copy", 20)}
   title Duplicate Tile
@@ -86,118 +105,16 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
   clickCommand destroyTileCommand
  span ${Icons("inspector", 20)}
   title Debug Tile
-  clickCommand inspectTileCommand` +
-      tileHelp +
-      `
- div ${hints}` +
-      jtree.TreeNode.nest(this._getFormStumpCode(), 1)
-    )
-  }
-
-  _getTileTypeDropdownStumpCode() {
-    const tile = this.getTargetTile()
-    const tileNames = tile
-      .getRootNode()
-      .getHandGrammarProgram()
-      ._getInScopeNodeTypeIds()
-      .filter(name => !name.includes("_") && !name.startsWith("@"))
-    tileNames.sort()
-    const selectedValue = tile.getFirstWord()
-    const options = tileNames
-      .map(
-        option =>
-          ` option ${option}
-  value ${option}
-  ${selectedValue === option ? "selected" : ""}`
-      )
-      .join("\n")
-    return `select
- changeCommand changeTileTypeCommand
-${options}`
-  }
-
-  _getParentDropdownStumpCode() {
-    const tile = this.getTargetTile()
-    const tilesProgram = tile.getRootNode()
-    const tilesParent = tile.getParent()
-
-    const options = tilesProgram
-      .getTiles()
-      .filter(t => t !== tile)
-      .map(tile => {
-        return {
-          name: tile.getFirstWordPathRelativeTo(tilesProgram),
-          value: tile.getPathVectorRelativeTo(tilesProgram).join(" "),
-          isParent: tile === tilesParent
-        }
-      })
-      .map(
-        option =>
-          ` option ${option.name}
-  value ${option.value}
-  ${option.isParent ? "selected" : ""}`
-      )
-      .join("\n")
-
-    return `select
- changeCommand changeParentCommand
- option (top)
-  value 
-  ${tilesParent.isRoot() ? "selected" : ""}${options ? "\n" + options : ""}`
+  clickCommand inspectTileCommand
+ {exampleTileButton}
+ div
+  class TileCommandsDropDown
+  {links}`).templateToString({ exampleTileButton, links})
   }
 
   _getSuggestionsStumpCode() {
     //return `div Add Suggested:`
     return "" //todo:
-  }
-
-  _getFormStumpCode() {
-    const tile = this.getTargetTile()
-
-    const formFields = []
-    formFields.unshift(["parent", this._getParentDropdownStumpCode()])
-    formFields.unshift(["type", this._getTileTypeDropdownStumpCode()])
-    formFields.unshift([
-      "content",
-      `input
- changeCommand changeTileContentAndRenderCommand
- value ${tile.getContent() || ""}`
-    ])
-
-    const html = formFields
-      .map(
-        control =>
-          `  tr
-   td ${control[0]}
-   td${jtree.TreeNode.nest(control[1], 4)}`
-      )
-      .join("\n")
-
-    let colTable = !tile.getOutputOrInputTable
-      ? ""
-      : tile
-          .getOutputOrInputTable()
-          .getColumnNamesAndTypes()
-          .map(
-            col => `  tr
-  td ${col.Column}
-  td ${col.JTableType}
-  td ${col.JavascriptType}`
-          )
-          .join("\n")
-
-    return `form
- table${html ? "\n" + html : html}
-div Output Table Columns:
-table
- class TableInspection
- thead
-  tr
-   th Column
-   th Type
-   th JavascriptType
- tbody
-${colTable}`
   }
 }
 

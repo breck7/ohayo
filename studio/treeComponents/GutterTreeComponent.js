@@ -11,7 +11,7 @@ class GutterTreeComponent extends AbstractTreeComponent {
   createParser() {
     return new jtree.TreeNode.Parser(undefined, {
       console: ConsoleTreeComponent,
-      terminal: this.isNodeJs() || !this.getRootNode().getPerfSettings().codeMirrorEnabled ? BasicTerminalTreeComponent : CodeMirrorTerminalTreeComponent
+      terminal: this.isNodeJs() ? BasicTerminalTreeComponent : CodeMirrorTerminalTreeComponent
     })
   }
 
@@ -43,11 +43,6 @@ class GutterTreeComponent extends AbstractTreeComponent {
   opacity .25
   &:hover
    opacity 1`
-  }
-
-  getDependencies() {
-    // todo: cleanup
-    return [this.getParent().getNode(StudioConstants.tabs), this.getParent()]
   }
 
   toStumpCode() {

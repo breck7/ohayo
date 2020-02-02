@@ -29,17 +29,15 @@ abstractTileTreeComponentNode
   div Error occurred. See console.
    class OhayoError
  string pencilStumpTemplate
-  span {icon}
-   class TilePencilButton
+  span ▾
+   class TileDropDownButton
    clickCommand toggleToolbarCommand
  string errorStateStumpTemplate
   div
    class {classes}
    id {id}
-   contextMenuCommand openTileContextMenuCommand
    div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
+    class TileHeaderGrabber
    div ERROR
     class TileHeader
    div
@@ -49,15 +47,13 @@ abstractTileTreeComponentNode
     class TileFooter
     {footer}
    div
-    class TileGrabber
+    class TileFooterGrabber
  string tileStumpTemplate
   div
    class {classes}
    id {id}
-   contextMenuCommand openTileContextMenuCommand
    div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
+    class TileHeaderGrabber
    div {header}
     class TileHeader
    div
@@ -68,7 +64,7 @@ abstractTileTreeComponentNode
     class TileFooter
     {footer}
    div
-    class TileGrabber
+    class TileFooterGrabber
  string inspectionStumpTemplate
   div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
   div Messages:
@@ -334,14 +330,6 @@ abstractTileTreeComponentNode
   getTileHeaderBern() {
    return `${this.getFirstWord()}`
   }
-  cloneAndOffset() {
-   const clone = this.duplicate()
-   const left = this.getLeft()
-   const _top = this.getTop()
-   if (left) clone.touchNode(OhayoConstants.left).setContent(parseInt(left) + 1)
-   if (_top) clone.touchNode(OhayoConstants.top).setContent(parseInt(_top) + 1)
-   return clone
-  }
   getTileBodyStumpCode() {
    return ``
   }
@@ -349,14 +337,10 @@ abstractTileTreeComponentNode
    const selector = "#" + this.getTreeComponentId()
    const theme = this.getTheme()
    const visibleCss = this.isVisible() ? "" : "display: none"
-   const dimensions = this.getTileDimensionIfAny()
-   const dimensionCss = dimensions ? dimensions.toCss() : ""
+   const dimensionCss = ""
    const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
    return `${selector} { ${visibleCss} ${dimensionCss} }
         ${theme.hakonToCss(hakonCode)}`
-  }
-  getContextMenuStumpCode() {
-   return ""
   }
   handleTileError(err) {
    if (!this._errorCount) this._errorCount = 0
@@ -368,17 +352,6 @@ abstractTileTreeComponentNode
   }
   getWebApp() {
    return this.getTab().getRootNode()
-  }
-  getTileDimensionIfAny() {
-   const dimensions = this.getWall().getWallViewPortDimensions()
-   return this.getRootNode()
-    .getTileDimensionMap(dimensions.width, dimensions.height)
-    .get(this)
-  }
-  getTileBodyDimension() {
-   const dimension = this.getTileDimensionIfAny()
-   dimension.height = dimension.height - this.headerHeight - this.footerHeight
-   return dimension
   }
   async runAndrenderAndGetRenderReport() {
    await this.execute()
@@ -394,16 +367,7 @@ abstractTileTreeComponentNode
    return this.getTileToolbarButtonStumpCode()
   }
   getTileToolbarButtonStumpCode() {
-   return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
-  }
-  getDefinedOrSuggestedSize() {
-   const size = this.getSuggestedSize()
-   const width = this.getWidth()
-   const height = this.getHeight()
-   return {
-    width: width ? width * 20 : size.width,
-    height: height ? height * 20 : size.height
-   }
+   return this.qFormat(this.pencilStumpTemplate)
   }
   getSuggestedSize() {
    const tileSize = this.tileSize || "280 220"
@@ -413,36 +377,7 @@ abstractTileTreeComponentNode
     height: parts[1]
    }
   }
-  getRequiredDimensionsForTreeLayout(padding = 0) {
-   const size = {
-    width: 0,
-    height: 0
-   }
-   const children = this.getChildTiles()
-   const suggestedSize = this.getDefinedOrSuggestedSize()
-   children.forEach(child => {
-    const childSize = child.getRequiredDimensionsForTreeLayout(padding)
-    size.width += childSize.width
-    size.height = childSize.height > size.height ? childSize.height : size.height
-   })
-   size.width += children.length * padding
-   size.width = Math.max(size.width, suggestedSize.width)
-   size.height = suggestedSize.height + (children.length ? padding + size.height : 0)
-   return size
-  }
-  getLeft() {
-   return this.get(OhayoConstants.left)
-  }
-  getTop() {
-   return this.get(OhayoConstants.top)
-  }
-  getWidth() {
-   return this.get(OhayoConstants.width)
-  }
-  getHeight() {
-   return this.get(OhayoConstants.height)
-  }
-  // Tile child rendering is done at the wall flex level.
+  // Tile child rendering is done at the wall level.
   _getChildTreeComponents() {
    return []
   }
@@ -476,7 +411,7 @@ abstractTileTreeComponentNode
    const outputNumericValues = new jtree.TreeNode(outputTable.getJavascriptNativeTypedValues()).toTable()
    const typeScriptInterface = outputTable.toTypeScriptInterface()
    const inputNumericValues = new jtree.TreeNode(inputTable.getJavascriptNativeTypedValues()).toTable()
-   return this.qFormat(this.ohayoStumpInspectionTemplate, {
+   return this.qFormat(this.inspectionStumpTemplate, {
     settings,
     inputCount,
     outputCount,
@@ -519,8 +454,11 @@ abstractTileTreeComponentNode
    return this
   }
   cloneTileCommand() {
-   this.cloneAndOffset()
+   this.duplicateLineCommand()
    return this.getTab().autosaveAndRender()
+  }
+  duplicateLineCommand() {
+    return this.getParent().insertLineAndChildren(this.getLine(), undefined, this.getIndex() + 1)
   }
   async toggleTileMaximizeCommand() {
    if (this.has(OhayoConstants.maximized)) this.delete(OhayoConstants.maximized)
@@ -533,14 +471,14 @@ abstractTileTreeComponentNode
   }
   // todo: refactor.
   async changeTileTypeCommand(newValue) {
+   const tab = this.getTab()
    this.setFirstWord(newValue)
    const newNode = this.duplicate()
    // todo: destroy or something? how do we reparse.
+   this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
    this.unmountAndDestroy()
-   const app = this.getTab().getRootNode()
    await Promise.all(this.getRootNode().getTiles().map(tile => tile.loadBrowserRequirements()))
-   await this.getTab().autosaveAndRender()
-   newNode.runAndrenderAndGetRenderReport()
+   await tab.autosaveAndRender()
   }
   changeParentCommand(pathVector) {
    // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
@@ -551,12 +489,6 @@ abstractTileTreeComponentNode
    this.copyTo(destinationTree, destinationTree.length)
    this.unmountAndDestroy()
    return this.getTab().autosaveAndRender()
-  }
-  async openTileContextMenuCommand() {
-   this.getTab()
-    .getRootNode()
-    .setTargetNode(this)
-    .toggleAndRender(StudioConstants.tileContextMenu)
   }
   destroyTileCommand() {
    this.unmountAndDestroy()

@@ -31,7 +31,6 @@ test clearingAFilterInUI
   assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 0
   pasteCommand
    withParagraph
-    doc.layout column
     samples.tinyIris
      filter.with vir
       tables.basic

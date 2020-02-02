@@ -13,7 +13,6 @@ abstractShowTileNode
    show.sum Amount
    show.min Amount
    show.max Amount
-  doc.layout bin
  string tileSize 140 120
  string dummyDataSetName stockPrice
  extends abstractEmptyFooterTileNode

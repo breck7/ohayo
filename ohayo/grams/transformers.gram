@@ -12,12 +12,15 @@ abstractTransformerNode
    placeholder {placeholderMessage}
    changeCommand changeTileContentAndRenderCommand
    class LargeTileInput
+ string tileFooterTemplate
+  span Rows In: {inputCount} Rows Out: {outputCount} Columns Out: {columnCount}
+  {toolbarButton}
  javascript
   getTileFooterStumpCode() {
-   const inputCount = this.getParentOrDummyTable().getRowCount()
+   const table = this.getParentOrDummyTable()
+   const inputCount = table.getRowCount()
    const outputTable = this.getOutputOrInputTable()
-   return `${this.getTileToolbarButtonStumpCode()}
-  span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: ${outputTable.getColumnCount()}`
+   return this.qFormat(this.tileFooterTemplate, {inputCount, outputCount: table.getRowCount(), columnCount: outputTable.getColumnCount(), toolbarButton: this.getTileToolbarButtonStumpCode()})
   }
   async _execute() {
    this._outputTable = this._createOutputTable()

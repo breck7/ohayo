@@ -7,10 +7,8 @@ abstractProviderNode
   div
    class {classes}
    id {id}
-   contextMenuCommand openTileContextMenuCommand
    div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
+    class TileHeaderGrabber
    div
     class TileBody HeaderLess
     {body}
@@ -18,14 +16,16 @@ abstractProviderNode
     class TileFooter
     {footer}
    div
-    class TileGrabber
+    class TileFooterGrabber
+ string tileFooterTemplate
+  span Rows Out: {outputCount} Columns Out: {columnCount} Time: {time}s Parser: {parserId} {errorMessageHtml}
+  {toolbarButton}
  javascript
   getTileFooterStumpCode() {
    const table = this.getOutputOrInputTable()
    const time = (this.getTimeToLoad() / 1000).toFixed(1)
-   const parserId = this.getParserId()
-   return `${this.getTileToolbarButtonStumpCode()}
-  span Rows Out: ${table.getRowCount()} Columns Out: ${table.getColumnCount()} Time: ${time}s Parser: ${parserId || "?"}${this.getErrorMessageHtml()}`
+   const parserId = this.getParserId() || "?"
+   return this.qFormat(this.tileFooterTemplate, {parserId, errorMessageHtml: this.getErrorMessageHtml() || "", time, outputCount: table.getRowCount(), columnCount: table.getColumnCount(), toolbarButton: this.getTileToolbarButtonStumpCode()})
   }
   getRowClass() {
    return Row

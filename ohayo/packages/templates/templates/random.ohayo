@@ -10,4 +10,3 @@ random.int 1000 0 1000
    xColumn index
    yColumn number
 doc.categories math
-doc.layout column

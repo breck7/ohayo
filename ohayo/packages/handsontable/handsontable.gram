@@ -26,23 +26,22 @@ handsontableBasicNode
    const colNames = columnDefs.map(col => col.getColumnName())
    const rows = this.getRowsWithRowDisplayLimit()
    const data = this.getRowsAsDataTableArrayWithHeader(rows, colNames)
-   const tileDimension = this.getTileDimensionIfAny()
    const container = this.getStumpNode().findStumpNodeByChild("class hot")
    const app = this.getWebApp()
    if (this.isNodeJs()) return undefined
-   const width = tileDimension.width - 20 // remove 10 for boddy padding?
-   const height = tileDimension.height - 60
+   const width = this._tileWidth
+   const height = this._tileHeight
    this._hot = new Handsontable(container.getShadow().getShadowElement(), {
     data: data,
     rowHeaders: true,
     colHeaders: true,
     stretchH: "all",
-    width: width,
+    width,
     minSpareCols: 10,
     minSpareRows: 30,
     afterSelection: () => app.pauseShortcutListener(),
     afterDeselect: () => app.startShortcutListener(),
-    height: height
+    height
    })
    return this._hot
   }

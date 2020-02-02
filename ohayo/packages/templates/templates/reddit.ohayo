@@ -10,5 +10,4 @@ reddit.all
    xColumn created_utc
   vega.bar Top Stories on Reddit Right Now
    yColumn score
-doc.layout column
 doc.categories socialMedia

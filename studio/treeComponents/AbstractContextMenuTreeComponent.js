@@ -33,7 +33,6 @@ class AbstractContextMenuTreeComponent extends AbstractTreeComponent {
 
   treeComponentDidMount() {
     const container = this.getStumpNode()
-    const that = this
     const app = this.getRootNode()
     const willowBrowser = app.getWillowBrowser()
     const bodyShadow = willowBrowser.getBodyStumpNode().getShadow()
@@ -44,7 +43,8 @@ class AbstractContextMenuTreeComponent extends AbstractTreeComponent {
     setTimeout(() => bodyShadow.onShadowEvent("click", unmountOnClick), 100) // todo: fix this.
     const event = app.getMouseEvent()
     const windowSize = willowBrowser.getWindowSize()
-    container.setStumpNodeCss(this._getContextMenuPosition(windowSize.width, windowSize.height, event.clientX, event.clientY, container.getShadow()))
+    const css = this._getContextMenuPosition(windowSize.width, windowSize.height, event.clientX, event.clientY, container.getShadow())
+    container.setStumpNodeCss(css)
   }
 
   _getContextMenuPosition(windowWidth, windowHeight, x, y, shadow) {

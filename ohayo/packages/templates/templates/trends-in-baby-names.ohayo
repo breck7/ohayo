@@ -7,5 +7,4 @@ samples.babyNames
    vega.line
     xColumn year
     yColumn percent
-doc.layout column
 doc.categories parenting

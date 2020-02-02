@@ -11,5 +11,4 @@ publicapis.entries
    hidden
    tables.basic Fully open APIS
  tables.basic All APIS
-doc.layout column
 doc.categories programming

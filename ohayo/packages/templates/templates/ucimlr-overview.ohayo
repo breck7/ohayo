@@ -1,5 +1,4 @@
 doc.title The Datasets in UCIMLR
-doc.layout column
 ucimlr.datasets
  show.rowCount Total Datasets
  group.by Category

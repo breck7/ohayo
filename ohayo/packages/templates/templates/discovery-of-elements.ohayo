@@ -24,6 +24,5 @@ samples.periodicTable
   xColumn Year
   yColumn AtomicNumber
   visible
-doc.layout column
 doc.categories chemistry
 doc.defaultHidden

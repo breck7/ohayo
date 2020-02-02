@@ -21,7 +21,7 @@ test deleteFile
   showDeleteFileConfirmDialogCommand
    assertTypeIs getMountedTab undefined
    createNewBlankProgramCommand
-    insertPickerTileCommand
+    insertChildPickerTileButton
      assertLengthIs getMountedTilesDiagnostic 1
      createNewBlankProgramCommand
       assertLengthIs getMountedTilesDiagnostic 0

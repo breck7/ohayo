@@ -9,28 +9,27 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
 .subdued
  color ${theme.midGray}
 
-.MenuTreeComponent
- .dropdownMenu
-  min-width 200px
-  position absolute
-  top 0
-  left 0
-  z-index 100
-  padding 7px 0
-  background ${theme.contextMenuBackground}
-  border 1px solid ${theme.borderColor}
-  box-shadow 0 1px 3px 0 ${theme.boxShadow}
-  .message
-   line-height 30px
-   padding 0 10px
-  a
-   color ${theme.foregroundColor}
-   display block
-   line-height 30px
-   padding 0 10px
-   &:hover
-    background ${theme.hoverBackground}
-    color ${theme.white}`
+.dropdownMenu
+ min-width 200px
+ position absolute
+ top 0
+ left 0
+ z-index 100
+ padding 7px 0
+ background ${theme.contextMenuBackground}
+ border 1px solid ${theme.borderColor}
+ box-shadow 0 1px 3px 0 ${theme.boxShadow}
+ .message
+  line-height 30px
+  padding 0 10px
+ a
+  color ${theme.foregroundColor}
+  display block
+  line-height 30px
+  padding 0 10px
+  &:hover
+   background ${theme.hoverBackground}
+   color ${theme.white}`
   }
 
   treeComponentDidMount() {
@@ -51,11 +50,12 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
       .getStumpNode()
       .findStumpNodeByChild("id " + anchorId)
     const buttonStumpNodeShadow = buttonStumpNode.getShadow()
+    const left = buttonStumpNodeShadow.getShadowPosition().left
 
     return new jtree.TreeNode(`div
- style top: 30px; left: {left}px;
+ style top: 30px; left: ${left}px;
  class dropdownMenu
- {dropDownStump}`).templateToString({ left: buttonStumpNodeShadow.getShadowPosition().left, dropDownStump: this.getDropDownStumpCode() })
+ {dropDownStump}`).templateToString({ dropDownStump: this.getDropDownStumpCode() })
   }
 }
 

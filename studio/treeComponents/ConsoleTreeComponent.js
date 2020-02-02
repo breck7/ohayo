@@ -24,12 +24,14 @@ class ConsoleTreeComponent extends AbstractTreeComponent {
   }
 
   _getMessageBuffer() {
+    // todo: cleanup
     const app = this.getRootNode()
     const tab = app.getMountedTab()
     return tab ? tab.getMessageBuffer() : app.getMessageBuffer()
   }
 
   getDependencies() {
+    // todo: cleanup
     // 2 dependencies. the program and the programs message buffer.
     // let's call the latter the panel buffer for now.
     const deps = this.getParent().getDependencies()

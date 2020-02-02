@@ -1,5 +1,4 @@
 doc.title Most Popular Top Level Domains
-doc.layout column
 doc.categories web
 doc.subtitle This script looks at the top 500 domain names. It then extracts the TLD and groups them. The conclusion is that .com is the most popular by about 10x.
 moz.top500

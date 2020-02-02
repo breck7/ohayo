@@ -3,68 +3,35 @@ const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework
 
 const { FullDiskPath } = require("../storage/FilePaths.js")
 
-const TabTreeComponent = require("./TabTreeComponent.js")
-const { WallTreeComponent } = require("./WallTreeComponent.js")
-const WallFlexTreeComponent = require("./WallFlexTreeComponent.js")
+const { TabTreeComponent } = require("./TabTreeComponent.js")
 const StudioConstants = require("./StudioConstants.js")
 
 class TabsTreeComponent extends AbstractTreeComponent {
   createParser() {
     return new jtree.TreeNode.Parser(undefined, {
-      tab: TabTreeComponent,
-      wall: WallTreeComponent,
-      flex: WallFlexTreeComponent
+      tab: TabTreeComponent
     })
-  }
-
-  removeWall() {
-    const wall = this.getWall()
-    if (wall) wall.unmountAndDestroy()
-  }
-
-  getDependencies() {
-    // todo: cleanup
-    return [this.getParent()]
   }
 
   getOpenTabs() {
     return this.getChildrenByNodeConstructor(TabTreeComponent)
   }
 
-  getWall() {
-    return this.getNode(StudioConstants.wall) || this.getNode(StudioConstants.flex)
-  }
-
-  addWall(type = StudioConstants.wall) {
-    this.removeWall()
-    return this.appendLine(type)
-  }
-
   addTab(url) {
     const line = `tab ${new FullDiskPath(url).toString()}`
-    // todo: add before wall
-    return this.getWall() ? this.insertLine(line, -1) : this.appendLine(line)
-  }
-
-  getGutterWidth() {
-    return this.getParent().getGutterWidth()
+    return this.appendLine(line)
   }
 
   toHakonCode() {
     const theme = this.getTheme()
-    const left = this.getGutterWidth()
-
     // todo: add comments to Hakon? So we can annotate why we have valignTop
     const valignTop = "vertical-align top" // https://stackoverflow.com/questions/23529369/why-does-x-overflowhidden-cause-extra-space-below
     // todo: make tab cell width dynamic? smaller as more tabs open?s
 
     return `.TabsTreeComponent
- left ${left}px
- width calc(100% - ${left}px)
- height calc(100% - 30px)
- position absolute
+ display inline-block
 .TabStub
- background ${theme.tabBackground}
+ background rgba(0,0,0,.05)
  height 30px
  display inline-block
  max-width 150px
@@ -79,11 +46,10 @@ class TabsTreeComponent extends AbstractTreeComponent {
  color ${theme.foregroundColor}
  line-height 30px
  border-right 1px solid ${theme.borderColor}
- border-bottom 1px solid ${theme.borderColor}
  &:hover
-  background ${theme.slightlyDarkerBackground}
+  background rgba(0,0,0,.1)
  &:active
-  background ${theme.activeTabColor}
+  background rgba(0,0,0,.2)
  span
   position absolute
   top 10px
@@ -96,7 +62,7 @@ class TabsTreeComponent extends AbstractTreeComponent {
   &:hover
    opacity 1
  &.mountedTab
-  background ${theme.activeTabColor}
+  background rgba(0,0,0,.2)
   border-bottom 0`
   }
 }

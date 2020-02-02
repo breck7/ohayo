@@ -5,9 +5,8 @@ ohayoNode
  _rootNodeJsHeader
   const projectRootDir = jtree.Utils.findProjectRoot(__dirname, "ohayo")
   const { AbstractTreeComponent } = require(projectRootDir + "node_modules/jtree/products/TreeComponentFramework.node.js")
-  const OhayoConstants = require(projectRootDir + "studio/tiles/OhayoConstants.js")
+  const OhayoConstants = require(projectRootDir + "studio/treeComponents/OhayoConstants.js")
   const StudioConstants = require(projectRootDir + "studio/treeComponents/StudioConstants.js")
-  const Layout = require(projectRootDir + "studio/tiles/Layout.js")
   const Icons = require(projectRootDir + "studio/themes/Icons.js")
   const lodash = require(projectRootDir + "node_modules/lodash")
   const { Table, DummyDataSets, Row, TableParser } = require("jtree/products/jtable.node.js")
@@ -21,7 +20,6 @@ ohayoNode
   }
   const numeral = require("numeral")
  catchAllNodeType DidYouMeanTileNode
- string wallType flex
  description Ohayo is a programming language for doing data science.
  inScope abstractTileTreeComponentNode tileBlankLineNode abstractDocSettingNode hashBangNode
  javascript
@@ -44,20 +42,6 @@ ohayoNode
   }
   tilesAreVisible() {
     return !this.has(OhayoConstants.defaultHidden)
-  }
-  canUseCustomLayout() {
-   const definedLayout = this.get(OhayoConstants.layout)
-   if (definedLayout === OhayoConstants.layouts.custom) return true
-   if (this.getTiles().some(tile => tile.has(OhayoConstants.left) || tile.has(OhayoConstants.top))) return true
-   return false
-  }
-  _getLayoutStrategy() {
-   const definedLayout = this.get(OhayoConstants.layout)
-   return definedLayout || (this.wallType === StudioConstants.flex ? (this.canUseCustomLayout() ? OhayoConstants.layouts.custom : OhayoConstants.layouts.tiled) : OhayoConstants.layouts.tree)
-  }
-  getTileDimensionMap(width, height) {
-   // todo: cache?
-   return new Layout().getTileDimensionMap(this, this._getLayoutStrategy(), width, height)
   }
   async loadAndIncrementalRender() {
    const app = this.getTab().getRootNode()

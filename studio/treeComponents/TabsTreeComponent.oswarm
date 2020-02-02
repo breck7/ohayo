@@ -7,11 +7,11 @@ test deleteAllTabs
 test twoPrograms
  createNewBlankProgramCommand
   assertStringIs getMountedTab.getFileName untitled.ohayo
-  assertLengthIs getFocusedPanel.getTabs 1
+  assertLengthIs getTabs 1
   createNewBlankProgramCommand
-   assertLengthIs getFocusedPanel.getTabs 2
+   assertLengthIs getTabs 2
    openFullPathInNewTabAndFocusCommand localStorage/untitled.ohayo
-    assertLengthIs getFocusedPanel.getTabs 2
+    assertLengthIs getTabs 2
 test cloneTabCommand
  createNewBlankProgramCommand
   appendTileCommand samples.presidents

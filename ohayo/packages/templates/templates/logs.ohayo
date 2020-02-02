@@ -15,6 +15,5 @@ math.gen exp 10 20 .1
   visible
   xColumn input
   yColumn output
-doc.layout column
 doc.categories math
 doc.defaultHidden

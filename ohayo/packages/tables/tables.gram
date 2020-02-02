@@ -16,10 +16,7 @@ tablesBasicNode
   .tablesBasicNode
    font-size 14px
    box-sizing border-box
-   width 100%
-   height 100%
    {enableTextSelect1}
-   top 34px
    table
     width 100%
    tr
@@ -84,9 +81,6 @@ tablesBasicNode
     })
     .join("\n")
   }
-  getContextMenuStumpCode() {
-   return this.contextMenuStumpTemplate
-  }
   _getHeaderRowsStumpCode(columns) {
    // todo: can we get a copy column command?
    return ["Row"]
@@ -107,9 +101,6 @@ tablesBasicNode
    const bodyRows = this._getTableRowsStumpCode(columnDefs)
    return this.qFormat(this.bodyStumpTemplate, { headerRows, bodyRows })
   }
- string contextMenuStumpTemplate
-  a Delete all rows
-   clickCommand deleteAllRowsInTargetTileCommand
  string headerRowStumpTemplate
   th
    value {colName}

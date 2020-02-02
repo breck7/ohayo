@@ -24163,9 +24163,6 @@ class AbstractWillowShadow {
   getShadowHeight() {
     return 111
   }
-  isShadowResizable() {
-    return false
-  }
   setShadowAttr(name, value) {
     return this
   }
@@ -24520,9 +24517,6 @@ class WillowBrowserShadow extends AbstractWillowShadow {
   }
   getShadowCss(prop) {
     return this._getJQElement().css(prop)
-  }
-  isShadowResizable() {
-    return this._getJQElement().find(".ui-resizable-handle").length > 0
   }
   triggerShadowEvent(event) {
     this._getJQElement().trigger(event)
@@ -25020,6 +25014,7 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
     })
     bodyShadow.onShadowEvent(BrowserEvents.click, `[${WillowConstants.clickCommand}]`, function(evt) {
       if (evt.shiftKey) return checkAndExecute(this, WillowConstants.shiftClickCommand, evt)
+      app._setMouseEvent(evt) // todo: remove?
       return checkAndExecute(this, WillowConstants.clickCommand, evt)
     })
     bodyShadow.onShadowEvent(BrowserEvents.dblclick, `[${WillowConstants.doubleClickCommand}]`, function(evt) {
@@ -25091,6 +25086,7 @@ class AbstractTreeComponent extends jtree.GrammarBackedNode {
     this.getMessageBuffer().appendLineAndChildren("message", message)
   }
   addStumpErrorMessageToLog(errorMessage) {
+    // tod: cleanup!
     return this.addStumpCodeMessageToLog(`div
  class OhayoError
  bern${jtree.TreeNode.nest(errorMessage, 2)}`)
@@ -25642,10 +25638,8 @@ pre
       return `div
  class {classes}
  id {id}
- contextMenuCommand openTileContextMenuCommand
  div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
+  class TileHeaderGrabber
  div {header}
   class TileHeader
  div
@@ -25656,16 +25650,14 @@ pre
   class TileFooter
   {footer}
  div
-  class TileGrabber`
+  class TileFooterGrabber`
     }
     get errorStateStumpTemplate() {
       return `div
  class {classes}
  id {id}
- contextMenuCommand openTileContextMenuCommand
  div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
+  class TileHeaderGrabber
  div ERROR
   class TileHeader
  div
@@ -25675,11 +25667,11 @@ pre
   class TileFooter
   {footer}
  div
-  class TileGrabber`
+  class TileFooterGrabber`
     }
     get pencilStumpTemplate() {
-      return `span {icon}
- class TilePencilButton
+      return `span ▾
+ class TileDropDownButton
  clickCommand toggleToolbarCommand`
     }
     get errorLogMessageStumpTemplate() {
@@ -25976,14 +25968,6 @@ pre
     getTileHeaderBern() {
       return `${this.getFirstWord()}`
     }
-    cloneAndOffset() {
-      const clone = this.duplicate()
-      const left = this.getLeft()
-      const _top = this.getTop()
-      if (left) clone.touchNode(OhayoConstants.left).setContent(parseInt(left) + 1)
-      if (_top) clone.touchNode(OhayoConstants.top).setContent(parseInt(_top) + 1)
-      return clone
-    }
     getTileBodyStumpCode() {
       return ``
     }
@@ -25991,14 +25975,10 @@ pre
       const selector = "#" + this.getTreeComponentId()
       const theme = this.getTheme()
       const visibleCss = this.isVisible() ? "" : "display: none"
-      const dimensions = this.getTileDimensionIfAny()
-      const dimensionCss = dimensions ? dimensions.toCss() : ""
+      const dimensionCss = ""
       const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
       return `${selector} { ${visibleCss} ${dimensionCss} }
       ${theme.hakonToCss(hakonCode)}`
-    }
-    getContextMenuStumpCode() {
-      return ""
     }
     handleTileError(err) {
       if (!this._errorCount) this._errorCount = 0
@@ -26010,17 +25990,6 @@ pre
     }
     getWebApp() {
       return this.getTab().getRootNode()
-    }
-    getTileDimensionIfAny() {
-      const dimensions = this.getWall().getWallViewPortDimensions()
-      return this.getRootNode()
-        .getTileDimensionMap(dimensions.width, dimensions.height)
-        .get(this)
-    }
-    getTileBodyDimension() {
-      const dimension = this.getTileDimensionIfAny()
-      dimension.height = dimension.height - this.headerHeight - this.footerHeight
-      return dimension
     }
     async runAndrenderAndGetRenderReport() {
       await this.execute()
@@ -26036,16 +26005,7 @@ pre
       return this.getTileToolbarButtonStumpCode()
     }
     getTileToolbarButtonStumpCode() {
-      return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
-    }
-    getDefinedOrSuggestedSize() {
-      const size = this.getSuggestedSize()
-      const width = this.getWidth()
-      const height = this.getHeight()
-      return {
-        width: width ? width * 20 : size.width,
-        height: height ? height * 20 : size.height
-      }
+      return this.qFormat(this.pencilStumpTemplate)
     }
     getSuggestedSize() {
       const tileSize = this.tileSize || "280 220"
@@ -26055,36 +26015,7 @@ pre
         height: parts[1]
       }
     }
-    getRequiredDimensionsForTreeLayout(padding = 0) {
-      const size = {
-        width: 0,
-        height: 0
-      }
-      const children = this.getChildTiles()
-      const suggestedSize = this.getDefinedOrSuggestedSize()
-      children.forEach(child => {
-        const childSize = child.getRequiredDimensionsForTreeLayout(padding)
-        size.width += childSize.width
-        size.height = childSize.height > size.height ? childSize.height : size.height
-      })
-      size.width += children.length * padding
-      size.width = Math.max(size.width, suggestedSize.width)
-      size.height = suggestedSize.height + (children.length ? padding + size.height : 0)
-      return size
-    }
-    getLeft() {
-      return this.get(OhayoConstants.left)
-    }
-    getTop() {
-      return this.get(OhayoConstants.top)
-    }
-    getWidth() {
-      return this.get(OhayoConstants.width)
-    }
-    getHeight() {
-      return this.get(OhayoConstants.height)
-    }
-    // Tile child rendering is done at the wall flex level.
+    // Tile child rendering is done at the wall level.
     _getChildTreeComponents() {
       return []
     }
@@ -26118,7 +26049,7 @@ pre
       const outputNumericValues = new jtree.TreeNode(outputTable.getJavascriptNativeTypedValues()).toTable()
       const typeScriptInterface = outputTable.toTypeScriptInterface()
       const inputNumericValues = new jtree.TreeNode(inputTable.getJavascriptNativeTypedValues()).toTable()
-      return this.qFormat(this.ohayoStumpInspectionTemplate, {
+      return this.qFormat(this.inspectionStumpTemplate, {
         settings,
         inputCount,
         outputCount,
@@ -26161,8 +26092,11 @@ pre
       return this
     }
     cloneTileCommand() {
-      this.cloneAndOffset()
+      this.duplicateLineCommand()
       return this.getTab().autosaveAndRender()
+    }
+    duplicateLineCommand() {
+      return this.getParent().insertLineAndChildren(this.getLine(), undefined, this.getIndex() + 1)
     }
     async toggleTileMaximizeCommand() {
       if (this.has(OhayoConstants.maximized)) this.delete(OhayoConstants.maximized)
@@ -26175,18 +26109,18 @@ pre
     }
     // todo: refactor.
     async changeTileTypeCommand(newValue) {
+      const tab = this.getTab()
       this.setFirstWord(newValue)
       const newNode = this.duplicate()
       // todo: destroy or something? how do we reparse.
+      this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
       this.unmountAndDestroy()
-      const app = this.getTab().getRootNode()
       await Promise.all(
         this.getRootNode()
           .getTiles()
           .map(tile => tile.loadBrowserRequirements())
       )
-      await this.getTab().autosaveAndRender()
-      newNode.runAndrenderAndGetRenderReport()
+      await tab.autosaveAndRender()
     }
     changeParentCommand(pathVector) {
       // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
@@ -26197,12 +26131,6 @@ pre
       this.copyTo(destinationTree, destinationTree.length)
       this.unmountAndDestroy()
       return this.getTab().autosaveAndRender()
-    }
-    async openTileContextMenuCommand() {
-      this.getTab()
-        .getRootNode()
-        .setTargetNode(this)
-        .toggleAndRender(StudioConstants.tileContextMenu)
     }
     destroyTileCommand() {
       this.unmountAndDestroy()
@@ -26356,13 +26284,26 @@ pre
         undefined
       )
     }
+    get tileFooterTemplate() {
+      return `span Rows: {rowCount} Columns Out: {columnCount}
+{toolbarButton}`
+    }
     get rowDisplayLimit() {
       return 10000
     }
     getTileFooterStumpCode() {
       const table = this.getParentOrDummyTable()
-      return `${this.getTileToolbarButtonStumpCode()}
-span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
+      return this.qFormat(this.tileFooterTemplate, {
+        rowCount: table.getRowCount(),
+        columnCount: table.getColumnCount(),
+        toolbarButton: this.getTileToolbarButtonStumpCode()
+      })
+    }
+    get _tileWidth() {
+      return this.isNodeJs() ? 456 : jQuery(".WallTreeComponent").width() - 100
+    }
+    get _tileHeight() {
+      return 300
     }
     toDisplayString(value, columnName) {
       // todo: remove.
@@ -26389,10 +26330,8 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
       return `div
  class {classes}
  id {id}
- contextMenuCommand openTileContextMenuCommand
  div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
+  class TileHeaderGrabber
  div
   class TileBody HeaderLess
   {body}
@@ -26400,7 +26339,7 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
   class TileFooter
   {footer}
  div
-  class TileGrabber`
+  class TileFooterGrabber`
     }
     get headerHeight() {
       return 0
@@ -26412,12 +26351,6 @@ span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
         body: this._getBodyStumpCodeCache(),
         footer: this.getTileToolbarButtonStumpCode()
       })
-    }
-    get _tileWidth() {
-      return this.getTileDimensionIfAny().width - 10
-    }
-    get _tileHeight() {
-      return this.getTileDimensionIfAny().height - 60 // 10 for padding. 10 for top grabber. 30 for footer. 10 fot bottom grabber.
     }
   }
 
@@ -26693,12 +26626,11 @@ table
         .slice(0, 10)
       const container = this.getStumpNode().findStumpNodeByChild("class DataTable")
       if (this.isNodeJs()) return undefined
-      const tileDimension = this.getTileDimensionIfAny()
-      const width = tileDimension.width - 20 // remove 10 for boddy padding?
-      const height = tileDimension.height - 150
+      const width = this._tileWidth
+      const height = this._tileHeight
       const shadow = container.getShadow()
       const el = shadow.getShadowElement()
-      shadow.setShadowCss({ width: width, height: height })
+      shadow.setShadowCss({ width, height })
       const rows = this.getRowsWithRowDisplayLimit()
       // todo: note, this is only works with jQuery
       jQuery.fn.dataTable.ext.errMode = "throw"
@@ -27041,12 +26973,6 @@ h3 {number}`
       if (this.isNodeJs()) return undefined
       this._drawVega()
     }
-    _getTileWidth() {
-      return this.getTileDimensionIfAny().width - 120
-    }
-    _getTileHeight() {
-      return this.getTileDimensionIfAny().height - 90
-    }
     treeComponentDidMount() {
       this.treeComponentDidUpdate()
     }
@@ -27064,8 +26990,8 @@ h3 {number}`
       return {
         description: "A simple bar chart with embedded data.",
         data: this._getVegaData(),
-        width: this._getTileWidth(),
-        height: this._getTileHeight(),
+        width: this._tileWidth,
+        height: this._tileHeight,
         mark: this._getVegaMarkObj(),
         encoding: this._getEncodingMap(),
         transform: this._getVegaTransform(),
@@ -27863,7 +27789,6 @@ a Run Tile Quality Check
    top 0
    overflow hidden
    div
-    position absolute
     background {linkColor}`
     }
     get dummyDataSetName() {
@@ -27879,11 +27804,10 @@ a Run Tile Quality Check
     }
     _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
       const ohayoProgram = new ohayoNode(sourceCode)
-      const dimensions = ohayoProgram.getTileDimensionMap(width, height)
       const theTiles = ohayoProgram
         .getTiles()
         .filter(tile => tile.isVisible())
-        .map(tile => this.qFormat(this.miniStyleTemplate, { style: dimensions.get(tile).getScaledCss(0.1) }))
+        .map(tile => this.qFormat(this.miniStyleTemplate))
         .join("\n")
       const onClick = permalink ? "clickCommand openFullPathInNewTabAndFocusCommand" : ""
       const value = permalink ? `value ${permalink}` : ""
@@ -27932,23 +27856,22 @@ a Run Tile Quality Check
       const colNames = columnDefs.map(col => col.getColumnName())
       const rows = this.getRowsWithRowDisplayLimit()
       const data = this.getRowsAsDataTableArrayWithHeader(rows, colNames)
-      const tileDimension = this.getTileDimensionIfAny()
       const container = this.getStumpNode().findStumpNodeByChild("class hot")
       const app = this.getWebApp()
       if (this.isNodeJs()) return undefined
-      const width = tileDimension.width - 20 // remove 10 for boddy padding?
-      const height = tileDimension.height - 60
+      const width = this._tileWidth
+      const height = this._tileHeight
       this._hot = new Handsontable(container.getShadow().getShadowElement(), {
         data: data,
         rowHeaders: true,
         colHeaders: true,
         stretchH: "all",
-        width: width,
+        width,
         minSpareCols: 10,
         minSpareRows: 30,
         afterSelection: () => app.pauseShortcutListener(),
         afterDeselect: () => app.startShortcutListener(),
-        height: height
+        height
       })
       return this._hot
     }
@@ -28061,10 +27984,6 @@ link isLink`
  span {colName}
  value {colName}`
     }
-    get contextMenuStumpTemplate() {
-      return `a Delete all rows
- clickCommand deleteAllRowsInTargetTileCommand`
-    }
     get rowStumpTemplate() {
       return `tr
  class tableRow
@@ -28088,10 +28007,7 @@ link isLink`
       return `.tablesBasicNode
  font-size 14px
  box-sizing border-box
- width 100%
- height 100%
  {enableTextSelect1}
- top 34px
  table
   width 100%
  tr
@@ -28154,9 +28070,6 @@ link isLink`
         })
         .join("\n")
     }
-    getContextMenuStumpCode() {
-      return this.contextMenuStumpTemplate
-    }
     _getHeaderRowsStumpCode(columns) {
       // todo: can we get a copy column command?
       return ["Row"]
@@ -28212,7 +28125,7 @@ count isString=false`
     get bodyStumpTemplate() {
       return `div
  class divWhereWordCloudWillGo
- style width: 100%; height: 100%;`
+ style height: 300px;`
     }
     getTileBodyStumpCode() {
       return this.bodyStumpTemplate
@@ -28306,14 +28219,13 @@ class visjs`
       const showGrid = tileStruct.showGrid
       // specify options
       // docs: http://visjs.org/docs/graph3d/
-      const tileDimension = this.getTileDimensionIfAny()
       const cameraPositionNode = this.getNode("cameraPosition") || new jtree.TreeNode("cameraPosition 4 .1 1.5").getNode("cameraPosition")
       const distance = parseFloat(cameraPositionNode.getWord(1))
       const horizontal = parseFloat(cameraPositionNode.getWord(2))
       const vertical = parseFloat(cameraPositionNode.getWord(3))
       const options = {
-        width: tileDimension.width + "px",
-        height: tileDimension.height - 80 + "px",
+        width: this._tileWidth + "px",
+        height: this._tileHeight - 80 + "px",
         style: "dot-color", // dot?
         showPerspective: false,
         showLegend: false,
@@ -28439,10 +28351,8 @@ class visjs`
       return `div
  class {classes}
  id {id}
- contextMenuCommand openTileContextMenuCommand
  div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
+  class TileHeaderGrabber
  div
   class TileBody HeaderLess
   {body}
@@ -28450,7 +28360,7 @@ class visjs`
   class TileFooter
   {footer}
  div
-  class TileGrabber`
+  class TileFooterGrabber`
     }
     get bodyStumpTemplate() {
       return `{tagName}
@@ -28642,14 +28552,16 @@ a {name}
   }
 
   class abstractProviderNode extends abstractTileTreeComponentNode {
+    get tileFooterTemplate() {
+      return `span Rows Out: {outputCount} Columns Out: {columnCount} Time: {time}s Parser: {parserId} {errorMessageHtml}
+{toolbarButton}`
+    }
     get tileStumpTemplate() {
       return `div
  class {classes}
  id {id}
- contextMenuCommand openTileContextMenuCommand
  div
-  class TileGrabber
-  doubleClickCommand toggleTileMaximizeCommand
+  class TileHeaderGrabber
  div
   class TileBody HeaderLess
   {body}
@@ -28657,7 +28569,7 @@ a {name}
   class TileFooter
   {footer}
  div
-  class TileGrabber`
+  class TileFooterGrabber`
     }
     get tileSize() {
       return `140 60`
@@ -28665,9 +28577,15 @@ a {name}
     getTileFooterStumpCode() {
       const table = this.getOutputOrInputTable()
       const time = (this.getTimeToLoad() / 1000).toFixed(1)
-      const parserId = this.getParserId()
-      return `${this.getTileToolbarButtonStumpCode()}
-span Rows Out: ${table.getRowCount()} Columns Out: ${table.getColumnCount()} Time: ${time}s Parser: ${parserId || "?"}${this.getErrorMessageHtml()}`
+      const parserId = this.getParserId() || "?"
+      return this.qFormat(this.tileFooterTemplate, {
+        parserId,
+        errorMessageHtml: this.getErrorMessageHtml() || "",
+        time,
+        outputCount: table.getRowCount(),
+        columnCount: table.getColumnCount(),
+        toolbarButton: this.getTileToolbarButtonStumpCode()
+      })
     }
     getRowClass() {
       return Row
@@ -29391,6 +29309,10 @@ This list was put together by a group of remote workers in a Google spreadsheet 
   }
 
   class abstractTransformerNode extends abstractProviderNode {
+    get tileFooterTemplate() {
+      return `span Rows In: {inputCount} Rows Out: {outputCount} Columns Out: {columnCount}
+{toolbarButton}`
+    }
     get bodyStumpTemplate() {
       return `span {kind}
  class LargeLabel
@@ -29407,10 +29329,15 @@ input
       return `160 100`
     }
     getTileFooterStumpCode() {
-      const inputCount = this.getParentOrDummyTable().getRowCount()
+      const table = this.getParentOrDummyTable()
+      const inputCount = table.getRowCount()
       const outputTable = this.getOutputOrInputTable()
-      return `${this.getTileToolbarButtonStumpCode()}
-span Rows In: ${inputCount} Rows Out: ${outputTable.getRowCount()} Columns Out: ${outputTable.getColumnCount()}`
+      return this.qFormat(this.tileFooterTemplate, {
+        inputCount,
+        outputCount: table.getRowCount(),
+        columnCount: outputTable.getColumnCount(),
+        toolbarButton: this.getTileToolbarButtonStumpCode()
+      })
     }
     async _execute() {
       this._outputTable = this._createOutputTable()
@@ -31051,24 +30978,6 @@ a {name}
     }
   }
 
-  class docZoomNode extends abstractDocSettingNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get zoomCell() {
-      return parseFloat(this.getWord(1))
-    }
-  }
-
-  class docLayoutNode extends abstractDocSettingNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get docLayoutOptionCell() {
-      return this.getWord(1)
-    }
-  }
-
   class abstractDocSectionComponentNode extends jtree.GrammarBackedNode {}
 
   class docSectionSubtitleNode extends abstractDocSectionComponentNode {
@@ -31376,15 +31285,10 @@ a {name}
           "doc.author": docAuthorNode,
           "doc.defaultHidden": docDefaultHiddenNode,
           "doc.date": docDateNode,
-          "doc.zoom": docZoomNode,
-          "doc.layout": docLayoutNode,
           "#!": hashBangNode
         }),
         [{ regex: /^$/, nodeConstructor: tileBlankLineNode }]
       )
-    }
-    get wallType() {
-      return `flex`
     }
     getTileClosestToLine(lineIndex) {
       let current = this.nodeAtLine(lineIndex)
@@ -31405,27 +31309,6 @@ a {name}
     }
     tilesAreVisible() {
       return !this.has(OhayoConstants.defaultHidden)
-    }
-    canUseCustomLayout() {
-      const definedLayout = this.get(OhayoConstants.layout)
-      if (definedLayout === OhayoConstants.layouts.custom) return true
-      if (this.getTiles().some(tile => tile.has(OhayoConstants.left) || tile.has(OhayoConstants.top))) return true
-      return false
-    }
-    _getLayoutStrategy() {
-      const definedLayout = this.get(OhayoConstants.layout)
-      return (
-        definedLayout ||
-        (this.wallType === StudioConstants.flex
-          ? this.canUseCustomLayout()
-            ? OhayoConstants.layouts.custom
-            : OhayoConstants.layouts.tiled
-          : OhayoConstants.layouts.tree)
-      )
-    }
-    getTileDimensionMap(width, height) {
-      // todo: cache?
-      return new Layout().getTileDimensionMap(this, this._getLayoutStrategy(), width, height)
     }
     async loadAndIncrementalRender() {
       const app = this.getTab().getRootNode()
@@ -31521,13 +31404,8 @@ codeCell
 documentCategoryCell
  highlightScope constant
  enum shopping biology chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
-zoomCell
- extends numberCell
 referenceIdCell
  highlightScope string
-docLayoutOptionCell
- enum custom bin tree column tiled
- highlightScope constant
 commentCell
  highlightScope comment
 commentKeywordCell
@@ -31666,17 +31544,15 @@ abstractTileTreeComponentNode
   div Error occurred. See console.
    class OhayoError
  string pencilStumpTemplate
-  span {icon}
-   class TilePencilButton
+  span ▾
+   class TileDropDownButton
    clickCommand toggleToolbarCommand
  string errorStateStumpTemplate
   div
    class {classes}
    id {id}
-   contextMenuCommand openTileContextMenuCommand
    div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
+    class TileHeaderGrabber
    div ERROR
     class TileHeader
    div
@@ -31686,15 +31562,13 @@ abstractTileTreeComponentNode
     class TileFooter
     {footer}
    div
-    class TileGrabber
+    class TileFooterGrabber
  string tileStumpTemplate
   div
    class {classes}
    id {id}
-   contextMenuCommand openTileContextMenuCommand
    div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
+    class TileHeaderGrabber
    div {header}
     class TileHeader
    div
@@ -31705,7 +31579,7 @@ abstractTileTreeComponentNode
     class TileFooter
     {footer}
    div
-    class TileGrabber
+    class TileFooterGrabber
  string inspectionStumpTemplate
   div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
   div Messages:
@@ -31966,14 +31840,6 @@ abstractTileTreeComponentNode
   getTileHeaderBern() {
    return \`\${this.getFirstWord()}\`
   }
-  cloneAndOffset() {
-   const clone = this.duplicate()
-   const left = this.getLeft()
-   const _top = this.getTop()
-   if (left) clone.touchNode(OhayoConstants.left).setContent(parseInt(left) + 1)
-   if (_top) clone.touchNode(OhayoConstants.top).setContent(parseInt(_top) + 1)
-   return clone
-  }
   getTileBodyStumpCode() {
    return \`\`
   }
@@ -31981,14 +31847,10 @@ abstractTileTreeComponentNode
    const selector = "#" + this.getTreeComponentId()
    const theme = this.getTheme()
    const visibleCss = this.isVisible() ? "" : "display: none"
-   const dimensions = this.getTileDimensionIfAny()
-   const dimensionCss = dimensions ? dimensions.toCss() : ""
+   const dimensionCss = ""
    const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
    return \`\${selector} { \${visibleCss} \${dimensionCss} }
         \${theme.hakonToCss(hakonCode)}\`
-  }
-  getContextMenuStumpCode() {
-   return ""
   }
   handleTileError(err) {
    if (!this._errorCount) this._errorCount = 0
@@ -32000,17 +31862,6 @@ abstractTileTreeComponentNode
   }
   getWebApp() {
    return this.getTab().getRootNode()
-  }
-  getTileDimensionIfAny() {
-   const dimensions = this.getWall().getWallViewPortDimensions()
-   return this.getRootNode()
-    .getTileDimensionMap(dimensions.width, dimensions.height)
-    .get(this)
-  }
-  getTileBodyDimension() {
-   const dimension = this.getTileDimensionIfAny()
-   dimension.height = dimension.height - this.headerHeight - this.footerHeight
-   return dimension
   }
   async runAndrenderAndGetRenderReport() {
    await this.execute()
@@ -32026,16 +31877,7 @@ abstractTileTreeComponentNode
    return this.getTileToolbarButtonStumpCode()
   }
   getTileToolbarButtonStumpCode() {
-   return this.qFormat(this.pencilStumpTemplate, { icon: Icons("pencil", 16) })
-  }
-  getDefinedOrSuggestedSize() {
-   const size = this.getSuggestedSize()
-   const width = this.getWidth()
-   const height = this.getHeight()
-   return {
-    width: width ? width * 20 : size.width,
-    height: height ? height * 20 : size.height
-   }
+   return this.qFormat(this.pencilStumpTemplate)
   }
   getSuggestedSize() {
    const tileSize = this.tileSize || "280 220"
@@ -32045,36 +31887,7 @@ abstractTileTreeComponentNode
     height: parts[1]
    }
   }
-  getRequiredDimensionsForTreeLayout(padding = 0) {
-   const size = {
-    width: 0,
-    height: 0
-   }
-   const children = this.getChildTiles()
-   const suggestedSize = this.getDefinedOrSuggestedSize()
-   children.forEach(child => {
-    const childSize = child.getRequiredDimensionsForTreeLayout(padding)
-    size.width += childSize.width
-    size.height = childSize.height > size.height ? childSize.height : size.height
-   })
-   size.width += children.length * padding
-   size.width = Math.max(size.width, suggestedSize.width)
-   size.height = suggestedSize.height + (children.length ? padding + size.height : 0)
-   return size
-  }
-  getLeft() {
-   return this.get(OhayoConstants.left)
-  }
-  getTop() {
-   return this.get(OhayoConstants.top)
-  }
-  getWidth() {
-   return this.get(OhayoConstants.width)
-  }
-  getHeight() {
-   return this.get(OhayoConstants.height)
-  }
-  // Tile child rendering is done at the wall flex level.
+  // Tile child rendering is done at the wall level.
   _getChildTreeComponents() {
    return []
   }
@@ -32108,7 +31921,7 @@ abstractTileTreeComponentNode
    const outputNumericValues = new jtree.TreeNode(outputTable.getJavascriptNativeTypedValues()).toTable()
    const typeScriptInterface = outputTable.toTypeScriptInterface()
    const inputNumericValues = new jtree.TreeNode(inputTable.getJavascriptNativeTypedValues()).toTable()
-   return this.qFormat(this.ohayoStumpInspectionTemplate, {
+   return this.qFormat(this.inspectionStumpTemplate, {
     settings,
     inputCount,
     outputCount,
@@ -32151,8 +31964,11 @@ abstractTileTreeComponentNode
    return this
   }
   cloneTileCommand() {
-   this.cloneAndOffset()
+   this.duplicateLineCommand()
    return this.getTab().autosaveAndRender()
+  }
+  duplicateLineCommand() {
+   return this.getParent().insertLineAndChildren(this.getLine(), undefined, this.getIndex() + 1)
   }
   async toggleTileMaximizeCommand() {
    if (this.has(OhayoConstants.maximized)) this.delete(OhayoConstants.maximized)
@@ -32165,18 +31981,18 @@ abstractTileTreeComponentNode
   }
   // todo: refactor.
   async changeTileTypeCommand(newValue) {
+   const tab = this.getTab()
    this.setFirstWord(newValue)
    const newNode = this.duplicate()
    // todo: destroy or something? how do we reparse.
+   this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
    this.unmountAndDestroy()
-   const app = this.getTab().getRootNode()
    await Promise.all(
     this.getRootNode()
      .getTiles()
      .map(tile => tile.loadBrowserRequirements())
    )
-   await this.getTab().autosaveAndRender()
-   newNode.runAndrenderAndGetRenderReport()
+   await tab.autosaveAndRender()
   }
   changeParentCommand(pathVector) {
    // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
@@ -32187,12 +32003,6 @@ abstractTileTreeComponentNode
    this.copyTo(destinationTree, destinationTree.length)
    this.unmountAndDestroy()
    return this.getTab().autosaveAndRender()
-  }
-  async openTileContextMenuCommand() {
-   this.getTab()
-    .getRootNode()
-    .setTargetNode(this)
-    .toggleAndRender(StudioConstants.tileContextMenu)
   }
   destroyTileCommand() {
    this.unmountAndDestroy()
@@ -32341,11 +32151,19 @@ abstractChartNode
  int rowDisplayLimit 10000
  extends abstractTileTreeComponentNode
  abstract
+ string tileFooterTemplate
+  span Rows: {rowCount} Columns Out: {columnCount}
+  {toolbarButton}
  javascript
   getTileFooterStumpCode() {
    const table = this.getParentOrDummyTable()
-   return \`\${this.getTileToolbarButtonStumpCode()}
-  span Rows: \${table.getRowCount()} Columns Out: \${table.getColumnCount()}\`
+   return this.qFormat(this.tileFooterTemplate, { rowCount: table.getRowCount(), columnCount: table.getColumnCount(), toolbarButton: this.getTileToolbarButtonStumpCode() })
+  }
+  get _tileWidth() {
+   return this.isNodeJs() ? 456 : jQuery(".WallTreeComponent").width() - 100
+  }
+  get _tileHeight() {
+   return 300
   }
   toDisplayString(value, columnName) {
    // todo: remove.
@@ -32373,10 +32191,8 @@ abstractHeaderlessChartTileNode
   div
    class {classes}
    id {id}
-   contextMenuCommand openTileContextMenuCommand
    div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
+    class TileHeaderGrabber
    div
     class TileBody HeaderLess
     {body}
@@ -32384,16 +32200,10 @@ abstractHeaderlessChartTileNode
     class TileFooter
     {footer}
    div
-    class TileGrabber
+    class TileFooterGrabber
  javascript
   toStumpCode() {
    return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileToolbarButtonStumpCode() })
-  }
-  get _tileWidth() {
-   return this.getTileDimensionIfAny().width - 10
-  }
-  get _tileHeight() {
-   return this.getTileDimensionIfAny().height - 60 // 10 for padding. 10 for top grabber. 30 for footer. 10 fot bottom grabber.
   }
 abstractEmptyFooterTileNode
  abstract
@@ -32542,7 +32352,6 @@ challengePlayNode
   challenge.list
   challenge.play 1
   challenge.play 2
-  doc.layout tiled
  string tileSize 640 240
  extends abstractEmptyFooterTileNode
  crux challenge.play
@@ -32646,12 +32455,11 @@ dtjsBasicNode
     .slice(0, 10)
    const container = this.getStumpNode().findStumpNodeByChild("class DataTable")
    if (this.isNodeJs()) return undefined
-   const tileDimension = this.getTileDimensionIfAny()
-   const width = tileDimension.width - 20 // remove 10 for boddy padding?
-   const height = tileDimension.height - 150
+   const width = this._tileWidth
+   const height = this._tileHeight
    const shadow = container.getShadow()
    const el = shadow.getShadowElement()
-   shadow.setShadowCss({ width: width, height: height })
+   shadow.setShadowCss({ width, height })
    const rows = this.getRowsWithRowDisplayLimit()
    // todo: note, this is only works with jQuery
    jQuery.fn.dataTable.ext.errMode = "throw"
@@ -32799,7 +32607,6 @@ abstractShowTileNode
    show.sum Amount
    show.min Amount
    show.max Amount
-  doc.layout bin
  string tileSize 140 120
  string dummyDataSetName stockPrice
  extends abstractEmptyFooterTileNode
@@ -32949,12 +32756,6 @@ abstractVegaNode
    if (this.isNodeJs()) return undefined
    this._drawVega()
   }
-  _getTileWidth() {
-   return this.getTileDimensionIfAny().width - 120
-  }
-  _getTileHeight() {
-   return this.getTileDimensionIfAny().height - 90
-  }
   treeComponentDidMount() {
    this.treeComponentDidUpdate()
   }
@@ -32972,8 +32773,8 @@ abstractVegaNode
    return {
     description: "A simple bar chart with embedded data.",
     data: this._getVegaData(),
-    width: this._getTileWidth(),
-    height: this._getTileHeight(),
+    width: this._tileWidth,
+    height: this._tileHeight,
     mark: this._getVegaMarkObj(),
     encoding: this._getEncodingMap(),
     transform: this._getVegaTransform(),
@@ -33674,7 +33475,6 @@ editorGalleryNode
      top 0
      overflow hidden
      div
-      position absolute
       background {linkColor}
  string miniStumpTemplate
   a
@@ -33702,11 +33502,10 @@ editorGalleryNode
   }
   _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
    const ohayoProgram = new ohayoNode(sourceCode)
-   const dimensions = ohayoProgram.getTileDimensionMap(width, height)
    const theTiles = ohayoProgram
     .getTiles()
     .filter(tile => tile.isVisible())
-    .map(tile => this.qFormat(this.miniStyleTemplate, { style: dimensions.get(tile).getScaledCss(0.1) }))
+    .map(tile => this.qFormat(this.miniStyleTemplate))
     .join("\\n")
    const onClick = permalink ? "clickCommand openFullPathInNewTabAndFocusCommand" : ""
    const value = permalink ? \`value \${permalink}\` : ""
@@ -33747,23 +33546,22 @@ handsontableBasicNode
    const colNames = columnDefs.map(col => col.getColumnName())
    const rows = this.getRowsWithRowDisplayLimit()
    const data = this.getRowsAsDataTableArrayWithHeader(rows, colNames)
-   const tileDimension = this.getTileDimensionIfAny()
    const container = this.getStumpNode().findStumpNodeByChild("class hot")
    const app = this.getWebApp()
    if (this.isNodeJs()) return undefined
-   const width = tileDimension.width - 20 // remove 10 for boddy padding?
-   const height = tileDimension.height - 60
+   const width = this._tileWidth
+   const height = this._tileHeight
    this._hot = new Handsontable(container.getShadow().getShadowElement(), {
     data: data,
     rowHeaders: true,
     colHeaders: true,
     stretchH: "all",
-    width: width,
+    width,
     minSpareCols: 10,
     minSpareRows: 30,
     afterSelection: () => app.pauseShortcutListener(),
     afterDeselect: () => app.startShortcutListener(),
-    height: height
+    height
    })
    return this._hot
   }
@@ -33850,10 +33648,7 @@ tablesBasicNode
   .tablesBasicNode
    font-size 14px
    box-sizing border-box
-   width 100%
-   height 100%
    {enableTextSelect1}
-   top 34px
    table
     width 100%
    tr
@@ -33918,9 +33713,6 @@ tablesBasicNode
     })
     .join("\\n")
   }
-  getContextMenuStumpCode() {
-   return this.contextMenuStumpTemplate
-  }
   _getHeaderRowsStumpCode(columns) {
    // todo: can we get a copy column command?
    return ["Row"]
@@ -33941,9 +33733,6 @@ tablesBasicNode
    const bodyRows = this._getTableRowsStumpCode(columnDefs)
    return this.qFormat(this.bodyStumpTemplate, { headerRows, bodyRows })
   }
- string contextMenuStumpTemplate
-  a Delete all rows
-   clickCommand deleteAllRowsInTargetTileCommand
  string headerRowStumpTemplate
   th
    value {colName}
@@ -33981,7 +33770,7 @@ textWordcloudNode
  string bodyStumpTemplate
   div
    class divWhereWordCloudWillGo
-   style width: 100%; height: 100%;
+   style height: 300px;
  javascript
   getTileBodyStumpCode() {
    return this.bodyStumpTemplate
@@ -34071,14 +33860,13 @@ treenotation3dNode
    const showGrid = tileStruct.showGrid
    // specify options
    // docs: http://visjs.org/docs/graph3d/
-   const tileDimension = this.getTileDimensionIfAny()
    const cameraPositionNode = this.getNode("cameraPosition") || new jtree.TreeNode("cameraPosition 4 .1 1.5").getNode("cameraPosition")
    const distance = parseFloat(cameraPositionNode.getWord(1))
    const horizontal = parseFloat(cameraPositionNode.getWord(2))
    const vertical = parseFloat(cameraPositionNode.getWord(3))
    const options = {
-    width: tileDimension.width + "px",
-    height: tileDimension.height - 80 + "px",
+    width: this._tileWidth + "px",
+    height: this._tileHeight - 80 + "px",
     style: "dot-color", // dot?
     showPerspective: false,
     showLegend: false,
@@ -34211,10 +33999,8 @@ abstractDocTileNode
   div
    class {classes}
    id {id}
-   contextMenuCommand openTileContextMenuCommand
    div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
+    class TileHeaderGrabber
    div
     class TileBody HeaderLess
     {body}
@@ -34222,7 +34008,7 @@ abstractDocTileNode
     class TileFooter
     {footer}
    div
-    class TileGrabber
+    class TileFooterGrabber
  javascript
   _getBody() {
    return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
@@ -34379,10 +34165,8 @@ abstractProviderNode
   div
    class {classes}
    id {id}
-   contextMenuCommand openTileContextMenuCommand
    div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
+    class TileHeaderGrabber
    div
     class TileBody HeaderLess
     {body}
@@ -34390,14 +34174,23 @@ abstractProviderNode
     class TileFooter
     {footer}
    div
-    class TileGrabber
+    class TileFooterGrabber
+ string tileFooterTemplate
+  span Rows Out: {outputCount} Columns Out: {columnCount} Time: {time}s Parser: {parserId} {errorMessageHtml}
+  {toolbarButton}
  javascript
   getTileFooterStumpCode() {
    const table = this.getOutputOrInputTable()
    const time = (this.getTimeToLoad() / 1000).toFixed(1)
-   const parserId = this.getParserId()
-   return \`\${this.getTileToolbarButtonStumpCode()}
-  span Rows Out: \${table.getRowCount()} Columns Out: \${table.getColumnCount()} Time: \${time}s Parser: \${parserId || "?"}\${this.getErrorMessageHtml()}\`
+   const parserId = this.getParserId() || "?"
+   return this.qFormat(this.tileFooterTemplate, {
+    parserId,
+    errorMessageHtml: this.getErrorMessageHtml() || "",
+    time,
+    outputCount: table.getRowCount(),
+    columnCount: table.getColumnCount(),
+    toolbarButton: this.getTileToolbarButtonStumpCode()
+   })
   }
   getRowClass() {
    return Row
@@ -34616,7 +34409,6 @@ hackernewsTopNode
      vega.scatter
       xColumn time
       yColumn score
-  doc.layout tree
  javascript
   async fetchTableInputs() {
    // todo: allow cache breaking.
@@ -34659,7 +34451,6 @@ hackernewsSubmissionsNode
      vega.scatter Comments
       xColumn time
       yColumn score
-  doc.layout tree
  javascript
   _getFirstUrls() {
    return this.getWordsFrom(2).map(username => \`https://hacker-news.firebaseio.com/v0/user/\${username}.json?print=pretty\`)
@@ -34958,7 +34749,6 @@ redditAllNode
     vega.scatter
      yColumn score
      xColumn created_utc
-  doc.layout bin
  frequency .05
  javascript
   async fetchTableInputs() {
@@ -35050,12 +34840,15 @@ abstractTransformerNode
    placeholder {placeholderMessage}
    changeCommand changeTileContentAndRenderCommand
    class LargeTileInput
+ string tileFooterTemplate
+  span Rows In: {inputCount} Rows Out: {outputCount} Columns Out: {columnCount}
+  {toolbarButton}
  javascript
   getTileFooterStumpCode() {
-   const inputCount = this.getParentOrDummyTable().getRowCount()
+   const table = this.getParentOrDummyTable()
+   const inputCount = table.getRowCount()
    const outputTable = this.getOutputOrInputTable()
-   return \`\${this.getTileToolbarButtonStumpCode()}
-  span Rows In: \${inputCount} Rows Out: \${outputTable.getRowCount()} Columns Out: \${outputTable.getColumnCount()}\`
+   return this.qFormat(this.tileFooterTemplate, { inputCount, outputCount: table.getRowCount(), columnCount: outputTable.getColumnCount(), toolbarButton: this.getTileToolbarButtonStumpCode() })
   }
   async _execute() {
    this._outputTable = this._createOutputTable()
@@ -35977,7 +35770,6 @@ rowsSortByNode
     rows.reverse
      rows.first 1
       tables.basic Most expensive
-  doc.layout tiled
  extends abstractTransformerNode
  crux rows.sortBy
  string placeholderMessage Columns you want to sort by
@@ -36649,15 +36441,6 @@ docDateNode
  extends abstractDocSettingNode
  crux doc.date
  catchAllCellType dateCell
-docZoomNode
- crux doc.zoom
- description Enlarge or shrink all tiles
- cells tileKeywordCell zoomCell
- extends abstractDocSettingNode
-docLayoutNode
- cells tileKeywordCell docLayoutOptionCell
- extends abstractDocSettingNode
- crux doc.layout
 abstractDocSectionComponentNode
  abstract
 docSectionSubtitleNode
@@ -36744,9 +36527,8 @@ ohayoNode
  _rootNodeJsHeader
   const projectRootDir = jtree.Utils.findProjectRoot(__dirname, "ohayo")
   const { AbstractTreeComponent } = require(projectRootDir + "node_modules/jtree/products/TreeComponentFramework.node.js")
-  const OhayoConstants = require(projectRootDir + "studio/tiles/OhayoConstants.js")
+  const OhayoConstants = require(projectRootDir + "studio/treeComponents/OhayoConstants.js")
   const StudioConstants = require(projectRootDir + "studio/treeComponents/StudioConstants.js")
-  const Layout = require(projectRootDir + "studio/tiles/Layout.js")
   const Icons = require(projectRootDir + "studio/themes/Icons.js")
   const lodash = require(projectRootDir + "node_modules/lodash")
   const { Table, DummyDataSets, Row, TableParser } = require("jtree/products/jtable.node.js")
@@ -36760,7 +36542,6 @@ ohayoNode
   }
   const numeral = require("numeral")
  catchAllNodeType DidYouMeanTileNode
- string wallType flex
  description Ohayo is a programming language for doing data science.
  inScope abstractTileTreeComponentNode tileBlankLineNode abstractDocSettingNode hashBangNode
  javascript
@@ -36783,20 +36564,6 @@ ohayoNode
   }
   tilesAreVisible() {
    return !this.has(OhayoConstants.defaultHidden)
-  }
-  canUseCustomLayout() {
-   const definedLayout = this.get(OhayoConstants.layout)
-   if (definedLayout === OhayoConstants.layouts.custom) return true
-   if (this.getTiles().some(tile => tile.has(OhayoConstants.left) || tile.has(OhayoConstants.top))) return true
-   return false
-  }
-  _getLayoutStrategy() {
-   const definedLayout = this.get(OhayoConstants.layout)
-   return definedLayout || (this.wallType === StudioConstants.flex ? (this.canUseCustomLayout() ? OhayoConstants.layouts.custom : OhayoConstants.layouts.tiled) : OhayoConstants.layouts.tree)
-  }
-  getTileDimensionMap(width, height) {
-   // todo: cache?
-   return new Layout().getTileDimensionMap(this, this._getLayoutStrategy(), width, height)
   }
   async loadAndIncrementalRender() {
    const app = this.getTab().getRootNode()
@@ -37139,8 +36906,6 @@ schemaNode
         docAuthorNode: docAuthorNode,
         docDefaultHiddenNode: docDefaultHiddenNode,
         docDateNode: docDateNode,
-        docZoomNode: docZoomNode,
-        docLayoutNode: docLayoutNode,
         abstractDocSectionComponentNode: abstractDocSectionComponentNode,
         docSectionSubtitleNode: docSectionSubtitleNode,
         docSectionParagraphNode: docSectionParagraphNode,
@@ -37283,7 +37048,6 @@ window.TemplatesStamp = `file templates/amazon-purchase-history.ohayo
       vega.bar Items Purchases by Year
        yColumn count
        xColumn year
-  doc.layout column
   doc.categories shopping
 file templates/boiling-points.ohayo
  data
@@ -37293,7 +37057,6 @@ file templates/boiling-points.ohayo
     xColumn AtomicNumber
     yColumn BoilingPoint
     colorColumn Phase
-  doc.layout column
   doc.categories chemistry
 file templates/cancer-rates-in-the-us.ohayo
  data
@@ -37309,7 +37072,6 @@ file templates/cancer-rates-in-the-us.ohayo
     vega.bar
      xColumn CancerType
      yColumn Male
-  doc.layout column
   doc.categories medicine
 file templates/country-names.ohayo
  data
@@ -37325,7 +37087,6 @@ file templates/country-names.ohayo
      vega.bar How many country names begin with each letter (in English)?
      show.rowCount Letters used
      doc.subtitle No countries have a name starting with X.
-  doc.layout column
   doc.categories geography
 file templates/country-populations.ohayo
  data
@@ -37342,13 +37103,11 @@ file templates/country-populations.ohayo
      vega.bar Population by Region
       visible
       yColumn Population2016
-  doc.layout column
   doc.defaultHidden
   doc.categories geography
 file templates/declaration-of-independence.ohayo
  data
   doc.title Declaration of Independence
-  doc.layout column
   doc.categories history
   samples.declaration
    hidden
@@ -37385,7 +37144,6 @@ file templates/discovery-of-elements.ohayo
     xColumn Year
     yColumn AtomicNumber
     visible
-  doc.layout column
   doc.categories chemistry
   doc.defaultHidden
 file templates/git-repo-dashboard.ohayo
@@ -37408,7 +37166,6 @@ file templates/git-repo-dashboard.ohayo
    show.rowCount Total Commits
    show.max time Most Recent Commit
    show.min time First Commit
-  doc.layout column
   doc.categories programming
 file templates/github-comparison.ohayo
  data
@@ -37421,7 +37178,6 @@ file templates/github-comparison.ohayo
    vega.scatter Stars by Year Created
     xColumn created_at
     yColumn stargazers_count
-  doc.layout column
   doc.categories programming
 file templates/github-project-stats.ohayo
  data
@@ -37433,7 +37189,6 @@ file templates/github-project-stats.ohayo
    show.value created_at Created
    show.value pushed_at Last Updated
    show.value stargazers_count Stars
-  doc.layout column
   doc.categories programming
 file templates/humanPopulation.ohayo
  data
@@ -37446,12 +37201,10 @@ file templates/humanPopulation.ohayo
      yColumn populationInMillions
      xColumn when
      visible
-  doc.layout column
   doc.defaultHidden
 file templates/life-expectancy.ohayo
  data
   doc.title Life Expectancy in the U.S.
-  doc.layout column
   doc.categories medicine
   owid.lifeExpectancy
    hidden
@@ -37478,7 +37231,6 @@ file templates/loc-with-bars.ohayo
      vega.bar Words
       yColumn words
      tables.basic Top Extensions
-  doc.layout column
   doc.categories programming
 file templates/logs.ohayo
  data
@@ -37499,13 +37251,11 @@ file templates/logs.ohayo
     visible
     xColumn input
     yColumn output
-  doc.layout column
   doc.categories math
   doc.defaultHidden
 file templates/most-popular-websites.ohayo
  data
   doc.title 500 Most Popular Websites
-  doc.layout column
   doc.categories web
   moz.top500
    hidden
@@ -37519,7 +37269,6 @@ file templates/ohayo-grammar-analysis.ohayo
  data
   doc.title Ohayo Grammar Analysis
   doc.categories ohayo
-  doc.layout column
   debug.ohayoGrammar
    hidden
    text.lineCount
@@ -37541,7 +37290,6 @@ file templates/ohayo-product-stats.ohayo
  data
   doc.title Ohayo Product Stats
   doc.categories ohayo
-  doc.layout column
   templates.list
    hidden
    show.rowCount Number of Templates
@@ -37581,7 +37329,10 @@ file templates/ohayo-readme.ohayo
    parser text
    hidden
    markdown.toHtml
-  doc.layout column
+  web.get ohayo/readme.md
+   parser text
+   hidden
+   markdown.toHtml
   doc.categories ohayo
 file templates/ohayo-reference.ohayo
  data
@@ -37589,7 +37340,6 @@ file templates/ohayo-reference.ohayo
   doc.author Breck Yunits
   doc.date 12/05/2019
   doc.categories ohayo
-  doc.layout column
   
   doc.subtitle Ohayo is a language for data powered documents.
   
@@ -37630,22 +37380,6 @@ file templates/ohayo-reference.ohayo
   doc.section
    subtitle Links
    link http://ohayo.computer A whole sentence can be linked
-  
-  
-  
-  doc.section
-   subtitle Layout
-   paragraph Layout changes the layout strategy of the tiles
-   code ohayo
-    doc.layout column
-  
-  
-  doc.section
-   subtitle Zoom
-   paragraph Zoom let's you adjust the zoom level of the doc.
-   code ohayo
-    doc.zoom .5
-  
   
   doc.section
    subtitle Default visibilitiy
@@ -37695,7 +37429,6 @@ file templates/pca-of-flowers.ohayo
      xColumn pc1
      yColumn pc2
      colorColumn Species
-  doc.layout column
   doc.categories math
   doc.subtitle This demonstration uses the PCA library from <a href="https://github.com/bitanath/pca">bitanath</a>. 
 file templates/planets-on-wikipedia.ohayo
@@ -37712,7 +37445,6 @@ file templates/planets-on-wikipedia.ohayo
       hidden
       text.wordcloud
   doc.categories wikipedia
-  doc.layout column
 file templates/portals.ohayo
  data
   doc.title Data Portals
@@ -37722,7 +37454,6 @@ file templates/portals.ohayo
     hidden
     tables.basic
   doc.categories dataScience
-  doc.layout column
 file templates/public-apis.ohayo
  data
   doc.title Public APIs
@@ -37738,7 +37469,6 @@ file templates/public-apis.ohayo
      hidden
      tables.basic Fully open APIS
    tables.basic All APIS
-  doc.layout column
   doc.categories programming
 file templates/random.ohayo
  data
@@ -37754,7 +37484,6 @@ file templates/random.ohayo
      xColumn index
      yColumn number
   doc.categories math
-  doc.layout column
 file templates/reddit.ohayo
  data
   doc.title Top Stories on Reddit
@@ -37769,7 +37498,6 @@ file templates/reddit.ohayo
      xColumn created_utc
     vega.bar Top Stories on Reddit Right Now
      yColumn score
-  doc.layout column
   doc.categories socialMedia
 file templates/subreddit.ohayo
  data
@@ -37780,12 +37508,10 @@ file templates/subreddit.ohayo
      yColumn score
      xColumn created_utc
     list.links
-  doc.layout column
   doc.categories socialMedia
 file templates/tlds.ohayo
  data
   doc.title Most Popular Top Level Domains
-  doc.layout column
   doc.categories web
   doc.subtitle This script looks at the top 500 domain names. It then extracts the TLD and groups them. The conclusion is that .com is the most popular by about 10x.
   moz.top500
@@ -37810,7 +37536,6 @@ file templates/trends-in-baby-names.ohayo
      vega.line
       xColumn year
       yColumn percent
-  doc.layout column
   doc.categories parenting
 file templates/trigonometry.ohayo
  data
@@ -37831,7 +37556,6 @@ file templates/trigonometry.ohayo
     visible
     xColumn input
     yColumn output
-  doc.layout column
   doc.categories math
   doc.defaultHidden
 file templates/typescript-interface-generator.ohayo
@@ -37844,12 +37568,10 @@ file templates/typescript-interface-generator.ohayo
    schema.toTypescript
     hidden
     html.printAs code
-  doc.layout column
   doc.categories programming
 file templates/ucimlr-overview.ohayo
  data
   doc.title The Datasets in UCIMLR
-  doc.layout column
   ucimlr.datasets
    show.rowCount Total Datasets
    group.by Category
@@ -37865,7 +37587,6 @@ file templates/ucimlr-overview.ohayo
 file templates/word-cloud.ohayo
  data
   doc.title Word Cloud
-  doc.layout column
   data.inline
    text.wordCount
     text.wordcloud
@@ -37880,6 +37601,7 @@ file templates/word-cloud.ohayo
 window.StudioDrums = `panel new createNewBlankProgramCommand ctrl+n New file
 mounted new cloneTabCommand ctrl+shift+n Clone file
 panel new createMiniMapCommand shift+m Browse files
+panel new openCreateNewProgramFromUrlDialogCommand  New from Url
 mounted new createNewSourceCodeVisualizationProgramCommand  Visualize Source Code
 mounted file saveTabAndNotifyCommand command+s Save file
 mounted file showTabMoveFilePromptCommand  Move file
@@ -37894,6 +37616,7 @@ panel navigation openFullDiskFilePathPromptCommand shift+o Open file from path
 panel navigation openFolderPromptCommand  Open folder
 panel navigation changeWorkingFolderPromptCommand  Change working folder
 mounted selection selectAllTilesCommand command+a Select all tiles
+mounted selection clearSelectionCommand  Clear Selection
 mounted selection selectNextTileCommand shift+down Select next tile
 mounted selection selectPreviousTileCommand shift+up Select previous Tile
 mounted selection deleteSelectionCommand backspace Delete Selection
@@ -37906,7 +37629,6 @@ panel window closeModalCommand escape Close any open modal
 mounted window clearTabMessagesCommand command+\\ Clear tab messages
 panel window toggleAutoSaveCommand  Toggle autosave
 mounted window fetchAndReloadFocusedTabCommand shift+r Re-download and refresh tab
-mounted edit toggleLayoutCommand shift+l Toggle layout
 mounted edit undoFocusedProgramCommand command+z Undo
 mounted edit redoFocusedProgramCommand command+shift+z Redo
 mounted edit insertAdjacentTileCommand shift+i Insert Tile
@@ -38241,8 +37963,7 @@ ohayo.ohayo
   hidden
   markdown.toHtml
  templates.list
- challenge.list
- doc.layout column`
+ challenge.list`
 
 window.DemoTemplates
  = DemoTemplates
@@ -38278,8 +37999,7 @@ data.inline
     tables.basic
     text.wordcloud
  content
-  {source}
-doc.layout column`).templateToString({ source, fileName, treeLanguage })
+  {source}`).templateToString({ source, fileName, treeLanguage })
 
 window.OhayoCodeEditorTemplate
  = OhayoCodeEditorTemplate
@@ -39096,7 +38816,7 @@ Themes[ThemeConstants.workshop] = new Theme({
   wallBackground: "rgba(244,216,105,.4)",
   menuBackground: "#3B539A",
   tileOpacity: 0.95,
-  tileShadow: "0 3px 5px rgba(33,33,33,.3)",
+  tileShadow: "0 2px 4px rgba(33,33,33,.2)",
   menuTreeComponentColor: "white"
 })
 
@@ -39173,21 +38893,6 @@ a
 ::-webkit-scrollbar
  display none
 
-.ui-resizable-handle
- position absolute
- font-size 0.1px
- display block
- -ms-touch-action none
- touch-action none
-
-.ui-resizable-disabled
- .ui-resizable-handle
-  display none
-
-.ui-resizable-autohide
- .ui-resizable-handle
-  display none
-
 .leftButton,.rightButton
  background transparent
  border 0
@@ -39253,9 +38958,6 @@ a
  top 0
  left 0
 
-.noTransition
- transition none
-
 .SVGIcon
  fill ${theme.foregroundColor}
  cursor pointer
@@ -39282,11 +38984,11 @@ input,textarea
  color ${theme.foregroundColor}
 
 .abstractTileTreeComponentNode
- position absolute
- box-shadow ${theme.tileShadow}
+ position relative
  opacity ${theme.tileOpacity}
  background ${theme.tileBackgroundColor}
- border 1px solid ${theme.borderColor}
+ margin 10px 15px
+ box-shadow ${theme.tileShadow}
  ol
   height 100%
   width 100%
@@ -39297,33 +38999,16 @@ input,textarea
  ${theme.disableTextSelect(1)}
  &.TileMaximized
   z-index 2
- .TilePencilButton
-  svg
-   opacity 0
- .ui-resizable-se
-  cursor se-resize
-  width 36px
-  height 36px
-  box-sizing border-box
-  right 1px
-  bottom 1px
-  opacity 0
-  border-right 4px solid ${theme.darkerBackground}
-  border-bottom 4px solid ${theme.darkerBackground}
-  &:hover
-   opacity 1
+ .TileDropDownButton
+  opacity .3
+  cursor pointer
  &:hover
-  background ${theme.backgroundColor}
   z-index 2
-  .ui-resizable-se
-   opacity .5
-  .TilePencilButton
-   svg
-    opacity 1
-    cursor pointer
-    fill ${theme.greyish}
-    &:hover
-     fill ${theme.foregroundColor}
+  .TileDropDownButton
+   opacity 1
+   color ${theme.greyish}
+   &:hover
+    color ${theme.foregroundColor}
  .TileHeader,.TileFooter
   height 30px
   line-height 30px
@@ -39333,15 +39018,12 @@ ${theme.enableTextSelect2}
  .TileBody
   padding 5px
   width 100%
-  height calc(100% - 50px)
+  max-height 400px
   box-sizing border-box
   overflow scroll
-  &.HeaderLess
-   height calc(100% - 20px)
- .TileGrabber
+ .TileHeaderGrabber,.TileFooterGrabber
   width 100%
   height 10px
-  cursor move
  .TileHeader
   font-size 14px
   text-transform uppercase
@@ -39359,7 +39041,7 @@ ${theme.enableTextSelect2}
   max-width 100%
   box-sizing border-box
   bottom 0
-  left 0
+  right 0
  iframe
   width 100%
   height 100%
@@ -39373,377 +39055,6 @@ ThemeTreeComponent.ThemeConstants = ThemeConstants
 
 window.ThemeTreeComponent
  = ThemeTreeComponent
-;
-
-
-
-class TileDimension {
-  constructor(tile, obj) {
-    const suggestedSize = tile.getSuggestedSize()
-    this.width = suggestedSize.width
-    this.height = suggestedSize.height
-    Object.assign(this, obj) // allow overrides.
-  }
-
-  getScaledCss(factor = 1) {
-    return this._toCss({
-      width: this.width * factor,
-      height: this.height * factor,
-      left: this.left * factor,
-      top: this.top * factor
-    })
-  }
-
-  get right() {
-    return this.width + (this.left || 0)
-  }
-
-  get bottom() {
-    return this.height + (this.top || 0)
-  }
-
-  toCss() {
-    return this._toCss(this)
-  }
-
-  _toCss(obj) {
-    return `width: ${obj.width}px; height: ${obj.height}px; left: ${obj.left}px; top: ${obj.top}px`
-  }
-}
-
-class BinPacker {
-  fit(tiles) {
-    const len = tiles.length
-    const width = len > 0 ? tiles[0].width : 0
-    const height = len > 0 ? tiles[0].height : 0
-    this.root = { xcc: 0, ycc: 0, width: width, height: height }
-    for (let index = 0; index < len; index++) {
-      const tile = tiles[index]
-      const node = this.findNode(this.root, tile.width, tile.height)
-      tile.fit = node ? this.splitNode(node, tile.width, tile.height) : this.growNode(tile.width, tile.height)
-    }
-  }
-
-  findNode(root, width, height) {
-    if (root.used) return this.findNode(root.right, width, height) || this.findNode(root.down, width, height)
-
-    return width <= root.width && height <= root.height ? root : null
-  }
-
-  splitNode(node, width, height) {
-    node.used = true
-    node.down = { xcc: node.xcc, ycc: node.ycc + height, width: node.width, height: node.height - height }
-    node.right = { xcc: node.xcc + width, ycc: node.ycc, width: node.width - width, height: height }
-    return node
-  }
-
-  growNode(width, height) {
-    const rootNode = this.root
-    const canGrowDown = width <= rootNode.width
-    const canGrowRight = height <= rootNode.height
-
-    const shouldGrowRight = canGrowRight && rootNode.height >= rootNode.width + width // attempt to keep square-ish by growing right when height is much greater than width
-    const shouldGrowDown = canGrowDown && rootNode.width >= rootNode.height + height // attempt to keep square-ish by growing down  when width  is much greater than height
-
-    if (shouldGrowRight) return this.growRight(width, height)
-    else if (shouldGrowDown) return this.growDown(width, height)
-    else if (canGrowRight) return this.growRight(width, height)
-    else if (canGrowDown) return this.growDown(width, height)
-    else return null // need to ensure sensible root starting size to avoid this happening
-  }
-
-  growRight(width, height) {
-    const oldRoot = this.root
-    this.root = {
-      used: true,
-      xcc: 0,
-      ycc: 0,
-      width: oldRoot.width + width,
-      height: oldRoot.height,
-      down: oldRoot,
-      right: { xcc: oldRoot.width, ycc: 0, width: width, height: oldRoot.height }
-    }
-    const node = this.findNode(this.root, width, height)
-    return node ? this.splitNode(node, width, height) : null
-  }
-
-  growDown(width, height) {
-    const oldRoot = this.root
-    this.root = {
-      used: true,
-      xcc: 0,
-      ycc: 0,
-      width: oldRoot.width,
-      height: oldRoot.height + height,
-      down: { xcc: 0, ycc: oldRoot.height, width: oldRoot.width, height: height },
-      right: oldRoot
-    }
-    const node = this.findNode(this.root, width, height)
-    return node ? this.splitNode(node, width, height) : null
-  }
-}
-
-class AbstractLayoutStrategy {
-  constructor(tilesProgram, wallViewPortWidth = 1400, wallViewPortHeight = 1400) {
-    this._tilesProgram = tilesProgram
-    this._wallViewPortWidth = wallViewPortWidth
-    this._wallViewPortHeight = wallViewPortHeight
-  }
-
-  _getZoomLevel() {
-    const zoomLevel = this._tilesProgram.get("zoom")
-    return zoomLevel ? parseFloat(zoomLevel) : 1.0
-  }
-
-  _getVisibleTiles() {
-    return this._getTilesProgram()
-      .getTiles()
-      .filter(tile => tile.isVisible())
-  }
-
-  _getVisibleRootTiles() {
-    return this._getTilesProgram()
-      .getRootLevelTiles()
-      .filter(tile => tile.isVisible())
-  }
-
-  _getTilesProgram() {
-    return this._tilesProgram
-  }
-
-  _getWallViewPortWidth() {
-    return this._wallViewPortWidth
-  }
-
-  _getWallViewPortHeight() {
-    return this._wallViewPortHeight
-  }
-}
-
-class CustomLayout extends AbstractLayoutStrategy {
-  makeTileDimensionMap() {
-    const tiles = this._getVisibleTiles()
-    const needLocations = []
-    const dimensionMap = new Map()
-    const zoomLevel = this._getZoomLevel()
-    tiles.forEach((tile, index) => {
-      if (!tile.getLeft()) return needLocations.push(tile)
-
-      dimensionMap.set(tile, CustomLayout._getTileDimension(tile, zoomLevel, tile.getLeft(), tile.getTop()))
-    })
-
-    let _top = 0
-    needLocations.forEach((tile, index) => {
-      const dimension = CustomLayout._getTileDimension(tile, zoomLevel, 0, _top)
-      dimensionMap.set(tile, dimension)
-      _top += dimension.height / 20
-    })
-
-    return dimensionMap
-  }
-  static _getTileDimension(tile, zoomLevel, left, _top) {
-    const gridSize = 20
-    const width = Math.floor(zoomLevel * tile.getWidth())
-    const height = Math.floor(zoomLevel * tile.getHeight())
-    const dimension = {}
-    if (left) dimension.left = parseInt(left) * gridSize
-    if (_top) dimension.top = parseInt(_top) * gridSize
-    if (width) dimension.width = parseInt(width) * gridSize
-    if (height) dimension.height = parseInt(height) * gridSize
-    return new TileDimension(tile, dimension)
-  }
-}
-
-const treeLayoutAddTileDimensionToMap = (tile, dimensionMap, left, _top, padding) => {
-  // Todo: handle invisibles.
-  const suggestedSize = tile.getDefinedOrSuggestedSize()
-  const requiredSpace = tile.getRequiredDimensionsForTreeLayout(padding)
-
-  const dimension = new TileDimension(tile, {
-    width: suggestedSize.width,
-    height: suggestedSize.height,
-    left: left + Math.floor(requiredSpace.width - suggestedSize.width) / 2,
-    top: _top
-  })
-  dimensionMap.set(tile, dimension)
-
-  const newTop = _top + suggestedSize.height + padding
-
-  let newLeft = left
-  let maxBottom = newTop
-  // todo: handle invisibles?
-  tile.getChildTiles().forEach(childTile => {
-    const result = treeLayoutAddTileDimensionToMap(childTile, dimensionMap, newLeft, newTop, padding)
-    newLeft = result.left
-    if (result._top > maxBottom) maxBottom = result._top
-  })
-
-  return { left: left + requiredSpace.width, _top: maxBottom, dimension: dimension }
-}
-
-class TreeLayout extends AbstractLayoutStrategy {
-  makeTileDimensionMap() {
-    const padding = 10
-    const dimensionMap = new Map()
-
-    // Todo: handle invisibles.
-    const tiles = this._getTilesProgram().getRootLevelTiles()
-
-    let left = 0
-    let _top = 0
-    tiles.forEach(tile => {
-      const result = treeLayoutAddTileDimensionToMap(tile, dimensionMap, left, _top, padding)
-      //left = result.left
-      _top = result._top
-    })
-
-    return dimensionMap
-  }
-}
-
-class ColumnLayout extends AbstractLayoutStrategy {
-  makeTileDimensionMap() {
-    let _top = 0
-    const width = 800
-    const padding = 10
-    const zoomLevel = this._getZoomLevel()
-    const boxWidth = Math.max(800, this._getWallViewPortWidth())
-    const left = Math.floor((boxWidth - 800) / 2)
-
-    const dimensionMap = new Map()
-    this._getVisibleTiles().forEach(tile => {
-      const size = tile.getDefinedOrSuggestedSize()
-      const height = Math.floor(size.height * zoomLevel)
-      const dimension = new TileDimension(tile, {
-        width,
-        height,
-        left,
-        top: _top
-      })
-      dimensionMap.set(tile, dimension)
-      _top += height + padding
-    })
-
-    return dimensionMap
-  }
-}
-
-class TiledLayout extends AbstractLayoutStrategy {
-  makeTileDimensionMap() {
-    let _top = 10
-    let left = 10
-    const increment = 30
-    const zoomLevel = this._getZoomLevel()
-
-    const dimensionMap = new Map()
-    this._getVisibleTiles().forEach(tile => {
-      const size = tile.getDefinedOrSuggestedSize()
-      const dimension = new TileDimension(tile, {
-        width: Math.floor(size.width * zoomLevel),
-        height: Math.floor(size.height * zoomLevel),
-        left: left,
-        top: _top
-      })
-      dimensionMap.set(tile, dimension)
-      left += increment
-      _top += increment
-    })
-
-    return dimensionMap
-  }
-}
-
-class BinLayout extends AbstractLayoutStrategy {
-  makeTileDimensionMap() {
-    const dimensionMap = new Map()
-    const zoomLevel = this._getZoomLevel()
-    const unsortedTiles = this._getVisibleTiles().map(tile => {
-      const size = tile.getDefinedOrSuggestedSize()
-      return {
-        width: Math.floor(size.width * zoomLevel),
-        height: Math.floor(size.height * zoomLevel),
-        tile: tile
-      }
-    })
-
-    const sortedTiles = lodash.sortBy(unsortedTiles, tile => Math.max(tile.width, tile.height)).reverse()
-    new BinPacker().fit(sortedTiles)
-    sortedTiles.forEach(tile => {
-      const dimension = new TileDimension(tile.tile, {
-        width: tile.width,
-        height: tile.height,
-        left: tile.fit.xcc,
-        top: tile.fit.ycc
-      })
-      dimensionMap.set(tile.tile, dimension)
-    })
-
-    return dimensionMap
-  }
-}
-
-class Layout {
-  constructor() {}
-
-  getTileDimensionMap(sourceTree, strategyName, wallViewPortWidth, wallViewPortHeight) {
-    const LayoutStrategies = {
-      custom: CustomLayout,
-      column: ColumnLayout,
-      tree: TreeLayout,
-      tiled: TiledLayout,
-      bin: BinLayout
-    }
-    const strategyClass = LayoutStrategies[strategyName] || TreeLayout
-    const dimensionMap = new strategyClass(sourceTree, wallViewPortWidth, wallViewPortHeight)
-    const map = dimensionMap.makeTileDimensionMap()
-    map.forEach((value, key, map) => {
-      if (key._isMaximized()) {
-        // todo: should be wall viewport width/height?
-        value.width = wallViewPortWidth
-        value.height = wallViewPortHeight
-        value.left = 0
-        value.top = 0
-      }
-    })
-    return map
-  }
-}
-
-window.Layout
- = Layout
-;
-
-const OhayoConstants = {}
-OhayoConstants.left = "left"
-OhayoConstants.top = "top"
-OhayoConstants.width = "width"
-OhayoConstants.height = "height"
-OhayoConstants.tileCssScript = "tileCssScript"
-OhayoConstants.tileScript = "tileScript"
-OhayoConstants.tileSize = "tileSize"
-OhayoConstants.abstractTileSetting = "abstractTileSetting"
-
-OhayoConstants.defaultHidden = "doc.defaultHidden"
-
-OhayoConstants.layout = "doc.layout"
-OhayoConstants.layouts = {}
-OhayoConstants.layouts.custom = "custom"
-OhayoConstants.layouts.tiled = "tiled"
-OhayoConstants.layouts.tree = "tree"
-OhayoConstants.layouts.bin = "bin"
-OhayoConstants.layouts.column = "column"
-OhayoConstants.noPicker = "noPicker"
-
-OhayoConstants.selectedClass = "ui-selected"
-OhayoConstants.staySelectedClass = "staySelected"
-
-OhayoConstants.maximized = "maximized"
-OhayoConstants.pickerTile = "doc.picker"
-
-OhayoConstants.abstractTileTreeComponentNode = "abstractTileTreeComponentNode"
-
-window.OhayoConstants
- = OhayoConstants
 ;
 
 
@@ -39781,7 +39092,6 @@ class AbstractContextMenuTreeComponent extends AbstractTreeComponent {
 
   treeComponentDidMount() {
     const container = this.getStumpNode()
-    const that = this
     const app = this.getRootNode()
     const willowBrowser = app.getWillowBrowser()
     const bodyShadow = willowBrowser.getBodyStumpNode().getShadow()
@@ -39792,7 +39102,8 @@ class AbstractContextMenuTreeComponent extends AbstractTreeComponent {
     setTimeout(() => bodyShadow.onShadowEvent("click", unmountOnClick), 100) // todo: fix this.
     const event = app.getMouseEvent()
     const windowSize = willowBrowser.getWindowSize()
-    container.setStumpNodeCss(this._getContextMenuPosition(windowSize.width, windowSize.height, event.clientX, event.clientY, container.getShadow()))
+    const css = this._getContextMenuPosition(windowSize.width, windowSize.height, event.clientX, event.clientY, container.getShadow())
+    container.setStumpNodeCss(css)
   }
 
   _getContextMenuPosition(windowWidth, windowHeight, x, y, shadow) {
@@ -39832,28 +39143,27 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
 .subdued
  color ${theme.midGray}
 
-.MenuTreeComponent
- .dropdownMenu
-  min-width 200px
-  position absolute
-  top 0
-  left 0
-  z-index 100
-  padding 7px 0
-  background ${theme.contextMenuBackground}
-  border 1px solid ${theme.borderColor}
-  box-shadow 0 1px 3px 0 ${theme.boxShadow}
-  .message
-   line-height 30px
-   padding 0 10px
-  a
-   color ${theme.foregroundColor}
-   display block
-   line-height 30px
-   padding 0 10px
-   &:hover
-    background ${theme.hoverBackground}
-    color ${theme.white}`
+.dropdownMenu
+ min-width 200px
+ position absolute
+ top 0
+ left 0
+ z-index 100
+ padding 7px 0
+ background ${theme.contextMenuBackground}
+ border 1px solid ${theme.borderColor}
+ box-shadow 0 1px 3px 0 ${theme.boxShadow}
+ .message
+  line-height 30px
+  padding 0 10px
+ a
+  color ${theme.foregroundColor}
+  display block
+  line-height 30px
+  padding 0 10px
+  &:hover
+   background ${theme.hoverBackground}
+   color ${theme.white}`
   }
 
   treeComponentDidMount() {
@@ -39874,11 +39184,12 @@ class AbstractDropDownMenuTreeComponent extends AbstractTreeComponent {
       .getStumpNode()
       .findStumpNodeByChild("id " + anchorId)
     const buttonStumpNodeShadow = buttonStumpNode.getShadow()
+    const left = buttonStumpNodeShadow.getShadowPosition().left
 
     return new jtree.TreeNode(`div
- style top: 30px; left: {left}px;
+ style top: 30px; left: ${left}px;
  class dropdownMenu
- {dropDownStump}`).templateToString({ left: buttonStumpNodeShadow.getShadowPosition().left, dropDownStump: this.getDropDownStumpCode() })
+ {dropDownStump}`).templateToString({ dropDownStump: this.getDropDownStumpCode() })
   }
 }
 
@@ -40255,12 +39566,14 @@ class ConsoleTreeComponent extends AbstractTreeComponent {
   }
 
   _getMessageBuffer() {
+    // todo: cleanup
     const app = this.getRootNode()
     const tab = app.getMountedTab()
     return tab ? tab.getMessageBuffer() : app.getMessageBuffer()
   }
 
   getDependencies() {
+    // todo: cleanup
     // 2 dependencies. the program and the programs message buffer.
     // let's call the latter the panel buffer for now.
     const deps = this.getParent().getDependencies()
@@ -40283,32 +39596,25 @@ window.ConsoleTreeComponent
  = ConsoleTreeComponent
 ;
 
+const OhayoConstants = {}
+OhayoConstants.tileCssScript = "tileCssScript"
+OhayoConstants.tileScript = "tileScript"
+OhayoConstants.tileSize = "tileSize"
+OhayoConstants.abstractTileSetting = "abstractTileSetting"
 
+OhayoConstants.defaultHidden = "doc.defaultHidden"
 
-class NewDropDownMenuTreeComponent extends AbstractDropDownMenuTreeComponent {
-  getDropDownStumpCode() {
-    const newProgram = `a New File
- clickCommand createNewBlankProgramCommand
- value untitled.ohayo
-a New From Url
- clickCommand openCreateNewProgramFromUrlDialogCommand`
-    const program = this.getRootNode().getMountedTab()
-    if (!program) return newProgram
+OhayoConstants.noPicker = "noPicker"
 
-    return `${newProgram}
-div
- class divider
-a Clone File
- clickCommand cloneTabCommand`
-  }
+OhayoConstants.selectedClass = "selected"
 
-  getAnchorId() {
-    return "newToggle"
-  }
-}
+OhayoConstants.maximized = "maximized"
+OhayoConstants.pickerTile = "doc.picker"
 
-window.NewDropDownMenuTreeComponent
- = NewDropDownMenuTreeComponent
+OhayoConstants.abstractTileTreeComponentNode = "abstractTileTreeComponentNode"
+
+window.OhayoConstants
+ = OhayoConstants
 ;
 
 // rename lodash
@@ -40332,14 +39638,11 @@ StudioConstants.console = "console"
 StudioConstants.theme = "theme"
 StudioConstants.menu = "menu"
 StudioConstants.wall = "wall"
-StudioConstants.flex = "flex"
-StudioConstants.newDropDownMenu = "newDropDownMenu"
 StudioConstants.windowSize = "windowSize"
 StudioConstants.panel = "panel"
 StudioConstants.tabs = "tabs"
 StudioConstants.helpModal = "helpModal"
-StudioConstants.tileContextMenu = "tileContextMenu"
-StudioConstants.tabContextMenu = "tabContextMenu"
+StudioConstants.tabMenu = "tabMenu"
 StudioConstants.DropDownMenuSubstring = "DropDownMenu"
 
 StudioConstants.productName = "ohayo"
@@ -40372,7 +39675,7 @@ class GutterTreeComponent extends AbstractTreeComponent {
   createParser() {
     return new jtree.TreeNode.Parser(undefined, {
       console: ConsoleTreeComponent,
-      terminal: this.isNodeJs() || !this.getRootNode().getPerfSettings().codeMirrorEnabled ? BasicTerminalTreeComponent : CodeMirrorTerminalTreeComponent
+      terminal: this.isNodeJs() ? BasicTerminalTreeComponent : CodeMirrorTerminalTreeComponent
     })
   }
 
@@ -40543,76 +39846,34 @@ window.HelpModal
 
 
 
-class MenuTreeComponent extends AbstractTreeComponent {
-  createParser() {
-    return new jtree.TreeNode.Parser(undefined, {
-      newDropDownMenu: NewDropDownMenuTreeComponent
-    })
-  }
-
-  getDependencies() {
-    return [{ getLineModifiedTime: () => this.getParent().getWindowSizeMTime() }]
-  }
-
-  toHakonCode() {
-    const theme = this.getTheme()
-    return `.MenuTreeComponent
- ${theme.disableTextSelect(1)}
- font-size 14px
- padding-left 5px
- box-sizing border-box
- right 0
- left 0
- position relative
- height 30px
- z-index 92
- white-space nowrap
- background ${theme.menuBackground}
- color ${theme.darkBlack}
- display flex
- a
-  padding-right 5px
-  line-height 30px
-  display inline-block
-  color ${theme.menuTreeComponentColor}`
-  }
-
-  toStumpCode() {
-    return `div
- class MenuTreeComponent ${this.constructor.name}
- a ${StudioConstants.productName}
-  clickCommand toggleHelpCommand
- a New ▾
-  id newToggle
-  clickCommand toggleAndRenderNewDropDownCommand`
-  }
-}
-
-window.MenuTreeComponent
- = MenuTreeComponent
-;
 
 
 
-class TabContextMenuTreeComponent extends AbstractContextMenuTreeComponent {
+
+class TabMenuTreeComponent extends AbstractContextMenuTreeComponent {
   getContextMenuBodyStumpCode() {
-    return this.getRootNode()
-      .getMountedTab()
-      .getContextMenuCommandsStumpCode()
+    const index = this.getWord(1)
+    return `a Save File
+ clickCommand saveTabAndNotifyCommand
+a Close File
+ clickCommand closeTabByIndexCommand
+ value ${index}
+a Rename File
+ clickCommand showTabRenameFilePromptCommand
+a Move File
+ clickCommand showTabMoveFilePromptCommand
+a Clone File
+ clickCommand cloneTabCommand
+a Delete File
+ clickCommand showDeleteFileConfirmDialogCommand
+a Copy program as link
+ clickCommand copyDeepLinkCommand
+a Log program stats
+ clickCommand printProgramStatsCommand
+a Close all other files
+ clickCommand closeAllTabsExceptFocusedTabCommand`
   }
 }
-
-window.TabContextMenuTreeComponent
- = TabContextMenuTreeComponent
-;
-
-
-
-
-
-
-
-
 
 class TabTreeComponent extends AbstractTreeComponent {
   toStumpCode() {
@@ -40628,12 +39889,32 @@ class TabTreeComponent extends AbstractTreeComponent {
  collapse
  value ${index}
  title ${fullPath}
+ id tab${index}
  class TabStub ${isMounted ? "mountedTab" : ""}
- span x
+ span ▾
   collapse
-  clickCommand closeTabByIndexCommand
+  clickCommand openTabMenuCommand
   value ${index}
-  class closeTabButton`
+  class tabDropDownButton`
+  }
+
+  toHakonCode() {
+    return `
+.TabStub
+ .tabDropDownButton
+  opacity 0
+ &:hover
+  .tabDropDownButton
+   cursor pointer
+   opacity 1
+.TabStub.mountedTab
+ .tabDropDownButton
+  opacity 1`
+  }
+
+  async openTabMenuCommand() {
+    const index = this.getIndex()
+    this.getRootNode().toggleAndRender(`${StudioConstants.tabMenu} ${index}`)
   }
 
   getDependencies() {
@@ -40646,27 +39927,6 @@ class TabTreeComponent extends AbstractTreeComponent {
     return this.getRootNode()
       .getWillowBrowser()
       .toPrettyDeepLink(this.getTabProgram().childrenToString(), obj)
-  }
-
-  getContextMenuCommandsStumpCode() {
-    const handGrammarProgram = this.getTabProgram().getHandGrammarProgram()
-
-    return `a Save File
- clickCommand saveTabAndNotifyCommand
-a Rename File
- clickCommand showTabRenameFilePromptCommand
-a Move File
- clickCommand showTabMoveFilePromptCommand
-a Clone File
- clickCommand cloneTabCommand
-a Delete File
- clickCommand showDeleteFileConfirmDialogCommand
-a Copy program as link
- clickCommand copyDeepLinkCommand
-a Log program stats
- clickCommand printProgramStatsCommand
-a Close all other files
- clickCommand closeAllTabsExceptFocusedTabCommand`
   }
 
   autosaveAndRender() {
@@ -40683,18 +39943,15 @@ a Close all other files
     this.getRootNode().renderApp()
   }
 
-  _getPanel() {
-    return this.getParent().getParent()
-  }
-
   async _initProgramRenderAndRun(source, shouldMount) {
     this._program = new ohayoNode(source)
     this._program.saveVersion()
     this._program.setTab(this)
+    const app = this.getRootNode()
 
-    if (shouldMount) this._getPanel().setMountedTab(this)
+    if (shouldMount) app.setMountedTab(this)
 
-    this.getRootNode().renderApp()
+    app.renderApp()
     await this._program.loadAndIncrementalRender()
     return this
   }
@@ -40734,7 +39991,7 @@ a Close all other files
   }
 
   getTabWall() {
-    return this.getParent().getWall()
+    return this.getRootNode().getAppWall()
   }
 
   async appendFromPaste(pastedText) {
@@ -40760,632 +40017,10 @@ a Close all other files
   }
 }
 
-window.TabTreeComponent
- = TabTreeComponent
+window.TabTreeComponent = TabTreeComponent
+
+window.TabMenuTreeComponent = TabMenuTreeComponent
 ;
-
-
-
-class TileContextMenuTreeComponent extends AbstractContextMenuTreeComponent {
-  getContextMenuBodyStumpCode() {
-    const targetTile = this.getRootNode().getTargetNode()
-    return `a Reload
- clickCommand fetchAndReloadFocusedTabCommand
-a Copy tile with inputs
- tabindex -1
- clickCommand copyTargetTileCommand
-a Copy data as tree
- clickCommand copyTargetTileDataAsTreeCommand
-a Copy data as javascript
- clickCommand copyTargetTileDataAsJavascriptCommand
-a Copy data as tsv
- clickCommand copyTargetTileDataCommand
- value \t
-a Copy data as csv
- clickCommand copyTargetTileDataCommand
- value ,
-a Export data to csv file
- clickCommand exportTargetTileDataCommand
-a Export data to tree file
- clickCommand exportTargetTileDataCommand
- value tree
-${targetTile.getContextMenuStumpCode()}`
-  }
-}
-
-window.TileContextMenuTreeComponent
- = TileContextMenuTreeComponent
-;
-
-
-
-
-
-
-
-class TileToolbarTreeComponent extends AbstractTreeComponent {
-  toHakonCode() {
-    const theme = this.getTheme()
-    return `.TileToolbarTreeComponent
- background ${theme.contextMenuBackground}
- border 1px solid ${theme.lineColor}
- font-size 12px
- position absolute
- padding 8px
- z-index 991
- min-width 300px
- top 100%
- left 0
- cursor pointer
- .TableInspection
-  margin-top 5px
-  border 1px solid ${theme.lineColor}
-  td
-   padding 2px 8px
-   text-align left
-  tr:nth-child(odd)
-   background-color ${theme.veryLightGrey}
- svg
-  fill ${theme.greyish}
-  padding 1px 3px 3px 3px
-  &:hover
-   fill ${theme.foregroundColor}`
-  }
-
-  getTargetTile() {
-    return this.getParent()
-  }
-
-  createProgramFromFocusedTileExampleCommand(uno, dos) {
-    return this.getTargetTile().createProgramFromTileExampleCommand(uno, dos)
-  }
-
-  cloneFocusedTileCommand(uno, dos) {
-    return this.getTargetTile().cloneTileCommand(uno, dos)
-  }
-  destroyFocusedTileCommand(uno, dos) {
-    return this.getTargetTile().destroyTileCommand(uno, dos)
-  }
-  inspectFocusedTileCommand(uno, dos) {
-    return this.getTargetTile().inspectTileCommand(uno, dos)
-  }
-  changeFocusedTileTypeCommand(uno, dos) {
-    return this.getTargetTile().changeTileTypeCommand(uno, dos)
-  }
-  changeFocusedTileParentCommand(uno, dos) {
-    return this.getTargetTile().changeParentCommand(uno, dos)
-  }
-  changeFocusedTileContentAndRenderCommand(uno, dos) {
-    return this.getTargetTile().changeTileContentAndRenderCommand(uno, dos)
-  }
-
-  toStumpCode() {
-    const tile = this.getTargetTile()
-    const suggestions = this._getSuggestionsStumpCode()
-    const exampleTile = tile.getExampleTemplate()
-    let tileHelp = ""
-    if (exampleTile) {
-      tileHelp = `
- span ${Icons("function", 20)}
-  title See an example program with '${tile.getFirstWord()}'
-  clickCommand createProgramFromTileExampleCommand`
-    }
-    const hints = tile.getDefinition().getLineHints()
-
-    // todo: cleanup
-
-    return (
-      `div
- class TileToolbarTreeComponent
- span ${Icons("copy", 20)}
-  title Duplicate Tile
-  clickCommand cloneTileCommand
- span ${Icons("trash", 20)}
-  title Delete Tile
-  clickCommand destroyTileCommand
- span ${Icons("inspector", 20)}
-  title Debug Tile
-  clickCommand inspectTileCommand` +
-      tileHelp +
-      `
- div ${hints}` +
-      jtree.TreeNode.nest(this._getFormStumpCode(), 1)
-    )
-  }
-
-  _getTileTypeDropdownStumpCode() {
-    const tile = this.getTargetTile()
-    const tileNames = tile
-      .getRootNode()
-      .getHandGrammarProgram()
-      ._getInScopeNodeTypeIds()
-      .filter(name => !name.includes("_") && !name.startsWith("@"))
-    tileNames.sort()
-    const selectedValue = tile.getFirstWord()
-    const options = tileNames
-      .map(
-        option =>
-          ` option ${option}
-  value ${option}
-  ${selectedValue === option ? "selected" : ""}`
-      )
-      .join("\n")
-    return `select
- changeCommand changeTileTypeCommand
-${options}`
-  }
-
-  _getParentDropdownStumpCode() {
-    const tile = this.getTargetTile()
-    const tilesProgram = tile.getRootNode()
-    const tilesParent = tile.getParent()
-
-    const options = tilesProgram
-      .getTiles()
-      .filter(t => t !== tile)
-      .map(tile => {
-        return {
-          name: tile.getFirstWordPathRelativeTo(tilesProgram),
-          value: tile.getPathVectorRelativeTo(tilesProgram).join(" "),
-          isParent: tile === tilesParent
-        }
-      })
-      .map(
-        option =>
-          ` option ${option.name}
-  value ${option.value}
-  ${option.isParent ? "selected" : ""}`
-      )
-      .join("\n")
-
-    return `select
- changeCommand changeParentCommand
- option (top)
-  value 
-  ${tilesParent.isRoot() ? "selected" : ""}${options ? "\n" + options : ""}`
-  }
-
-  _getSuggestionsStumpCode() {
-    //return `div Add Suggested:`
-    return "" //todo:
-  }
-
-  _getFormStumpCode() {
-    const tile = this.getTargetTile()
-
-    const formFields = []
-    formFields.unshift(["parent", this._getParentDropdownStumpCode()])
-    formFields.unshift(["type", this._getTileTypeDropdownStumpCode()])
-    formFields.unshift([
-      "content",
-      `input
- changeCommand changeTileContentAndRenderCommand
- value ${tile.getContent() || ""}`
-    ])
-
-    const html = formFields
-      .map(
-        control =>
-          `  tr
-   td ${control[0]}
-   td${jtree.TreeNode.nest(control[1], 4)}`
-      )
-      .join("\n")
-
-    let colTable = !tile.getOutputOrInputTable
-      ? ""
-      : tile
-          .getOutputOrInputTable()
-          .getColumnNamesAndTypes()
-          .map(
-            col => `  tr
-  td ${col.Column}
-  td ${col.JTableType}
-  td ${col.JavascriptType}`
-          )
-          .join("\n")
-
-    return `form
- table${html ? "\n" + html : html}
-div Output Table Columns:
-table
- class TableInspection
- thead
-  tr
-   th Column
-   th Type
-   th JavascriptType
- tbody
-${colTable}`
-  }
-}
-
-window.TileToolbarTreeComponent
- = TileToolbarTreeComponent
-;
-
-const Version = "18.0.0"
-if (typeof exports !== "undefined") module.exports = Version
-;
-
-
-
-
-
-class WallTreeComponent extends AbstractTreeComponent {
-  // pin?
-  // duplicate?
-  // reload?
-  toHakonCode() {
-    const theme = this.getTheme()
-    return `.WallTreeComponent
- background-color ${theme.wallBackground}
- background-image ${theme.wallBackgroundImage || "none"}
- display block
- position relative
- height 100%
- overflow scroll
-
-.ui-selectable-helper
- position absolute
- z-index 100
- border-radius 2px
- background ${theme.selectionBackground}
-
-.ui-selecting,.${OhayoConstants.selectedClass},.${OhayoConstants.staySelectedClass}
- outline 3px solid ${theme.selectedOutline}`
-  }
-
-  getPickerBlock(event) {}
-
-  async openWallContextMenuCommand() {
-    this.getRootNode().toggleAndRender("tabContextMenu")
-  }
-
-  async insertAdjacentTileCommand() {
-    const app = this.getRootNode()
-    const tilesProgram = app.getMountedTilesProgram()
-    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
-    const newTiles = app
-      .getNodeCursors()
-      .slice(0, 1)
-      .map(cursor => cursor.appendLine(OhayoConstants.pickerTile))
-    const promise = await app.getMountedTab().autosaveAndRender()
-    tilesProgram.clearSelection()
-    newTiles.forEach(tile => tile.selectTile())
-    return promise
-  }
-
-  async insertPickerTileCommand() {
-    const app = this.getRootNode()
-    const evt = app.getMouseEvent()
-    const tilesProgram = app.getMountedTilesProgram()
-
-    if (!evt.shiftKey) {
-      tilesProgram.clearSelection()
-    }
-    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
-    const newTiles = app
-      .getNodeCursors()
-      .slice(0, 1)
-      .map(cursor => cursor.appendLineAndChildren(OhayoConstants.pickerTile, this.getPickerBlock(evt)))
-    await app.getMountedTab().autosaveAndRender()
-    tilesProgram.clearSelection()
-    newTiles.forEach(tile => {
-      tile.selectTile()
-    })
-  }
-
-  getDependencies() {
-    return [{ getLineModifiedTime: () => this.getRootNode().getWindowSizeMTime() }]
-  }
-
-  selectTilesByShadowClass(className = OhayoConstants.selectedClass) {
-    this.getRootNode()
-      .getWillowBrowser()
-      .findStumpNodesByShadowClass(className)
-      .forEach(stumpNode => stumpNode.getStumpNodeTreeComponent().selectTile())
-  }
-
-  getWallViewPortDimensions() {
-    // depends on window.resize and whether gutter is open
-    const bodyShadowDimensions = this.getRootNode().getBodyShadowDimensions()
-
-    return {
-      width: bodyShadowDimensions.width - this.getParent().getGutterWidth(),
-      height: bodyShadowDimensions.height
-    }
-  }
-
-  treeComponentDidUpdate() {
-    // todo: I don't think this ever gets called. actually seems to get called when you toggle gutter
-    this._makeSelectable()
-  }
-
-  _getChildTreeComponents() {
-    const tilesProgram = this.getRootNode().getMountedTilesProgram()
-    return tilesProgram ? tilesProgram.getTiles() : []
-  }
-
-  treeComponentDidMount() {
-    this.treeComponentDidUpdate()
-  }
-
-  toStumpCode() {
-    return `div
- class WallTreeComponent
- contextMenuCommand openWallContextMenuCommand
- doubleClickCommand insertPickerTileCommand`
-  }
-
-  _getSelectedTileStumpNodes() {
-    return this.getRootNode()
-      .getWillowBrowser()
-      .getBodyStumpNode()
-      .findStumpNodesWithClass(OhayoConstants.selectedClass) // todo: also filter by .abstractTileTreeComponentNode?
-  }
-
-  _makeSelectable() {
-    const app = this.getRootNode()
-    const stumpNode = this.getStumpNode()
-    const willowBrowser = app.getWillowBrowser()
-    const selector = "." + OhayoConstants.abstractTileTreeComponentNode
-    const shadow = stumpNode.getShadow()
-
-    // I think we need this because jquery selectable breaks click behavior otherwise?
-    shadow.onShadowEvent("click", function(evt) {
-      // Only if this is the direct target
-      if (evt.target === shadow.getShadowElement()) willowBrowser.blurFocusedInput()
-    })
-
-    // todo: can we delay this a bit? getting a perf hit.
-    // can we move off jquery ui?
-    // todo: https://bugs.jqueryui.com/ticket/15044
-    //todo: SPEED!!!
-
-    if (app.getPerfSettings().bodyDragSelect) {
-      let wasAdded = false
-
-      // NOTE: SHADOW AND STUMP GET OUT OF SYNC HERE....NEED TESTS. NEED TO MVOE SHADOW AND STUMP
-      // TO THEIR OWN TESTED REPO.
-      shadow.onShadowEvent("mouseover", function(evt) {
-        if (wasAdded) return true
-        wasAdded = true
-        shadow.makeSelectable({
-          cancel: selector,
-          distance: 10,
-          filter: selector,
-          start: function(evt) {
-            if (evt.shiftKey)
-              willowBrowser
-                .getBodyStumpNode()
-                .findStumpNodesWithClass(OhayoConstants.selectedClass)
-                .forEach(stumpNode => {
-                  stumpNode.addClassToStumpNode(OhayoConstants.staySelectedClass)
-                })
-            else app.clearSelectionCommand()
-          },
-          stop: function() {
-            willowBrowser
-              .getBodyStumpNode()
-              .findStumpNodesWithClass(OhayoConstants.staySelectedClass)
-              .forEach(stumpNode => {
-                stumpNode.removeClassFromStumpNode(OhayoConstants.staySelectedClass)
-                stumpNode.addClassToStumpNode(OhayoConstants.selectedClass)
-              })
-            app.selectTilesByShadowClassCommand()
-            return true
-          }
-        })
-      })
-    }
-  }
-}
-
-window.WallTreeComponent = WallTreeComponent
-;
-
-
-
-
-
-
-
-class WallFlexTreeComponent extends WallTreeComponent {
-  _resizeTiles(stumpNode) {
-    const selected = this._getSelectedTileStumpNodes()
-    selected.length > 1 ? selected.forEach(stumpNode => this._resizeStumpNode(stumpNode)) : this._resizeStumpNode(stumpNode)
-    this.setLayoutToCustomCommand()
-  }
-
-  setLayoutToCustomCommand() {
-    const app = this.getRootNode()
-    const tab = app.getMountedTab()
-    const tabProgram = tab.getTabProgram()
-    tabProgram.touchNode(OhayoConstants.layout).setContent(OhayoConstants.custom)
-    return tab.autosaveAndRender()
-  }
-
-  moveTilesFromShadowsCommand() {
-    // todo: remove this. ditch jqery ui.
-    const app = this.getRootNode()
-    app
-      .getWillowBrowser()
-      .getBodyStumpNode()
-      .findStumpNodesWithClass(OhayoConstants.abstractTileTreeComponentNode)
-      .filter(stumpNode => stumpNode.getStumpNodeTreeComponent().isVisible())
-      .forEach(stumpNode => this._moveStumpNode(stumpNode))
-    return this.setLayoutToCustomCommand()
-  }
-
-  _getLayoutOptions(mountedProgram) {
-    // only include custom IF there are custom properties.
-    const toggleOptions = Object.keys(OhayoConstants.layouts).filter(key => key !== OhayoConstants.layouts.custom)
-    if (mountedProgram.canUseCustomLayout()) toggleOptions.push(OhayoConstants.layouts.custom)
-    return toggleOptions
-  }
-
-  async toggleLayoutCommand() {
-    const mountedProgram = this.getRootNode().getMountedTilesProgram()
-    const currentLayoutNode = mountedProgram.touchNode(OhayoConstants.layout)
-    const currentLayout = currentLayoutNode.getContent() || OhayoConstants.layouts.tiled
-    const newLayout = jtree.Utils.toggle(currentLayout, this._getLayoutOptions(mountedProgram))
-    currentLayoutNode.setContent(newLayout)
-    mountedProgram.getTiles().forEach(tile => tile.makeDirty()) // todo: delete this
-    const tab = mountedProgram.getTab()
-    tab.addStumpCodeMessageToLog(`div Layout changed to '${newLayout}'.`)
-    await tab.autosaveAndRender()
-  }
-
-  _resizeStumpNode(stumpNode) {
-    const tile = stumpNode.getStumpNodeTreeComponent()
-    const shadow = stumpNode.getShadow()
-    const gridSize = this.getGridSize()
-    const position = shadow.getPositionAndDimensions(gridSize)
-    tile.changeTileSettingCommand(OhayoConstants.width, position.width)
-    tile.changeTileSettingCommand(OhayoConstants.height, position.height)
-  }
-
-  getPickerBlock(event) {
-    const offset = 0 // todo: take into account navigator.
-    const gridSize = 20
-    const left = Math.floor((event.offsetX - offset) / gridSize)
-    const _top = Math.floor(event.offsetY / gridSize)
-    return `${OhayoConstants.left} ${left}
-${OhayoConstants.top} ${_top}`
-  }
-
-  _moveStumpNode(stumpNode) {
-    const tile = stumpNode.getStumpNodeTreeComponent()
-    const shadow = stumpNode.getShadow()
-    const gridSize = this.getGridSize()
-    const position = shadow.getPositionAndDimensions(gridSize)
-    tile.changeTileSettingCommand(OhayoConstants.left, position.left)
-    tile.changeTileSettingCommand(OhayoConstants.top, position.top)
-  }
-
-  getGridSize() {
-    return 20
-  }
-
-  treeComponentDidMount() {
-    this._makeTilesMoveableAndResizableAndEditable()
-    super.treeComponentDidMount()
-  }
-
-  _tileMouseOverHandler(tileStumpNode) {
-    const shadow = tileStumpNode.getShadow()
-    if (!shadow.isShadowResizable()) this._makeShadowResizable(shadow)
-    if (!shadow.isShadowDraggable()) this._makeGroupDraggable(tileStumpNode)
-  }
-
-  _makeShadowResizable(shadow) {
-    const gridSize = this.getGridSize()
-    const app = this.getRootNode()
-    const that = this
-    const willowBrowser = app.getWillowBrowser()
-    shadow.makeResizable({
-      handles: "se",
-      grid: gridSize,
-      resize: evt => {
-        //  otherwise will trigger a window resize
-        evt.stopPropagation()
-        evt.preventDefault()
-        return false
-      },
-      stop: ui => that._resizeTiles(willowBrowser.getStumpNodeFromElement(ui.target))
-    })
-  }
-
-  _makeTilesMoveableAndResizableAndEditable() {
-    const app = this.getRootNode()
-    const that = this
-    this.getStumpNode()
-      .getShadow()
-      .onShadowEvent("mouseover", "." + OhayoConstants.abstractTileTreeComponentNode, function() {
-        const tileStumpNode = app.getWillowBrowser().getStumpNodeFromElement(this)
-        that._tileMouseOverHandler(tileStumpNode)
-      })
-  }
-
-  _updateSelectedOnMove(draggedStumpNode, change) {
-    this._getSelectedTileStumpNodes()
-      .filter(stumpNode => stumpNode !== draggedStumpNode)
-      .forEach(stumpNode => {
-        const position = {
-          top: parseFloat(stumpNode.getStumpNodeCss("top")),
-          left: parseFloat(stumpNode.getStumpNodeCss("left"))
-        }
-        const newCss = {
-          transform: "",
-          top: position.top + change.top + "px",
-          left: position.left + change.left + "px"
-        }
-        stumpNode.setStumpNodeCss(newCss)
-      })
-  }
-
-  _getElementChangeInPixels(ui, offset) {
-    return {
-      left: ui.offset.left - offset.left,
-      top: ui.offset.top - offset.top
-    }
-  }
-
-  _makeGroupDraggable(stumpNode) {
-    const shadow = stumpNode.getShadow()
-    let offset
-    let originalLeft
-    let originalTop
-    let newLeft
-    let newTop
-    const that = this
-    const app = this.getRootNode()
-    const gridSize = this.getGridSize()
-
-    const options = {
-      stop: function(event, ui) {
-        shadow.removeClassFromShadow("noTransition")
-        shadow.setShadowAttr("data-translate", newLeft + " " + newTop)
-        const change = that._getElementChangeInPixels(ui, offset)
-        that._updateSelectedOnMove(stumpNode, change)
-        offset = ui // todo: what does this do?
-        app.moveTilesFromShadowsCommand()
-      },
-      grid: [gridSize, gridSize],
-      handle: ".TileGrabber",
-      drag: function(event, ui) {
-        if (!shadow.shadowHasClass(OhayoConstants.selectedClass)) return
-        // move entire selection
-        const change = that._getElementChangeInPixels(ui, offset)
-        that
-          ._getSelectedTileStumpNodes()
-          .filter(selectedStumpNode => selectedStumpNode !== stumpNode)
-          .forEach(selectedStumpNode => selectedStumpNode.setStumpNodeCss({ transform: `translate(${change.left}px, ${change.top}px)` }))
-      },
-      start: function(event, ui) {
-        offset = ui.offset
-        shadow.addClassToShadow("noTransition")
-        const translate = shadow.getShadowAttr("data-translate")
-        if (translate) {
-          originalLeft = parseInt(translate.split(" ")[0])
-          originalTop = parseInt(translate.split(" ")[1])
-        } else {
-          originalLeft = 0
-          originalTop = 0
-        }
-      }
-    }
-
-    shadow.addClassToShadow("draggable").makeDraggable(options)
-  }
-}
-
-window.WallFlexTreeComponent
- = WallFlexTreeComponent
-;
-
-
 
 
 
@@ -41398,15 +40033,8 @@ window.WallFlexTreeComponent
 class TabsTreeComponent extends AbstractTreeComponent {
   createParser() {
     return new jtree.TreeNode.Parser(undefined, {
-      tab: TabTreeComponent,
-      wall: WallTreeComponent,
-      flex: WallFlexTreeComponent
+      tab: TabTreeComponent
     })
-  }
-
-  removeWall() {
-    const wall = this.getWall()
-    if (wall) wall.unmountAndDestroy()
   }
 
   getDependencies() {
@@ -41418,38 +40046,19 @@ class TabsTreeComponent extends AbstractTreeComponent {
     return this.getChildrenByNodeConstructor(TabTreeComponent)
   }
 
-  getWall() {
-    return this.getNode(StudioConstants.wall) || this.getNode(StudioConstants.flex)
-  }
-
-  addWall(type = StudioConstants.wall) {
-    this.removeWall()
-    return this.appendLine(type)
-  }
-
   addTab(url) {
     const line = `tab ${new FullDiskPath(url).toString()}`
-    // todo: add before wall
-    return this.getWall() ? this.insertLine(line, -1) : this.appendLine(line)
-  }
-
-  getGutterWidth() {
-    return this.getParent().getGutterWidth()
+    return this.appendLine(line)
   }
 
   toHakonCode() {
     const theme = this.getTheme()
-    const left = this.getGutterWidth()
-
     // todo: add comments to Hakon? So we can annotate why we have valignTop
     const valignTop = "vertical-align top" // https://stackoverflow.com/questions/23529369/why-does-x-overflowhidden-cause-extra-space-below
     // todo: make tab cell width dynamic? smaller as more tabs open?s
 
     return `.TabsTreeComponent
- left ${left}px
- width calc(100% - ${left}px)
- height calc(100% - 30px)
- position absolute
+ display inline-block
 .TabStub
  background ${theme.tabBackground}
  height 30px
@@ -41498,14 +40107,281 @@ window.TabsTreeComponent
 
 
 
+class LogoTreeComponent extends AbstractTreeComponent {
+  toStumpCode() {
+    return `a ${StudioConstants.productName}
+ clickCommand toggleHelpCommand`
+  }
+}
+
+class NewButtonTreeComponent extends AbstractTreeComponent {
+  toStumpCode() {
+    return `a +
+ id newButton
+ clickCommand createNewBlankProgramCommand
+ value untitled.ohayo`
+  }
+}
+
+class MenuTreeComponent extends AbstractTreeComponent {
+  createParser() {
+    return new jtree.TreeNode.Parser(undefined, {
+      logo: LogoTreeComponent,
+      tabs: TabsTreeComponent,
+      newButton: NewButtonTreeComponent
+    })
+  }
+
+  getDependencies() {
+    return [{ getLineModifiedTime: () => this.getParent().getWindowSizeMTime() }]
+  }
+
+  toHakonCode() {
+    const theme = this.getTheme()
+    return `.MenuTreeComponent
+ ${theme.disableTextSelect(1)}
+ font-size 14px
+ padding-left 5px
+ box-sizing border-box
+ right 0
+ left 0
+ position relative
+ height 30px
+ z-index 92
+ white-space nowrap
+ background ${theme.menuBackground}
+ color ${theme.darkBlack}
+ display flex
+ a
+  padding-right 5px
+  line-height 30px
+  display inline-block
+  color ${theme.menuTreeComponentColor}`
+  }
+}
+
+window.MenuTreeComponent
+ = MenuTreeComponent
+;
+
+
+
+
+
+
+
+class TileToolbarTreeComponent extends AbstractTreeComponent {
+  toHakonCode() {
+    const theme = this.getTheme()
+    return `.TileToolbarTreeComponent
+ background ${theme.contextMenuBackground}
+ border 1px solid ${theme.lineColor}
+ font-size 12px
+ position absolute
+ padding 8px
+ z-index 991
+ min-width 300px
+ top 100%
+ right 0
+ .TileCommandsDropDown
+  a
+   display block
+ cursor pointer
+ .TableInspection
+  margin-top 5px
+  border 1px solid ${theme.lineColor}
+  td
+   padding 2px 8px
+   text-align left
+  tr:nth-child(odd)
+   background-color ${theme.veryLightGrey}
+ svg
+  fill ${theme.greyish}
+  padding 1px 3px 3px 3px
+  &:hover
+   fill ${theme.foregroundColor}`
+  }
+
+  getTargetTile() {
+    return this.getParent()
+  }
+
+  createProgramFromFocusedTileExampleCommand(uno, dos) {
+    return this.getTargetTile().createProgramFromTileExampleCommand(uno, dos)
+  }
+
+  cloneFocusedTileCommand(uno, dos) {
+    return this.getTargetTile().cloneTileCommand(uno, dos)
+  }
+  destroyFocusedTileCommand(uno, dos) {
+    return this.getTargetTile().destroyTileCommand(uno, dos)
+  }
+  inspectFocusedTileCommand(uno, dos) {
+    return this.getTargetTile().inspectTileCommand(uno, dos)
+  }
+  changeFocusedTileTypeCommand(uno, dos) {
+    return this.getTargetTile().changeTileTypeCommand(uno, dos)
+  }
+  changeFocusedTileParentCommand(uno, dos) {
+    return this.getTargetTile().changeParentCommand(uno, dos)
+  }
+  changeFocusedTileContentAndRenderCommand(uno, dos) {
+    return this.getTargetTile().changeTileContentAndRenderCommand(uno, dos)
+  }
+
+  toStumpCode() {
+    const tile = this.getTargetTile()
+    const suggestions = this._getSuggestionsStumpCode()
+    const exampleTile = tile.getExampleTemplate()
+    let exampleTileButton = ""
+    if (exampleTile) {
+      exampleTileButton = `span ${Icons("function", 20)}
+ title See an example program with '${tile.getFirstWord()}'
+ clickCommand createProgramFromTileExampleCommand`
+    }
+
+    const links = `a Reload
+ clickCommand fetchAndReloadFocusedTabCommand
+a Copy tile with inputs
+ tabindex -1
+ clickCommand copyTargetTileCommand
+a Copy data as tree
+ clickCommand copyTargetTileDataAsTreeCommand
+a Copy data as javascript
+ clickCommand copyTargetTileDataAsJavascriptCommand
+a Copy data as tsv
+ clickCommand copyTargetTileDataCommand
+ value \t
+a Copy data as csv
+ clickCommand copyTargetTileDataCommand
+ value ,
+a Export data to csv file
+ clickCommand exportTargetTileDataCommand
+a Export data to tree file
+ clickCommand exportTargetTileDataCommand
+ value tree`
+
+    return new jtree.TreeNode(`div
+ class TileToolbarTreeComponent
+ span ${Icons("copy", 20)}
+  title Duplicate Tile
+  clickCommand cloneTileCommand
+ span ${Icons("trash", 20)}
+  title Delete Tile
+  clickCommand destroyTileCommand
+ span ${Icons("inspector", 20)}
+  title Debug Tile
+  clickCommand inspectTileCommand
+ {exampleTileButton}
+ div
+  class TileCommandsDropDown
+  {links}`).templateToString({ exampleTileButton, links})
+  }
+
+  _getSuggestionsStumpCode() {
+    //return `div Add Suggested:`
+    return "" //todo:
+  }
+}
+
+window.TileToolbarTreeComponent
+ = TileToolbarTreeComponent
+;
+
+const Version = "18.0.0"
+if (typeof exports !== "undefined") module.exports = Version
+;
+
+
+
+
+
+class WallTreeComponent extends AbstractTreeComponent {
+  // pin?
+  // duplicate?
+  // reload?
+  toHakonCode() {
+    const theme = this.getTheme()
+    return `.WallTreeComponent
+ background-color ${theme.wallBackground}
+ background-image ${theme.wallBackgroundImage || "none"}
+ display block
+ position relative
+ height 100%
+ overflow scroll
+.insertChildTileButton
+ text-align center
+ font-size 28px
+ font-weight bold
+ opacity .9
+ width 50px
+ margin auto
+ &:hover
+  opacity 1
+  cursor pointer
+
+.${OhayoConstants.selectedClass}
+ outline 3px solid ${theme.selectedOutline}`
+  }
+
+  async insertAdjacentTileCommand() {
+    const app = this.getRootNode()
+    const tilesProgram = app.getMountedTilesProgram()
+    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
+    const newTiles = app
+      .getNodeCursors()
+      .slice(0, 1)
+      .map(cursor => cursor.appendLine(OhayoConstants.pickerTile))
+    const promise = await app.getMountedTab().autosaveAndRender()
+    tilesProgram.clearSelection()
+    newTiles.forEach(tile => tile.selectTile())
+    return promise
+  }
+
+  getDependencies() {
+    return [{ getLineModifiedTime: () => this.getRootNode().getWindowSizeMTime() }]
+  }
+
+  _getChildTreeComponents() {
+    const tilesProgram = this.getRootNode().getMountedTilesProgram()
+    return tilesProgram ? tilesProgram.getTiles() : []
+  }
+
+  treeComponentDidMount() {
+    this.treeComponentDidUpdate()
+  }
+
+  toStumpCode() {
+    return `div
+ class WallTreeComponent
+ div +
+  class insertChildTileButton
+  clickCommand insertChildPickerTileButton`
+  }
+
+  _getSelectedTileStumpNodes() {
+    return this.getRootNode()
+      .getWillowBrowser()
+      .getBodyStumpNode()
+      .findStumpNodesWithClass(OhayoConstants.selectedClass) // todo: also filter by .abstractTileTreeComponentNode?
+  }
+}
+
+window.WallTreeComponent = WallTreeComponent
+;
+
+
+
+
+
 
 
 
 class PanelTreeComponent extends AbstractTreeComponent {
   createParser() {
     return new jtree.TreeNode.Parser(undefined, {
-      tabs: TabsTreeComponent,
-      gutter: GutterTreeComponent
+      gutter: GutterTreeComponent,
+      wall: WallTreeComponent
     })
   }
 
@@ -41543,129 +40419,25 @@ class PanelTreeComponent extends AbstractTreeComponent {
     return this
   }
 
-  mountTabByIndex(index) {
-    this.setMountedTab(this.getTabs()[index])
-    this.getRootNode().renderApp()
-    return this
+  getWall() {
+    return this.getNode(StudioConstants.wall)
   }
 
-  getMountedTab() {
-    return this._getMountedTab()
+  removeWall() {
+    const wall = this.getWall()
+    if (wall) wall.unmountAndDestroy()
   }
 
-  _getMountedTab() {
-    return this._focusedTab
-  }
-
-  getOpenTabByFullFilePath(fullPath) {
-    return this.getTabs().find(tab => tab.getFullTabFilePath() === fullPath)
-  }
-
-  setMountedTabName(tabName) {
-    if (tabName) this.setWord(2, tabName)
-    else this.deleteWordAt(2)
-  }
-
-  getMountedTabName() {
-    return this.getWord(2)
-  }
-
-  setMountedTab(tab) {
-    const currentTab = this._getMountedTab()
-    if (currentTab === tab) return this
-    else if (currentTab) this._getTabsNode().removeWall()
-    this._focusedTab = tab
-    this.setMountedTabName(tab.getFullTabFilePath())
-    const wallType = tab.getTabProgram().wallType
-    this._getTabsNode().addWall(wallType)
-    this._updateLocationForRestoreOnRefresh()
-    return this
-  }
-
-  _getTabsNode() {
-    return this.getNode("tabs")
-  }
-
-  async getAlreadyOpenTabOrOpenFullFilePathInNewTab(filePath, andMount = false) {
-    const existingTab = this.getOpenTabByFullFilePath(new FullDiskPath(filePath).toString())
-    if (existingTab) {
-      if (andMount) {
-        this.setMountedTab(existingTab)
-        this.getRootNode().renderApp()
-      }
-      return existingTab
-    }
-
-    const tab = this._getTabsNode().addTab(new FullDiskPath(filePath).toString())
-
-    await tab._fetchTabInitProgramRenderAndRun(andMount)
-
-    this.getRootNode().renderApp()
-    return tab
-  }
-
-  closeTabByIndex(index) {
-    return this.closeTab(this.getTabs()[index])
-  }
-
-  closeTab(tab) {
-    if (tab.isMounted()) {
-      const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs())
-      this._getTabsNode().removeWall()
-      tab.unmountAndDestroy()
-      delete this._focusedTab
-      if (tabToMountNext) this.setMountedTab(tabToMountNext)
-      else this.setMountedTabName()
-    } else tab.destroy()
-    this._updateLocationForRestoreOnRefresh()
-  }
-
-  _updateLocationForRestoreOnRefresh() {
-    this.getRootNode().saveAppState()
-  }
-
-  closeAllTabs() {
-    this._getTabsNode()
-      .getOpenTabs()
-      .forEach(tab => {
-        this.closeTab(tab)
-      })
-  }
-
-  closeAllTabsExceptFocusedTab() {
-    const mountedTab = this.getMountedTab()
-    this._getTabsNode()
-      .getOpenTabs()
-      .forEach(tab => {
-        if (tab !== mountedTab) this.closeTab(tab)
-      })
-  }
-
-  mountPreviousTab() {
-    const tabs = this.getTabs()
-    const mountedTab = this._getMountedTab()
-    if (tabs.length < 2 || !mountedTab) return this
-    const index = tabs.indexOf(mountedTab)
-    return this.mountTabByIndex(index === 0 ? tabs.length - 1 : index - 1)
-  }
-
-  mountNextTab() {
-    const tabs = this.getTabs()
-    const mountedTab = this._getMountedTab()
-    if (tabs.length < 2 || !mountedTab) return this
-    const index = tabs.indexOf(mountedTab)
-    return this.mountTabByIndex(index === tabs.length - 1 ? 0 : index + 1)
-  }
-
-  getTabs() {
-    return this._getTabsNode().getOpenTabs()
+  // todo: remove?
+  addWall() {
+    this.removeWall()
+    return this.appendLine(StudioConstants.wall)
   }
 }
 
 window.PanelTreeComponent
  = PanelTreeComponent
 ;
-
 
 
 
@@ -41791,9 +40563,8 @@ class StudioApp extends AbstractTreeComponent {
   }
 
   _restoreTabs() {
-    const panel = this.getFocusedPanel()
-    const tabToMount = panel.getMountedTabName()
-    panel.getTabs().forEach(async tab => {
+    const tabToMount = this.getMountedTabName()
+    this.getTabs().forEach(async tab => {
       await tab._fetchTabInitProgramRenderAndRun(tab.getFullTabFilePath() === tabToMount)
       this.renderApp()
     })
@@ -41803,18 +40574,8 @@ class StudioApp extends AbstractTreeComponent {
     return this.isNodeJs() ? jtree.Utils.findProjectRoot(__dirname, "ohayo") : ""
   }
 
-  getPerfSettings() {
-    if (!this._perfSettings)
-      this._perfSettings = {
-        codeMirrorEnabled: true,
-        bodyDragSelect: true,
-        max10tiles: false
-      }
-    return this._perfSettings
-  }
-
   terminalHasFocus() {
-    const terminalNode = this.getFocusedPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.terminal}`)
+    const terminalNode = this.getPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.terminal}`)
     return terminalNode && terminalNode.hasFocus()
   }
 
@@ -41913,8 +40674,7 @@ ${StudioConstants.panel} 400
 
   createParser() {
     const map = {}
-    map[StudioConstants.tileContextMenu] = TileContextMenuTreeComponent
-    map[StudioConstants.tabContextMenu] = TabContextMenuTreeComponent
+    map[StudioConstants.tabMenu] = TabMenuTreeComponent
     map[StudioConstants.panel] = PanelTreeComponent
     map[StudioConstants.menu] = MenuTreeComponent
     map[StudioConstants.theme] = ThemeTreeComponent
@@ -41995,13 +40755,12 @@ ${StudioConstants.panel} 400
   }
 
   async _openOhayoProgram(name) {
-    const panel = this.getFocusedPanel()
     const disk = this.getDefaultDisk()
     const fullPath = disk.getPathBase() + name
-    const openTab = panel.getOpenTabByFullFilePath(fullPath)
+    const openTab = this.getOpenTabByFullFilePath(fullPath)
 
     if (openTab) {
-      panel.setMountedTab(openTab)
+      this.setMountedTab(openTab)
       return undefined
     }
 
@@ -42028,12 +40787,83 @@ ${StudioConstants.panel} 400
     return res
   }
 
-  getFocusedPanel() {
-    return this.getNode(StudioConstants.panel)
+  setMountedTab(tab) {
+    const currentTab = this._getMountedTab()
+    if (currentTab === tab) return this
+    else if (currentTab) this._getTabsNode().removeWall()
+    this._focusedTab = tab
+    this.setMountedTabName(tab.getFullTabFilePath())
+    this._getTabsNode().addWall()
+    this._updateLocationForRestoreOnRefresh()
+    return this
   }
 
-  getMountedTab() {
-    return this.getFocusedPanel().getMountedTab()
+  closeAllTabsExceptFocusedTab() {
+    const mountedTab = this.getMountedTab()
+    this._getTabsNode()
+      .getOpenTabs()
+      .forEach(tab => {
+        if (tab !== mountedTab) this.closeTab(tab)
+      })
+  }
+
+  mountPreviousTab() {
+    const tabs = this.getTabs()
+    const mountedTab = this._getMountedTab()
+    if (tabs.length < 2 || !mountedTab) return this
+    const index = tabs.indexOf(mountedTab)
+    return this.mountTabByIndex(index === 0 ? tabs.length - 1 : index - 1)
+  }
+
+  mountNextTab() {
+    const tabs = this.getTabs()
+    const mountedTab = this._getMountedTab()
+    if (tabs.length < 2 || !mountedTab) return this
+    const index = tabs.indexOf(mountedTab)
+    return this.mountTabByIndex(index === tabs.length - 1 ? 0 : index + 1)
+  }
+
+  getTabs() {
+    return this._getTabsNode().getOpenTabs()
+  }
+
+  _updateLocationForRestoreOnRefresh() {
+    this.getRootNode().saveAppState()
+  }
+
+  async getAlreadyOpenTabOrOpenFullFilePathInNewTab(filePath, andMount = false) {
+    const existingTab = this.getOpenTabByFullFilePath(new FullDiskPath(filePath).toString())
+    if (existingTab) {
+      if (andMount) {
+        this.setMountedTab(existingTab)
+        this.getRootNode().renderApp()
+      }
+      return existingTab
+    }
+
+    const tab = this._getTabsNode().addTab(new FullDiskPath(filePath).toString())
+
+    await tab._fetchTabInitProgramRenderAndRun(andMount)
+
+    this.getRootNode().renderApp()
+    return tab
+  }
+
+  getOpenTabByFullFilePath(fullPath) {
+    return this.getTabs().find(tab => tab.getFullTabFilePath() === fullPath)
+  }
+
+  setMountedTabName(tabName) {
+    if (tabName) this.setWord(2, tabName)
+    else this.deleteWordAt(2)
+  }
+
+  getMountedTabName() {
+    return this.getWord(2)
+  }
+
+  getPanel() {
+    return this.getNode(StudioConstants.panel)
   }
 
   getMountedTilesProgram() {
@@ -42046,12 +40876,12 @@ ${StudioConstants.panel} 400
   }
 
   async _openFullDiskFilePathInNewTab(fullDiskFilePath) {
-    const res = await this.getFocusedPanel().getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString())
+    const res = await this.getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString())
     return res
   }
 
   async openFullPathInNewTabAndFocus(fullDiskFilePath) {
-    const tab = await this.getFocusedPanel().getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString(), true)
+    const tab = await this.getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString(), true)
     return tab
   }
 
@@ -42224,9 +41054,7 @@ ${StudioConstants.panel} 400
   }
 
   getAppWall() {
-    return this.getFocusedPanel()
-      .getNode(StudioConstants.tabs)
-      .getWall()
+    return this.getPanel().getWall()
   }
 
   // for tests
@@ -42239,8 +41067,7 @@ ${StudioConstants.panel} 400
   // for tests
   getMountedTilesDiagnostic() {
     return jtree.Utils.flatten(
-      this.getFocusedPanel()
-        .getNode(StudioConstants.tabs)
+      this._getTabsNode()
         .getOpenTabs()
         .map(tab =>
           tab
@@ -42382,27 +41209,6 @@ ${StudioConstants.panel} 400
     return this.getTargetNode().exportTileDataCommand(uno, dos)
   }
 
-  moveTilesFromShadowsCommand() {
-    return this.getAppWall().moveTilesFromShadowsCommand()
-  }
-
-  async toggleLayoutCommand() {
-    const wall = this.getAppWall()
-    return wall.toggleLayoutCommand && wall.toggleLayoutCommand() // todo: cleanup
-  }
-
-  async togglePerfModeCommand() {
-    const settings = this.getPerfSettings()
-    Object.keys(settings).forEach(key => {
-      settings[key] = !settings[key]
-    })
-
-    // todo: what is this?.. ah, codeMirror vs terminal should be different.
-    this.getFocusedPanel().toggleGutter()
-    this.getFocusedPanel().toggleGutter()
-    this.renderApp()
-  }
-
   async cellCheckProgramCommand() {
     const program = this.mountedTab.getTabProgram()
     const errors = program.getAllErrors().map(err => err.getMessage())
@@ -42451,15 +41257,11 @@ ${StudioConstants.panel} 400
   }
 
   async openDeleteAllTabsPromptCommand() {
-    const tabs = this.focusedPanel.getTabs()
+    const tabs = this.getTabs()
 
     const shouldProceed = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${tabs.length} open files?`)
 
     return shouldProceed ? Promise.all(tabs.map(tab => tab.unlinkTab())) : false
-  }
-
-  async toggleAndRenderNewDropDownCommand() {
-    this.getNode(StudioConstants.menu).toggleAndRender(StudioConstants.newDropDownMenu)
   }
 
   async closeAllDropDownMenusCommand() {
@@ -42477,8 +41279,13 @@ ${StudioConstants.panel} 400
     tiles.forEach(tile => tile.selectTile())
   }
 
-  insertPickerTileCommand() {
-    return this.getAppWall().insertPickerTileCommand()
+  async insertChildPickerTileButton() {
+    const program = this.getMountedTilesProgram()
+    const tiles = program.getTiles()
+    const target = tiles.length ? tiles[tiles.length - 1] : program
+    const newTile = target.appendLineAndChildren(OhayoConstants.pickerTile)
+    await this.getMountedTab().autosaveAndRender()
+    newTile.selectTile()
   }
 
   insertAdjacentTileCommand() {
@@ -42599,12 +41406,42 @@ ${StudioConstants.panel} 400
   }
 
   async mountTabByIndexCommand(index) {
-    this.focusedPanel.mountTabByIndex(index)
+    this.mountTabByIndex(index)
   }
 
   async closeTabByIndexCommand(index) {
-    this.focusedPanel.closeTabByIndex(index)
+    this.closeTab(this.getTabs()[index])
     this.renderApp()
+  }
+
+  mountTabByIndex(index) {
+    this.setMountedTab(this.getTabs()[index])
+    this.getRootNode().renderApp()
+    return this
+  }
+
+  getMountedTab() {
+    return this._getMountedTab()
+  }
+
+  _getMountedTab() {
+    return this._focusedTab
+  }
+
+  _getTabsNode() {
+    return this.getNode("menu tabs")
+  }
+
+  closeTab(tab) {
+    if (tab.isMounted()) {
+      const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs())
+      this._getTabsNode().removeWall()
+      tab.unmountAndDestroy()
+      delete this._focusedTab
+      if (tabToMountNext) this.setMountedTab(tabToMountNext)
+      else this.setMountedTabName()
+    } else tab.destroy()
+    this._updateLocationForRestoreOnRefresh()
   }
 
   async toggleAutoSaveCommand() {
@@ -42612,10 +41449,6 @@ ${StudioConstants.panel} 400
     if (!newSetting) this.storeValue(StorageKeys.autoSave, "false")
     else this.removeValue(StorageKeys.autoSave)
     this.addStumpCodeMessageToLog(`div Autosave is ${newSetting}`)
-  }
-
-  get focusedPanel() {
-    return this.getFocusedPanel()
   }
 
   get willowBrowser() {
@@ -42643,7 +41476,7 @@ ${StudioConstants.panel} 400
 
     const newName = await this.promptToMoveFile(mountedTab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
     if (!newName) return false
-    await this.focusedPanel.closeTab(mountedTab)
+    await this.closeTab(mountedTab)
     const tab = await this.openFullPathInNewTabAndFocus(newName)
     this.renderApp()
   }
@@ -42669,7 +41502,7 @@ ${StudioConstants.panel} 400
   }
 
   async closeMountedProgramCommand() {
-    this.focusedPanel.closeTab(this.mountedTab)
+    this.closeTab(this.mountedTab)
     this.renderApp()
   }
 
@@ -42680,11 +41513,6 @@ ${StudioConstants.panel} 400
   async selectAllTilesCommand() {
     // todo: bug. they are not showing selected state.
     this.mountedProgram.getTiles().forEach(tile => tile.selectTile())
-  }
-
-  async selectTilesByShadowClassCommand(className) {
-    this.addToCommandLog("app selectTilesByShadowClassCommand") // todo: what is this?
-    this.mountedTab.getTabWall().selectTilesByShadowClass(className)
   }
 
   async clearSelectionCommand() {
@@ -42715,7 +41543,7 @@ ${StudioConstants.panel} 400
   }
 
   async duplicateSelectionCommand() {
-    const newTiles = this.mountedProgram.getSelectedNodes().map(tile => tile.cloneAndOffset())
+    const newTiles = this.mountedProgram.getSelectedNodes().map(tile => tile.duplicate())
     await this.renderApp()
     this.mountedProgram.clearSelection()
     newTiles.forEach(tile => tile.selectTile())
@@ -42733,25 +41561,30 @@ ${StudioConstants.panel} 400
     const tab = this.mountedTab
     await tab.unlinkTab()
 
-    this.focusedPanel.closeTab(tab)
+    this.closeTab(tab)
     this.renderApp()
   }
 
   async mountPreviousTabCommand() {
-    this.focusedPanel.mountPreviousTab()
+    this.mountPreviousTab()
   }
 
   async mountNextTabCommand() {
-    this.focusedPanel.mountNextTab()
+    this.mountNextTab()
   }
 
   async closeAllTabsCommand() {
-    this.focusedPanel.closeAllTabs() // todo: confirm before closing if unsaved changes?
+    this.closeAllTabs() // todo: confirm before closing if unsaved changes?
+    this._getTabsNode()
+      .getOpenTabs()
+      .forEach(tab => {
+        this.closeTab(tab)
+      })
     this.renderApp()
   }
 
   async closeAllTabsExceptFocusedTabCommand() {
-    this.focusedPanel.closeAllTabsExceptFocusedTab() // todo: confirm before closing if unsaved changes?
+    this.closeAllTabsExceptFocusedTab() // todo: confirm before closing if unsaved changes?
     this.renderApp()
   }
 
@@ -42777,12 +41610,12 @@ ${StudioConstants.panel} 400
 
   // TODO: make it slidable.?
   async toggleGutterWidthCommand() {
-    this.focusedPanel.toggleGutterWidth()
+    this.toggleGutterWidth()
     this.renderApp()
   }
 
   async toggleGutterCommand() {
-    this.getFocusedPanel().toggleGutter()
+    this.getPanel().toggleGutter()
     this.renderApp()
   }
 
@@ -42929,7 +41762,7 @@ ${StudioConstants.panel} 400
     const handGrammarProgram = this.mountedProgram.getHandGrammarProgram()
     const topNodeTypes = handGrammarProgram.getTopNodeTypeDefinitions().map(def => def.get("crux"))
 
-    const sourceCode = topNodeTypes.join("\n") + `\n${OhayoConstants.layout} ${OhayoConstants.layouts.column}`
+    const sourceCode = topNodeTypes.join("\n")
     const tab = await this._createAndOpen(sourceCode, "all-tiles" + StudioConstants.ohayoExtension)
     const data = tab
       .getTabProgram()
@@ -42949,21 +41782,20 @@ ${StudioConstants.panel} 400
   async _runSpeedTestCommand() {
     const files = await this.getDefaultDisk().readFiles()
     const startTime = Date.now()
-    const focusedPanel = this.focusedPanel
 
     const timePromises = files.map(async file => {
       const url = file.getFileLink()
       const newTab = await this._openFullDiskFilePathInNewTab(url)
-      const mountedTab = focusedPanel.getMountedTab()
-      focusedPanel.setMountedTab(newTab)
-      if (mountedTab) focusedPanel.closeTab(mountedTab)
+      const mountedTab = this.getMountedTab()
+      this.setMountedTab(newTab)
+      if (mountedTab) this.closeTab(mountedTab)
       this.renderApp()
       return newTab.getTabProgram().toRunTimeStats()
     })
 
     const times = await Promise.all(timePromises)
     // todo: trigger shift+w shortcut instead of this if clause.
-    if (focusedPanel.getMountedTab()) this.closeMountedProgramCommand()
+    if (this.getMountedTab()) this.closeMountedProgramCommand()
     const rowsAsCsv = new jtree.TreeNode(times)
     const runTime = Date.now() - startTime
     const title = `Program Load Times ${moment().format("MM/DD/YYYY")} version ${this.getVersion()}. Run time: ${runTime}`

@@ -1,5 +1,4 @@
 doc.title Word Cloud
-doc.layout column
 data.inline
  text.wordCount
   text.wordcloud
