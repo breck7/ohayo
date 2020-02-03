@@ -168,4 +168,4 @@ class TabTreeComponent extends AbstractTreeComponent {
   }
 }
 
-module.exports = { TabTreeComponent, TabMenuTreeComponent }
+module.exports = { TabTreeComponent, MountedTabTreeComponent, TabMenuTreeComponent }

@@ -116,7 +116,6 @@ class StudioApp extends AbstractTreeComponent {
   }
 
   _onResizeEndEvent(event) {
-    this.touchNode(StudioConstants.windowSize).setContent(`${event.width} ${event.height}`)
     delete this._bodyShadowDimensionsCache
     this.renderApp()
   }
@@ -160,11 +159,6 @@ class StudioApp extends AbstractTreeComponent {
       width: bodyShadow.getShadowWidth(),
       height: bodyShadow.getShadowHeight()
     }
-  }
-
-  getWindowSizeMTime() {
-    const node = this.getNode(StudioConstants.windowSize)
-    return node ? node.getLineModifiedTime() : 0
   }
 
   static getDefaultStartState() {
