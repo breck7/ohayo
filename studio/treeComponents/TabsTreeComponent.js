@@ -18,7 +18,7 @@ class TabsTreeComponent extends AbstractTreeComponent {
   }
 
   addTab(url) {
-    const line = `tab ${new FullDiskPath(url).toString()}`
+    const line = `tab unmounted ${new FullDiskPath(url).toString()}`
     return this.appendLine(line)
   }
 
@@ -31,7 +31,6 @@ class TabsTreeComponent extends AbstractTreeComponent {
     return `.TabsTreeComponent
  display inline-block
 .TabStub
- background rgba(0,0,0,.05)
  height 30px
  display inline-block
  max-width 150px

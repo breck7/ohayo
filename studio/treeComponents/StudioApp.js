@@ -121,9 +121,8 @@ class StudioApp extends AbstractTreeComponent {
   }
 
   _restoreTabs() {
-    const tabToMount = this.getMountedTabName()
     this.getTabs().forEach(async tab => {
-      await tab._fetchTabInitProgramRenderAndRun(tab.getFullTabFilePath() === tabToMount)
+      await tab._fetchTabInitProgramRenderAndRun(tab.isMountedTab())
       this.renderApp()
     })
   }
@@ -345,9 +344,12 @@ ${StudioConstants.panel} 400
   setMountedTab(tab) {
     const currentTab = this._getMountedTab()
     if (currentTab === tab) return this
-    else if (currentTab) this.getPanel().removeWall()
+    else if (currentTab) {
+      currentTab.markAsUnmounted()
+      this.getPanel().removeWall()
+    }
     this._focusedTab = tab
-    this.setMountedTabName(tab.getFullTabFilePath())
+    tab.markAsMounted()
     this.getPanel().addWall()
     this._updateLocationForRestoreOnRefresh()
     return this
@@ -367,7 +369,7 @@ ${StudioConstants.panel} 400
     const mountedTab = this._getMountedTab()
     if (tabs.length < 2 || !mountedTab) return this
     const index = tabs.indexOf(mountedTab)
-    return this.mountTabByIndex(index === 0 ? tabs.length - 1 : index - 1)
+    return this._mountTabByIndex(index === 0 ? tabs.length - 1 : index - 1)
   }
 
   mountNextTab() {
@@ -375,7 +377,7 @@ ${StudioConstants.panel} 400
     const mountedTab = this._getMountedTab()
     if (tabs.length < 2 || !mountedTab) return this
     const index = tabs.indexOf(mountedTab)
-    return this.mountTabByIndex(index === tabs.length - 1 ? 0 : index + 1)
+    return this._mountTabByIndex(index === tabs.length - 1 ? 0 : index + 1)
   }
 
   getTabs() {
@@ -406,15 +408,6 @@ ${StudioConstants.panel} 400
 
   getOpenTabByFullFilePath(fullPath) {
     return this.getTabs().find(tab => tab.getFullTabFilePath() === fullPath)
-  }
-
-  setMountedTabName(tabName) {
-    if (tabName) this.set("mountedFile", tabName)
-    else this.delete("mountedFile")
-  }
-
-  getMountedTabName() {
-    return this.get("mountedFile")
   }
 
   getPanel() {
@@ -961,7 +954,7 @@ ${StudioConstants.panel} 400
   }
 
   async mountTabByIndexCommand(index) {
-    this.mountTabByIndex(index)
+    this._mountTabByIndex(index)
   }
 
   async closeTabByIndexCommand(index) {
@@ -969,7 +962,7 @@ ${StudioConstants.panel} 400
     this.renderApp()
   }
 
-  mountTabByIndex(index) {
+  _mountTabByIndex(index) {
     this.setMountedTab(this.getTabs()[index])
     this.getRootNode().renderApp()
     return this
@@ -991,10 +984,10 @@ ${StudioConstants.panel} 400
     if (tab.isMounted()) {
       const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs())
       this.getPanel().removeWall()
+      tab.markAsUnmounted()
       tab.unmountAndDestroy()
       delete this._focusedTab
       if (tabToMountNext) this.setMountedTab(tabToMountNext)
-      else this.setMountedTabName()
     } else tab.destroy()
     this._updateLocationForRestoreOnRefresh()
   }

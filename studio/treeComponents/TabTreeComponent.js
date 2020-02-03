@@ -39,14 +39,13 @@ class TabTreeComponent extends AbstractTreeComponent {
     const index = this.getIndex()
     const fullPath = this.getFullTabFilePath()
     const filename = this.getFileName()
-    const isMounted = app.getMountedTabName() === fullPath
     return `a ${filename}
  clickCommand mountTabByIndexCommand
  collapse
  value ${index}
  title ${fullPath}
  id tab${index}
- class TabStub ${isMounted ? "mountedTab" : ""}
+ class TabStub ${this.isMountedTab() ? "mountedTab" : ""}
  span ▾
   collapse
   clickCommand openTabMenuCommand
@@ -134,7 +133,7 @@ class TabTreeComponent extends AbstractTreeComponent {
   }
 
   getFullTabFilePath() {
-    return this.getWordsFrom(1).join(" ")
+    return this.getWordsFrom(2).join(" ")
   }
 
   getFileName() {
@@ -143,6 +142,20 @@ class TabTreeComponent extends AbstractTreeComponent {
 
   getTabWall() {
     return this.getRootNode().getAppWall()
+  }
+
+  isMountedTab() {
+    return this.getWord(1) === "mounted"
+  }
+
+  markAsUnmounted() {
+    this.setWord(1, "unmounted")
+    return this
+  }
+
+  markAsMounted() {
+    this.setWord(1, "mounted")
+    return this
   }
 
   async appendFromPaste(pastedText) {
@@ -168,4 +181,4 @@ class TabTreeComponent extends AbstractTreeComponent {
   }
 }
 
-module.exports = { TabTreeComponent, MountedTabTreeComponent, TabMenuTreeComponent }
+module.exports = { TabTreeComponent, TabMenuTreeComponent }

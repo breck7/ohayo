@@ -7,7 +7,8 @@ const TabsTreeComponent = require("./TabsTreeComponent.js")
 class LogoTreeComponent extends AbstractTreeComponent {
   toStumpCode() {
     return `a ${StudioConstants.productName}
- clickCommand toggleHelpCommand`
+ clickCommand toggleHelpCommand
+ class LogoTreeComponent`
   }
 }
 
@@ -15,6 +16,7 @@ class NewButtonTreeComponent extends AbstractTreeComponent {
   toStumpCode() {
     return `a &nbsp;+
  id newButton
+ class NewButtonTreeComponent
  clickCommand createNewBlankProgramCommand
  value untitled.ohayo`
   }
@@ -45,7 +47,7 @@ class MenuTreeComponent extends AbstractTreeComponent {
  background ${theme.menuBackground}
  color ${theme.darkBlack}
  display flex
- a
+ .LogoTreeComponent,.NewButtonTreeComponent
   padding-right 5px
   line-height 30px
   display inline-block
