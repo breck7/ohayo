@@ -857,7 +857,7 @@ ${StudioConstants.panel} ${defaultGutterWidth}
     tiles.forEach(tile => tile.selectTile())
   }
 
-  async insertChildPickerTileButton() {
+  async insertChildPickerTileCommand() {
     const program = this.getMountedTilesProgram()
     const tiles = program.getTiles()
     const target = tiles.length ? tiles[tiles.length - 1] : program

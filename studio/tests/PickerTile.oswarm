@@ -2,7 +2,7 @@
 test PickerTile
  createNewBlankProgramCommand
   assertStringExcludes getTextContent waterBill
-  insertChildPickerTileButton
+  insertChildPickerTileCommand
    assertLengthIs getRenderedTilesDiagnostic 1
    assertStringExcludes getTextContent Loading
    assertStringIncludes getTextContent waterBill

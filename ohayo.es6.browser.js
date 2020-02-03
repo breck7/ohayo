@@ -25664,6 +25664,16 @@ pre
       return `div Error occurred. See console.
  class OhayoError`
     }
+    get tileLoadingTemplate() {
+      return `div
+ class abstractTileTreeComponentNode
+ id {id}
+ div Loading {name}...
+  class TileBody
+ div
+  class TileFooter
+  {footer}`
+    }
     get visibleKey() {
       return `visible`
     }
@@ -25821,6 +25831,14 @@ pre
       // todo: right now we only have 1 example per tile.
       const exampleNode = this.getDefinition().getNode(jtree.GrammarConstants.example)
       return exampleNode ? exampleNode.childrenToString() : ""
+    }
+    toStumpLoadingCode() {
+      return this.qFormat(this.tileLoadingTemplate, {
+        classes: this.getCssClassNames().join(" "),
+        id: this.getTreeComponentId(),
+        name: this.getWord(0),
+        footer: this.getTileToolbarButtonStumpCode()
+      })
     }
     emitLogMessage(message) {
       const tab = this.getTab()
@@ -31526,6 +31544,15 @@ abstractTileTreeComponentNode
  int footerHeight 30
  string hiddenKey hidden
  string visibleKey visible
+ string tileLoadingTemplate
+  div
+   class abstractTileTreeComponentNode
+   id {id}
+   div Loading {name}...
+    class TileBody
+   div
+    class TileFooter
+    {footer}
  string errorLogMessageStumpTemplate
   div Error occurred. See console.
    class OhayoError
@@ -31701,6 +31728,9 @@ abstractTileTreeComponentNode
    // todo: right now we only have 1 example per tile.
    const exampleNode = this.getDefinition().getNode(jtree.GrammarConstants.example)
    return exampleNode ? exampleNode.childrenToString() : ""
+  }
+  toStumpLoadingCode() {
+   return this.qFormat(this.tileLoadingTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), name: this.getWord(0), footer: this.getTileToolbarButtonStumpCode() })
   }
   emitLogMessage(message) {
    const tab = this.getTab()
@@ -39307,6 +39337,10 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
     if (this._getTextareaShadow()) this._getTextareaShadow().setInputOrTextAreaValue(this._getProgramSource())
   }
 
+  setFile(fileName) {
+    this.setWord(1, fileName)
+  }
+
   treeComponentDidUpdate() {
     this._updateTA()
     super.treeComponentDidUpdate()
@@ -39539,6 +39573,10 @@ class ConsoleTreeComponent extends AbstractTreeComponent {
     return Math.floor((this.getRootNode().getBodyShadowDimensions().height - 60) * 0.3)
   }
 
+  setFile(fileName) {
+    this.setWord(1, fileName)
+  }
+
   toHakonCode() {
     return `.consoleOutput
  height ${this._getHeight()}px
@@ -39662,12 +39700,20 @@ class GutterTreeComponent extends AbstractTreeComponent {
     })
   }
 
+  get _gutterWidth() {
+    return this.getWord(1)
+  }
+
+  setGutterWidth(newWidth) {
+    this.setWord(1, newWidth)
+    return this
+  }
+
   toHakonCode() {
     const theme = this.getTheme()
-    const width = this.getParent().getGutterWidth()
     return `${super.toHakonCode()}
 .Gutter
- width ${width}px
+ width ${this._gutterWidth}px
  left 0
  background ${theme.backgroundColor}
  border-color ${theme.borderColor}
@@ -39802,7 +39848,7 @@ p
 p Current working folder: ${app.getDefaultDisk().getPathBase()}
 p Version ${app.getVersion()} ${app.constructor.name}
 p
- a Welcome Page
+ a Open Demo Page
   id welcomePageButton
   clickCommand openOhayoProgramCommand
   value ohayo.ohayo
@@ -39888,9 +39934,9 @@ class TabsTreeComponent extends AbstractTreeComponent {
  position relative
  font-size 13px
  padding 0 15px
- color ${theme.foregroundColor}
+ color ${theme.menuTreeComponentColor}
  line-height 30px
- border-right 1px solid ${theme.borderColor}
+ border-right 1px solid rgba(0,0,0,.2)
  &:hover
   background rgba(0,0,0,.1)
  &:active
@@ -40074,7 +40120,7 @@ window.TabMenuTreeComponent = TabMenuTreeComponent
 
 class LogoTreeComponent extends AbstractTreeComponent {
   toStumpCode() {
-    return `a ${StudioConstants.productName}
+    return `a help
  clickCommand toggleHelpCommand
  class LogoTreeComponent`
   }
@@ -40114,7 +40160,6 @@ class MenuTreeComponent extends AbstractTreeComponent {
  z-index 92
  white-space nowrap
  background ${theme.menuBackground}
- color ${theme.darkBlack}
  display flex
  .LogoTreeComponent,.NewButtonTreeComponent
   padding-right 5px
@@ -40266,7 +40311,7 @@ class WallTreeComponent extends AbstractTreeComponent {
   // reload?
   toHakonCode() {
     const theme = this.getTheme()
-    const gutterWidth = this.getParent().getGutterWidth()
+    const gutterWidth = this._gutterWidth
     return `.WallTreeComponent
  background-color ${theme.wallBackground}
  background-image ${theme.wallBackgroundImage || "none"}
@@ -40289,6 +40334,16 @@ class WallTreeComponent extends AbstractTreeComponent {
 
 .${OhayoConstants.selectedClass}
  outline 3px solid ${theme.selectedOutline}`
+  }
+
+  get _gutterWidth() {
+    const value = this.getWord(1)
+    return value === undefined ? this.getParent().getGutterWidth() : value
+  }
+
+  setGutterWidth(newWidth) {
+    this.setWord(1, newWidth)
+    return this
   }
 
   async insertAdjacentTileCommand() {
@@ -40319,7 +40374,7 @@ class WallTreeComponent extends AbstractTreeComponent {
  class WallTreeComponent
  div +
   class insertChildTileButton
-  clickCommand insertChildPickerTileButton`
+  clickCommand insertChildPickerTileCommand`
   }
 
   _getSelectedTileStumpNodes() {
@@ -40350,13 +40405,17 @@ class PanelTreeComponent extends AbstractTreeComponent {
 
   toggleGutter() {
     // todo: this is UI buggy! toggling resets scroll states
-    const gutter = this.getNode(StudioConstants.gutter)
+    const gutter = this.getGutter()
     if (gutter) gutter.unmountAndDestroy()
     else {
       const node = this.touchNode(StudioConstants.gutter)
       node.appendLine(StudioConstants.terminal)
       node.appendLine(StudioConstants.console)
     }
+  }
+
+  getGutter() {
+    return this.getNode(StudioConstants.gutter)
   }
 
   toHakonCode() {
@@ -40374,11 +40433,15 @@ class PanelTreeComponent extends AbstractTreeComponent {
   }
 
   setGutterWidth(newWidth) {
-    return this.setWord(1, newWidth)
+    this.setWord(1, newWidth)
+    this.getWall().setGutterWidth(newWidth)
+    this.getGutter().setGutterWidth(newWidth)
+    return this
   }
 
   toggleGutterWidth() {
-    this.setGutterWidth(this.getGutterWidth() === 50 ? 400 : 50)
+    const newWidth = this.getGutterWidth() === 50 ? 400 : 50
+    this.setGutterWidth(newWidth)
     return this
   }
 
@@ -40536,8 +40599,16 @@ class StudioApp extends AbstractTreeComponent {
   }
 
   terminalHasFocus() {
-    const terminalNode = this.getPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.terminal}`)
+    const terminalNode = this.getTerminalNode()
     return terminalNode && terminalNode.hasFocus()
+  }
+
+  getTerminalNode() {
+    return this.getPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.terminal}`)
+  }
+
+  getConsoleNode() {
+    return this.getPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.console}`)
   }
 
   initLocalDataStorage(key, value) {
@@ -40565,13 +40636,14 @@ class StudioApp extends AbstractTreeComponent {
   }
 
   static getDefaultStartState() {
+    const defaultGutterWidth = 400
     return `${StudioConstants.theme} ${ThemeTreeComponent.defaultTheme}
 ${StudioConstants.menu}
  logo
  tabs
  newButton
-${StudioConstants.panel} 400
- ${StudioConstants.gutter}
+${StudioConstants.panel} ${defaultGutterWidth}
+ ${StudioConstants.gutter} ${defaultGutterWidth}
   ${StudioConstants.terminal}
   ${StudioConstants.console}`
   }
@@ -40719,6 +40791,7 @@ ${StudioConstants.panel} 400
 
     if (openTab) {
       this.setMountedTab(openTab)
+      this.getRootNode().renderApp()
       return undefined
     }
 
@@ -40754,9 +40827,29 @@ ${StudioConstants.panel} 400
     }
     this._focusedTab = tab
     tab.markAsMounted()
+    // update terminal and console
+    const fileName = tab.getFullTabFilePath()
+    const terminal = this.getTerminalNode()
+    if (terminal) terminal.setFile(fileName)
+    const consoleNode = this.getConsoleNode()
+    if (consoleNode) consoleNode.setFile(fileName)
+
     this.getPanel().addWall()
     this._updateLocationForRestoreOnRefresh()
     return this
+  }
+
+  closeTab(tab) {
+    // todo: terminal and console on last tab close.
+    if (tab.isMounted()) {
+      const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs(), tab)
+      this.getPanel().removeWall()
+      tab.markAsUnmounted()
+      tab.unmountAndDestroy()
+      delete this._focusedTab
+      if (tabToMountNext) this.setMountedTab(tabToMountNext)
+    } else tab.destroy()
+    this._updateLocationForRestoreOnRefresh()
   }
 
   closeAllTabsExceptFocusedTab() {
@@ -40797,7 +40890,7 @@ ${StudioConstants.panel} 400
     if (existingTab) {
       if (andMount) {
         this.setMountedTab(existingTab)
-        this.getRootNode().renderApp()
+        this.renderApp()
       }
       return existingTab
     }
@@ -40806,7 +40899,7 @@ ${StudioConstants.panel} 400
 
     await tab._fetchTabInitProgramRenderAndRun(andMount)
 
-    this.getRootNode().renderApp()
+    this.renderApp()
     return tab
   }
 
@@ -41231,7 +41324,7 @@ ${StudioConstants.panel} 400
     tiles.forEach(tile => tile.selectTile())
   }
 
-  async insertChildPickerTileButton() {
+  async insertChildPickerTileCommand() {
     const program = this.getMountedTilesProgram()
     const tiles = program.getTiles()
     const target = tiles.length ? tiles[tiles.length - 1] : program
@@ -41368,7 +41461,7 @@ ${StudioConstants.panel} 400
 
   _mountTabByIndex(index) {
     this.setMountedTab(this.getTabs()[index])
-    this.getRootNode().renderApp()
+    this.renderApp()
     return this
   }
 
@@ -41382,18 +41475,6 @@ ${StudioConstants.panel} 400
 
   _getTabsNode() {
     return this.getNode("menu tabs")
-  }
-
-  closeTab(tab) {
-    if (tab.isMounted()) {
-      const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs(), tab)
-      this.getPanel().removeWall()
-      tab.markAsUnmounted()
-      tab.unmountAndDestroy()
-      delete this._focusedTab
-      if (tabToMountNext) this.setMountedTab(tabToMountNext)
-    } else tab.destroy()
-    this._updateLocationForRestoreOnRefresh()
   }
 
   async toggleAutoSaveCommand() {

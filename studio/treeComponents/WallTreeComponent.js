@@ -71,7 +71,7 @@ class WallTreeComponent extends AbstractTreeComponent {
  class WallTreeComponent
  div +
   class insertChildTileButton
-  clickCommand insertChildPickerTileButton`
+  clickCommand insertChildPickerTileCommand`
   }
 
   _getSelectedTileStumpNodes() {

@@ -25,6 +25,15 @@ abstractTileTreeComponentNode
  int footerHeight 30
  string hiddenKey hidden
  string visibleKey visible
+ string tileLoadingTemplate
+  div
+   class abstractTileTreeComponentNode
+   id {id}
+   div Loading {name}...
+    class TileBody
+   div
+    class TileFooter
+    {footer}
  string errorLogMessageStumpTemplate
   div Error occurred. See console.
    class OhayoError
@@ -204,6 +213,9 @@ abstractTileTreeComponentNode
    // todo: right now we only have 1 example per tile.
    const exampleNode = this.getDefinition().getNode(jtree.GrammarConstants.example)
    return exampleNode ? exampleNode.childrenToString() : ""
+  }
+  toStumpLoadingCode() {
+   return this.qFormat(this.tileLoadingTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), name: this.getWord(0), footer: this.getTileToolbarButtonStumpCode() })
   }
   emitLogMessage(message) {
    const tab = this.getTab()
