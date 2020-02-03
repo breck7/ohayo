@@ -170,12 +170,13 @@ class StudioApp extends AbstractTreeComponent {
 
   static getDefaultStartState() {
     const defaultGutterWidth = 400
+    const menuHeight = 30
     return `${StudioConstants.theme} ${ThemeTreeComponent.defaultTheme}
-${StudioConstants.menu}
+${StudioConstants.menu} visible
  logo
  tabs
  newButton
-${StudioConstants.panel} ${defaultGutterWidth}
+${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
  ${StudioConstants.gutter} ${defaultGutterWidth}
   ${StudioConstants.terminal}
   ${StudioConstants.console}`
@@ -1158,20 +1159,11 @@ ${StudioConstants.panel} ${defaultGutterWidth}
     this.willowBrowser.toggleFullScreen()
   }
 
-  _hideMenuAndTabs() {
-    this.getNode(StudioConstants.menu).unmount()
-    this.getNode(StudioConstants.menu).replaceNode(() => StudioConstants.menu + "PlaceHolder")
-  }
-
-  _showMenuAndTabs() {
-    // todo: make this hide tabs
-    this.getNode(StudioConstants.menu + "PlaceHolder").replaceNode(() => StudioConstants.menu)
-  }
-
-  toggleFocusedModeCommand() {
-    this.has(StudioConstants.menu) ? this._hideMenuAndTabs() : this._showMenuAndTabs()
-    this.makeAllDirty() // cleanup
-    return this.toggleFullScreenCommand()
+  toggleMenuCommand() {
+    const menu = this.getMenuTreeComponent()
+    menu.toggleVisibility()
+    this.getPanel().setMenuHeight(menu.isVisible() ? 30 : 0)
+    this.renderApp()
   }
 
   // TODO: make it slidable.?

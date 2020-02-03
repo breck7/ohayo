@@ -13,29 +13,25 @@ class PanelTreeComponent extends AbstractTreeComponent {
     })
   }
 
-  toggleGutter() {
-    // todo: this is UI buggy! toggling resets scroll states
-    const gutter = this.getGutter()
-    if (gutter) gutter.unmountAndDestroy()
-    else {
-      const node = this.touchNode(StudioConstants.gutter)
-      node.appendLine(StudioConstants.terminal)
-      node.appendLine(StudioConstants.console)
-    }
-  }
-
   getGutter() {
     return this.getNode(StudioConstants.gutter)
   }
 
+  get _menuHeight() {
+    return this.getWord(2)
+  }
+
+  setMenuHeight(value) {
+    this.setWord(2, value)
+  }
+
   toHakonCode() {
-    const menuHeight = this.getParent().getMenuTreeComponent() ? "30" : "0"
     return `.PanelTreeComponent
  position relative
  left 0
  right 0
  bottom 0
- height calc(100% - ${menuHeight}px)`
+ height calc(100% - ${this._menuHeight}px)`
   }
 
   getGutterWidth() {
@@ -51,6 +47,12 @@ class PanelTreeComponent extends AbstractTreeComponent {
 
   toggleGutterWidth() {
     const newWidth = this.getGutterWidth() === 50 ? 400 : 50
+    this.setGutterWidth(newWidth)
+    return this
+  }
+
+  toggleGutter() {
+    const newWidth = this.getGutterWidth() === 0 ? 400 : 0
     this.setGutterWidth(newWidth)
     return this
   }

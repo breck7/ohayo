@@ -24,7 +24,7 @@ mounted selection duplicateSelectionCommand command+d Duplicate Selection
 panel window toggleThemeCommand shift+t Toggle Theme
 panel window toggleGutterCommand shift+u Toggle Source Editor Gutter
 panel window toggleFullScreenCommand shift+f Toggle Full Screen
-panel window toggleFocusedModeCommand command+shift+f Toggle Focused Mode
+panel window toggleMenuCommand command+shift+f Toggle Menu
 panel window closeModalCommand escape Close any open modal
 mounted window clearTabMessagesCommand command+\\ Clear tab messages
 panel window toggleAutoSaveCommand  Toggle autosave

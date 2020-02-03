@@ -64,5 +64,5 @@ test navigation
               assertTypeIs getMountedTab undefined
               toggleFullScreenCommand
                toggleFullScreenCommand
-                toggleFocusedModeCommand
-                 toggleFocusedModeCommand
+                toggleMenuCommand
+                 toggleMenuCommand

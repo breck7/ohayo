@@ -31,8 +31,17 @@ class MenuTreeComponent extends AbstractTreeComponent {
     })
   }
 
+  toggleVisibility() {
+    this.setWord(1, this.isVisible() ? "hidden" : "visible")
+  }
+
+  isVisible() {
+    return this.getWord(1) === "visible"
+  }
+
   toHakonCode() {
     const theme = this.getTheme()
+    const display = this.isVisible() ? "flex" : "none"
     return `.MenuTreeComponent
  ${theme.disableTextSelect(1)}
  font-size 14px
@@ -46,7 +55,7 @@ class MenuTreeComponent extends AbstractTreeComponent {
  z-index 92
  white-space nowrap
  background ${theme.menuBackground}
- display flex
+ display ${display}
  .LogoTreeComponent,.NewButtonTreeComponent
   padding-right 5px
   line-height 30px
