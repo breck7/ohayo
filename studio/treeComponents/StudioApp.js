@@ -23,7 +23,7 @@ const StudioConstants = require("./StudioConstants.js")
 const HelpModal = require("./HelpModal.js")
 
 const AbstractContextMenuTreeComponent = require("./AbstractContextMenuTreeComponent.js")
-const { TabMenuTreeComponent } = require("./TabTreeComponent.js")
+const { TabMenuTreeComponent } = require("./TabsTreeComponent.js")
 
 const OhayoConstants = require("../treeComponents/OhayoConstants.js")
 
@@ -132,8 +132,16 @@ class StudioApp extends AbstractTreeComponent {
   }
 
   terminalHasFocus() {
-    const terminalNode = this.getPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.terminal}`)
+    const terminalNode = this.getTerminalNode()
     return terminalNode && terminalNode.hasFocus()
+  }
+
+  getTerminalNode() {
+    return this.getPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.terminal}`)
+  }
+
+  getConsoleNode() {
+    return this.getPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.console}`)
   }
 
   initLocalDataStorage(key, value) {
@@ -161,13 +169,14 @@ class StudioApp extends AbstractTreeComponent {
   }
 
   static getDefaultStartState() {
+    const defaultGutterWidth = 400
     return `${StudioConstants.theme} ${ThemeTreeComponent.defaultTheme}
 ${StudioConstants.menu}
  logo
  tabs
  newButton
-${StudioConstants.panel} 400
- ${StudioConstants.gutter}
+${StudioConstants.panel} ${defaultGutterWidth}
+ ${StudioConstants.gutter} ${defaultGutterWidth}
   ${StudioConstants.terminal}
   ${StudioConstants.console}`
   }
@@ -315,6 +324,7 @@ ${StudioConstants.panel} 400
 
     if (openTab) {
       this.setMountedTab(openTab)
+      this.getRootNode().renderApp()
       return undefined
     }
 
@@ -350,9 +360,29 @@ ${StudioConstants.panel} 400
     }
     this._focusedTab = tab
     tab.markAsMounted()
+    // update terminal and console
+    const fileName = tab.getFullTabFilePath()
+    const terminal = this.getTerminalNode()
+    if (terminal) terminal.setFile(fileName)
+    const consoleNode = this.getConsoleNode()
+    if (consoleNode) consoleNode.setFile(fileName)
+
     this.getPanel().addWall()
     this._updateLocationForRestoreOnRefresh()
     return this
+  }
+
+  closeTab(tab) {
+    // todo: terminal and console on last tab close.
+    if (tab.isMounted()) {
+      const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs(), tab)
+      this.getPanel().removeWall()
+      tab.markAsUnmounted()
+      tab.unmountAndDestroy()
+      delete this._focusedTab
+      if (tabToMountNext) this.setMountedTab(tabToMountNext)
+    } else tab.destroy()
+    this._updateLocationForRestoreOnRefresh()
   }
 
   closeAllTabsExceptFocusedTab() {
@@ -393,7 +423,7 @@ ${StudioConstants.panel} 400
     if (existingTab) {
       if (andMount) {
         this.setMountedTab(existingTab)
-        this.getRootNode().renderApp()
+        this.renderApp()
       }
       return existingTab
     }
@@ -402,7 +432,7 @@ ${StudioConstants.panel} 400
 
     await tab._fetchTabInitProgramRenderAndRun(andMount)
 
-    this.getRootNode().renderApp()
+    this.renderApp()
     return tab
   }
 
@@ -964,7 +994,7 @@ ${StudioConstants.panel} 400
 
   _mountTabByIndex(index) {
     this.setMountedTab(this.getTabs()[index])
-    this.getRootNode().renderApp()
+    this.renderApp()
     return this
   }
 
@@ -978,18 +1008,6 @@ ${StudioConstants.panel} 400
 
   _getTabsNode() {
     return this.getNode("menu tabs")
-  }
-
-  closeTab(tab) {
-    if (tab.isMounted()) {
-      const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs())
-      this.getPanel().removeWall()
-      tab.markAsUnmounted()
-      tab.unmountAndDestroy()
-      delete this._focusedTab
-      if (tabToMountNext) this.setMountedTab(tabToMountNext)
-    } else tab.destroy()
-    this._updateLocationForRestoreOnRefresh()
   }
 
   async toggleAutoSaveCommand() {

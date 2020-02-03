@@ -15,12 +15,20 @@ class GutterTreeComponent extends AbstractTreeComponent {
     })
   }
 
+  get _gutterWidth() {
+    return this.getWord(1)
+  }
+
+  setGutterWidth(newWidth) {
+    this.setWord(1, newWidth)
+    return this
+  }
+
   toHakonCode() {
     const theme = this.getTheme()
-    const width = this.getParent().getGutterWidth()
     return `${super.toHakonCode()}
 .Gutter
- width ${width}px
+ width ${this._gutterWidth}px
  left 0
  background ${theme.backgroundColor}
  border-color ${theme.borderColor}

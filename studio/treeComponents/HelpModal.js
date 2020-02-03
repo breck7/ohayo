@@ -95,7 +95,7 @@ p
 p Current working folder: ${app.getDefaultDisk().getPathBase()}
 p Version ${app.getVersion()} ${app.constructor.name}
 p
- a Welcome Page
+ a Open Demo Page
   id welcomePageButton
   clickCommand openOhayoProgramCommand
   value ohayo.ohayo

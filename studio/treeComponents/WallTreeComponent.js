@@ -8,7 +8,7 @@ class WallTreeComponent extends AbstractTreeComponent {
   // reload?
   toHakonCode() {
     const theme = this.getTheme()
-    const gutterWidth = this.getParent().getGutterWidth()
+    const gutterWidth = this._gutterWidth
     return `.WallTreeComponent
  background-color ${theme.wallBackground}
  background-image ${theme.wallBackgroundImage || "none"}
@@ -31,6 +31,16 @@ class WallTreeComponent extends AbstractTreeComponent {
 
 .${OhayoConstants.selectedClass}
  outline 3px solid ${theme.selectedOutline}`
+  }
+
+  get _gutterWidth() {
+    const value = this.getWord(1)
+    return value === undefined ? this.getParent().getGutterWidth() : value
+  }
+
+  setGutterWidth(newWidth) {
+    this.setWord(1, newWidth)
+    return this
   }
 
   async insertAdjacentTileCommand() {

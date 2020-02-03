@@ -15,13 +15,17 @@ class PanelTreeComponent extends AbstractTreeComponent {
 
   toggleGutter() {
     // todo: this is UI buggy! toggling resets scroll states
-    const gutter = this.getNode(StudioConstants.gutter)
+    const gutter = this.getGutter()
     if (gutter) gutter.unmountAndDestroy()
     else {
       const node = this.touchNode(StudioConstants.gutter)
       node.appendLine(StudioConstants.terminal)
       node.appendLine(StudioConstants.console)
     }
+  }
+
+  getGutter() {
+    return this.getNode(StudioConstants.gutter)
   }
 
   toHakonCode() {
@@ -39,11 +43,15 @@ class PanelTreeComponent extends AbstractTreeComponent {
   }
 
   setGutterWidth(newWidth) {
-    return this.setWord(1, newWidth)
+    this.setWord(1, newWidth)
+    this.getWall().setGutterWidth(newWidth)
+    this.getGutter().setGutterWidth(newWidth)
+    return this
   }
 
   toggleGutterWidth() {
-    this.setGutterWidth(this.getGutterWidth() === 50 ? 400 : 50)
+    const newWidth = this.getGutterWidth() === 50 ? 400 : 50
+    this.setGutterWidth(newWidth)
     return this
   }
 

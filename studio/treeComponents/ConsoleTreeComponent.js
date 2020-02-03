@@ -13,6 +13,10 @@ class ConsoleTreeComponent extends AbstractTreeComponent {
     return Math.floor((this.getRootNode().getBodyShadowDimensions().height - 60) * 0.3)
   }
 
+  setFile(fileName) {
+    this.setWord(1, fileName)
+  }
+
   toHakonCode() {
     return `.consoleOutput
  height ${this._getHeight()}px

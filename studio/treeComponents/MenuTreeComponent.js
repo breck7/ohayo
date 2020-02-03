@@ -2,11 +2,11 @@ const { jtree } = require("jtree")
 const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework.node.js")
 
 const StudioConstants = require("./StudioConstants.js")
-const TabsTreeComponent = require("./TabsTreeComponent.js")
+const { TabsTreeComponent } = require("./TabsTreeComponent.js")
 
 class LogoTreeComponent extends AbstractTreeComponent {
   toStumpCode() {
-    return `a ${StudioConstants.productName}
+    return `a help
  clickCommand toggleHelpCommand
  class LogoTreeComponent`
   }
@@ -38,6 +38,7 @@ class MenuTreeComponent extends AbstractTreeComponent {
  font-size 14px
  padding-left 5px
  box-sizing border-box
+ overflow-x scroll
  right 0
  left 0
  position relative
@@ -45,7 +46,6 @@ class MenuTreeComponent extends AbstractTreeComponent {
  z-index 92
  white-space nowrap
  background ${theme.menuBackground}
- color ${theme.darkBlack}
  display flex
  .LogoTreeComponent,.NewButtonTreeComponent
   padding-right 5px
