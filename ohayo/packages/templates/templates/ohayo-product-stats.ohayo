@@ -1,6 +1,5 @@
 doc.title Ohayo Product Stats
 doc.categories ohayo
-doc.layout column
 templates.list
  hidden
  show.rowCount Number of Templates

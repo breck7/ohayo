@@ -57,6 +57,10 @@ class BasicTerminalTreeComponent extends AbstractTreeComponent {
     if (this._getTextareaShadow()) this._getTextareaShadow().setInputOrTextAreaValue(this._getProgramSource())
   }
 
+  setFile(fileName) {
+    this.setWord(1, fileName)
+  }
+
   treeComponentDidUpdate() {
     this._updateTA()
     super.treeComponentDidUpdate()

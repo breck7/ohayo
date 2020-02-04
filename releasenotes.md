@@ -1,3 +1,21 @@
+19.0.0 2020-02-04
+-----------------
+- New: one click insert tile button
+- New: one click new file button
+- New: top menu simplified and tabs moved to top menu
+- New: file commands moved to tabs. Ability to use file commands on all tabs, not just focused tab.
+- New: speed improvements
+- Fix: fixed bug related to closing tabs
+- Fix: fixed bug related to closing last tab
+- Fix: fixed overflow tabs bug
+- Fix: fixed bugs related to toggling gutters/menu
+- Breaking: removed doc.layout and tree, bin, and custom layouts. Only layout is now column.
+- Removed: drag select tiles, resize tiles, move tiles
+- Removed: removed all context menus in favor of visible dropdowns
+- Infra: removed jquery-ui
+- Infra: refactored TCF components to better represent page state
+- Infra: removed windowSize
+
 18.0.0 2020-1-24
 ----------------
 - Breaking: Maia language is now simply named Ohayo. "maia" file extension is now "ohayo"

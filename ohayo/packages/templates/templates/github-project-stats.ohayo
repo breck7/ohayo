@@ -6,5 +6,4 @@ github.info treenotation/ohayo
  show.value created_at Created
  show.value pushed_at Last Updated
  show.value stargazers_count Stars
-doc.layout column
 doc.categories programming

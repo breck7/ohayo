@@ -5,5 +5,4 @@ reddit.sub Astronomy
    yColumn score
    xColumn created_utc
   list.links
-doc.layout column
 doc.categories socialMedia

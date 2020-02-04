@@ -10,5 +10,4 @@ samples.populations
    vega.bar How many country names begin with each letter (in English)?
    show.rowCount Letters used
    doc.subtitle No countries have a name starting with X.
-doc.layout column
 doc.categories geography

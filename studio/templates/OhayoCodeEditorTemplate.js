@@ -17,7 +17,6 @@ data.inline
     tables.basic
     text.wordcloud
  content
-  {source}
-doc.layout column`).templateToString({ source, fileName, treeLanguage })
+  {source}`).templateToString({ source, fileName, treeLanguage })
 
 module.exports = OhayoCodeEditorTemplate

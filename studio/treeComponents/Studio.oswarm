@@ -15,10 +15,6 @@ test lastTabTest
   assertStringIncludes toString untitled
   showDeleteFileConfirmDialogCommand
    assertStringExcludes toString untitled
-test perfMode
- createNewBlankProgramCommand
-  togglePerfModeCommand
-   togglePerfModeCommand
 test moreBasics
  createNewBlankProgramCommand
   assertLengthIs getCommandsBuffer 0
@@ -67,18 +63,18 @@ test clearStore
    assertLengthIs getDefaultDisk.readFilesSync 0
 test mini
  playFirstVisitCommand
-  assertLengthIs getFocusedPanel.getTabs 1
+  assertLengthIs getTabs 1
   createMiniMapCommand
-   assertLengthIs getFocusedPanel.getTabs 2
+   assertLengthIs getTabs 2
 test ohayoPrograms
  playFirstVisitCommand
-  assertLengthIs getFocusedPanel.getTabs 1
+  assertLengthIs getTabs 1
   closeAllTabsCommand
-   assertLengthIs getFocusedPanel.getTabs 0
+   assertLengthIs getTabs 0
    assertLengthIs getDefaultDisk.readFilesSync 1
    openFolderCommand localStorage/
     assertLengthIs getDefaultDisk.readFilesSync 1
-    assertLengthIs getFocusedPanel.getTabs 1
+    assertLengthIs getTabs 1
     _runSpeedTestCommand
 test echoCommand
  echoCommand hello world

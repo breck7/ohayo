@@ -1,0 +1,5 @@
+#! /usr/bin/env node /usr/local/bin/jtree
+test tabMenu
+ createNewBlankProgramCommand
+  executeCommandOnStumpWithClassCommand clickCommand tabDropDownButton
+   assertStringIncludes getStumpNodeString Save File

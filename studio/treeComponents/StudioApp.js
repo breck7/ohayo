@@ -23,10 +23,11 @@ const StudioConstants = require("./StudioConstants.js")
 const HelpModal = require("./HelpModal.js")
 
 const AbstractContextMenuTreeComponent = require("./AbstractContextMenuTreeComponent.js")
-const TabContextMenuTreeComponent = require("./TabContextMenuTreeComponent.js")
-const TileContextMenuTreeComponent = require("./TileContextMenuTreeComponent.js")
+const { TabMenuTreeComponent } = require("./TabsTreeComponent.js")
 
-const OhayoConstants = require("../tiles/OhayoConstants.js")
+const { TileMenuTreeComponent } = require("./TileMenuTreeComponent.js")
+
+const OhayoConstants = require("../treeComponents/OhayoConstants.js")
 
 const OhayoCodeEditorTemplate = require("../templates/OhayoCodeEditorTemplate.js")
 const MiniTemplate = require("../templates/MiniTemplate.js")
@@ -117,16 +118,13 @@ class StudioApp extends AbstractTreeComponent {
   }
 
   _onResizeEndEvent(event) {
-    this.touchNode(StudioConstants.windowSize).setContent(`${event.width} ${event.height}`)
     delete this._bodyShadowDimensionsCache
     this.renderApp()
   }
 
   _restoreTabs() {
-    const panel = this.getFocusedPanel()
-    const tabToMount = panel.getMountedTabName()
-    panel.getTabs().forEach(async tab => {
-      await tab._fetchTabInitProgramRenderAndRun(tab.getFullTabFilePath() === tabToMount)
+    this.getTabs().forEach(async tab => {
+      await tab._fetchTabInitProgramRenderAndRun(tab.isMountedTab())
       this.renderApp()
     })
   }
@@ -135,19 +133,17 @@ class StudioApp extends AbstractTreeComponent {
     return this.isNodeJs() ? jtree.Utils.findProjectRoot(__dirname, "ohayo") : ""
   }
 
-  getPerfSettings() {
-    if (!this._perfSettings)
-      this._perfSettings = {
-        codeMirrorEnabled: true,
-        bodyDragSelect: true,
-        max10tiles: false
-      }
-    return this._perfSettings
+  terminalHasFocus() {
+    const terminalNode = this.getTerminalNode()
+    return terminalNode && terminalNode.hasFocus()
   }
 
-  terminalHasFocus() {
-    const terminalNode = this.getFocusedPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.terminal}`)
-    return terminalNode && terminalNode.hasFocus()
+  getTerminalNode() {
+    return this.getPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.terminal}`)
+  }
+
+  getConsoleNode() {
+    return this.getPanel().getNode(`${StudioConstants.gutter} ${StudioConstants.console}`)
   }
 
   initLocalDataStorage(key, value) {
@@ -174,17 +170,16 @@ class StudioApp extends AbstractTreeComponent {
     }
   }
 
-  getWindowSizeMTime() {
-    const node = this.getNode(StudioConstants.windowSize)
-    return node ? node.getLineModifiedTime() : 0
-  }
-
   static getDefaultStartState() {
+    const defaultGutterWidth = 400
+    const menuHeight = 30
     return `${StudioConstants.theme} ${ThemeTreeComponent.defaultTheme}
-${StudioConstants.menu}
-${StudioConstants.panel} 400
- ${StudioConstants.tabs}
- ${StudioConstants.gutter}
+${StudioConstants.menu} visible
+ logo
+ tabs
+ newButton
+${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
+ ${StudioConstants.gutter} ${defaultGutterWidth}
   ${StudioConstants.terminal}
   ${StudioConstants.console}`
   }
@@ -208,12 +203,12 @@ ${StudioConstants.panel} 400
     return this._ohayoGrammarTree
   }
 
-  getTargetNode() {
-    return this._targetNode
+  getTargetTile() {
+    return this._targetTile
   }
 
-  setTargetNode(node) {
-    this._targetNode = node
+  setTargetTile(tile) {
+    this._targetTile = tile
     return this
   }
 
@@ -245,8 +240,8 @@ ${StudioConstants.panel} 400
 
   createParser() {
     const map = {}
-    map[StudioConstants.tileContextMenu] = TileContextMenuTreeComponent
-    map[StudioConstants.tabContextMenu] = TabContextMenuTreeComponent
+    map[StudioConstants.tabMenu] = TabMenuTreeComponent
+    map[StudioConstants.tileMenu] = TileMenuTreeComponent
     map[StudioConstants.panel] = PanelTreeComponent
     map[StudioConstants.menu] = MenuTreeComponent
     map[StudioConstants.theme] = ThemeTreeComponent
@@ -327,13 +322,13 @@ ${StudioConstants.panel} 400
   }
 
   async _openOhayoProgram(name) {
-    const panel = this.getFocusedPanel()
     const disk = this.getDefaultDisk()
     const fullPath = disk.getPathBase() + name
-    const openTab = panel.getOpenTabByFullFilePath(fullPath)
+    const openTab = this.getOpenTabByFullFilePath(fullPath)
 
     if (openTab) {
-      panel.setMountedTab(openTab)
+      this.setMountedTab(openTab)
+      this.getRootNode().renderApp()
       return undefined
     }
 
@@ -360,12 +355,94 @@ ${StudioConstants.panel} 400
     return res
   }
 
-  getFocusedPanel() {
-    return this.getNode(StudioConstants.panel)
+  setMountedTab(tab) {
+    const currentTab = this._getMountedTab()
+    if (currentTab === tab) return this
+    else if (currentTab) {
+      currentTab.markAsUnmounted()
+      this.getPanel().removeWall()
+    }
+    this._focusedTab = tab
+    tab.markAsMounted()
+    // update terminal and console
+    this._setTerminalAndConsole(tab.getFullTabFilePath())
+
+    this.getPanel().addWall()
+    this._updateLocationForRestoreOnRefresh()
+    return this
   }
 
-  getMountedTab() {
-    return this.getFocusedPanel().getMountedTab()
+  _setTerminalAndConsole(fileName) {
+    const terminal = this.getTerminalNode()
+    if (terminal) terminal.setFile(fileName)
+    const consoleNode = this.getConsoleNode()
+    if (consoleNode) consoleNode.setFile(fileName)
+  }
+
+  closeTab(tab) {
+    // todo: terminal and console on last tab close.
+    if (tab.isMountedTab()) {
+      const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs(), tab)
+      this.getPanel().removeWall()
+      tab.markAsUnmounted()
+      tab.unmountAndDestroy()
+      delete this._focusedTab
+      if (tabToMountNext) this.setMountedTab(tabToMountNext)
+    } else tab.unmountAndDestroy()
+
+    if (!this.getTabs().length) this._setTerminalAndConsole()
+
+    this._updateLocationForRestoreOnRefresh()
+  }
+
+  mountPreviousTab() {
+    const tabs = this.getTabs()
+    const mountedTab = this._getMountedTab()
+    if (tabs.length < 2 || !mountedTab) return this
+    const tabIndex = tabs.indexOf(mountedTab)
+    return this._mountTabByIndex(tabIndex === 0 ? tabs.length - 1 : tabIndex - 1)
+  }
+
+  mountNextTab() {
+    const tabs = this.getTabs()
+    const mountedTab = this._getMountedTab()
+    if (tabs.length < 2 || !mountedTab) return this
+    const tabIndex = tabs.indexOf(mountedTab)
+    return this._mountTabByIndex(tabIndex === tabs.length - 1 ? 0 : tabIndex + 1)
+  }
+
+  getTabs() {
+    return this._getTabsNode().getOpenTabs()
+  }
+
+  _updateLocationForRestoreOnRefresh() {
+    this.saveAppState()
+  }
+
+  async getAlreadyOpenTabOrOpenFullFilePathInNewTab(filePath, andMount = false) {
+    const existingTab = this.getOpenTabByFullFilePath(new FullDiskPath(filePath).toString())
+    if (existingTab) {
+      if (andMount) {
+        this.setMountedTab(existingTab)
+        this.renderApp()
+      }
+      return existingTab
+    }
+
+    const tab = this._getTabsNode().addTab(new FullDiskPath(filePath).toString())
+
+    await tab._fetchTabInitProgramRenderAndRun(andMount)
+
+    this.renderApp()
+    return tab
+  }
+
+  getOpenTabByFullFilePath(fullPath) {
+    return this.getTabs().find(tab => tab.getFullTabFilePath() === fullPath)
+  }
+
+  getPanel() {
+    return this.getNode(StudioConstants.panel)
   }
 
   getMountedTilesProgram() {
@@ -378,12 +455,12 @@ ${StudioConstants.panel} 400
   }
 
   async _openFullDiskFilePathInNewTab(fullDiskFilePath) {
-    const res = await this.getFocusedPanel().getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString())
+    const res = await this.getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString())
     return res
   }
 
   async openFullPathInNewTabAndFocus(fullDiskFilePath) {
-    const tab = await this.getFocusedPanel().getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString(), true)
+    const tab = await this.getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString(), true)
     return tab
   }
 
@@ -556,9 +633,7 @@ ${StudioConstants.panel} 400
   }
 
   getAppWall() {
-    return this.getFocusedPanel()
-      .getNode(StudioConstants.tabs)
-      .getWall()
+    return this.getPanel().getWall()
   }
 
   // for tests
@@ -571,8 +646,7 @@ ${StudioConstants.panel} 400
   // for tests
   getMountedTilesDiagnostic() {
     return jtree.Utils.flatten(
-      this.getFocusedPanel()
-        .getNode(StudioConstants.tabs)
+      this._getTabsNode()
         .getOpenTabs()
         .map(tab =>
           tab
@@ -695,44 +769,23 @@ ${StudioConstants.panel} 400
   }
 
   copyTargetTileCommand(uno, dos) {
-    return this.getTargetNode().copyTileCommand(uno, dos)
+    return this.getTargetTile().copyTileCommand(uno, dos)
   }
 
   copyTargetTileDataAsTreeCommand(uno, dos) {
-    return this.getTargetNode().copyDataAsTreeCommand(uno, dos)
+    return this.getTargetTile().copyDataAsTreeCommand(uno, dos)
   }
 
   copyTargetTileDataAsJavascriptCommand(uno, dos) {
-    return this.getTargetNode().copyDataAsJavascriptCommand(uno, dos)
+    return this.getTargetTile().copyDataAsJavascriptCommand(uno, dos)
   }
 
   copyTargetTileDataCommand(uno, dos) {
-    return this.getTargetNode().copyDataCommand(uno, dos)
+    return this.getTargetTile().copyDataCommand(uno, dos)
   }
 
   exportTargetTileDataCommand(uno, dos) {
-    return this.getTargetNode().exportTileDataCommand(uno, dos)
-  }
-
-  moveTilesFromShadowsCommand() {
-    return this.getAppWall().moveTilesFromShadowsCommand()
-  }
-
-  async toggleLayoutCommand() {
-    const wall = this.getAppWall()
-    return wall.toggleLayoutCommand && wall.toggleLayoutCommand() // todo: cleanup
-  }
-
-  async togglePerfModeCommand() {
-    const settings = this.getPerfSettings()
-    Object.keys(settings).forEach(key => {
-      settings[key] = !settings[key]
-    })
-
-    // todo: what is this?.. ah, codeMirror vs terminal should be different.
-    this.getFocusedPanel().toggleGutter()
-    this.getFocusedPanel().toggleGutter()
-    this.renderApp()
+    return this.getTargetTile().exportTileDataCommand(uno, dos)
   }
 
   async cellCheckProgramCommand() {
@@ -748,9 +801,10 @@ ${StudioConstants.panel} 400
     this.renderApp()
   }
 
-  async printProgramStatsCommand() {
-    const stats = new jtree.TreeNode(this.mountedProgram.toRunTimeStats()).toString()
-    this.mountedTab.logMessageText(stats)
+  async printProgramStatsCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    const stats = new jtree.TreeNode(tab.getTabProgram().toRunTimeStats()).toString()
+    tab.logMessageText(stats)
     this.renderApp()
   }
 
@@ -783,15 +837,11 @@ ${StudioConstants.panel} 400
   }
 
   async openDeleteAllTabsPromptCommand() {
-    const tabs = this.focusedPanel.getTabs()
+    const tabs = this.getTabs()
 
     const shouldProceed = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${tabs.length} open files?`)
 
     return shouldProceed ? Promise.all(tabs.map(tab => tab.unlinkTab())) : false
-  }
-
-  async toggleAndRenderNewDropDownCommand() {
-    this.getNode(StudioConstants.menu).toggleAndRender(StudioConstants.newDropDownMenu)
   }
 
   async closeAllDropDownMenusCommand() {
@@ -809,8 +859,13 @@ ${StudioConstants.panel} 400
     tiles.forEach(tile => tile.selectTile())
   }
 
-  insertPickerTileCommand() {
-    return this.getAppWall().insertPickerTileCommand()
+  async insertChildPickerTileCommand() {
+    const program = this.getMountedTilesProgram()
+    const tiles = program.getTiles()
+    const target = tiles.length ? tiles[tiles.length - 1] : program
+    const newTile = target.appendLineAndChildren(OhayoConstants.pickerTile)
+    await this.getMountedTab().autosaveAndRender()
+    newTile.selectTile()
   }
 
   insertAdjacentTileCommand() {
@@ -824,7 +879,7 @@ ${StudioConstants.panel} 400
   }
 
   async deleteAllRowsInTargetTileCommand() {
-    const inputTable = this.getTargetNode().getParentOrDummyTable()
+    const inputTable = this.getTargetTile().getParentOrDummyTable()
     await Promise.all(inputTable.getRows().map(row => row.destroyRow(this)))
     this.renderApp() // todo: cleanup
   }
@@ -856,8 +911,12 @@ ${StudioConstants.panel} 400
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
-  async copyDeepLinkCommand() {
-    this.getWillowBrowser().copyTextToClipboard(this.mountedTab.getDeepLink())
+  async copyTabDeepLinkCommand(tabId) {
+    this.getWillowBrowser().copyTextToClipboard(this._getTabByIdOrMountedTab(tabId).getDeepLink())
+  }
+
+  _getTabByIdOrMountedTab(tabId) {
+    return tabId === undefined || tabId === "" ? this.mountedTab : this.getTabs().find(tab => tab._getUid().toString() === tabId)
   }
 
   async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
@@ -930,13 +989,38 @@ ${StudioConstants.panel} 400
     return this._openFullDiskFilePathInNewTab(new FullDiskPath(url).toString())
   }
 
-  async mountTabByIndexCommand(index) {
-    this.focusedPanel.mountTabByIndex(index)
+  async mountTabCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    this.setMountedTab(tab)
+    this.renderApp()
   }
 
-  async closeTabByIndexCommand(index) {
-    this.focusedPanel.closeTabByIndex(index)
+  async mountTabByIndexCommand(index) {
+    this.setMountedTab(this.getTabs()[index])
     this.renderApp()
+  }
+
+  async closeTabCommand(tabId) {
+    this.closeTab(this._getTabByIdOrMountedTab(tabId))
+    this.renderApp()
+  }
+
+  _mountTabByIndex(tabIndex) {
+    this.setMountedTab(this.getTabs()[tabIndex])
+    this.renderApp()
+    return this
+  }
+
+  getMountedTab() {
+    return this._getMountedTab()
+  }
+
+  _getMountedTab() {
+    return this._focusedTab
+  }
+
+  _getTabsNode() {
+    return this.getNode("menu tabs")
   }
 
   async toggleAutoSaveCommand() {
@@ -944,10 +1028,6 @@ ${StudioConstants.panel} 400
     if (!newSetting) this.storeValue(StorageKeys.autoSave, "false")
     else this.removeValue(StorageKeys.autoSave)
     this.addStumpCodeMessageToLog(`div Autosave is ${newSetting}`)
-  }
-
-  get focusedPanel() {
-    return this.getFocusedPanel()
   }
 
   get willowBrowser() {
@@ -970,22 +1050,22 @@ ${StudioConstants.panel} 400
     return this.openFullPathInNewTabAndFocus(url)
   }
 
-  async _showTabMoveFilePromptCommand(suggestedNewFilename, isRenameOp = false) {
-    const mountedTab = this.mountedTab
+  async _showTabMoveFilePromptCommand(tabId, suggestedNewFilename, isRenameOp = false) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
 
-    const newName = await this.promptToMoveFile(mountedTab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
+    const newName = await this.promptToMoveFile(tab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
     if (!newName) return false
-    await this.focusedPanel.closeTab(mountedTab)
-    const tab = await this.openFullPathInNewTabAndFocus(newName)
+    await this.closeTab(tab)
+    await this.openFullPathInNewTabAndFocus(newName)
     this.renderApp()
   }
 
-  async showTabMoveFilePromptCommand(suggestedNewFilename) {
-    await this._showTabMoveFilePromptCommand(suggestedNewFilename)
+  async showTabMoveFilePromptCommand(tabId, suggestedNewFilename) {
+    await this._showTabMoveFilePromptCommand(tabId, suggestedNewFilename)
   }
 
-  async showTabRenameFilePromptCommand(suggestedNewFilename) {
-    await this._showTabMoveFilePromptCommand(suggestedNewFilename, true)
+  async showTabRenameFilePromptCommand(tabId, suggestedNewFilename) {
+    await this._showTabMoveFilePromptCommand(tabId, suggestedNewFilename, true)
   }
 
   async toggleOfflineModeCommand() {
@@ -1001,7 +1081,7 @@ ${StudioConstants.panel} 400
   }
 
   async closeMountedProgramCommand() {
-    this.focusedPanel.closeTab(this.mountedTab)
+    this.closeTab(this.mountedTab)
     this.renderApp()
   }
 
@@ -1012,11 +1092,6 @@ ${StudioConstants.panel} 400
   async selectAllTilesCommand() {
     // todo: bug. they are not showing selected state.
     this.mountedProgram.getTiles().forEach(tile => tile.selectTile())
-  }
-
-  async selectTilesByShadowClassCommand(className) {
-    this.addToCommandLog("app selectTilesByShadowClassCommand") // todo: what is this?
-    this.mountedTab.getTabWall().selectTilesByShadowClass(className)
   }
 
   async clearSelectionCommand() {
@@ -1047,15 +1122,16 @@ ${StudioConstants.panel} 400
   }
 
   async duplicateSelectionCommand() {
-    const newTiles = this.mountedProgram.getSelectedNodes().map(tile => tile.cloneAndOffset())
+    const newTiles = this.mountedProgram.getSelectedNodes().map(tile => tile.duplicate())
     await this.renderApp()
     this.mountedProgram.clearSelection()
     newTiles.forEach(tile => tile.selectTile())
     await this.mountedProgram.getTab().autosaveAndRender()
   }
 
-  async showDeleteFileConfirmDialogCommand() {
-    const filename = this.mountedTab.getFileName()
+  async showDeleteFileConfirmDialogCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    const filename = tab.getFileName()
     // todo: make this an undo operation. on web should be easyish. on desktop via move to trash.
     const result = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${filename}?`)
     return result ? this.deleteFocusedTabCommand() : undefined
@@ -1065,25 +1141,36 @@ ${StudioConstants.panel} 400
     const tab = this.mountedTab
     await tab.unlinkTab()
 
-    this.focusedPanel.closeTab(tab)
+    this.closeTab(tab)
     this.renderApp()
   }
 
   async mountPreviousTabCommand() {
-    this.focusedPanel.mountPreviousTab()
+    this.mountPreviousTab()
   }
 
   async mountNextTabCommand() {
-    this.focusedPanel.mountNextTab()
+    this.mountNextTab()
   }
 
   async closeAllTabsCommand() {
-    this.focusedPanel.closeAllTabs() // todo: confirm before closing if unsaved changes?
+    // todo: confirm before closing if unsaved changes?
+    this._getTabsNode()
+      .getOpenTabs()
+      .forEach(tab => {
+        this.closeTab(tab)
+      })
     this.renderApp()
   }
 
-  async closeAllTabsExceptFocusedTabCommand() {
-    this.focusedPanel.closeAllTabsExceptFocusedTab() // todo: confirm before closing if unsaved changes?
+  async closeAllTabsExceptThisOneCommand(tabId) {
+    const keepTabOpen = this._getTabByIdOrMountedTab(tabId)
+    // todo: confirm before closing if unsaved changes?
+    this._getTabsNode()
+      .getOpenTabs()
+      .forEach(tab => {
+        if (tab !== keepTabOpen) this.closeTab(tab)
+      })
     this.renderApp()
   }
 
@@ -1091,30 +1178,21 @@ ${StudioConstants.panel} 400
     this.willowBrowser.toggleFullScreen()
   }
 
-  _hideMenuAndTabs() {
-    this.getNode(StudioConstants.menu).unmount()
-    this.getNode(StudioConstants.menu).replaceNode(() => StudioConstants.menu + "PlaceHolder")
-  }
-
-  _showMenuAndTabs() {
-    // todo: make this hide tabs
-    this.getNode(StudioConstants.menu + "PlaceHolder").replaceNode(() => StudioConstants.menu)
-  }
-
-  toggleFocusedModeCommand() {
-    this.has(StudioConstants.menu) ? this._hideMenuAndTabs() : this._showMenuAndTabs()
-    this.makeAllDirty() // cleanup
-    return this.toggleFullScreenCommand()
+  toggleMenuCommand() {
+    const menu = this.getMenuTreeComponent()
+    menu.toggleVisibility()
+    this.getPanel().setMenuHeight(menu.isVisible() ? 30 : 0)
+    this.renderApp()
   }
 
   // TODO: make it slidable.?
   async toggleGutterWidthCommand() {
-    this.focusedPanel.toggleGutterWidth()
+    this.getPanel().toggleGutterWidth()
     this.renderApp()
   }
 
   async toggleGutterCommand() {
-    this.getFocusedPanel().toggleGutter()
+    this.getPanel().toggleGutter()
     this.renderApp()
   }
 
@@ -1217,16 +1295,17 @@ ${StudioConstants.panel} 400
     this.addStumpCodeMessageToLog(`div ${words.join(" ")}`)
   }
 
-  async saveTabAndNotifyCommand() {
-    const tab = this.mountedTab
+  async saveTabAndNotifyCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
     await tab.forceSaveToFile()
     tab.addStumpCodeMessageToLog(`div Saved ${tab.getFileName()}
  title Saved ${tab.getFullTabFilePath()}`)
     this.renderApp()
   }
 
-  cloneTabCommand() {
-    return this._createAndOpen(this.mountedTab.getTabProgram().childrenToString(), this.mountedTab.getFileName())
+  cloneTabCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    return this._createAndOpen(tab.getTabProgram().childrenToString(), tab.getFileName())
   }
 
   async pasteCommand(pastedText) {
@@ -1240,10 +1319,6 @@ ${StudioConstants.panel} 400
 
   async executeCommandOnStumpWithClassCommand(commandName, stumpNodeClass) {
     await this._executeCommandByStumpNodeChild(commandName, "class " + stumpNodeClass)
-  }
-
-  async executeCommandByStumpNodeStringCommand(commandName, str) {
-    await this._executeCommandByStumpNodeString(commandName, str)
   }
 
   async executeCommandOnFirstSelectedTileCommand(command, valueParam, nameParam) {
@@ -1261,7 +1336,7 @@ ${StudioConstants.panel} 400
     const handGrammarProgram = this.mountedProgram.getHandGrammarProgram()
     const topNodeTypes = handGrammarProgram.getTopNodeTypeDefinitions().map(def => def.get("crux"))
 
-    const sourceCode = topNodeTypes.join("\n") + `\n${OhayoConstants.layout} ${OhayoConstants.layouts.column}`
+    const sourceCode = topNodeTypes.join("\n")
     const tab = await this._createAndOpen(sourceCode, "all-tiles" + StudioConstants.ohayoExtension)
     const data = tab
       .getTabProgram()
@@ -1281,21 +1356,20 @@ ${StudioConstants.panel} 400
   async _runSpeedTestCommand() {
     const files = await this.getDefaultDisk().readFiles()
     const startTime = Date.now()
-    const focusedPanel = this.focusedPanel
 
     const timePromises = files.map(async file => {
       const url = file.getFileLink()
       const newTab = await this._openFullDiskFilePathInNewTab(url)
-      const mountedTab = focusedPanel.getMountedTab()
-      focusedPanel.setMountedTab(newTab)
-      if (mountedTab) focusedPanel.closeTab(mountedTab)
+      const mountedTab = this.getMountedTab()
+      this.setMountedTab(newTab)
+      if (mountedTab) this.closeTab(mountedTab)
       this.renderApp()
       return newTab.getTabProgram().toRunTimeStats()
     })
 
     const times = await Promise.all(timePromises)
     // todo: trigger shift+w shortcut instead of this if clause.
-    if (focusedPanel.getMountedTab()) this.closeMountedProgramCommand()
+    if (this.getMountedTab()) this.closeMountedProgramCommand()
     const rowsAsCsv = new jtree.TreeNode(times)
     const runTime = Date.now() - startTime
     const title = `Program Load Times ${moment().format("MM/DD/YYYY")} version ${this.getVersion()}. Run time: ${runTime}`

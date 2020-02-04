@@ -2,9 +2,5 @@
 test tileContextMenu
  createNewBlankProgramCommand
   appendTileCommand data.inline
-   executeCommandByStumpNodeStringCommand
-    withParagraph
-     contextMenuCommand
-    withParagraph
-     dataInlineNode
+   executeCommandOnStumpWithClassCommand clickCommand TileDropDownButton
     assertStringIncludes getStumpNodeString Export data to csv file

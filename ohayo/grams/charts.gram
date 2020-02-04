@@ -4,11 +4,19 @@ abstractChartNode
  int rowDisplayLimit 10000
  extends abstractTileTreeComponentNode
  abstract
+ string tileFooterTemplate
+  span Rows: {rowCount} Columns Out: {columnCount}
+  {tileMenuButton}
  javascript
   getTileFooterStumpCode() {
    const table = this.getParentOrDummyTable()
-   return `${this.getTileToolbarButtonStumpCode()}
-  span Rows: ${table.getRowCount()} Columns Out: ${table.getColumnCount()}`
+   return this.qFormat(this.tileFooterTemplate, {rowCount: table.getRowCount(), columnCount: table.getColumnCount(), tileMenuButton: this.getTileMenuButtonStumpCode()})
+  }
+  get _tileWidth() {
+   return this.isNodeJs() ? 456 : (jQuery(".WallTreeComponent").width() - 100)
+  }
+  get _tileHeight() {
+   return 300
   }
   toDisplayString(value, columnName) {
    // todo: remove.
@@ -36,10 +44,8 @@ abstractHeaderlessChartTileNode
   div
    class {classes}
    id {id}
-   contextMenuCommand openTileContextMenuCommand
    div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
+    class TileHeaderGrabber
    div
     class TileBody HeaderLess
     {body}
@@ -47,16 +53,10 @@ abstractHeaderlessChartTileNode
     class TileFooter
     {footer}
    div
-    class TileGrabber
+    class TileFooterGrabber
  javascript
   toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileToolbarButtonStumpCode() })
-  }
-  get _tileWidth() {
-   return this.getTileDimensionIfAny().width - 10
-  }
-  get _tileHeight() {
-   return this.getTileDimensionIfAny().height - 60 // 10 for padding. 10 for top grabber. 30 for footer. 10 fot bottom grabber.
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileMenuButtonStumpCode() })
   }
 abstractEmptyFooterTileNode
  abstract

@@ -59,12 +59,11 @@ dtjsBasicNode
     .slice(0, 10)
    const container = this.getStumpNode().findStumpNodeByChild("class DataTable")
    if (this.isNodeJs()) return undefined
-   const tileDimension = this.getTileDimensionIfAny()
-   const width = tileDimension.width - 20 // remove 10 for boddy padding?
-   const height = tileDimension.height - 150
+   const width = this._tileWidth
+   const height = this._tileHeight
    const shadow = container.getShadow()
    const el = shadow.getShadowElement()
-   shadow.setShadowCss({ width: width, height: height })
+   shadow.setShadowCss({ width, height })
    const rows = this.getRowsWithRowDisplayLimit()
    // todo: note, this is only works with jQuery
    jQuery.fn.dataTable.ext.errMode = "throw"

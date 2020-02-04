@@ -87,7 +87,6 @@ node_modules/tinycolor2/dist/tinycolor-min.js
 node_modules/superagent/dist/superagent.js
 node_modules/mousetrap/mousetrap.min.js
 node_modules/jquery/dist/jquery.min.js
-node_modules/jquery-ui-dist/jquery-ui.min.js
 node_modules/codemirror/lib/codemirror.js
 node_modules/codemirror/addon/hint/show-hint.js
 ${jtreeProductsPath}jtree.browser.js

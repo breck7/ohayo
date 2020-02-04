@@ -21,7 +21,7 @@ test deleteFile
   showDeleteFileConfirmDialogCommand
    assertTypeIs getMountedTab undefined
    createNewBlankProgramCommand
-    insertPickerTileCommand
+    insertChildPickerTileCommand
      assertLengthIs getMountedTilesDiagnostic 1
      createNewBlankProgramCommand
       assertLengthIs getMountedTilesDiagnostic 0
@@ -38,7 +38,7 @@ test moveFilePrompt
  createNewBlankProgramCommand
   showTabRenameFilePromptCommand
    assertStringIs getMountedTab.getFileName untitled.ohayo
-   showTabRenameFilePromptCommand renamed.ohayo
+   showTabRenameFilePromptCommand  renamed.ohayo
     assertStringIs getMountedTab.getFileName renamed.ohayo
 test deleteFileCommand
  createNewBlankProgramCommand

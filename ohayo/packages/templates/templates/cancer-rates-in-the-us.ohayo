@@ -10,5 +10,4 @@ cancer.cases
   vega.bar
    xColumn CancerType
    yColumn Male
-doc.layout column
 doc.categories medicine

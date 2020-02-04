@@ -29,7 +29,6 @@ rowsSortByNode
     rows.reverse
      rows.first 1
       tables.basic Most expensive
-  doc.layout tiled
  extends abstractTransformerNode
  crux rows.sortBy
  string placeholderMessage Columns you want to sort by

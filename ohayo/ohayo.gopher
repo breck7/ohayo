@@ -29,7 +29,6 @@ testProgram linecount.ohayo
   text.lineCount
    tables.basic
 testProgram twocolumn.ohayo
- doc.layout column
  html.h1 hello world
  html.text h2 world
 testProgram wordcount.ohayo

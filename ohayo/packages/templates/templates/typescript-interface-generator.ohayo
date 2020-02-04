@@ -6,5 +6,4 @@ data.inline
  schema.toTypescript
   hidden
   html.printAs code
-doc.layout column
 doc.categories programming

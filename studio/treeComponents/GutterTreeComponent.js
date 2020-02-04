@@ -11,16 +11,24 @@ class GutterTreeComponent extends AbstractTreeComponent {
   createParser() {
     return new jtree.TreeNode.Parser(undefined, {
       console: ConsoleTreeComponent,
-      terminal: this.isNodeJs() || !this.getRootNode().getPerfSettings().codeMirrorEnabled ? BasicTerminalTreeComponent : CodeMirrorTerminalTreeComponent
+      terminal: this.isNodeJs() ? BasicTerminalTreeComponent : CodeMirrorTerminalTreeComponent
     })
+  }
+
+  get _gutterWidth() {
+    return this.getWord(1)
+  }
+
+  setGutterWidth(newWidth) {
+    this.setWord(1, newWidth)
+    return this
   }
 
   toHakonCode() {
     const theme = this.getTheme()
-    const width = this.getParent().getGutterWidth()
     return `${super.toHakonCode()}
 .Gutter
- width ${width}px
+ width ${this._gutterWidth}px
  left 0
  background ${theme.backgroundColor}
  border-color ${theme.borderColor}
@@ -43,11 +51,6 @@ class GutterTreeComponent extends AbstractTreeComponent {
   opacity .25
   &:hover
    opacity 1`
-  }
-
-  getDependencies() {
-    // todo: cleanup
-    return [this.getParent().getNode(StudioConstants.tabs), this.getParent()]
   }
 
   toStumpCode() {

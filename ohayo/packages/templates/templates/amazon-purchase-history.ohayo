@@ -17,5 +17,4 @@ amazon.history
     vega.bar Items Purchases by Year
      yColumn count
      xColumn year
-doc.layout column
 doc.categories shopping

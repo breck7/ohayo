@@ -1,6 +1,5 @@
 doc.title Ohayo Grammar Analysis
 doc.categories ohayo
-doc.layout column
 debug.ohayoGrammar
  hidden
  text.lineCount

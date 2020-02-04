@@ -22,7 +22,7 @@ abstractHtmlNode
     {content}
  javascript
   getTileFooterStumpCode() {
-   return this.getTileToolbarButtonStumpCode()
+   return this.getTileMenuButtonStumpCode()
   }
   async fetchTableInputs() {
    return { rows: [{ text: this.getHtmlContent() }] }

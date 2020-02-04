@@ -9,22 +9,20 @@ test newFromExample
  createNewBlankProgramCommand
   appendTileCommand tables.basic
    selectAllTilesCommand
-    assertLengthIs getFocusedPanel.getTabs 1
-    executeCommandOnFirstSelectedTileCommand toggleToolbarCommand
+    assertLengthIs getTabs 1
+    executeCommandOnFirstSelectedTileCommand toggleTileMenuCommand
      executeCommandOnFirstSelectedTileCommand createProgramFromTileExampleCommand
-      assertLengthIs getFocusedPanel.getTabs 2
-test toolbars
+      assertLengthIs getTabs 2
+test menu
  createNewBlankProgramCommand
   appendTileCommand samples.presidents
    selectAllTilesCommand
     appendTileCommand group.by
      selectAllTilesCommand
       assertLengthIs getMountedTilesProgram.getTiles 2
-      assertStringExcludes getStumpNodeString columnName
-      assertStringExcludes getStumpNodeString example
-      executeCommandOnLastSelectedTileCommand toggleToolbarCommand
-       assertStringIncludes getStumpNodeString columnName
-       assertStringIncludes getStumpNodeString example
-       assertLengthIs getFocusedPanel.getTabs 1
+      assertStringExcludes getStumpNodeString Copy tile
+      executeCommandOnLastSelectedTileCommand toggleTileMenuCommand
+       assertStringIncludes getStumpNodeString Copy tile
+       assertLengthIs getTabs 1
        executeCommandOnFirstSelectedTileCommand inspectTileCommand
         executeCommandOnFirstSelectedTileCommand changeTileTypeCommand data.inline

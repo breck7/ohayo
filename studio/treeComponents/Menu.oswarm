@@ -2,6 +2,6 @@
 test newMenuTest
  createNewBlankProgramCommand
   assertLengthIs getCommandsBuffer 0
-  assertStringExcludes getStumpNodeString Clone
-  executeCommandOnStumpWithIdCommand clickCommand newToggle
-   assertStringIncludes getStumpNodeString Clone
+  assertStringExcludes getStumpNodeString untitled-2
+  executeCommandOnStumpWithIdCommand clickCommand newButton
+   assertStringIncludes getStumpNodeString untitled-2

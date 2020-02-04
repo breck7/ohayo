@@ -7,5 +7,4 @@ github.info rstudio/rstudio jupyter/notebook treenotation/ohayo
  vega.scatter Stars by Year Created
   xColumn created_at
   yColumn stargazers_count
-doc.layout column
 doc.categories programming

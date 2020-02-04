@@ -7,13 +7,8 @@ codeCell
 documentCategoryCell
  highlightScope constant
  enum shopping biology chemistry programming socialMedia math parenting writing dataScience ohayo geography web history wikipedia
-zoomCell
- extends numberCell
 referenceIdCell
  highlightScope string
-docLayoutOptionCell
- enum custom bin tree column tiled
- highlightScope constant
 commentCell
  highlightScope comment
 commentKeywordCell
@@ -37,10 +32,8 @@ abstractDocTileNode
   div
    class {classes}
    id {id}
-   contextMenuCommand openTileContextMenuCommand
    div
-    class TileGrabber
-    doubleClickCommand toggleTileMaximizeCommand
+    class TileHeaderGrabber
    div
     class TileBody HeaderLess
     {body}
@@ -48,13 +41,13 @@ abstractDocTileNode
     class TileFooter
     {footer}
    div
-    class TileGrabber
+    class TileFooterGrabber
  javascript
   _getBody() {
    return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
   }
   toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileMenuButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
   }
 docTitleNode
  catchAllCellType stringCell
@@ -161,15 +154,6 @@ docDateNode
  extends abstractDocSettingNode
  crux doc.date
  catchAllCellType dateCell
-docZoomNode
- crux doc.zoom
- description Enlarge or shrink all tiles
- cells tileKeywordCell zoomCell
- extends abstractDocSettingNode
-docLayoutNode
- cells tileKeywordCell docLayoutOptionCell
- extends abstractDocSettingNode
- crux doc.layout
 commentLineNode
  catchAllCellType commentCell
  catchAllNodeType commentLineNode

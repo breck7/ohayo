@@ -2,7 +2,6 @@ doc.title Ohayo Reference
 doc.author Breck Yunits
 doc.date 12/05/2019
 doc.categories ohayo
-doc.layout column
 
 doc.subtitle Ohayo is a language for data powered documents.
 
@@ -43,22 +42,6 @@ doc.section
 doc.section
  subtitle Links
  link http://ohayo.computer A whole sentence can be linked
-
-
-
-doc.section
- subtitle Layout
- paragraph Layout changes the layout strategy of the tiles
- code ohayo
-  doc.layout column
-
-
-doc.section
- subtitle Zoom
- paragraph Zoom let's you adjust the zoom level of the doc.
- code ohayo
-  doc.zoom .5
-
 
 doc.section
  subtitle Default visibilitiy

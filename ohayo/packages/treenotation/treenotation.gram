@@ -59,14 +59,13 @@ treenotation3dNode
    const showGrid = tileStruct.showGrid
    // specify options
    // docs: http://visjs.org/docs/graph3d/
-   const tileDimension = this.getTileDimensionIfAny()
    const cameraPositionNode = this.getNode("cameraPosition") || new jtree.TreeNode("cameraPosition 4 .1 1.5").getNode("cameraPosition")
    const distance = parseFloat(cameraPositionNode.getWord(1))
    const horizontal = parseFloat(cameraPositionNode.getWord(2))
    const vertical = parseFloat(cameraPositionNode.getWord(3))
    const options = {
-    width: tileDimension.width + "px",
-    height: tileDimension.height - 80 + "px",
+    width: this._tileWidth + "px",
+    height: this._tileHeight - 80 + "px",
     style: "dot-color", // dot?
     showPerspective: false,
     showLegend: false,

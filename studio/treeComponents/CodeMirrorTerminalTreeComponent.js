@@ -22,6 +22,7 @@ CodeMirrorConstants.keyMap.shiftCmdEnter = "Shift-Cmd-Enter"
 CodeMirrorConstants.keyMap.cmdBackSlash = "Cmd-\\"
 CodeMirrorConstants.keyMap.cmdS = "Cmd-S"
 CodeMirrorConstants.keyMap.ctrlS = "Ctrl-S"
+CodeMirrorConstants.keyMap.escape = "Esc"
 
 class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
   getCode() {
@@ -68,6 +69,10 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
 
     keyMap[CodeMirrorConstants.keyMap.cmdBackSlash] = () => {
       this.getRootNode().clearTabMessagesCommand()
+    }
+
+    keyMap[CodeMirrorConstants.keyMap.escape] = () => {
+      cm.getInputField().blur()
     }
 
     keyMap[CodeMirrorConstants.keyMap.cmdS] = async () => {

@@ -79,8 +79,9 @@ editorGalleryNode
      top 0
      overflow hidden
      div
-      position absolute
       background {linkColor}
+      height 5px
+      margin 1px
  string miniStumpTemplate
   a
    class miniMap
@@ -98,19 +99,17 @@ editorGalleryNode
    {minis}
  string miniStyleTemplate
   div
-   style {style}
  javascript
   async openFullPathInNewTabAndFocusCommand(url) {
    return this.getTab().getRootNode().openFullPathInNewTabAndFocusCommand(url)
   }
   _getMiniStumpCode(sourceCode, filename, permalink, width = 120, height = 75) {
    const ohayoProgram = new ohayoNode(sourceCode)
-   const dimensions = ohayoProgram.getTileDimensionMap(width, height)
    const theTiles = ohayoProgram
     .getTiles()
     .filter(tile => tile.isVisible())
     .map(
-     tile => this.qFormat(this.miniStyleTemplate, {style: dimensions.get(tile).getScaledCss(0.1)})
+     tile => this.qFormat(this.miniStyleTemplate, {})
     )
     .join("\n")
    const onClick = permalink ? "clickCommand openFullPathInNewTabAndFocusCommand" : ""
