@@ -1,5 +1,5 @@
 #! /usr/bin/env node /usr/local/bin/jtree
-test wallContextMenu
+test tabMenu
  createNewBlankProgramCommand
-  executeCommandOnStumpWithClassCommand contextMenuCommand WallTreeComponent
+  executeCommandOnStumpWithClassCommand openTabMenuCommand tabDropDownButton
    assertStringIncludes getStumpNodeString Save File
