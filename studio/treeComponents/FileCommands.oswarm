@@ -38,7 +38,7 @@ test moveFilePrompt
  createNewBlankProgramCommand
   showTabRenameFilePromptCommand
    assertStringIs getMountedTab.getFileName untitled.ohayo
-   showTabRenameFilePromptCommand renamed.ohayo
+   showTabRenameFilePromptCommand  renamed.ohayo
     assertStringIs getMountedTab.getFileName renamed.ohayo
 test deleteFileCommand
  createNewBlankProgramCommand

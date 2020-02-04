@@ -12,26 +12,34 @@ const AbstractContextMenuTreeComponent = require("./AbstractContextMenuTreeCompo
 
 class TabMenuTreeComponent extends AbstractContextMenuTreeComponent {
   getContextMenuBodyStumpCode() {
-    const index = this.getWord(1)
+    const tabId = this.getWord(1)
     return `a Save File
  clickCommand saveTabAndNotifyCommand
+ value ${tabId}
 a Close File
- clickCommand closeTabByIndexCommand
- value ${index}
+ clickCommand closeTabCommand
+ value ${tabId}
 a Rename File
  clickCommand showTabRenameFilePromptCommand
+ value ${tabId}
 a Move File
  clickCommand showTabMoveFilePromptCommand
+ value ${tabId}
 a Clone File
  clickCommand cloneTabCommand
+ value ${tabId}
 a Delete File
  clickCommand showDeleteFileConfirmDialogCommand
+ value ${tabId}
 a Copy program as link
- clickCommand copyDeepLinkCommand
+ clickCommand copyTabDeepLinkCommand
+ value ${tabId}
 a Log program stats
  clickCommand printProgramStatsCommand
+ value ${tabId}
 a Close all other files
- clickCommand closeAllTabsExceptFocusedTabCommand`
+ clickCommand closeAllTabsExceptThisOneCommand
+ value ${tabId}`
   }
 }
 
@@ -101,18 +109,19 @@ class TabTreeComponent extends AbstractTreeComponent {
     const index = this.getIndex()
     const fullPath = this.getFullTabFilePath()
     const filename = this.getFileName()
+    const tabId = this._getUid()
     const filenameWithoutExtension = jtree.Utils.removeFileExtension(filename)
     return `a ${filenameWithoutExtension}
- clickCommand mountTabByIndexCommand
+ clickCommand mountTabCommand
  collapse
- value ${index}
+ value ${tabId}
  title ${fullPath}
  id tab${index}
  class TabStub ${this.isMountedTab() ? "mountedTab" : ""}
  span ▾
   collapse
   clickCommand openTabMenuCommand
-  value ${index}
+  value ${tabId}
   class tabDropDownButton`
   }
 
@@ -129,9 +138,8 @@ class TabTreeComponent extends AbstractTreeComponent {
   opacity 1`
   }
 
-  async openTabMenuCommand() {
-    const index = this.getIndex()
-    this.getRootNode().toggleAndRender(`${StudioConstants.tabMenu} ${index}`)
+  async openTabMenuCommand(tabId) {
+    this.getRootNode().toggleAndRender(`${StudioConstants.tabMenu} ${tabId}`)
   }
 
   getDeepLink() {

@@ -28,7 +28,7 @@ test mountTab
   assertStringIs getMountedTab.getFileName untitled.ohayo
   createNewBlankProgramCommand
    assertStringIs getMountedTab.getFileName untitled-2.ohayo
-   mountTabByIndexCommand 0
+   mountTabCommand
    assertStringIs getMountedTab.getFileName untitled.ohayo
 test nav
  openUrlInNewTabCommand localStorage/new
@@ -60,7 +60,7 @@ test navigation
            createNewBlankProgramCommand
             assertStringIs getMountedTab.getFileName untitled-3.ohayo
             toggleGutterCommand
-             closeTabByIndexCommand 0
+             closeTabCommand
               assertTypeIs getMountedTab undefined
               toggleFullScreenCommand
                toggleFullScreenCommand

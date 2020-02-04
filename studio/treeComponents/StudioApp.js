@@ -375,40 +375,31 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
 
   closeTab(tab) {
     // todo: terminal and console on last tab close.
-    if (tab.isMounted()) {
+    if (tab.isMountedTab()) {
       const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs(), tab)
       this.getPanel().removeWall()
       tab.markAsUnmounted()
       tab.unmountAndDestroy()
       delete this._focusedTab
       if (tabToMountNext) this.setMountedTab(tabToMountNext)
-    } else tab.destroy()
+    } else tab.unmountAndDestroy()
     this._updateLocationForRestoreOnRefresh()
-  }
-
-  closeAllTabsExceptFocusedTab() {
-    const mountedTab = this.getMountedTab()
-    this._getTabsNode()
-      .getOpenTabs()
-      .forEach(tab => {
-        if (tab !== mountedTab) this.closeTab(tab)
-      })
   }
 
   mountPreviousTab() {
     const tabs = this.getTabs()
     const mountedTab = this._getMountedTab()
     if (tabs.length < 2 || !mountedTab) return this
-    const index = tabs.indexOf(mountedTab)
-    return this._mountTabByIndex(index === 0 ? tabs.length - 1 : index - 1)
+    const tabIndex = tabs.indexOf(mountedTab)
+    return this._mountTabByIndex(tabIndex === 0 ? tabs.length - 1 : tabIndex - 1)
   }
 
   mountNextTab() {
     const tabs = this.getTabs()
     const mountedTab = this._getMountedTab()
     if (tabs.length < 2 || !mountedTab) return this
-    const index = tabs.indexOf(mountedTab)
-    return this._mountTabByIndex(index === tabs.length - 1 ? 0 : index + 1)
+    const tabIndex = tabs.indexOf(mountedTab)
+    return this._mountTabByIndex(tabIndex === tabs.length - 1 ? 0 : tabIndex + 1)
   }
 
   getTabs() {
@@ -801,9 +792,10 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     this.renderApp()
   }
 
-  async printProgramStatsCommand() {
-    const stats = new jtree.TreeNode(this.mountedProgram.toRunTimeStats()).toString()
-    this.mountedTab.logMessageText(stats)
+  async printProgramStatsCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    const stats = new jtree.TreeNode(tab.getTabProgram().toRunTimeStats()).toString()
+    tab.logMessageText(stats)
     this.renderApp()
   }
 
@@ -910,8 +902,12 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
-  async copyDeepLinkCommand() {
-    this.getWillowBrowser().copyTextToClipboard(this.mountedTab.getDeepLink())
+  async copyTabDeepLinkCommand(tabId) {
+    this.getWillowBrowser().copyTextToClipboard(this._getTabByIdOrMountedTab(tabId).getDeepLink())
+  }
+
+  _getTabByIdOrMountedTab(tabId) {
+    return tabId === undefined ? this.mountedTab : this.getTabs().find(tab => tab._getUid().toString() === tabId)
   }
 
   async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
@@ -984,17 +980,19 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return this._openFullDiskFilePathInNewTab(new FullDiskPath(url).toString())
   }
 
-  async mountTabByIndexCommand(index) {
-    this._mountTabByIndex(index)
-  }
-
-  async closeTabByIndexCommand(index) {
-    this.closeTab(this.getTabs()[index])
+  async mountTabCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    this.setMountedTab(tab)
     this.renderApp()
   }
 
-  _mountTabByIndex(index) {
-    this.setMountedTab(this.getTabs()[index])
+  async closeTabCommand(tabId) {
+    this.closeTab(this._getTabByIdOrMountedTab(tabId))
+    this.renderApp()
+  }
+
+  _mountTabByIndex(tabIndex) {
+    this.setMountedTab(this.getTabs()[tabIndex])
     this.renderApp()
     return this
   }
@@ -1038,22 +1036,22 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return this.openFullPathInNewTabAndFocus(url)
   }
 
-  async _showTabMoveFilePromptCommand(suggestedNewFilename, isRenameOp = false) {
-    const mountedTab = this.mountedTab
+  async _showTabMoveFilePromptCommand(tabId, suggestedNewFilename, isRenameOp = false) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
 
-    const newName = await this.promptToMoveFile(mountedTab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
+    const newName = await this.promptToMoveFile(tab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
     if (!newName) return false
-    await this.closeTab(mountedTab)
-    const tab = await this.openFullPathInNewTabAndFocus(newName)
+    await this.closeTab(tab)
+    await this.openFullPathInNewTabAndFocus(newName)
     this.renderApp()
   }
 
-  async showTabMoveFilePromptCommand(suggestedNewFilename) {
-    await this._showTabMoveFilePromptCommand(suggestedNewFilename)
+  async showTabMoveFilePromptCommand(tabId, suggestedNewFilename) {
+    await this._showTabMoveFilePromptCommand(tabId, suggestedNewFilename)
   }
 
-  async showTabRenameFilePromptCommand(suggestedNewFilename) {
-    await this._showTabMoveFilePromptCommand(suggestedNewFilename, true)
+  async showTabRenameFilePromptCommand(tabId, suggestedNewFilename) {
+    await this._showTabMoveFilePromptCommand(tabId, suggestedNewFilename, true)
   }
 
   async toggleOfflineModeCommand() {
@@ -1117,8 +1115,9 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     await this.mountedProgram.getTab().autosaveAndRender()
   }
 
-  async showDeleteFileConfirmDialogCommand() {
-    const filename = this.mountedTab.getFileName()
+  async showDeleteFileConfirmDialogCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    const filename = tab.getFileName()
     // todo: make this an undo operation. on web should be easyish. on desktop via move to trash.
     const result = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${filename}?`)
     return result ? this.deleteFocusedTabCommand() : undefined
@@ -1150,8 +1149,14 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     this.renderApp()
   }
 
-  async closeAllTabsExceptFocusedTabCommand() {
-    this.closeAllTabsExceptFocusedTab() // todo: confirm before closing if unsaved changes?
+  async closeAllTabsExceptThisOneCommand(tabId) {
+    const keepTabOpen = this._getTabByIdOrMountedTab(tabId)
+    // todo: confirm before closing if unsaved changes?
+    this._getTabsNode()
+      .getOpenTabs()
+      .forEach(tab => {
+        if (tab !== keepTabOpen) this.closeTab(tab)
+      })
     this.renderApp()
   }
 
@@ -1276,16 +1281,17 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     this.addStumpCodeMessageToLog(`div ${words.join(" ")}`)
   }
 
-  async saveTabAndNotifyCommand() {
-    const tab = this.mountedTab
+  async saveTabAndNotifyCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
     await tab.forceSaveToFile()
     tab.addStumpCodeMessageToLog(`div Saved ${tab.getFileName()}
  title Saved ${tab.getFullTabFilePath()}`)
     this.renderApp()
   }
 
-  cloneTabCommand() {
-    return this._createAndOpen(this.mountedTab.getTabProgram().childrenToString(), this.mountedTab.getFileName())
+  cloneTabCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    return this._createAndOpen(tab.getTabProgram().childrenToString(), tab.getFileName())
   }
 
   async pasteCommand(pastedText) {
