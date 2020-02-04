@@ -910,7 +910,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
   }
 
   _getTabByIdOrMountedTab(tabId) {
-    return tabId === undefined ? this.mountedTab : this.getTabs().find(tab => tab._getUid().toString() === tabId)
+    return tabId === undefined || tabId === "" ? this.mountedTab : this.getTabs().find(tab => tab._getUid().toString() === tabId)
   }
 
   async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
@@ -1143,7 +1143,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
   }
 
   async closeAllTabsCommand() {
-    this.closeAllTabs() // todo: confirm before closing if unsaved changes?
+    // todo: confirm before closing if unsaved changes?
     this._getTabsNode()
       .getOpenTabs()
       .forEach(tab => {

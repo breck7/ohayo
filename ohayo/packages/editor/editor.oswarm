@@ -1,15 +1,15 @@
 #! /usr/bin/env node /usr/local/bin/jtree
 test browseFiles
  createNewBlankProgramCommand
-  assertStringIncludes getTextContent untitled.ohayo
+  assertStringIncludes getTextContent untitled
   closeMountedProgramCommand
-   assertStringExcludes getTextContent untitled.ohayo
+   assertStringExcludes getTextContent untitled
    createNewBlankProgramCommand
     assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 0
-    assertStringExcludes getTextContent untitled.ohayo
+    assertStringExcludes getTextContent untitled
     pasteCommand
      withParagraph
       editor.files
        editor.gallery
      assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 2
-     assertStringIncludes getTextContent untitled.ohayo
+     assertStringIncludes getTextContent untitled
