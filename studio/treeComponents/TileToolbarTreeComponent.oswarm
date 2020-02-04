@@ -10,7 +10,7 @@ test newFromExample
   appendTileCommand tables.basic
    selectAllTilesCommand
     assertLengthIs getTabs 1
-    executeCommandOnFirstSelectedTileCommand toggleToolbarCommand
+    executeCommandOnFirstSelectedTileCommand toggleTileMenuCommand
      executeCommandOnFirstSelectedTileCommand createProgramFromTileExampleCommand
       assertLengthIs getTabs 2
 test toolbars
@@ -22,7 +22,7 @@ test toolbars
       assertLengthIs getMountedTilesProgram.getTiles 2
       assertStringExcludes getStumpNodeString columnName
       assertStringExcludes getStumpNodeString example
-      executeCommandOnLastSelectedTileCommand toggleToolbarCommand
+      executeCommandOnLastSelectedTileCommand toggleTileMenuCommand
        assertStringIncludes getStumpNodeString columnName
        assertStringIncludes getStumpNodeString example
        assertLengthIs getTabs 1

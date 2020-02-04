@@ -47,7 +47,7 @@ abstractDocTileNode
    return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
   }
   toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileMenuButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
   }
 docTitleNode
  catchAllCellType stringCell

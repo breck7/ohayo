@@ -40,7 +40,7 @@ abstractTileTreeComponentNode
  string pencilStumpTemplate
   span ▾
    class TileDropDownButton
-   clickCommand toggleToolbarCommand
+   clickCommand toggleTileMenuCommand
  string errorStateStumpTemplate
   div
    class {classes}
@@ -215,7 +215,7 @@ abstractTileTreeComponentNode
    return exampleNode ? exampleNode.childrenToString() : ""
   }
   toStumpLoadingCode() {
-   return this.qFormat(this.tileLoadingTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), name: this.getWord(0), footer: this.getTileToolbarButtonStumpCode() })
+   return this.qFormat(this.tileLoadingTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), name: this.getWord(0), footer: this.getTileMenuButtonStumpCode() })
   }
   emitLogMessage(message) {
    const tab = this.getTab()
@@ -287,20 +287,13 @@ abstractTileTreeComponentNode
    return errors.length ? ` <span style="color: ${this.getTheme().errorColor};">${errors.join(" ")}</span>` : "" //todo: cleanup
   }
   toStumpErrorStateCode(err) {
-   return this.qFormat(this.errorStateStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), content: `div ` + err, footer: this.getTileToolbarButtonStumpCode() })
+   return this.qFormat(this.errorStateStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), content: `div ` + err, footer: this.getTileMenuButtonStumpCode() })
   }
   // todo: delete this
   makeDirty() {
    delete this._cache_settingsObject
    delete this._bodyStumpCodeCache // todo: cleanup
    this._setLastRenderedTime(0)
-  }
-  toggleToolbar() {
-   if (!this._tileToolbar) {
-    const TileToolbarTreeComponent = this.require("TileToolbarTreeComponent", this._getProjectRootDir() + "studio/treeComponents/TileToolbarTreeComponent.js")
-    this._tileToolbar = new TileToolbarTreeComponent("", undefined, this)
-    this._tileToolbar.renderAndGetRenderReport(this.getStumpNode())
-   } else this._tileToolbar = this._tileToolbar.unmount()
   }
   getAllTileSettingsDefinitions() {
    const def = this.getDefinition()
@@ -376,9 +369,9 @@ abstractTileTreeComponentNode
    return ""
   }
   getTileFooterStumpCode() {
-   return this.getTileToolbarButtonStumpCode()
+   return this.getTileMenuButtonStumpCode()
   }
-  getTileToolbarButtonStumpCode() {
+  getTileMenuButtonStumpCode() {
    return this.qFormat(this.pencilStumpTemplate)
   }
   getSuggestedSize() {
@@ -396,10 +389,6 @@ abstractTileTreeComponentNode
   getStumpNodeForChildren() {
    // We render all Tiles on the Wall.
    return this.getStumpNode().getParent()
-  }
-  async treeComponentDidMount() {
-   super.treeComponentDidMount()
-   if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
   }
   toInspectionStumpCode() {
    const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
@@ -502,6 +491,7 @@ abstractTileTreeComponentNode
    return this.getTab().autosaveAndRender()
   }
   destroyTileCommand() {
+   this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
    this.unmountAndDestroy()
    return this.getTab().autosaveAndRender()
   }
@@ -583,8 +573,10 @@ abstractTileTreeComponentNode
     .getRootNode()
     .renderApp()
   }
-  async toggleToolbarCommand() {
-   this.toggleToolbar()
+  async toggleTileMenuCommand() {
+   const app = this.getTab().getRootNode()
+   app.setTargetTile(this)
+   app.toggleAndRender(`${StudioConstants.tileMenu}`)
   }
   async createProgramFromTemplateCommand(id) {
    const programTemplate = this.getProgramTemplate(id)

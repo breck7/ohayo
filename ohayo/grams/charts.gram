@@ -6,11 +6,11 @@ abstractChartNode
  abstract
  string tileFooterTemplate
   span Rows: {rowCount} Columns Out: {columnCount}
-  {toolbarButton}
+  {tileMenuButton}
  javascript
   getTileFooterStumpCode() {
    const table = this.getParentOrDummyTable()
-   return this.qFormat(this.tileFooterTemplate, {rowCount: table.getRowCount(), columnCount: table.getColumnCount(), toolbarButton: this.getTileToolbarButtonStumpCode()})
+   return this.qFormat(this.tileFooterTemplate, {rowCount: table.getRowCount(), columnCount: table.getColumnCount(), tileMenuButton: this.getTileMenuButtonStumpCode()})
   }
   get _tileWidth() {
    return this.isNodeJs() ? 456 : (jQuery(".WallTreeComponent").width() - 100)
@@ -56,7 +56,7 @@ abstractHeaderlessChartTileNode
     class TileFooterGrabber
  javascript
   toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileToolbarButtonStumpCode() })
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileMenuButtonStumpCode() })
   }
 abstractEmptyFooterTileNode
  abstract

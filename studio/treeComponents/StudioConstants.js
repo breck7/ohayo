@@ -10,6 +10,7 @@ StudioConstants.panel = "panel"
 StudioConstants.tabs = "tabs"
 StudioConstants.helpModal = "helpModal"
 StudioConstants.tabMenu = "tabMenu"
+StudioConstants.tileMenu = "tileMenu"
 StudioConstants.DropDownMenuSubstring = "DropDownMenu"
 
 StudioConstants.productName = "ohayo"

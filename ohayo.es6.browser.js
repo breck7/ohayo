@@ -25658,7 +25658,7 @@ pre
     get pencilStumpTemplate() {
       return `span ▾
  class TileDropDownButton
- clickCommand toggleToolbarCommand`
+ clickCommand toggleTileMenuCommand`
     }
     get errorLogMessageStumpTemplate() {
       return `div Error occurred. See console.
@@ -25837,7 +25837,7 @@ pre
         classes: this.getCssClassNames().join(" "),
         id: this.getTreeComponentId(),
         name: this.getWord(0),
-        footer: this.getTileToolbarButtonStumpCode()
+        footer: this.getTileMenuButtonStumpCode()
       })
     }
     emitLogMessage(message) {
@@ -25913,7 +25913,7 @@ pre
         classes: this.getCssClassNames().join(" "),
         id: this.getTreeComponentId(),
         content: `div ` + err,
-        footer: this.getTileToolbarButtonStumpCode()
+        footer: this.getTileMenuButtonStumpCode()
       })
     }
     // todo: delete this
@@ -25921,16 +25921,6 @@ pre
       delete this._cache_settingsObject
       delete this._bodyStumpCodeCache // todo: cleanup
       this._setLastRenderedTime(0)
-    }
-    toggleToolbar() {
-      if (!this._tileToolbar) {
-        const TileToolbarTreeComponent = this.require(
-          "TileToolbarTreeComponent",
-          this._getProjectRootDir() + "studio/treeComponents/TileToolbarTreeComponent.js"
-        )
-        this._tileToolbar = new TileToolbarTreeComponent("", undefined, this)
-        this._tileToolbar.renderAndGetRenderReport(this.getStumpNode())
-      } else this._tileToolbar = this._tileToolbar.unmount()
     }
     getAllTileSettingsDefinitions() {
       const def = this.getDefinition()
@@ -26006,9 +25996,9 @@ pre
       return ""
     }
     getTileFooterStumpCode() {
-      return this.getTileToolbarButtonStumpCode()
+      return this.getTileMenuButtonStumpCode()
     }
-    getTileToolbarButtonStumpCode() {
+    getTileMenuButtonStumpCode() {
       return this.qFormat(this.pencilStumpTemplate)
     }
     getSuggestedSize() {
@@ -26026,10 +26016,6 @@ pre
     getStumpNodeForChildren() {
       // We render all Tiles on the Wall.
       return this.getStumpNode().getParent()
-    }
-    async treeComponentDidMount() {
-      super.treeComponentDidMount()
-      if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
     }
     toInspectionStumpCode() {
       const messages = this.getMessageBuffer().map(message => `li ${moment(message.getLineModifiedTime()).fromNow()} - ${message.childrenToString()}`)
@@ -26132,6 +26118,7 @@ pre
       return this.getTab().autosaveAndRender()
     }
     destroyTileCommand() {
+      this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
       this.unmountAndDestroy()
       return this.getTab().autosaveAndRender()
     }
@@ -26213,8 +26200,10 @@ pre
         .getRootNode()
         .renderApp()
     }
-    async toggleToolbarCommand() {
-      this.toggleToolbar()
+    async toggleTileMenuCommand() {
+      const app = this.getTab().getRootNode()
+      app.setTargetTile(this)
+      app.toggleAndRender(`${StudioConstants.tileMenu}`)
     }
     async createProgramFromTemplateCommand(id) {
       const programTemplate = this.getProgramTemplate(id)
@@ -26285,7 +26274,7 @@ pre
     }
     get tileFooterTemplate() {
       return `span Rows: {rowCount} Columns Out: {columnCount}
-{toolbarButton}`
+{tileMenuButton}`
     }
     get rowDisplayLimit() {
       return 10000
@@ -26295,7 +26284,7 @@ pre
       return this.qFormat(this.tileFooterTemplate, {
         rowCount: table.getRowCount(),
         columnCount: table.getColumnCount(),
-        toolbarButton: this.getTileToolbarButtonStumpCode()
+        tileMenuButton: this.getTileMenuButtonStumpCode()
       })
     }
     get _tileWidth() {
@@ -26348,7 +26337,7 @@ pre
         classes: this.getCssClassNames().join(" "),
         id: this.getTreeComponentId(),
         body: this._getBodyStumpCodeCache(),
-        footer: this.getTileToolbarButtonStumpCode()
+        footer: this.getTileMenuButtonStumpCode()
       })
     }
   }
@@ -26670,7 +26659,7 @@ table
   user-select text`
     }
     getTileFooterStumpCode() {
-      return this.getTileToolbarButtonStumpCode()
+      return this.getTileMenuButtonStumpCode()
     }
     async fetchTableInputs() {
       return { rows: [{ text: this.getHtmlContent() }] }
@@ -28378,7 +28367,7 @@ class visjs`
     toStumpCode() {
       return this.qFormat(this.tileStumpTemplate, {
         classes: this.getCssClassNames().join(" "),
-        footer: this.getTileToolbarButtonStumpCode(),
+        footer: this.getTileMenuButtonStumpCode(),
         id: this.getTreeComponentId(),
         body: this._getBody()
       })
@@ -28553,7 +28542,7 @@ a {name}
   class abstractProviderNode extends abstractTileTreeComponentNode {
     get tileFooterTemplate() {
       return `span Rows Out: {outputCount} Columns Out: {columnCount} Time: {time}s Parser: {parserId} {errorMessageHtml}
-{toolbarButton}`
+{tileMenuButton}`
     }
     get tileStumpTemplate() {
       return `div
@@ -28583,7 +28572,7 @@ a {name}
         time,
         outputCount: table.getRowCount(),
         columnCount: table.getColumnCount(),
-        toolbarButton: this.getTileToolbarButtonStumpCode()
+        tileMenuButton: this.getTileMenuButtonStumpCode()
       })
     }
     getRowClass() {
@@ -29310,7 +29299,7 @@ This list was put together by a group of remote workers in a Google spreadsheet 
   class abstractTransformerNode extends abstractProviderNode {
     get tileFooterTemplate() {
       return `span Rows In: {inputCount} Rows Out: {outputCount} Columns Out: {columnCount}
-{toolbarButton}`
+{tileMenuButton}`
     }
     get bodyStumpTemplate() {
       return `span {kind}
@@ -29335,7 +29324,7 @@ input
         inputCount,
         outputCount: table.getRowCount(),
         columnCount: outputTable.getColumnCount(),
-        toolbarButton: this.getTileToolbarButtonStumpCode()
+        tileMenuButton: this.getTileMenuButtonStumpCode()
       })
     }
     async _execute() {
@@ -31554,7 +31543,7 @@ abstractTileTreeComponentNode
  string pencilStumpTemplate
   span ▾
    class TileDropDownButton
-   clickCommand toggleToolbarCommand
+   clickCommand toggleTileMenuCommand
  string errorStateStumpTemplate
   div
    class {classes}
@@ -31725,7 +31714,7 @@ abstractTileTreeComponentNode
    return exampleNode ? exampleNode.childrenToString() : ""
   }
   toStumpLoadingCode() {
-   return this.qFormat(this.tileLoadingTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), name: this.getWord(0), footer: this.getTileToolbarButtonStumpCode() })
+   return this.qFormat(this.tileLoadingTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), name: this.getWord(0), footer: this.getTileMenuButtonStumpCode() })
   }
   emitLogMessage(message) {
    const tab = this.getTab()
@@ -31796,20 +31785,13 @@ abstractTileTreeComponentNode
    return errors.length ? \` <span style="color: \${this.getTheme().errorColor};">\${errors.join(" ")}</span>\` : "" //todo: cleanup
   }
   toStumpErrorStateCode(err) {
-   return this.qFormat(this.errorStateStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), content: \`div \` + err, footer: this.getTileToolbarButtonStumpCode() })
+   return this.qFormat(this.errorStateStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), content: \`div \` + err, footer: this.getTileMenuButtonStumpCode() })
   }
   // todo: delete this
   makeDirty() {
    delete this._cache_settingsObject
    delete this._bodyStumpCodeCache // todo: cleanup
    this._setLastRenderedTime(0)
-  }
-  toggleToolbar() {
-   if (!this._tileToolbar) {
-    const TileToolbarTreeComponent = this.require("TileToolbarTreeComponent", this._getProjectRootDir() + "studio/treeComponents/TileToolbarTreeComponent.js")
-    this._tileToolbar = new TileToolbarTreeComponent("", undefined, this)
-    this._tileToolbar.renderAndGetRenderReport(this.getStumpNode())
-   } else this._tileToolbar = this._tileToolbar.unmount()
   }
   getAllTileSettingsDefinitions() {
    const def = this.getDefinition()
@@ -31885,9 +31867,9 @@ abstractTileTreeComponentNode
    return ""
   }
   getTileFooterStumpCode() {
-   return this.getTileToolbarButtonStumpCode()
+   return this.getTileMenuButtonStumpCode()
   }
-  getTileToolbarButtonStumpCode() {
+  getTileMenuButtonStumpCode() {
    return this.qFormat(this.pencilStumpTemplate)
   }
   getSuggestedSize() {
@@ -31905,10 +31887,6 @@ abstractTileTreeComponentNode
   getStumpNodeForChildren() {
    // We render all Tiles on the Wall.
    return this.getStumpNode().getParent()
-  }
-  async treeComponentDidMount() {
-   super.treeComponentDidMount()
-   if (this._tileToolbar) this._tileToolbar.renderAndGetRenderReport()
   }
   toInspectionStumpCode() {
    const messages = this.getMessageBuffer().map(message => \`li \${moment(message.getLineModifiedTime()).fromNow()} - \${message.childrenToString()}\`)
@@ -32011,6 +31989,7 @@ abstractTileTreeComponentNode
    return this.getTab().autosaveAndRender()
   }
   destroyTileCommand() {
+   this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
    this.unmountAndDestroy()
    return this.getTab().autosaveAndRender()
   }
@@ -32092,8 +32071,10 @@ abstractTileTreeComponentNode
     .getRootNode()
     .renderApp()
   }
-  async toggleToolbarCommand() {
-   this.toggleToolbar()
+  async toggleTileMenuCommand() {
+   const app = this.getTab().getRootNode()
+   app.setTargetTile(this)
+   app.toggleAndRender(\`\${StudioConstants.tileMenu}\`)
   }
   async createProgramFromTemplateCommand(id) {
    const programTemplate = this.getProgramTemplate(id)
@@ -32159,11 +32140,11 @@ abstractChartNode
  abstract
  string tileFooterTemplate
   span Rows: {rowCount} Columns Out: {columnCount}
-  {toolbarButton}
+  {tileMenuButton}
  javascript
   getTileFooterStumpCode() {
    const table = this.getParentOrDummyTable()
-   return this.qFormat(this.tileFooterTemplate, { rowCount: table.getRowCount(), columnCount: table.getColumnCount(), toolbarButton: this.getTileToolbarButtonStumpCode() })
+   return this.qFormat(this.tileFooterTemplate, { rowCount: table.getRowCount(), columnCount: table.getColumnCount(), tileMenuButton: this.getTileMenuButtonStumpCode() })
   }
   get _tileWidth() {
    return this.isNodeJs() ? 456 : jQuery(".WallTreeComponent").width() - 100
@@ -32209,7 +32190,7 @@ abstractHeaderlessChartTileNode
     class TileFooterGrabber
  javascript
   toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileToolbarButtonStumpCode() })
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileMenuButtonStumpCode() })
   }
 abstractEmptyFooterTileNode
  abstract
@@ -32499,7 +32480,7 @@ abstractHtmlNode
     {content}
  javascript
   getTileFooterStumpCode() {
-   return this.getTileToolbarButtonStumpCode()
+   return this.getTileMenuButtonStumpCode()
   }
   async fetchTableInputs() {
    return { rows: [{ text: this.getHtmlContent() }] }
@@ -34020,7 +34001,7 @@ abstractDocTileNode
    return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
   }
   toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileToolbarButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
+   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), footer: this.getTileMenuButtonStumpCode(), id: this.getTreeComponentId(), body: this._getBody() })
   }
 docTitleNode
  catchAllCellType stringCell
@@ -34183,7 +34164,7 @@ abstractProviderNode
     class TileFooterGrabber
  string tileFooterTemplate
   span Rows Out: {outputCount} Columns Out: {columnCount} Time: {time}s Parser: {parserId} {errorMessageHtml}
-  {toolbarButton}
+  {tileMenuButton}
  javascript
   getTileFooterStumpCode() {
    const table = this.getOutputOrInputTable()
@@ -34195,7 +34176,7 @@ abstractProviderNode
     time,
     outputCount: table.getRowCount(),
     columnCount: table.getColumnCount(),
-    toolbarButton: this.getTileToolbarButtonStumpCode()
+    tileMenuButton: this.getTileMenuButtonStumpCode()
    })
   }
   getRowClass() {
@@ -34848,13 +34829,13 @@ abstractTransformerNode
    class LargeTileInput
  string tileFooterTemplate
   span Rows In: {inputCount} Rows Out: {outputCount} Columns Out: {columnCount}
-  {toolbarButton}
+  {tileMenuButton}
  javascript
   getTileFooterStumpCode() {
    const table = this.getParentOrDummyTable()
    const inputCount = table.getRowCount()
    const outputTable = this.getOutputOrInputTable()
-   return this.qFormat(this.tileFooterTemplate, { inputCount, outputCount: table.getRowCount(), columnCount: outputTable.getColumnCount(), toolbarButton: this.getTileToolbarButtonStumpCode() })
+   return this.qFormat(this.tileFooterTemplate, { inputCount, outputCount: table.getRowCount(), columnCount: outputTable.getColumnCount(), tileMenuButton: this.getTileMenuButtonStumpCode() })
   }
   async _execute() {
    this._outputTable = this._createOutputTable()
@@ -39659,6 +39640,7 @@ StudioConstants.panel = "panel"
 StudioConstants.tabs = "tabs"
 StudioConstants.helpModal = "helpModal"
 StudioConstants.tabMenu = "tabMenu"
+StudioConstants.tileMenu = "tileMenu"
 StudioConstants.DropDownMenuSubstring = "DropDownMenu"
 
 StudioConstants.productName = "ohayo"
@@ -39870,26 +39852,34 @@ window.HelpModal
 
 class TabMenuTreeComponent extends AbstractContextMenuTreeComponent {
   getContextMenuBodyStumpCode() {
-    const index = this.getWord(1)
+    const tabId = this.getWord(1)
     return `a Save File
  clickCommand saveTabAndNotifyCommand
+ value ${tabId}
 a Close File
- clickCommand closeTabByIndexCommand
- value ${index}
+ clickCommand closeTabCommand
+ value ${tabId}
 a Rename File
  clickCommand showTabRenameFilePromptCommand
+ value ${tabId}
 a Move File
  clickCommand showTabMoveFilePromptCommand
+ value ${tabId}
 a Clone File
  clickCommand cloneTabCommand
+ value ${tabId}
 a Delete File
  clickCommand showDeleteFileConfirmDialogCommand
+ value ${tabId}
 a Copy program as link
- clickCommand copyDeepLinkCommand
+ clickCommand copyTabDeepLinkCommand
+ value ${tabId}
 a Log program stats
  clickCommand printProgramStatsCommand
+ value ${tabId}
 a Close all other files
- clickCommand closeAllTabsExceptFocusedTabCommand`
+ clickCommand closeAllTabsExceptThisOneCommand
+ value ${tabId}`
   }
 }
 
@@ -39959,18 +39949,19 @@ class TabTreeComponent extends AbstractTreeComponent {
     const index = this.getIndex()
     const fullPath = this.getFullTabFilePath()
     const filename = this.getFileName()
+    const tabId = this._getUid()
     const filenameWithoutExtension = jtree.Utils.removeFileExtension(filename)
     return `a ${filenameWithoutExtension}
- clickCommand mountTabByIndexCommand
+ clickCommand mountTabCommand
  collapse
- value ${index}
+ value ${tabId}
  title ${fullPath}
  id tab${index}
  class TabStub ${this.isMountedTab() ? "mountedTab" : ""}
  span ▾
   collapse
   clickCommand openTabMenuCommand
-  value ${index}
+  value ${tabId}
   class tabDropDownButton`
   }
 
@@ -39987,9 +39978,8 @@ class TabTreeComponent extends AbstractTreeComponent {
   opacity 1`
   }
 
-  async openTabMenuCommand() {
-    const index = this.getIndex()
-    this.getRootNode().toggleAndRender(`${StudioConstants.tabMenu} ${index}`)
+  async openTabMenuCommand(tabId) {
+    this.getRootNode().toggleAndRender(`${StudioConstants.tabMenu} ${tabId}`)
   }
 
   getDeepLink() {
@@ -40183,10 +40173,10 @@ window.MenuTreeComponent
 
 
 
-class TileToolbarTreeComponent extends AbstractTreeComponent {
+class TileMenuTreeComponent extends AbstractContextMenuTreeComponent {
   toHakonCode() {
     const theme = this.getTheme()
-    return `.TileToolbarTreeComponent
+    return `.TileMenuTreeComponent
  background ${theme.contextMenuBackground}
  border 1px solid ${theme.lineColor}
  font-size 12px
@@ -40216,7 +40206,7 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
   }
 
   getTargetTile() {
-    return this.getParent()
+    return this.getRootNode().getTargetTile()
   }
 
   createProgramFromFocusedTileExampleCommand(uno, dos) {
@@ -40275,20 +40265,20 @@ a Export data to tree file
  value tree`
 
     return new jtree.TreeNode(`div
- class TileToolbarTreeComponent
+ class TileMenuTreeComponent
  span ${Icons("copy", 20)}
   title Duplicate Tile
-  clickCommand cloneTileCommand
+  clickCommand cloneFocusedTileCommand
  span ${Icons("trash", 20)}
   title Delete Tile
-  clickCommand destroyTileCommand
+  clickCommand destroyFocusedTileCommand
  span ${Icons("inspector", 20)}
   title Debug Tile
-  clickCommand inspectTileCommand
+  clickCommand inspectFocusedTileCommand
  {exampleTileButton}
  div
   class TileCommandsDropDown
-  {links}`).templateToString({ exampleTileButton, links})
+  {links}`).templateToString({ exampleTileButton, links })
   }
 
   _getSuggestionsStumpCode() {
@@ -40297,8 +40287,7 @@ a Export data to tree file
   }
 }
 
-window.TileToolbarTreeComponent
- = TileToolbarTreeComponent
+window.TileMenuTreeComponent = TileMenuTreeComponent
 ;
 
 const Version = "18.0.0"
@@ -40505,6 +40494,8 @@ window.PanelTreeComponent
 
 
 
+
+
 class GlobalShortcutNode extends jtree.TreeNode {
   getKeyCombo() {
     return this.getWord(3)
@@ -40674,12 +40665,12 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return this._ohayoGrammarTree
   }
 
-  getTargetNode() {
-    return this._targetNode
+  getTargetTile() {
+    return this._targetTile
   }
 
-  setTargetNode(node) {
-    this._targetNode = node
+  setTargetTile(tile) {
+    this._targetTile = tile
     return this
   }
 
@@ -40712,6 +40703,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
   createParser() {
     const map = {}
     map[StudioConstants.tabMenu] = TabMenuTreeComponent
+    map[StudioConstants.tileMenu] = TileMenuTreeComponent
     map[StudioConstants.panel] = PanelTreeComponent
     map[StudioConstants.menu] = MenuTreeComponent
     map[StudioConstants.theme] = ThemeTreeComponent
@@ -40848,40 +40840,31 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
 
   closeTab(tab) {
     // todo: terminal and console on last tab close.
-    if (tab.isMounted()) {
+    if (tab.isMountedTab()) {
       const tabToMountNext = jtree.Utils.getNextOrPrevious(this.getTabs(), tab)
       this.getPanel().removeWall()
       tab.markAsUnmounted()
       tab.unmountAndDestroy()
       delete this._focusedTab
       if (tabToMountNext) this.setMountedTab(tabToMountNext)
-    } else tab.destroy()
+    } else tab.unmountAndDestroy()
     this._updateLocationForRestoreOnRefresh()
-  }
-
-  closeAllTabsExceptFocusedTab() {
-    const mountedTab = this.getMountedTab()
-    this._getTabsNode()
-      .getOpenTabs()
-      .forEach(tab => {
-        if (tab !== mountedTab) this.closeTab(tab)
-      })
   }
 
   mountPreviousTab() {
     const tabs = this.getTabs()
     const mountedTab = this._getMountedTab()
     if (tabs.length < 2 || !mountedTab) return this
-    const index = tabs.indexOf(mountedTab)
-    return this._mountTabByIndex(index === 0 ? tabs.length - 1 : index - 1)
+    const tabIndex = tabs.indexOf(mountedTab)
+    return this._mountTabByIndex(tabIndex === 0 ? tabs.length - 1 : tabIndex - 1)
   }
 
   mountNextTab() {
     const tabs = this.getTabs()
     const mountedTab = this._getMountedTab()
     if (tabs.length < 2 || !mountedTab) return this
-    const index = tabs.indexOf(mountedTab)
-    return this._mountTabByIndex(index === tabs.length - 1 ? 0 : index + 1)
+    const tabIndex = tabs.indexOf(mountedTab)
+    return this._mountTabByIndex(tabIndex === tabs.length - 1 ? 0 : tabIndex + 1)
   }
 
   getTabs() {
@@ -41242,23 +41225,23 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
   }
 
   copyTargetTileCommand(uno, dos) {
-    return this.getTargetNode().copyTileCommand(uno, dos)
+    return this.getTargetTile().copyTileCommand(uno, dos)
   }
 
   copyTargetTileDataAsTreeCommand(uno, dos) {
-    return this.getTargetNode().copyDataAsTreeCommand(uno, dos)
+    return this.getTargetTile().copyDataAsTreeCommand(uno, dos)
   }
 
   copyTargetTileDataAsJavascriptCommand(uno, dos) {
-    return this.getTargetNode().copyDataAsJavascriptCommand(uno, dos)
+    return this.getTargetTile().copyDataAsJavascriptCommand(uno, dos)
   }
 
   copyTargetTileDataCommand(uno, dos) {
-    return this.getTargetNode().copyDataCommand(uno, dos)
+    return this.getTargetTile().copyDataCommand(uno, dos)
   }
 
   exportTargetTileDataCommand(uno, dos) {
-    return this.getTargetNode().exportTileDataCommand(uno, dos)
+    return this.getTargetTile().exportTileDataCommand(uno, dos)
   }
 
   async cellCheckProgramCommand() {
@@ -41274,9 +41257,10 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     this.renderApp()
   }
 
-  async printProgramStatsCommand() {
-    const stats = new jtree.TreeNode(this.mountedProgram.toRunTimeStats()).toString()
-    this.mountedTab.logMessageText(stats)
+  async printProgramStatsCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    const stats = new jtree.TreeNode(tab.getTabProgram().toRunTimeStats()).toString()
+    tab.logMessageText(stats)
     this.renderApp()
   }
 
@@ -41351,7 +41335,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
   }
 
   async deleteAllRowsInTargetTileCommand() {
-    const inputTable = this.getTargetNode().getParentOrDummyTable()
+    const inputTable = this.getTargetTile().getParentOrDummyTable()
     await Promise.all(inputTable.getRows().map(row => row.destroyRow(this)))
     this.renderApp() // todo: cleanup
   }
@@ -41383,8 +41367,12 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
   }
 
-  async copyDeepLinkCommand() {
-    this.getWillowBrowser().copyTextToClipboard(this.mountedTab.getDeepLink())
+  async copyTabDeepLinkCommand(tabId) {
+    this.getWillowBrowser().copyTextToClipboard(this._getTabByIdOrMountedTab(tabId).getDeepLink())
+  }
+
+  _getTabByIdOrMountedTab(tabId) {
+    return tabId === undefined ? this.mountedTab : this.getTabs().find(tab => tab._getUid().toString() === tabId)
   }
 
   async createAndOpenNewProgramFromDeepLinkCommand(deepLink) {
@@ -41457,17 +41445,19 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return this._openFullDiskFilePathInNewTab(new FullDiskPath(url).toString())
   }
 
-  async mountTabByIndexCommand(index) {
-    this._mountTabByIndex(index)
-  }
-
-  async closeTabByIndexCommand(index) {
-    this.closeTab(this.getTabs()[index])
+  async mountTabCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    this.setMountedTab(tab)
     this.renderApp()
   }
 
-  _mountTabByIndex(index) {
-    this.setMountedTab(this.getTabs()[index])
+  async closeTabCommand(tabId) {
+    this.closeTab(this._getTabByIdOrMountedTab(tabId))
+    this.renderApp()
+  }
+
+  _mountTabByIndex(tabIndex) {
+    this.setMountedTab(this.getTabs()[tabIndex])
     this.renderApp()
     return this
   }
@@ -41511,22 +41501,22 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return this.openFullPathInNewTabAndFocus(url)
   }
 
-  async _showTabMoveFilePromptCommand(suggestedNewFilename, isRenameOp = false) {
-    const mountedTab = this.mountedTab
+  async _showTabMoveFilePromptCommand(tabId, suggestedNewFilename, isRenameOp = false) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
 
-    const newName = await this.promptToMoveFile(mountedTab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
+    const newName = await this.promptToMoveFile(tab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
     if (!newName) return false
-    await this.closeTab(mountedTab)
-    const tab = await this.openFullPathInNewTabAndFocus(newName)
+    await this.closeTab(tab)
+    await this.openFullPathInNewTabAndFocus(newName)
     this.renderApp()
   }
 
-  async showTabMoveFilePromptCommand(suggestedNewFilename) {
-    await this._showTabMoveFilePromptCommand(suggestedNewFilename)
+  async showTabMoveFilePromptCommand(tabId, suggestedNewFilename) {
+    await this._showTabMoveFilePromptCommand(tabId, suggestedNewFilename)
   }
 
-  async showTabRenameFilePromptCommand(suggestedNewFilename) {
-    await this._showTabMoveFilePromptCommand(suggestedNewFilename, true)
+  async showTabRenameFilePromptCommand(tabId, suggestedNewFilename) {
+    await this._showTabMoveFilePromptCommand(tabId, suggestedNewFilename, true)
   }
 
   async toggleOfflineModeCommand() {
@@ -41590,8 +41580,9 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     await this.mountedProgram.getTab().autosaveAndRender()
   }
 
-  async showDeleteFileConfirmDialogCommand() {
-    const filename = this.mountedTab.getFileName()
+  async showDeleteFileConfirmDialogCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    const filename = tab.getFileName()
     // todo: make this an undo operation. on web should be easyish. on desktop via move to trash.
     const result = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${filename}?`)
     return result ? this.deleteFocusedTabCommand() : undefined
@@ -41623,8 +41614,14 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     this.renderApp()
   }
 
-  async closeAllTabsExceptFocusedTabCommand() {
-    this.closeAllTabsExceptFocusedTab() // todo: confirm before closing if unsaved changes?
+  async closeAllTabsExceptThisOneCommand(tabId) {
+    const keepTabOpen = this._getTabByIdOrMountedTab(tabId)
+    // todo: confirm before closing if unsaved changes?
+    this._getTabsNode()
+      .getOpenTabs()
+      .forEach(tab => {
+        if (tab !== keepTabOpen) this.closeTab(tab)
+      })
     this.renderApp()
   }
 
@@ -41749,16 +41746,17 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     this.addStumpCodeMessageToLog(`div ${words.join(" ")}`)
   }
 
-  async saveTabAndNotifyCommand() {
-    const tab = this.mountedTab
+  async saveTabAndNotifyCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
     await tab.forceSaveToFile()
     tab.addStumpCodeMessageToLog(`div Saved ${tab.getFileName()}
  title Saved ${tab.getFullTabFilePath()}`)
     this.renderApp()
   }
 
-  cloneTabCommand() {
-    return this._createAndOpen(this.mountedTab.getTabProgram().childrenToString(), this.mountedTab.getFileName())
+  cloneTabCommand(tabId) {
+    const tab = this._getTabByIdOrMountedTab(tabId)
+    return this._createAndOpen(tab.getTabProgram().childrenToString(), tab.getFileName())
   }
 
   async pasteCommand(pastedText) {

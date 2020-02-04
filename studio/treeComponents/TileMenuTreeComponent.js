@@ -1,13 +1,13 @@
 const { jtree } = require("jtree")
 
-const { AbstractTreeComponent } = require("jtree/products/TreeComponentFramework.node.js")
+const AbstractContextMenuTreeComponent = require("./AbstractContextMenuTreeComponent.js")
 
 const Icons = require("../themes/Icons.js")
 
-class TileToolbarTreeComponent extends AbstractTreeComponent {
+class TileMenuTreeComponent extends AbstractContextMenuTreeComponent {
   toHakonCode() {
     const theme = this.getTheme()
-    return `.TileToolbarTreeComponent
+    return `.TileMenuTreeComponent
  background ${theme.contextMenuBackground}
  border 1px solid ${theme.lineColor}
  font-size 12px
@@ -37,7 +37,7 @@ class TileToolbarTreeComponent extends AbstractTreeComponent {
   }
 
   getTargetTile() {
-    return this.getParent()
+    return this.getRootNode().getTargetTile()
   }
 
   createProgramFromFocusedTileExampleCommand(uno, dos) {
@@ -96,20 +96,20 @@ a Export data to tree file
  value tree`
 
     return new jtree.TreeNode(`div
- class TileToolbarTreeComponent
+ class TileMenuTreeComponent
  span ${Icons("copy", 20)}
   title Duplicate Tile
-  clickCommand cloneTileCommand
+  clickCommand cloneFocusedTileCommand
  span ${Icons("trash", 20)}
   title Delete Tile
-  clickCommand destroyTileCommand
+  clickCommand destroyFocusedTileCommand
  span ${Icons("inspector", 20)}
   title Debug Tile
-  clickCommand inspectTileCommand
+  clickCommand inspectFocusedTileCommand
  {exampleTileButton}
  div
   class TileCommandsDropDown
-  {links}`).templateToString({ exampleTileButton, links})
+  {links}`).templateToString({ exampleTileButton, links })
   }
 
   _getSuggestionsStumpCode() {
@@ -118,4 +118,4 @@ a Export data to tree file
   }
 }
 
-module.exports = TileToolbarTreeComponent
+module.exports = { TileMenuTreeComponent }

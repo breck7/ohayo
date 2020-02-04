@@ -25,6 +25,8 @@ const HelpModal = require("./HelpModal.js")
 const AbstractContextMenuTreeComponent = require("./AbstractContextMenuTreeComponent.js")
 const { TabMenuTreeComponent } = require("./TabsTreeComponent.js")
 
+const { TileMenuTreeComponent } = require("./TileMenuTreeComponent.js")
+
 const OhayoConstants = require("../treeComponents/OhayoConstants.js")
 
 const OhayoCodeEditorTemplate = require("../templates/OhayoCodeEditorTemplate.js")
@@ -201,12 +203,12 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return this._ohayoGrammarTree
   }
 
-  getTargetNode() {
-    return this._targetNode
+  getTargetTile() {
+    return this._targetTile
   }
 
-  setTargetNode(node) {
-    this._targetNode = node
+  setTargetTile(tile) {
+    this._targetTile = tile
     return this
   }
 
@@ -239,6 +241,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
   createParser() {
     const map = {}
     map[StudioConstants.tabMenu] = TabMenuTreeComponent
+    map[StudioConstants.tileMenu] = TileMenuTreeComponent
     map[StudioConstants.panel] = PanelTreeComponent
     map[StudioConstants.menu] = MenuTreeComponent
     map[StudioConstants.theme] = ThemeTreeComponent
@@ -760,23 +763,23 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
   }
 
   copyTargetTileCommand(uno, dos) {
-    return this.getTargetNode().copyTileCommand(uno, dos)
+    return this.getTargetTile().copyTileCommand(uno, dos)
   }
 
   copyTargetTileDataAsTreeCommand(uno, dos) {
-    return this.getTargetNode().copyDataAsTreeCommand(uno, dos)
+    return this.getTargetTile().copyDataAsTreeCommand(uno, dos)
   }
 
   copyTargetTileDataAsJavascriptCommand(uno, dos) {
-    return this.getTargetNode().copyDataAsJavascriptCommand(uno, dos)
+    return this.getTargetTile().copyDataAsJavascriptCommand(uno, dos)
   }
 
   copyTargetTileDataCommand(uno, dos) {
-    return this.getTargetNode().copyDataCommand(uno, dos)
+    return this.getTargetTile().copyDataCommand(uno, dos)
   }
 
   exportTargetTileDataCommand(uno, dos) {
-    return this.getTargetNode().exportTileDataCommand(uno, dos)
+    return this.getTargetTile().exportTileDataCommand(uno, dos)
   }
 
   async cellCheckProgramCommand() {
@@ -870,7 +873,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
   }
 
   async deleteAllRowsInTargetTileCommand() {
-    const inputTable = this.getTargetNode().getParentOrDummyTable()
+    const inputTable = this.getTargetTile().getParentOrDummyTable()
     await Promise.all(inputTable.getRows().map(row => row.destroyRow(this)))
     this.renderApp() // todo: cleanup
   }

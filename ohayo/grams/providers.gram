@@ -19,13 +19,13 @@ abstractProviderNode
     class TileFooterGrabber
  string tileFooterTemplate
   span Rows Out: {outputCount} Columns Out: {columnCount} Time: {time}s Parser: {parserId} {errorMessageHtml}
-  {toolbarButton}
+  {tileMenuButton}
  javascript
   getTileFooterStumpCode() {
    const table = this.getOutputOrInputTable()
    const time = (this.getTimeToLoad() / 1000).toFixed(1)
    const parserId = this.getParserId() || "?"
-   return this.qFormat(this.tileFooterTemplate, {parserId, errorMessageHtml: this.getErrorMessageHtml() || "", time, outputCount: table.getRowCount(), columnCount: table.getColumnCount(), toolbarButton: this.getTileToolbarButtonStumpCode()})
+   return this.qFormat(this.tileFooterTemplate, {parserId, errorMessageHtml: this.getErrorMessageHtml() || "", time, outputCount: table.getRowCount(), columnCount: table.getColumnCount(), tileMenuButton: this.getTileMenuButtonStumpCode()})
   }
   getRowClass() {
    return Row

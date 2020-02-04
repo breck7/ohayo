@@ -14,13 +14,13 @@ abstractTransformerNode
    class LargeTileInput
  string tileFooterTemplate
   span Rows In: {inputCount} Rows Out: {outputCount} Columns Out: {columnCount}
-  {toolbarButton}
+  {tileMenuButton}
  javascript
   getTileFooterStumpCode() {
    const table = this.getParentOrDummyTable()
    const inputCount = table.getRowCount()
    const outputTable = this.getOutputOrInputTable()
-   return this.qFormat(this.tileFooterTemplate, {inputCount, outputCount: table.getRowCount(), columnCount: outputTable.getColumnCount(), toolbarButton: this.getTileToolbarButtonStumpCode()})
+   return this.qFormat(this.tileFooterTemplate, {inputCount, outputCount: table.getRowCount(), columnCount: outputTable.getColumnCount(), tileMenuButton: this.getTileMenuButtonStumpCode()})
   }
   async _execute() {
    this._outputTable = this._createOutputTable()
