@@ -26119,12 +26119,7 @@ pre
       // todo: destroy or something? how do we reparse.
       this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
       this.unmountAndDestroy()
-      await Promise.all(
-        this.getRootNode()
-          .getTiles()
-          .map(tile => tile.loadBrowserRequirements())
-      )
-      await tab.autosaveAndRender()
+      this.getRootNode().loadAndIncrementalRender()
     }
     changeParentCommand(pathVector) {
       // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
@@ -32003,12 +31998,7 @@ abstractTileTreeComponentNode
    // todo: destroy or something? how do we reparse.
    this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
    this.unmountAndDestroy()
-   await Promise.all(
-    this.getRootNode()
-     .getTiles()
-     .map(tile => tile.loadBrowserRequirements())
-   )
-   await tab.autosaveAndRender()
+   this.getRootNode().loadAndIncrementalRender()
   }
   changeParentCommand(pathVector) {
    // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
@@ -37640,7 +37630,7 @@ mounted selection duplicateSelectionCommand command+d Duplicate Selection
 panel window toggleThemeCommand shift+t Toggle Theme
 panel window toggleGutterCommand shift+u Toggle Source Editor Gutter
 panel window toggleFullScreenCommand shift+f Toggle Full Screen
-panel window toggleFocusedModeCommand command+shift+f Toggle Focused Mode
+panel window toggleMenuCommand command+shift+f Toggle Menu
 panel window closeModalCommand escape Close any open modal
 mounted window clearTabMessagesCommand command+\\ Clear tab messages
 panel window toggleAutoSaveCommand  Toggle autosave
@@ -39415,6 +39405,7 @@ CodeMirrorConstants.keyMap.shiftCmdEnter = "Shift-Cmd-Enter"
 CodeMirrorConstants.keyMap.cmdBackSlash = "Cmd-\\"
 CodeMirrorConstants.keyMap.cmdS = "Cmd-S"
 CodeMirrorConstants.keyMap.ctrlS = "Ctrl-S"
+CodeMirrorConstants.keyMap.escape = "Esc"
 
 class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
   getCode() {
@@ -39461,6 +39452,10 @@ class CodeMirrorTerminalTreeComponent extends BasicTerminalTreeComponent {
 
     keyMap[CodeMirrorConstants.keyMap.cmdBackSlash] = () => {
       this.getRootNode().clearTabMessagesCommand()
+    }
+
+    keyMap[CodeMirrorConstants.keyMap.escape] = () => {
+      cm.getInputField().blur()
     }
 
     keyMap[CodeMirrorConstants.keyMap.cmdS] = async () => {
@@ -40145,8 +40140,17 @@ class MenuTreeComponent extends AbstractTreeComponent {
     })
   }
 
+  toggleVisibility() {
+    this.setWord(1, this.isVisible() ? "hidden" : "visible")
+  }
+
+  isVisible() {
+    return this.getWord(1) === "visible"
+  }
+
   toHakonCode() {
     const theme = this.getTheme()
+    const display = this.isVisible() ? "flex" : "none"
     return `.MenuTreeComponent
  ${theme.disableTextSelect(1)}
  font-size 14px
@@ -40160,7 +40164,7 @@ class MenuTreeComponent extends AbstractTreeComponent {
  z-index 92
  white-space nowrap
  background ${theme.menuBackground}
- display flex
+ display ${display}
  .LogoTreeComponent,.NewButtonTreeComponent
   padding-right 5px
   line-height 30px
@@ -40403,29 +40407,25 @@ class PanelTreeComponent extends AbstractTreeComponent {
     })
   }
 
-  toggleGutter() {
-    // todo: this is UI buggy! toggling resets scroll states
-    const gutter = this.getGutter()
-    if (gutter) gutter.unmountAndDestroy()
-    else {
-      const node = this.touchNode(StudioConstants.gutter)
-      node.appendLine(StudioConstants.terminal)
-      node.appendLine(StudioConstants.console)
-    }
-  }
-
   getGutter() {
     return this.getNode(StudioConstants.gutter)
   }
 
+  get _menuHeight() {
+    return this.getWord(2)
+  }
+
+  setMenuHeight(value) {
+    this.setWord(2, value)
+  }
+
   toHakonCode() {
-    const menuHeight = this.getParent().getMenuTreeComponent() ? "30" : "0"
     return `.PanelTreeComponent
  position relative
  left 0
  right 0
  bottom 0
- height calc(100% - ${menuHeight}px)`
+ height calc(100% - ${this._menuHeight}px)`
   }
 
   getGutterWidth() {
@@ -40441,6 +40441,12 @@ class PanelTreeComponent extends AbstractTreeComponent {
 
   toggleGutterWidth() {
     const newWidth = this.getGutterWidth() === 50 ? 400 : 50
+    this.setGutterWidth(newWidth)
+    return this
+  }
+
+  toggleGutter() {
+    const newWidth = this.getGutterWidth() === 0 ? 400 : 0
     this.setGutterWidth(newWidth)
     return this
   }
@@ -40637,12 +40643,13 @@ class StudioApp extends AbstractTreeComponent {
 
   static getDefaultStartState() {
     const defaultGutterWidth = 400
+    const menuHeight = 30
     return `${StudioConstants.theme} ${ThemeTreeComponent.defaultTheme}
-${StudioConstants.menu}
+${StudioConstants.menu} visible
  logo
  tabs
  newButton
-${StudioConstants.panel} ${defaultGutterWidth}
+${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
  ${StudioConstants.gutter} ${defaultGutterWidth}
   ${StudioConstants.terminal}
   ${StudioConstants.console}`
@@ -41625,20 +41632,11 @@ ${StudioConstants.panel} ${defaultGutterWidth}
     this.willowBrowser.toggleFullScreen()
   }
 
-  _hideMenuAndTabs() {
-    this.getNode(StudioConstants.menu).unmount()
-    this.getNode(StudioConstants.menu).replaceNode(() => StudioConstants.menu + "PlaceHolder")
-  }
-
-  _showMenuAndTabs() {
-    // todo: make this hide tabs
-    this.getNode(StudioConstants.menu + "PlaceHolder").replaceNode(() => StudioConstants.menu)
-  }
-
-  toggleFocusedModeCommand() {
-    this.has(StudioConstants.menu) ? this._hideMenuAndTabs() : this._showMenuAndTabs()
-    this.makeAllDirty() // cleanup
-    return this.toggleFullScreenCommand()
+  toggleMenuCommand() {
+    const menu = this.getMenuTreeComponent()
+    menu.toggleVisibility()
+    this.getPanel().setMenuHeight(menu.isVisible() ? 30 : 0)
+    this.renderApp()
   }
 
   // TODO: make it slidable.?

@@ -489,8 +489,7 @@ abstractTileTreeComponentNode
    // todo: destroy or something? how do we reparse.
    this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
    this.unmountAndDestroy()
-   await Promise.all(this.getRootNode().getTiles().map(tile => tile.loadBrowserRequirements()))
-   await tab.autosaveAndRender()
+   this.getRootNode().loadAndIncrementalRender()
   }
   changeParentCommand(pathVector) {
    // if (tile.getFirstWordPath() === value) return; // todo: do we need this line?
