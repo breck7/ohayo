@@ -12,9 +12,21 @@ You can try ohayo at [https://ohayo.computer](https://ohayo.computer), [download
 
 Let's make it faster to do data science. Much faster. So fast that you can do data science as fast as you can speak.
 
-The Ohayo strategy is to make an open source web based tool and crowdsource a collection of very high level words that fit together like lego blocks. [Ohayo the language](https://github.com/treenotation/ohayo/tree/master/ohayo) is a Tree Language, built using [Tree Notation](https://treenotation.org/).
+## Key Concepts
 
-In data science you have 2 main kinds of things: datasets and data transformations. Datasets include everything from weather forecasts to emails to business transactions. There are millions of possible datasets and a couple of thousand common operations. 
+**OhayoLang** [Ohayo the language](https://github.com/treenotation/ohayo/tree/master/ohayo) is a Tree Language, built using [Tree Notation](https://treenotation.org/). Ohayo is a dataflow language.
+
+**Scripts** OhayoLang is a scripting language like any other and you can write programs in it by hand or using the Ohayo Studio. OhayoLang scripts generally have the file extension ".ohayo".
+
+**Tiles** An Ohayo program is composed of Tiles. Tiles can display UI to the user. Tiles are recursive and can be the parent of other tiles. Tiles are namespaced and all must contain at least one ".".
+
+**Tile Properties** Tiles can define and use their own Properties. The names of Tile Properties cannot contain a ".".
+
+**DataTables** All Tiles can access the tables of their ancestor tiles and also pass on a new table to their descendants. The data tables currently use the [jTable library](https://github.com/treenotation/jtree/tree/master/jtable).
+
+**Common Tile Types** All Tiles extend from a base class. The three most common core Tile Types are Provider, Transformer, and Chart. In data science you have 3 main kinds of things: datasets, data transformations, and visualizations. Datasets include everything from weather forecasts to emails to business transactions. There are millions of possible datasets. In Ohayo tiles that provide datasets generally extend the Provider base tile type. Transformations are things like filtering, grouping, and joining. In Ohayo tiles that transform data generally extend the Transformer tile type. Charts include bar charts, line charts, scatterplots and word clouds. In Ohayo charts generally extend the Chart base tile type.
+
+**Creating Tiles** If you need a new tile—to add a new user friendly data source or visualization type, for example—you can implement it using TypeScript/Javascript/Grammar language. See the [packages folder](https://github.com/treenotation/ohayo/tree/master/ohayo/packages) for examples. Documentation for this will come out later in 2020.
 
 ## BETA!
 
