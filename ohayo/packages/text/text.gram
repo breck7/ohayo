@@ -149,6 +149,74 @@ textToLowerCaseNode
   }
  extends abstractColumnAdderTileNode
  crux text.toLowerCase
+textPermalinkNode
+ description Convert all cells in a column to a url friendly permalink.
+ cells tileKeywordCell columnNameCell newColumnNameCell
+ example
+  samples.presidents
+   text.permalink name Permalink
+    tables.basic
+ javascript
+  getNewColumns() {
+   const sourceColumnName = this.getWord(1) || "text"
+   const destinationColumnName = this.getWord(2) || "Permalink"
+   return [
+    {
+     source: sourceColumnName,
+     name: destinationColumnName,
+     accessorFn: row => jtree.Utils.stringToPermalink(row[sourceColumnName])
+    }
+   ]
+  }
+ extends abstractColumnAdderTileNode
+ crux text.permalink
+textReplaceNode
+ description Does a global search/replace across all cells in a column.
+ cells tileKeywordCell columnNameCell
+ catchAllCellType anyCell
+ example 
+  samples.presidents
+   text.replace name George Georgette
+    tables.basic
+ javascript
+  getNewColumns() {
+   const sourceColumnName = this.getWord(1) || "text"
+   const simpleSearch = this.getWord(2)
+   const simpleReplace = this.getWord(3)
+   const destinationColumnName = sourceColumnName
+   return [
+    {
+     source: sourceColumnName,
+     name: destinationColumnName,
+     accessorFn: row => row[sourceColumnName].replace(new RegExp(simpleSearch, "g"), simpleReplace)
+    }
+   ]
+  }
+ extends abstractColumnAdderTileNode
+ crux text.replace
+textTrimNode
+ description Trims whitespace or a provided sequence from both sides of a string in all cells in a column.
+ cells tileKeywordCell columnNameCell
+ catchAllCellType anyCell
+ example 
+  samples.presidents
+   text.trim HomeState New
+    tables.basic
+ javascript
+  getNewColumns() {
+   const sourceColumnName = this.getWord(1) || "text"
+   const trimChar = this.getWord(2)
+   const destinationColumnName = sourceColumnName
+   return [
+    {
+     source: sourceColumnName,
+     name: destinationColumnName,
+     accessorFn: row => trimChar ? row[sourceColumnName].replace(new RegExp(`(^${trimChar}|${trimChar}$)`, "g"), "") : row[sourceColumnName].trim()
+    }
+   ]
+  }
+ extends abstractColumnAdderTileNode
+ crux text.trim
 textSubstringNode
  description Extract parts of one column into another column called "substring".
  cells tileKeywordCell columnNameCell startIndexCell lengthCell
