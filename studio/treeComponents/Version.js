@@ -1,2 +1,2 @@
-const Version = "19.0.0"
+const Version = "19.1.0"
 if (typeof exports !== "undefined") module.exports = Version

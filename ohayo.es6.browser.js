@@ -25515,6 +25515,9 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "text.split": textSplitNode,
           "text.reverseSplit": reverseTextSplitNode,
           "text.toLowerCase": textToLowerCaseNode,
+          "text.permalink": textPermalinkNode,
+          "text.replace": textReplaceNode,
+          "text.trim": textTrimNode,
           "text.substring": textSubstringNode,
           "text.firstLetter": testFirstLetterNode,
           "columns.describe": columnsDescribeNode,
@@ -29575,6 +29578,78 @@ input
     }
   }
 
+  class textPermalinkNode extends abstractColumnAdderTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    get newColumnNameCell() {
+      return this.getWord(2)
+    }
+    getNewColumns() {
+      const sourceColumnName = this.getWord(1) || "text"
+      const destinationColumnName = this.getWord(2) || "Permalink"
+      return [
+        {
+          source: sourceColumnName,
+          name: destinationColumnName,
+          accessorFn: row => jtree.Utils.stringToPermalink(row[sourceColumnName])
+        }
+      ]
+    }
+  }
+
+  class textReplaceNode extends abstractColumnAdderTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    get anyCell() {
+      return this.getWordsFrom(2)
+    }
+    getNewColumns() {
+      const sourceColumnName = this.getWord(1) || "text"
+      const simpleSearch = this.getWord(2)
+      const simpleReplace = this.getWord(3)
+      const destinationColumnName = sourceColumnName
+      return [
+        {
+          source: sourceColumnName,
+          name: destinationColumnName,
+          accessorFn: row => row[sourceColumnName].replace(new RegExp(simpleSearch, "g"), simpleReplace)
+        }
+      ]
+    }
+  }
+
+  class textTrimNode extends abstractColumnAdderTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    get anyCell() {
+      return this.getWordsFrom(2)
+    }
+    getNewColumns() {
+      const sourceColumnName = this.getWord(1) || "text"
+      const trimChar = this.getWord(2)
+      const destinationColumnName = sourceColumnName
+      return [
+        {
+          source: sourceColumnName,
+          name: destinationColumnName,
+          accessorFn: row => (trimChar ? row[sourceColumnName].replace(new RegExp(`(^${trimChar}|${trimChar}$)`, "g"), "") : row[sourceColumnName].trim())
+        }
+      ]
+    }
+  }
+
   class textSubstringNode extends abstractColumnAdderTileNode {
     get tileKeywordCell() {
       return this.getWord(0)
@@ -31215,6 +31290,9 @@ a {name}
           "text.split": textSplitNode,
           "text.reverseSplit": reverseTextSplitNode,
           "text.toLowerCase": textToLowerCaseNode,
+          "text.permalink": textPermalinkNode,
+          "text.replace": textReplaceNode,
+          "text.trim": textTrimNode,
           "text.substring": textSubstringNode,
           "text.firstLetter": testFirstLetterNode,
           "columns.describe": columnsDescribeNode,
@@ -35059,6 +35137,74 @@ textToLowerCaseNode
   }
  extends abstractColumnAdderTileNode
  crux text.toLowerCase
+textPermalinkNode
+ description Convert all cells in a column to a url friendly permalink.
+ cells tileKeywordCell columnNameCell newColumnNameCell
+ example
+  samples.presidents
+   text.permalink name Permalink
+    tables.basic
+ javascript
+  getNewColumns() {
+   const sourceColumnName = this.getWord(1) || "text"
+   const destinationColumnName = this.getWord(2) || "Permalink"
+   return [
+    {
+     source: sourceColumnName,
+     name: destinationColumnName,
+     accessorFn: row => jtree.Utils.stringToPermalink(row[sourceColumnName])
+    }
+   ]
+  }
+ extends abstractColumnAdderTileNode
+ crux text.permalink
+textReplaceNode
+ description Does a global search/replace across all cells in a column.
+ cells tileKeywordCell columnNameCell
+ catchAllCellType anyCell
+ example 
+  samples.presidents
+   text.replace name George Georgette
+    tables.basic
+ javascript
+  getNewColumns() {
+   const sourceColumnName = this.getWord(1) || "text"
+   const simpleSearch = this.getWord(2)
+   const simpleReplace = this.getWord(3)
+   const destinationColumnName = sourceColumnName
+   return [
+    {
+     source: sourceColumnName,
+     name: destinationColumnName,
+     accessorFn: row => row[sourceColumnName].replace(new RegExp(simpleSearch, "g"), simpleReplace)
+    }
+   ]
+  }
+ extends abstractColumnAdderTileNode
+ crux text.replace
+textTrimNode
+ description Trims whitespace or a provided sequence from both sides of a string in all cells in a column.
+ cells tileKeywordCell columnNameCell
+ catchAllCellType anyCell
+ example 
+  samples.presidents
+   text.trim HomeState New
+    tables.basic
+ javascript
+  getNewColumns() {
+   const sourceColumnName = this.getWord(1) || "text"
+   const trimChar = this.getWord(2)
+   const destinationColumnName = sourceColumnName
+   return [
+    {
+     source: sourceColumnName,
+     name: destinationColumnName,
+     accessorFn: row => (trimChar ? row[sourceColumnName].replace(new RegExp(\`(^\${trimChar}|\${trimChar}$)\`, "g"), "") : row[sourceColumnName].trim())
+    }
+   ]
+  }
+ extends abstractColumnAdderTileNode
+ crux text.trim
 textSubstringNode
  description Extract parts of one column into another column called "substring".
  cells tileKeywordCell columnNameCell startIndexCell lengthCell
@@ -36785,6 +36931,9 @@ schemaNode
         textSplitNode: textSplitNode,
         reverseTextSplitNode: reverseTextSplitNode,
         textToLowerCaseNode: textToLowerCaseNode,
+        textPermalinkNode: textPermalinkNode,
+        textReplaceNode: textReplaceNode,
+        textTrimNode: textTrimNode,
         textSubstringNode: textSubstringNode,
         testFirstLetterNode: testFirstLetterNode,
         abstractNewRowsTransformerTileNode: abstractNewRowsTransformerTileNode,
@@ -39896,9 +40045,8 @@ class TabsTreeComponent extends AbstractTreeComponent {
     return this.getChildrenByNodeConstructor(TabTreeComponent)
   }
 
-  addTab(url) {
-    const line = `tab unmounted ${new FullDiskPath(url).toString()}`
-    return this.appendLine(line)
+  insertTab(url, tabIndex) {
+    return this.insertLine(`tab unmounted ${new FullDiskPath(url).toString()}`, tabIndex)
   }
 
   toHakonCode() {
@@ -40242,7 +40390,8 @@ class TileMenuTreeComponent extends AbstractContextMenuTreeComponent {
     if (exampleTile) {
       exampleTileButton = `span ${Icons("function", 20)}
  title See an example program with '${tile.getFirstWord()}'
- clickCommand createProgramFromTileExampleCommand`
+ class createProgramFromFocusedTileExampleButton
+ clickCommand createProgramFromFocusedTileExampleCommand`
     }
 
     const links = `a Reload
@@ -40292,7 +40441,7 @@ a Export data to tree file
 window.TileMenuTreeComponent = TileMenuTreeComponent
 ;
 
-const Version = "19.0.0"
+const Version = "19.1.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
@@ -40813,9 +40962,9 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return disk.getDisplayName() + newName
   }
 
-  async _createAndOpen(sourceStr, filename) {
+  async _createAndOpen(sourceStr, filename, tabIndex) {
     const newName = await this.createFileOnDefaultDisk(filename, sourceStr)
-    const res = await this.openFullPathInNewTabAndFocus(newName)
+    const res = await this.openFullPathInNewTabAndFocus(newName, tabIndex)
     return res
   }
 
@@ -40883,7 +41032,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     this.saveAppState()
   }
 
-  async getAlreadyOpenTabOrOpenFullFilePathInNewTab(filePath, andMount = false) {
+  async getAlreadyOpenTabOrOpenFullFilePathInNewTab(filePath, andMount = false, tabIndex) {
     const existingTab = this.getOpenTabByFullFilePath(new FullDiskPath(filePath).toString())
     if (existingTab) {
       if (andMount) {
@@ -40893,7 +41042,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
       return existingTab
     }
 
-    const tab = this._getTabsNode().addTab(new FullDiskPath(filePath).toString())
+    const tab = this._getTabsNode().insertTab(new FullDiskPath(filePath).toString(), tabIndex)
 
     await tab._fetchTabInitProgramRenderAndRun(andMount)
 
@@ -40923,8 +41072,8 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return res
   }
 
-  async openFullPathInNewTabAndFocus(fullDiskFilePath) {
-    const tab = await this.getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString(), true)
+  async openFullPathInNewTabAndFocus(fullDiskFilePath, tabIndex) {
+    const tab = await this.getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString(), true, tabIndex)
     return tab
   }
 
@@ -41519,8 +41668,9 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
 
     const newName = await this.promptToMoveFile(tab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
     if (!newName) return false
+    const tabIndex = tab.getIndex()
     await this.closeTab(tab)
-    await this.openFullPathInNewTabAndFocus(newName)
+    await this.openFullPathInNewTabAndFocus(newName, tabIndex)
     this.renderApp()
   }
 
@@ -41769,7 +41919,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
 
   cloneTabCommand(tabId) {
     const tab = this._getTabByIdOrMountedTab(tabId)
-    return this._createAndOpen(tab.getTabProgram().childrenToString(), tab.getFileName())
+    return this._createAndOpen(tab.getTabProgram().childrenToString(), tab.getFileName(), tab.getIndex() + 1)
   }
 
   async pasteCommand(pastedText) {

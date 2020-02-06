@@ -1,3 +1,9 @@
+19.1.0 2020-02-05
+-----------------
+- New: Text permalink, trim, and replace tiles
+- Fix: Rename and Clone Tab now preserve tab order
+- Fix: added test and fix for create program from tile example
+
 19.0.0 2020-02-04
 -----------------
 - New: one click insert tile button
