@@ -4,3 +4,6 @@ test tileContextMenu
   appendTileCommand data.inline
    executeCommandOnStumpWithClassCommand clickCommand TileDropDownButton
     assertStringIncludes getStumpNodeString Export data to csv file
+    assertStringExcludes getStumpNodeString petal_length
+    executeCommandOnStumpWithClassCommand clickCommand createProgramFromFocusedTileExampleButton
+     assertStringIncludes getStumpNodeString petal_length

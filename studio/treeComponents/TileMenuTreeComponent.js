@@ -71,7 +71,8 @@ class TileMenuTreeComponent extends AbstractContextMenuTreeComponent {
     if (exampleTile) {
       exampleTileButton = `span ${Icons("function", 20)}
  title See an example program with '${tile.getFirstWord()}'
- clickCommand createProgramFromTileExampleCommand`
+ class createProgramFromFocusedTileExampleButton
+ clickCommand createProgramFromFocusedTileExampleCommand`
     }
 
     const links = `a Reload
