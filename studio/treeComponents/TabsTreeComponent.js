@@ -54,9 +54,8 @@ class TabsTreeComponent extends AbstractTreeComponent {
     return this.getChildrenByNodeConstructor(TabTreeComponent)
   }
 
-  addTab(url) {
-    const line = `tab unmounted ${new FullDiskPath(url).toString()}`
-    return this.appendLine(line)
+  insertTab(url, tabIndex) {
+    return this.insertLine(`tab unmounted ${new FullDiskPath(url).toString()}`, tabIndex)
   }
 
   toHakonCode() {

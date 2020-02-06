@@ -349,9 +349,9 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return disk.getDisplayName() + newName
   }
 
-  async _createAndOpen(sourceStr, filename) {
+  async _createAndOpen(sourceStr, filename, tabIndex) {
     const newName = await this.createFileOnDefaultDisk(filename, sourceStr)
-    const res = await this.openFullPathInNewTabAndFocus(newName)
+    const res = await this.openFullPathInNewTabAndFocus(newName, tabIndex)
     return res
   }
 
@@ -419,7 +419,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     this.saveAppState()
   }
 
-  async getAlreadyOpenTabOrOpenFullFilePathInNewTab(filePath, andMount = false) {
+  async getAlreadyOpenTabOrOpenFullFilePathInNewTab(filePath, andMount = false, tabIndex) {
     const existingTab = this.getOpenTabByFullFilePath(new FullDiskPath(filePath).toString())
     if (existingTab) {
       if (andMount) {
@@ -429,7 +429,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
       return existingTab
     }
 
-    const tab = this._getTabsNode().addTab(new FullDiskPath(filePath).toString())
+    const tab = this._getTabsNode().insertTab(new FullDiskPath(filePath).toString(), tabIndex)
 
     await tab._fetchTabInitProgramRenderAndRun(andMount)
 
@@ -459,8 +459,8 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return res
   }
 
-  async openFullPathInNewTabAndFocus(fullDiskFilePath) {
-    const tab = await this.getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString(), true)
+  async openFullPathInNewTabAndFocus(fullDiskFilePath, tabIndex) {
+    const tab = await this.getAlreadyOpenTabOrOpenFullFilePathInNewTab(new FullDiskPath(fullDiskFilePath).toString(), true, tabIndex)
     return tab
   }
 
@@ -1055,8 +1055,9 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
 
     const newName = await this.promptToMoveFile(tab.getFullTabFilePath(), suggestedNewFilename, isRenameOp)
     if (!newName) return false
+    const tabIndex = tab.getIndex()
     await this.closeTab(tab)
-    await this.openFullPathInNewTabAndFocus(newName)
+    await this.openFullPathInNewTabAndFocus(newName, tabIndex)
     this.renderApp()
   }
 
@@ -1305,7 +1306,7 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
 
   cloneTabCommand(tabId) {
     const tab = this._getTabByIdOrMountedTab(tabId)
-    return this._createAndOpen(tab.getTabProgram().childrenToString(), tab.getFileName())
+    return this._createAndOpen(tab.getTabProgram().childrenToString(), tab.getFileName(), tab.getIndex() + 1)
   }
 
   async pasteCommand(pastedText) {
