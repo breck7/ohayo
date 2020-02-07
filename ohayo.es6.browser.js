@@ -25400,6 +25400,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
           "vega.example.list": vegaExampleListNode,
+          "asciichart.line": asciiChartNode,
           "challenge.play": challengePlayNode,
           "dtjs.basic": dtjsBasicNode,
           "html.text": htmlTextNode,
@@ -25515,6 +25516,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "text.split": textSplitNode,
           "text.reverseSplit": reverseTextSplitNode,
           "text.toLowerCase": textToLowerCaseNode,
+          "text.template": textTemplateNode,
           "text.permalink": textPermalinkNode,
           "text.replace": textReplaceNode,
           "text.trim": textTrimNode,
@@ -25541,6 +25543,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "filter.with": filterWithNode,
           "filter.without": filterWithoutNode,
           "rows.first": rowsFirstNode,
+          "rows.sample": rowsSampleNode,
           "rows.dropIfMissing": rowsDropIfMissingNode,
           "rows.last": rowsLastNode,
           "bitanath.pca": pcaNode,
@@ -26494,6 +26497,43 @@ pre
     }
     getSnippetTemplate(id) {
       return `vega.example ${id}`
+    }
+  }
+
+  class asciiChartNode extends abstractEmptyFooterTileNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { yColumn: yColumnNode }),
+        undefined
+      )
+    }
+    get titleCell() {
+      return this.getWordsFrom(0)
+    }
+    get bodyStumpTemplate() {
+      return `pre
+ class TileSelectable
+ style overflow: scroll; width: 100%; height: 100%; white-space: pre;
+ bern
+  {title}
+  {chart}`
+    }
+    get columnPredictionHints() {
+      return `yColumn isString=false`
+    }
+    get tileScript() {
+      return `ohayo/packages/asciichart/asciichart.js`
+    }
+    getTileBodyStumpCode() {
+      // todo: autodetect column
+      const columName = this.mapSettingNamesToColumnNames(["yColumn"])[0]
+      const column = this.getParentOrDummyTable().getColumnByName(columName)
+      const values = column._getSummaryVector().values
+      const chart = asciichart.plot(values, { height: 15 })
+      const title = this.getContent() || ""
+      const leftPad = Math.max(0, Math.floor((chart.split("\n")[0].length - title.length) / 2))
+      return this.qFormat(this.bodyStumpTemplate, { title: " ".repeat(leftPad) + title, chart })
     }
   }
 
@@ -29578,6 +29618,50 @@ input
     }
   }
 
+  class textTemplateNode extends abstractColumnAdderTileNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
+        undefined
+      )
+    }
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get newColumnNameCell() {
+      return this.getWordsFrom(1)
+    }
+    get bodyStumpTemplate() {
+      return `textarea
+ name content
+ changeCommand changeTileSettingMultilineCommand
+ placeholder Enter template here.
+ class TileTextArea savable
+ bern
+  {text}`
+    }
+    getNewColumns() {
+      const contentNode = this.getNode("content")
+      const templateString = contentNode ? contentNode.childrenToString() : ""
+      const destColumnName = this.getWord(1) || "Output"
+      return [
+        {
+          name: destColumnName,
+          accessorFn: row => new jtree.TreeNode(templateString).templateToString(row)
+        }
+      ]
+    }
+    getDataContent() {
+      const node = this.getNode("content")
+      return node ? node.childrenToString() : ""
+    }
+    getTileBodyStumpCode() {
+      const text = lodash.escape(this.getDataContent())
+      return this.qFormat(this.bodyStumpTemplate, { text })
+    }
+  }
+
   class textPermalinkNode extends abstractColumnAdderTileNode {
     get tileKeywordCell() {
       return this.getWord(0)
@@ -30066,6 +30150,30 @@ class LargeLabel`
       const limit = parseInt(this.getContent())
       if (isNaN(limit)) return undefined
       return (row, rowIndex) => rowIndex < limit
+    }
+  }
+
+  class rowsSampleNode extends abstractRowFilterTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get intCell() {
+      return parseInt(this.getWord(1))
+    }
+    getRowFilterFn() {
+      // todo: move to jtable?
+      const sampleCount = parseInt(this.getContent())
+      if (isNaN(sampleCount)) return undefined
+      const totalCount = this.getParentOrDummyTable().getRowCount()
+      if (totalCount <= sampleCount) return undefined
+      const every = Math.floor(totalCount / sampleCount)
+      let total = 0
+      return (row, rowIndex) => {
+        if (total === totalCount) return false
+        if (rowIndex % every !== 0) return false
+        total++
+        return true
+      }
     }
   }
 
@@ -31175,6 +31283,7 @@ a {name}
           "samples.list": samplesListNode,
           "vega.data.list": vegaDataListNode,
           "vega.example.list": vegaExampleListNode,
+          "asciichart.line": asciiChartNode,
           "challenge.play": challengePlayNode,
           "dtjs.basic": dtjsBasicNode,
           "html.text": htmlTextNode,
@@ -31290,6 +31399,7 @@ a {name}
           "text.split": textSplitNode,
           "text.reverseSplit": reverseTextSplitNode,
           "text.toLowerCase": textToLowerCaseNode,
+          "text.template": textTemplateNode,
           "text.permalink": textPermalinkNode,
           "text.replace": textReplaceNode,
           "text.trim": textTrimNode,
@@ -31316,6 +31426,7 @@ a {name}
           "filter.with": filterWithNode,
           "filter.without": filterWithoutNode,
           "rows.first": rowsFirstNode,
+          "rows.sample": rowsSampleNode,
           "rows.dropIfMissing": rowsDropIfMissingNode,
           "rows.last": rowsLastNode,
           "bitanath.pca": pcaNode,
@@ -32408,6 +32519,36 @@ vegaExampleListNode
   }
   getSnippetTemplate(id) {
    return \`vega.example \${id}\`
+  }
+asciiChartNode
+ description Lightweight ASCII line chart from the library https://github.com/kroitor/asciichart
+ string tileScript ohayo/packages/asciichart/asciichart.js
+ extends abstractEmptyFooterTileNode
+ crux asciichart.line
+ catchAllCellType titleCell
+ inScope yColumnNode
+ example
+  samples.waterBill
+   asciichart.line Water Bill
+ string columnPredictionHints
+  yColumn isString=false
+ string bodyStumpTemplate
+  pre
+   class TileSelectable
+   style overflow: scroll; width: 100%; height: 100%; white-space: pre;
+   bern
+    {title}
+    {chart}
+ javascript
+  getTileBodyStumpCode() {
+   // todo: autodetect column
+   const columName = this.mapSettingNamesToColumnNames(["yColumn"])[0]
+   const column = this.getParentOrDummyTable().getColumnByName(columName)
+   const values = column._getSummaryVector().values
+   const chart = asciichart.plot(values, { height: 15 })
+   const title = this.getContent() || ""
+   const leftPad = Math.max(0, Math.floor((chart.split("\\n")[0].length - title.length) / 2))
+   return this.qFormat(this.bodyStumpTemplate, { title: " ".repeat(leftPad) + title, chart })
   }
 challengePlayNode
  cells tileKeywordCell challengeIdCell
@@ -35137,6 +35278,48 @@ textToLowerCaseNode
   }
  extends abstractColumnAdderTileNode
  crux text.toLowerCase
+textTemplateNode
+ inScope contentNode
+ description Evaluates a common programming template string and generates a new cell for each row.
+ cells tileKeywordCell
+ catchAllCellType newColumnNameCell
+ string bodyStumpTemplate
+  textarea
+   name content
+   changeCommand changeTileSettingMultilineCommand
+   placeholder Enter template here.
+   class TileTextArea savable
+   bern
+    {text}
+ example
+  samples.presidents
+   text.template
+    content
+     Hello {name}!
+     How did you like being born in {HomeState}?
+    tables.basic
+ javascript
+  getNewColumns() {
+   const contentNode = this.getNode("content")
+   const templateString = contentNode ? contentNode.childrenToString() : ""
+   const destColumnName = this.getWord(1) || "Output"
+   return [
+    {
+     name: destColumnName,
+     accessorFn: row => new jtree.TreeNode(templateString).templateToString(row)
+    }
+   ]
+  }
+  getDataContent() {
+   const node = this.getNode("content")
+   return node ? node.childrenToString() : ""
+  }
+  getTileBodyStumpCode() {
+   const text = lodash.escape(this.getDataContent())
+   return this.qFormat(this.bodyStumpTemplate, { text })
+  }
+ extends abstractColumnAdderTileNode
+ crux text.template
 textPermalinkNode
  description Convert all cells in a column to a url friendly permalink.
  cells tileKeywordCell columnNameCell newColumnNameCell
@@ -35644,6 +35827,27 @@ rowsFirstNode
    const limit = parseInt(this.getContent())
    if (isNaN(limit)) return undefined
    return (row, rowIndex) => rowIndex < limit
+  }
+rowsSampleNode
+ description Return N rows sampling uniformly in order.
+ extends abstractRowFilterTileNode
+ crux rows.sample
+ cells tileKeywordCell intCell
+ javascript
+  getRowFilterFn() {
+   // todo: move to jtable?
+   const sampleCount = parseInt(this.getContent())
+   if (isNaN(sampleCount)) return undefined
+   const totalCount = this.getParentOrDummyTable().getRowCount()
+   if (totalCount <= sampleCount) return undefined
+   const every = Math.floor(totalCount / sampleCount)
+   let total = 0
+   return (row, rowIndex) => {
+    if (total === totalCount) return false
+    if (rowIndex % every !== 0) return false
+    total++
+    return true
+   }
   }
 rowsDropIfMissingNode
  cells tileKeywordCell
@@ -36794,6 +36998,7 @@ schemaNode
         samplesListNode: samplesListNode,
         vegaDataListNode: vegaDataListNode,
         vegaExampleListNode: vegaExampleListNode,
+        asciiChartNode: asciiChartNode,
         challengePlayNode: challengePlayNode,
         dtjsBasicNode: dtjsBasicNode,
         abstractHtmlNode: abstractHtmlNode,
@@ -36931,6 +37136,7 @@ schemaNode
         textSplitNode: textSplitNode,
         reverseTextSplitNode: reverseTextSplitNode,
         textToLowerCaseNode: textToLowerCaseNode,
+        textTemplateNode: textTemplateNode,
         textPermalinkNode: textPermalinkNode,
         textReplaceNode: textReplaceNode,
         textTrimNode: textTrimNode,
@@ -36961,6 +37167,7 @@ schemaNode
         filterWithNode: filterWithNode,
         filterWithoutNode: filterWithoutNode,
         rowsFirstNode: rowsFirstNode,
+        rowsSampleNode: rowsSampleNode,
         rowsDropIfMissingNode: rowsDropIfMissingNode,
         rowsLastNode: rowsLastNode,
         pcaNode: pcaNode,
@@ -37647,6 +37854,18 @@ file templates/subreddit.ohayo
      xColumn created_utc
     list.links
   doc.categories socialMedia
+file templates/template-generation.ohayo
+ data
+  doc.title Template Maker
+  doc.categories dataScience
+  samples.presidents
+   text.template Message
+    content
+     Hello {name}!
+     What was {HomeState} like?
+    columns.keep Message
+     hidden
+     tables.basic
 file templates/tlds.ohayo
  data
   doc.title Most Popular Top Level Domains
@@ -40441,7 +40660,7 @@ a Export data to tree file
 window.TileMenuTreeComponent = TileMenuTreeComponent
 ;
 
-const Version = "19.1.0"
+const Version = "19.2.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 

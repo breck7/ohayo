@@ -1,3 +1,7 @@
+19.2.0 2020-2-7
+---------------
+- New: text.template, row.sample, and asciichart.line tiles
+
 19.1.0 2020-02-05
 -----------------
 - New: Text permalink, trim, and replace tiles
