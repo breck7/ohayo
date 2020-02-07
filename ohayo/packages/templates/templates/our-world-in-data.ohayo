@@ -1,0 +1,13 @@
+doc.title Our World in Data
+doc.subtitle Exploration of datasets in https://ourworldindata.org/
+owid.list
+ vega.scatter Row Counts by ID
+  xColumn id
+  yColumn rowCount
+ vega.scatter
+  xColumn rowCount
+  yColumn columnCount
+ columns.describe
+  hidden
+  tables.basic
+doc.categories dataScience

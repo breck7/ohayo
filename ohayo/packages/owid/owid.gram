@@ -4,3 +4,9 @@ lifeExpectancyNode
  string url ohayo/packages/owid/life-expectancy.csv
  extends abstractFixedDatasetFromOhayoCollectionNode
  crux owid.lifeExpectancy
+owidListNode
+ string parser treeRows
+ description Gets all datasets on Our World in Data.
+ string url ohayo/packages/owid/owid.tree
+ extends abstractFixedDatasetFromOhayoCollectionNode
+ crux owid.list

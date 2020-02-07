@@ -138,8 +138,15 @@ class DevServer extends StudioServerApp {
 
     const { TypeScriptRewriter } = require("jtree/products/TypeScriptRewriter.js")
     // todo; cleanup
-    const treeLangExtensions = "grammar drums tree stamp".split(" ")
-    const isTreeFile = filename => treeLangExtensions.indexOf(jtree.Utils.getFileExtension(filename)) > -1
+    const treeFiles = "Studio.drums challenges.tree Templates.stamp".split(" ")
+    treeFiles.forEach(name => {
+      this.app.get(new RegExp(`.*/${name}`), (req, res) => {
+        const filename = __dirname + req.path
+        fs.readFile(filename, "utf8", (err, file) => {
+          res.send(TypeScriptRewriter.treeToJs(filename, file))
+        })
+      })
+    })
 
     // todo: cleanup
     const serveDevFile = (req, res, next) => {
@@ -148,8 +155,7 @@ class DevServer extends StudioServerApp {
         if (err) {
           console.log(err)
           return res.status(400).send(err)
-        } else if (isTreeFile(filename)) res.send(TypeScriptRewriter.treeToJs(filename, file))
-        else if (filename.endsWith(".js") && !filename.endsWith("min.js")) {
+        } else if (filename.endsWith(".js") && !filename.endsWith("min.js")) {
           res.send(
             new TypeScriptRewriter(file)
               .removeRequires()
@@ -166,7 +172,7 @@ class DevServer extends StudioServerApp {
       })
     }
 
-    this.app.get(/.*(studio|ohayo)\/.*\.(js|grammar|drums|tree|stamp)/, serveDevFile)
+    this.app.get(/.*(studio|ohayo)\/.*\.(js)/, serveDevFile)
     return this
   }
 }
