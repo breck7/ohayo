@@ -1,0 +1,10 @@
+doc.title Template Maker
+doc.categories dataScience
+samples.presidents
+ text.template Message
+  content
+   Hello {name}!
+   What was {HomeState} like?
+  columns.keep Message
+   hidden
+   tables.basic

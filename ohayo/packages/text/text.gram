@@ -149,6 +149,48 @@ textToLowerCaseNode
   }
  extends abstractColumnAdderTileNode
  crux text.toLowerCase
+textTemplateNode
+ inScope contentNode
+ description Evaluates a common programming template string and generates a new cell for each row.
+ cells tileKeywordCell
+ catchAllCellType newColumnNameCell
+ string bodyStumpTemplate
+  textarea
+   name content
+   changeCommand changeTileSettingMultilineCommand
+   placeholder Enter template here.
+   class TileTextArea savable
+   bern
+    {text}
+ example
+  samples.presidents
+   text.template
+    content
+     Hello {name}!
+     How did you like being born in {HomeState}?
+    tables.basic
+ javascript
+  getNewColumns() {
+   const contentNode = this.getNode("content")
+   const templateString = contentNode ? contentNode.childrenToString() : ""
+   const destColumnName = this.getWord(1) || "Output"
+   return [
+    {
+     name: destColumnName,
+     accessorFn: row => new jtree.TreeNode(templateString).templateToString(row)
+    }
+   ]
+  }
+  getDataContent() {
+   const node = this.getNode("content")
+   return node ? node.childrenToString() : ""
+  }
+  getTileBodyStumpCode() {
+   const text = lodash.escape(this.getDataContent())
+   return this.qFormat(this.bodyStumpTemplate, { text })
+  }
+ extends abstractColumnAdderTileNode
+ crux text.template
 textPermalinkNode
  description Convert all cells in a column to a url friendly permalink.
  cells tileKeywordCell columnNameCell newColumnNameCell
