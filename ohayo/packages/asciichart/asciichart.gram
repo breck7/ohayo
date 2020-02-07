@@ -1,0 +1,31 @@
+tooling onsave jtree build produceOhayoGrammar
+asciiChartNode
+ description Lightweight ASCII line chart from the library https://github.com/kroitor/asciichart
+ string tileScript ohayo/packages/asciichart/asciichart.js
+ extends abstractEmptyFooterTileNode
+ crux asciichart.line
+ catchAllCellType titleCell
+ inScope yColumnNode
+ example
+  samples.waterBill
+   asciichart.line Water Bill
+ string columnPredictionHints
+  yColumn isString=false
+ string bodyStumpTemplate
+  pre
+   class TileSelectable
+   style overflow: scroll; width: 100%; height: 100%; white-space: pre;
+   bern
+    {title}
+    {chart}
+ javascript
+  getTileBodyStumpCode() {
+    // todo: autodetect column
+    const columName = this.mapSettingNamesToColumnNames(["yColumn"])[0]
+    const column = this.getParentOrDummyTable().getColumnByName(columName)
+    const values = column._getSummaryVector().values
+    const chart = asciichart.plot(values, {height: 15})
+    const title = this.getContent() || ""
+    const leftPad = Math.max(0, Math.floor((chart.split("\n")[0].length - title.length) / 2))
+    return this.qFormat(this.bodyStumpTemplate, {title : " ".repeat(leftPad) + title, chart})
+  }
