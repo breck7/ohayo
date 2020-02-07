@@ -18,6 +18,30 @@ rowsShuffleNode
   _createOutputTable() {
    return this.getParentOrDummyTable().shuffleRows()
   }
+rowsSampleNode
+ description Return N rows sampling uniformly in order.
+ extends abstractRowFilterTileNode
+ crux rows.sample
+ cells tileKeywordCell intCell
+ javascript
+  getRowFilterFn() {
+   // todo: move to jtable?
+   const sampleCount = parseInt(this.getContent())
+   if (isNaN(sampleCount)) return undefined
+   const totalCount = this.getParentOrDummyTable().getRowCount()
+   if (totalCount <= sampleCount)
+    return undefined
+   const every = Math.floor(totalCount/ sampleCount)
+   let total = 0
+   return (row, rowIndex) => {
+    if (total === totalCount)
+      return false
+    if (rowIndex % every !== 0)
+      return false
+      total++
+      return true
+     }
+  }
 rowsSortByNode
  catchAllCellType columnNameCell
  description Sort the rows by a column(s) from smallest to largest.
