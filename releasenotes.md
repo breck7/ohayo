@@ -1,3 +1,7 @@
+19.3.0 2020-2-7
+---------------
+- New: owid.list tile
+
 19.2.0 2020-2-7
 ---------------
 - New: text.template, row.sample, and asciichart.line tiles

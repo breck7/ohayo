@@ -25482,6 +25482,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "moz.top500": mozTop500Node,
           "owid.lifeExpectancy": lifeExpectancyNode,
+          "owid.list": owidListNode,
           "samples.telescopes": samplesTelescopesNode,
           "samples.mtcars": samplesMtcarsNode,
           "samples.iris": samplesIrisNode,
@@ -29087,6 +29088,15 @@ input
     }
   }
 
+  class owidListNode extends abstractFixedDatasetFromOhayoCollectionNode {
+    get url() {
+      return `ohayo/packages/owid/owid.tree`
+    }
+    get parser() {
+      return `treeRows`
+    }
+  }
+
   class samplesTelescopesNode extends abstractFixedDatasetFromOhayoCollectionNode {
     get url() {
       return `ohayo/packages/samples/telescopes.tsv`
@@ -31365,6 +31375,7 @@ a {name}
           "kaggle.datasets.heart": kaggleDatasetsHeartNode,
           "moz.top500": mozTop500Node,
           "owid.lifeExpectancy": lifeExpectancyNode,
+          "owid.list": owidListNode,
           "samples.telescopes": samplesTelescopesNode,
           "samples.mtcars": samplesMtcarsNode,
           "samples.iris": samplesIrisNode,
@@ -34821,6 +34832,12 @@ lifeExpectancyNode
  string url ohayo/packages/owid/life-expectancy.csv
  extends abstractFixedDatasetFromOhayoCollectionNode
  crux owid.lifeExpectancy
+owidListNode
+ string parser treeRows
+ description Gets all datasets on Our World in Data.
+ string url ohayo/packages/owid/owid.tree
+ extends abstractFixedDatasetFromOhayoCollectionNode
+ crux owid.list
 samplesTelescopesNode
  description A partial list of humankind's largest telescopes.
  string dataDescription
@@ -37099,6 +37116,7 @@ schemaNode
         kaggleDatasetsHeartNode: kaggleDatasetsHeartNode,
         mozTop500Node: mozTop500Node,
         lifeExpectancyNode: lifeExpectancyNode,
+        owidListNode: owidListNode,
         samplesTelescopesNode: samplesTelescopesNode,
         samplesMtcarsNode: samplesMtcarsNode,
         samplesIrisNode: samplesIrisNode,
@@ -40660,7 +40678,7 @@ a Export data to tree file
 window.TileMenuTreeComponent = TileMenuTreeComponent
 ;
 
-const Version = "19.2.0"
+const Version = "19.3.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
