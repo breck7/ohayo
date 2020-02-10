@@ -478,6 +478,7 @@ abstractTileTreeComponentNode
    // todo: destroy or something? how do we reparse.
    this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
    this.unmountAndDestroy()
+   tab.autosaveTab()
    this.getRootNode().loadAndIncrementalRender()
   }
   changeParentCommand(pathVector) {
