@@ -40,9 +40,6 @@ ohayoNode
   getTab() {
    return this._tab
   }
-  tilesAreVisible() {
-    return !this.has(OhayoConstants.defaultHidden)
-  }
   async loadAndIncrementalRender() {
    const app = this.getTab().getRootNode()
    await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))

@@ -1,15 +1,11 @@
 doc.title Largest Countries by Population
- visible
 samples.populations
  rows.sortBy Population2016
   vega.bar Population by Country
-   visible
    yColumn Population2016
    colorColumn Continent
   group.by Continent
    reduce Population2016 sum Population2016
    vega.bar Population by Region
-    visible
     yColumn Population2016
-doc.defaultHidden
 doc.categories geography

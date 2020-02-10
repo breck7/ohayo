@@ -33,6 +33,3 @@ DidYouMeanTileNode
   getErrors() {
    return [new jtree.UnknownNodeTypeError(this)]
   }
-  getTileHeaderBern() {
-   return ""
-  }

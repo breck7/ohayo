@@ -1,3 +1,16 @@
+edge 2020-2-10
+--------------
+- New: added insert between button to tiles
+- Breaking: removed "title" content from tables.basic
+- Breaking: removed doc.defaultHidden
+- Fix: when you delete a tile using the button it only deletes that tile
+- Fix: Bigger down arrow for tile dropdown menu
+- Fix: autosave tab after clicking tile picker command
+- Fix: debug.commands tile regression fix
+- Infra: test all templates command
+- Infra: removed TileHeader, TileGrabbers
+- Infra: removed duplicate TilePicker code
+
 19.3.0 2020-2-7
 ---------------
 - New: owid.list tile

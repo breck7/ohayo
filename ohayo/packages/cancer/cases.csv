@@ -1,4 +1,4 @@
-Countr,Year,CancerType,Female,Male
+Country,Year,CancerType,Female,Male
 USA,2019,Acute lymphocytic leukemia,2650,3280
 USA,2019,Acute myeloid leukemia,9800,11650
 USA,2019,Anus and anal canal and anorectum,5530,2770

@@ -8,15 +8,11 @@ abstractProviderNode
    class {classes}
    id {id}
    div
-    class TileHeaderGrabber
-   div
-    class TileBody HeaderLess
+    class TileBody
     {body}
    div
     class TileFooter
     {footer}
-   div
-    class TileFooterGrabber
  string tileFooterTemplate
   span Rows Out: {outputCount} Columns Out: {columnCount} Time: {time}s Parser: {parserId} {errorMessageHtml}
   {tileMenuButton}

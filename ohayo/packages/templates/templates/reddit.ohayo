@@ -4,7 +4,7 @@ reddit.all
  columns.keep title created_utc score subreddit url
   hidden
   rows.sortByReverse score
-   tables.basic Top Stories on Reddit
+   tables.basic
   vega.scatter
    yColumn score
    xColumn created_utc

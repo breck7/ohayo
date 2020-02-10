@@ -44,22 +44,6 @@ doc.section
  link http://ohayo.computer A whole sentence can be linked
 
 doc.section
- subtitle Default visibilitiy
- paragraph You can change the default visibility of a tile
- paragraph The line below will hide all tiles by default.
- code ohayo
-  doc.tiles hidden
- paragraph When you hide all tiles, you'll need to opt-in to visible to show tiles.
- code ohayo
-  samples.portals
-   vega.bar
-    visible
- paragraph By default, all tiles are set to visible, which is equivalent to:
- code
-  doc.tiles visible
-
-
-doc.section
  subtitle Categories
  paragraph You might want to add some tags categorizing your document.
  code ohayo

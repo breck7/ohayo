@@ -2,7 +2,7 @@ doc.title Amazon Purchase History
 doc.comment Delete the below line and replace with your data
 amazon.history
  columns.keep Category ItemTotal OrderDate Title
-  tables.basic All Amazon Purchases
+  tables.basic
   group.by Category
    reduce ItemTotal sum sum
    vega.bar Amount Spent by Category

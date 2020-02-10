@@ -13,7 +13,7 @@ challengePlayNode
   challenge.play 1
   challenge.play 2
  string tileSize 640 240
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  crux challenge.play
  javascript
   getProgramTemplate(id) {

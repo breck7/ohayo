@@ -25396,42 +25396,6 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
       return new jtree.TreeNode.Parser(
         catchAllErrorNode,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          "challenge.list": challengeListNode,
-          "samples.list": samplesListNode,
-          "vega.data.list": vegaDataListNode,
-          "vega.example.list": vegaExampleListNode,
-          "asciichart.line": asciiChartNode,
-          "challenge.play": challengePlayNode,
-          "dtjs.basic": dtjsBasicNode,
-          "html.text": htmlTextNode,
-          "html.printAs": htmlPrintAsNode,
-          "html.h1": htmlH1Node,
-          "html.img": htmlImgNode,
-          "html.iframe": htmlIframeNode,
-          "html.custom": htmlCustomNode,
-          "show.rowCount": showRowCountNode,
-          "show.columnCount": showColumnCountNode,
-          "show.static": showStaticNode,
-          "show.value": showValueNode,
-          "show.median": showMedianNode,
-          "show.sum": showSumNode,
-          "show.mean": showMeanNode,
-          "show.min": showMinNode,
-          "show.max": showMaxNode,
-          "vega.bar": vegaBarNode,
-          "vega.line": vegaLineNode,
-          "vega.area": vegaAreaNode,
-          "vega.scatter": vegaScatterNode,
-          "vega.bubble": vegaBubbleNode,
-          "vega.emoji": vegaEmojiNode,
-          "vega.histogram": vegaHistogramNode,
-          "vega.example": vegaExampleNode,
-          "calendar.heat": calendarHeatNode,
-          "icons.human": iconsHumanNode,
-          "icons.circle": iconsCircleNode,
-          "markdown.toHtml": markdownToHtmlNode,
-          "treenotation.outline": treenotationOutlineNode,
-          "treenotation.dotline": treenotationDotlineNode,
           "amazon.history": amazonHistoryNode,
           "fitbit.all": fitbitAllNode,
           "datawrapper.comingSoon": datawrapperComingSoonNode,
@@ -25443,21 +25407,59 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "re3data.comingSoon": re3dataComingSoonNode,
           "zing.comingSoon": zingComingSoonNode,
           "editor.helloWorld": editorHelloWorldNode,
+          "challenge.list": challengeListNode,
+          "samples.list": samplesListNode,
+          "vega.data.list": vegaDataListNode,
+          "vega.example.list": vegaExampleListNode,
+          "doc.picker": PickerTileNode,
+          "templates.list": templatesListNode,
+          "asciichart.line": asciiChartNode,
+          "calendar.heat": calendarHeatNode,
+          "challenge.play": challengePlayNode,
           "debug.dump": debugDumpNode,
           "web.dump": webDumpNode,
           "debug.commands": debugCommandsNode,
           "debug.sleep": debugSleepNode,
           "debug.noop": debugNoOpNode,
           "debug.throw": debugThrowNode,
+          "dtjs.basic": dtjsBasicNode,
           "editor.gallery": editorGalleryNode,
           "handsontable.basic": handsontableBasicNode,
+          "html.text": htmlTextNode,
+          "html.printAs": htmlPrintAsNode,
+          "html.h1": htmlH1Node,
+          "html.img": htmlImgNode,
+          "html.iframe": htmlIframeNode,
+          "html.custom": htmlCustomNode,
+          "icons.human": iconsHumanNode,
+          "icons.circle": iconsCircleNode,
           "list.basic": listBasicNode,
           "list.links": listLinksNode,
+          "markdown.toHtml": markdownToHtmlNode,
+          "show.rowCount": showRowCountNode,
+          "show.columnCount": showColumnCountNode,
+          "show.static": showStaticNode,
+          "show.value": showValueNode,
+          "show.median": showMedianNode,
+          "show.sum": showSumNode,
+          "show.mean": showMeanNode,
+          "show.min": showMinNode,
+          "show.max": showMaxNode,
           "tables.basic": tablesBasicNode,
           "tables.interesting": tablesInterestingNode,
           "tables.dump": tablesDumpNode,
           "text.wordcloud": textWordcloudNode,
           "treenotation.3d": treenotation3dNode,
+          "treenotation.outline": treenotationOutlineNode,
+          "treenotation.dotline": treenotationDotlineNode,
+          "vega.bar": vegaBarNode,
+          "vega.line": vegaLineNode,
+          "vega.area": vegaAreaNode,
+          "vega.scatter": vegaScatterNode,
+          "vega.bubble": vegaBubbleNode,
+          "vega.emoji": vegaEmojiNode,
+          "vega.histogram": vegaHistogramNode,
+          "vega.example": vegaExampleNode,
           "tiles.didyoumean": DidYouMeanTileNode,
           "doc.title": docTitleNode,
           "doc.subtitle": docSubtitleNode,
@@ -25465,7 +25467,6 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "doc.ref": docReferenceNode,
           "doc.comment": docCommentNode,
           "doc.tooling": docToolingNode,
-          "doc.picker": PickerTileNode,
           "github.info": githubInfoNode,
           "disk.browse": diskBrowseNode,
           "disk.read": diskReadNode,
@@ -25573,7 +25574,6 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "random.float": randomFloatNode,
           "random.int": randomIntNode,
           "samples.tinyIris": samplesTinyIrisNode,
-          "templates.list": templatesListNode,
           "assert.rowCount": assertRowCountNode,
           "print.text": printNode,
           "print.csv": printCsvNode,
@@ -25632,38 +25632,30 @@ pre
  class {classes}
  id {id}
  div
-  class TileHeaderGrabber
- div {header}
-  class TileHeader
- div
   style {bodyStyle}
   class TileBody
   {body}
  div
   class TileFooter
-  {footer}
- div
-  class TileFooterGrabber`
+  {footer}`
     }
     get errorStateStumpTemplate() {
       return `div
  class {classes}
  id {id}
  div
-  class TileHeaderGrabber
- div ERROR
-  class TileHeader
- div
   class TileBody
+  div ERROR
   {content}
  div
   class TileFooter
-  {footer}
- div
-  class TileFooterGrabber`
+  {footer}`
     }
     get pencilStumpTemplate() {
-      return `span ▾
+      return `span +
+ class TileInsertBetweenButton
+ clickCommand insertTileBetweenCommand
+span ▼
  class TileDropDownButton
  clickCommand toggleTileMenuCommand`
     }
@@ -25686,12 +25678,6 @@ pre
     }
     get hiddenKey() {
       return `hidden`
-    }
-    get footerHeight() {
-      return 30
-    }
-    get headerHeight() {
-      return 30
     }
     get yearKey() {
       return `year`
@@ -25956,7 +25942,6 @@ pre
       return this.qFormat(this.tileStumpTemplate, {
         classes: this.getCssClassNames().join(" "),
         id: this.getTreeComponentId(),
-        header: this.getTileHeaderBern(),
         bodyStyle: this.customBodyStyle || "",
         body: this._getBodyStumpCodeCache() || "",
         footer: this.getTileFooterStumpCode()
@@ -25965,9 +25950,6 @@ pre
     _getBodyStumpCodeCache() {
       if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
       return this._bodyStumpCodeCache
-    }
-    getTileHeaderBern() {
-      return `${this.getFirstWord()}`
     }
     getTileBodyStumpCode() {
       return ``
@@ -25985,6 +25967,14 @@ pre
       if (!this._errorCount) this._errorCount = 0
       this._errorCount++
       this.getRootNode().goRed(err)
+    }
+    insertTileBetweenCommand() {
+      const tab = this.getTab()
+      const current = this.childrenToString()
+      this.getChildTiles().forEach(tile => tile.unmountAndDestroy())
+      const newNode = this.appendLineAndChildren("doc.picker", current)
+      tab.autosaveTab()
+      this.getRootNode().loadAndIncrementalRender()
     }
     getWall() {
       return this.getWebApp().getAppWall()
@@ -26064,8 +26054,10 @@ pre
       })
     }
     isVisible() {
+      if (this.has(this.visibleKey)) return true
       if (this.visible === false) return false
-      return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
+      if (this.has(this.hiddenKey)) return false
+      return true
     }
     _isMaximized() {
       return this.has(OhayoConstants.maximized)
@@ -26110,8 +26102,9 @@ pre
       this.setFirstWord(newValue)
       const newNode = this.duplicate()
       // todo: destroy or something? how do we reparse.
-      this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
+      this.getChildTiles().forEach(tile => tile.unmountAndDestroy())
       this.unmountAndDestroy()
+      tab.autosaveTab()
       this.getRootNode().loadAndIncrementalRender()
     }
     changeParentCommand(pathVector) {
@@ -26124,10 +26117,15 @@ pre
       this.unmountAndDestroy()
       return this.getTab().autosaveAndRender()
     }
-    destroyTileCommand() {
-      this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
+    async removeTileCommand() {
+      const tab = this.getTab()
+      this.getChildTiles().forEach(tile => {
+        tile.unmount()
+        tile.shiftLeft()
+      })
       this.unmountAndDestroy()
-      return this.getTab().autosaveAndRender()
+      tab.autosaveTab()
+      this.getRootNode().loadAndIncrementalRender()
     }
     getNewDataCommand() {
       // todo: have some type of paging system to fetch new data.
@@ -26320,42 +26318,116 @@ pre
     }
   }
 
-  class abstractHeaderlessChartTileNode extends abstractChartNode {
-    get tileStumpTemplate() {
+  class abstractTextNode extends abstractChartNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
+        undefined
+      )
+    }
+    get stringCell() {
+      return this.getWordsFrom(0)
+    }
+    get bodyStumpTemplate() {
       return `div
- class {classes}
- id {id}
- div
-  class TileHeaderGrabber
- div
-  class TileBody HeaderLess
-  {body}
- div
-  class TileFooter
-  {footer}
- div
-  class TileFooterGrabber`
+ class TileSelectable
+ bern
+  {content}`
     }
-    get headerHeight() {
-      return 0
-    }
-    toStumpCode() {
-      return this.qFormat(this.tileStumpTemplate, {
-        classes: this.getCssClassNames().join(" "),
-        id: this.getTreeComponentId(),
-        body: this._getBodyStumpCodeCache(),
-        footer: this.getTileMenuButtonStumpCode()
-      })
+    getTileBodyStumpCode() {
+      return this.qFormat(this.bodyStumpTemplate, { content: this.content ? jtree.Utils.linkify(this.content) : "" })
     }
   }
 
-  class abstractEmptyFooterTileNode extends abstractHeaderlessChartTileNode {
-    get footerHeight() {
-      return 0
+  class abstractInstructionsNode extends abstractTextNode {
+    get content() {
+      return `Instructions go here.`
+    }
+    get tileSize() {
+      return `600 240`
     }
   }
 
-  class abstractSnippetGalleryNode extends abstractEmptyFooterTileNode {
+  class amazonHistoryNode extends abstractInstructionsNode {
+    get dummyDataSetName() {
+      return `amazonPurchases`
+    }
+    get content() {
+      return `Step 1. Go to https://www.amazon.com/gp/b2b/reports to download your Amazon order history.<br> Step 2. Add the data here.`
+    }
+  }
+
+  class fitbitAllNode extends abstractInstructionsNode {
+    get content() {
+      return `Step 1. Go to <a target="_blank" href="https://www.fitbit.com/settings/data/export">https://www.fitbit.com/settings/data/export</a> to download your Fitbit data.<br> Step 2. Drop the CSV onto this page.`
+    }
+  }
+
+  class abstractComingSoonNode extends abstractTextNode {
+    get content() {
+      return `Instructions go here.`
+    }
+    get tileSize() {
+      return `600 240`
+    }
+  }
+
+  class datawrapperComingSoonNode extends abstractComingSoonNode {
+    get content() {
+      return `We don't have support yet for https://www.datawrapper.de/`
+    }
+  }
+
+  class dcjsComingSoonNode extends abstractComingSoonNode {
+    get content() {
+      return `We don't have support yet for https://github.com/dc-js/dc.js`
+    }
+  }
+
+  class finosPerspectiveComingSoonNode extends abstractComingSoonNode {
+    get content() {
+      return `We don't have support yet for https://perspective.finos.org/`
+    }
+  }
+
+  class fivethirtyeightComingSoonNode extends abstractComingSoonNode {
+    get content() {
+      return `We don't have support yet for https://github.com/fivethirtyeight/data/`
+    }
+  }
+
+  class GovNode extends abstractComingSoonNode {
+    get content() {
+      return `We don't have support yet for https://www.data.gov/`
+    }
+  }
+
+  class highchartsComingSoonNode extends abstractComingSoonNode {
+    get content() {
+      return `We don't have support yet for https://www.highcharts.com/blog/snippets/3d-solar-system/`
+    }
+  }
+
+  class re3dataComingSoonNode extends abstractComingSoonNode {
+    get content() {
+      return `We don't have support yet for https://www.re3data.org/`
+    }
+  }
+
+  class zingComingSoonNode extends abstractComingSoonNode {
+    get content() {
+      return `We don't have support yet for https://www.zingchart.com/`
+    }
+  }
+
+  class editorHelloWorldNode extends abstractTextNode {
+    get content() {
+      return `Ohayo world!`
+    }
+  }
+
+  class abstractSnippetGalleryNode extends abstractChartNode {
     get optionStumpTemplate() {
       return `li
  a {title}
@@ -26501,7 +26573,117 @@ pre
     }
   }
 
-  class asciiChartNode extends abstractEmptyFooterTileNode {
+  class abstractPickerTileNode extends abstractChartNode {
+    get categoryBreakStumpTemplate() {
+      return `div {category}
+ class PickerCategory`
+    }
+    get itemStumpTemplate() {
+      return `{categoryBreak}
+a {name}
+ br
+  span {description}
+ title {description}
+ tabindex -1
+ value {value}
+ class pickerItemButton
+ clickCommand {command}`
+    }
+    get hakonTemplate() {
+      return `.abstractPickerTileNode
+ .PickerCategory
+  width 100%
+  margin-top 20px
+  text-align center
+ .TileBody
+  display flex
+  flex-flow row wrap
+  a
+   &:hover
+    background-color {borderColor}
+   padding 10px
+   margin 5px
+   height 30px
+   background-color {backgroundColor}
+   border 1px solid {borderColor}
+   overflow hidden
+   text-align center
+   text-overflow ellipsis
+   font-size 14px
+   width 120px
+   span
+    font-size 70%`
+    }
+    get needsData() {
+      return false
+    }
+    get tileSize() {
+      return `480 420`
+    }
+    async fetchTableInputs() {
+      return { rows: this.getChoices() }
+    }
+    getTileBodyStumpCode() {
+      let lastCat = ""
+      return this.getChoices()
+        .map(choice => {
+          choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+          lastCat = choice.category
+          return this.qFormat(this.itemStumpTemplate, choice)
+        })
+        .join("\n")
+    }
+  }
+
+  class PickerTileNode extends abstractPickerTileNode {
+    getChoices() {
+      const allChoices = this.getRootNode()
+        .getHandGrammarProgram()
+        .getTopNodeTypeDefinitions()
+      const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(OhayoConstants.noPicker))
+      const theChoices = filteredChoices.length ? filteredChoices : allChoices
+      return theChoices.map(nodeDefinition => {
+        const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
+        const name = nodeId.split(".")[1] || ""
+        const category = lodash.upperFirst(nodeId.split(".")[0])
+        const description = nodeDefinition.getDescription()
+        return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
+      })
+    }
+  }
+
+  class templatesListNode extends abstractPickerTileNode {
+    getChoices() {
+      // todo: cleanup.
+      const choices = this.getWebApp()
+        .getStandardTemplates()
+        .map(node => {
+          const id = node
+            .getWord(1)
+            .replace("templates/", "")
+            .replace(this.ohayoFileExtensionKey, "")
+          return {
+            command: "createProgramFromTemplateCommand",
+            name: node.get("data doc.title"),
+            value: id,
+            category: lodash.upperFirst(node.get("data doc.categories")),
+            description: ""
+          }
+        })
+      return lodash.sortBy(choices, "category")
+    }
+    getProgramTemplate(id) {
+      const node = this.getWebApp()
+        .getStandardTemplates()
+        .filter(node => node.getContent() === `templates/${id}${this.ohayoFileExtensionKey}`)[0]
+      return {
+        template: node.getNode("data").childrenToString(),
+        name: id + this.ohayoFileExtensionKey
+      }
+    }
+  }
+
+  class asciiChartNode extends abstractChartNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -26538,714 +26720,7 @@ pre
     }
   }
 
-  class challengePlayNode extends abstractEmptyFooterTileNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get challengeIdCell() {
-      return parseInt(this.getWord(1))
-    }
-    get challengeAnswerCell() {
-      return this.getWordsFrom(2).map(val => parseFloat(val))
-    }
-    get tileSize() {
-      return `640 240`
-    }
-    getProgramTemplate(id) {
-      const challengeNode = this._getChallengeNode(parseInt(id))
-      return {
-        template: challengeNode.getNode("solution").childrenToString(),
-        name: "challenge-" + id + "-solution.ohayo"
-      }
-    }
-    _getChallengeNode(challengeId) {
-      const challenges =
-        typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("ohayo/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
-      return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
-    }
-    getTileBodyStumpCode() {
-      const challengeId = parseInt(this.getWord(1))
-      const answer = this.getWord(2)
-      const challengeNode = this._getChallengeNode(challengeId)
-      const isCorrect = answer === challengeNode.get("answer")
-      const theme = this.getTheme()
-      const color = answer ? (isCorrect ? theme.successColor : theme.errorColor) : theme.warningColor
-      const answerMessage = answer !== undefined ? (isCorrect ? "CORRECT!" : "Wrong.") : ""
-      return `h3 Challenge #${challengeId}
- style color:${color}
-br
-div ${challengeNode.evalTemplateString(`Question: {question}`)}
- class TileSelectable
-br
-input
- placeholder Enter your answer here. All answers are a number.
- value ${answer !== undefined ? answer : ""}
- style width: 300px;
- name 2
- changeCommand changeWordAndRenderCommand
-span ${answerMessage}
- style color: ${color};
-br
-div
- a See a solution
-  clickCommand createProgramFromTemplateCommand
-  value ${challengeId}`
-    }
-  }
-
-  class dtjsBasicNode extends abstractEmptyFooterTileNode {
-    get rowStumpTemplate() {
-      return `tr
- {cols}`
-    }
-    get cellStumpTemplate() {
-      return `td
- bern
-  {box}`
-    }
-    get bodyStumpTemplate() {
-      return `div
-table
- class DataTable
- thead
-  tr
-   {headerRows}
- tbody
-  {rows}`
-    }
-    get tileScript() {
-      return `ohayo/packages/dtjs/datatables.min.js`
-    }
-    get tileCssScript() {
-      return `ohayo/packages/dtjs/datatables.min.css`
-    }
-    get tileSize() {
-      return `1200 500`
-    }
-    getTileBodyStumpCode() {
-      const columnDefs = this.getParentOrDummyTable()
-        .getColumnsArray()
-        .slice(0, 10)
-      const headerRows = this._getHeaderRowsStumpCode(columnDefs.map(col => col.getColumnName()))
-      const rows = this._getTableRowsStumpCode(columnDefs)
-      return this.qFormat(this.bodyStumpTemplate, { headerRows, rows })
-    }
-    _getHeaderRowsStumpCode(columns) {
-      return columns.map(colName => `th ${colName}`).join("\n")
-    }
-    _getTableRowsStumpCode(columns) {
-      return this.getRowsWithRowDisplayLimit()
-        .slice(0, 10)
-        .map((row, index) => {
-          const cols = columns
-            .map(column => {
-              const box = row.getRowHtmlSafeValue(column.getColumnName()) // todo: cache?
-              return this.qFormat(this.cellStumpTemplate, { box })
-            })
-            .join("\n")
-          return this.qFormat(this.cellStumpTemplate, { cols })
-        })
-        .join("\n")
-    }
-    treeComponentWillUnmount() {
-      // cleanup
-    }
-    treeComponentDidUpdate() {
-      super.treeComponentDidUpdate()
-      const table = this.getParentOrDummyTable()
-      const columnDefs = this.getParentOrDummyTable()
-        .getColumnsArray()
-        .slice(0, 10)
-      const container = this.getStumpNode().findStumpNodeByChild("class DataTable")
-      if (this.isNodeJs()) return undefined
-      const width = this._tileWidth
-      const height = this._tileHeight
-      const shadow = container.getShadow()
-      const el = shadow.getShadowElement()
-      shadow.setShadowCss({ width, height })
-      const rows = this.getRowsWithRowDisplayLimit()
-      // todo: note, this is only works with jQuery
-      jQuery.fn.dataTable.ext.errMode = "throw"
-      this._dataTables = jQuery(el).DataTable({
-        data: this.getRowsAsDataTableArrayWithHeader(rows, columnDefs.map(col => col.getColumnName())).slice(1),
-        pageLength: 10,
-        scrollY: height
-        //"scrollCollapse": true,
-        //"paging": false
-      })
-    }
-    treeComponentDidMount() {
-      this.treeComponentDidUpdate()
-    }
-  }
-
-  class abstractHtmlNode extends abstractEmptyFooterTileNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { style: styleNode, content: contentNode }),
-        undefined
-      )
-    }
-    get htmlCell() {
-      return this.getWordsFrom(0)
-    }
-    get bodyStumpTemplate() {
-      return `{tag}
- {style}
- {src}
- bern
-  {content}`
-    }
-    get hakonTemplate() {
-      return `.abstractHtmlNode
- code
-  user-select text`
-    }
-    getTileFooterStumpCode() {
-      return this.getTileMenuButtonStumpCode()
-    }
-    async fetchTableInputs() {
-      return { rows: [{ text: this.getHtmlContent() }] }
-    }
-    getHtmlContent() {
-      return this.getWordsFrom(2).join(" ") || "No html content to show."
-    }
-    getTag() {
-      return this.getWord(1) || "div" // todo: verify this is legal tag.
-    }
-    getSrc() {
-      return this.getSettingsStruct().src
-    }
-    getTileBodyStumpCode() {
-      return this.qFormat(this.bodyStumpTemplate, {
-        tag: this.getTag(),
-        style: this.style ? `style ${this.style}` : "",
-        src: this.getSrc() ? `src ${this.getSrc()}` : "",
-        content: this.getHtmlContent() || ""
-      })
-    }
-  }
-
-  class htmlTextNode extends abstractHtmlNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get htmlTextTagCell() {
-      return this.getWord(1)
-    }
-    get htmlCell() {
-      return this.getWordsFrom(2)
-    }
-  }
-
-  class htmlPrintAsNode extends abstractHtmlNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get htmlTextTagCell() {
-      return this.getWord(1)
-    }
-    getHtmlContent() {
-      return this.getPipishInput()
-    }
-  }
-
-  class abstractHTMLFixedTagTileNode extends abstractHtmlNode {
-    getHtmlContent() {
-      return this.getContent()
-    }
-    getTag() {
-      return this.htmlTagName
-    }
-  }
-
-  class htmlH1Node extends abstractHTMLFixedTagTileNode {
-    get htmlCell() {
-      return this.getWordsFrom(0)
-    }
-    get style() {
-      return `text-align:center;`
-    }
-    get htmlTagName() {
-      return `h1`
-    }
-    get tileSize() {
-      return `600 75`
-    }
-  }
-
-  class abstractHTMLContentIsSrcTileNode extends abstractHTMLFixedTagTileNode {
-    getHtmlContent() {
-      return ""
-    }
-    getSrc() {
-      return this.getContent() || super.getSrc()
-    }
-  }
-
-  class htmlImgNode extends abstractHTMLContentIsSrcTileNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get urlCell() {
-      return this.getWord(1)
-    }
-    get style() {
-      return `width:100%;`
-    }
-    get htmlTagName() {
-      return `img`
-    }
-  }
-
-  class htmlIframeNode extends abstractHTMLContentIsSrcTileNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get urlCell() {
-      return this.getWord(1)
-    }
-    get htmlTagName() {
-      return `iframe`
-    }
-  }
-
-  class htmlCustomNode extends abstractEmptyFooterTileNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
-        undefined
-      )
-    }
-    get bodyStumpTemplate() {
-      return `div
- bern
-  {content}`
-    }
-    getTileBodyStumpCode() {
-      // https://meta.stackexchange.com/questions/1777/what-html-tags-are-allowed-on-stack-exchange-sites
-      // todo: sanitize tags
-      const contentNode = this.getNode("content")
-      const content = contentNode ? contentNode.childrenToString() : "No HTML content to show"
-      return this.qFormat(this.bodyStumpTemplate, { content })
-    }
-  }
-
-  class abstractShowTileNode extends abstractEmptyFooterTileNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get columnNameCell() {
-      return this.getWord(1)
-    }
-    get titleCell() {
-      return this.getWordsFrom(2)
-    }
-    get bodyStumpTemplate() {
-      return `h6 {title}
-h3 {number}`
-    }
-    get hakonTemplate() {
-      return `.abstractShowTileNode
- h3
-  text-align center
- h6
-  text-align center
-  height 40px
-  overflow hidden`
-    }
-    get dummyDataSetName() {
-      return `stockPrice`
-    }
-    get tileSize() {
-      return `140 120`
-    }
-    getTileBodyStumpCode() {
-      const columnName = this.getWord(1)
-      if (!columnName) return `No data for ${this.getFirstWord()}`
-      const table = this.getParentOrDummyTable()
-      const col = table.getTableColumnByName(columnName)
-      if (!col) {
-        console.log(`No column named ${columnName}`)
-        return ""
-      }
-      const reductionName = this.reductionName || this.getWord(0).split(".")[1]
-      const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
-      const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
-      return this.qFormat(this.bodyStumpTemplate, { title, number })
-    }
-  }
-
-  class showRowCountNode extends abstractShowTileNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get titleCell() {
-      return this.getWordsFrom(1)
-    }
-    get defaultTitle() {
-      return `Total rows`
-    }
-    get dummyDataSetName() {
-      return `stockPrice`
-    }
-    get tileSize() {
-      return `140 120`
-    }
-    getTileBodyStumpCode() {
-      const title = this.getWordsFrom(1).join(" ") || this.defaultTitle
-      return this.qFormat(this.bodyStumpTemplate, { title, number: this._getNumber() })
-    }
-    _getNumber() {
-      return this.getParentOrDummyTable().getRowCount()
-    }
-  }
-
-  class showColumnCountNode extends showRowCountNode {
-    get defaultTitle() {
-      return `Total columns`
-    }
-    _getNumber() {
-      return this.getParentOrDummyTable().getColumnNames().length
-    }
-  }
-
-  class showStaticNode extends abstractShowTileNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get numberCell() {
-      return parseFloat(this.getWord(1))
-    }
-    get titleCell() {
-      return this.getWordsFrom(2)
-    }
-    getTileBodyStumpCode() {
-      const title = this.getWordsFrom(2).join(" ")
-      return this.qFormat(this.bodyStumpTemplate, { title, number: this.getWord(1) || "" })
-    }
-  }
-
-  class showValueNode extends abstractShowTileNode {
-    get reductionName() {
-      return `median`
-    }
-  }
-
-  class showMedianNode extends abstractShowTileNode {}
-
-  class showSumNode extends abstractShowTileNode {}
-
-  class showMeanNode extends abstractShowTileNode {}
-
-  class showMinNode extends abstractShowTileNode {}
-
-  class showMaxNode extends abstractShowTileNode {}
-
-  class abstractVegaNode extends abstractEmptyFooterTileNode {
-    get titleCell() {
-      return this.getWordsFrom(0)
-    }
-    get bodyStumpTemplate() {
-      return `div
- class divForExternalLibrary`
-    }
-    get markName() {
-      return `bar`
-    }
-    get dummyDataSetName() {
-      return `stockPrice`
-    }
-    get tileScript() {
-      return `ohayo/packages/vega/vega.combined.min.js`
-    }
-    get tileSize() {
-      return `800 300`
-    }
-    // todo: I don't think vega handles . in column names.
-    getTileBodyStumpCode() {
-      return this.bodyStumpTemplate
-    }
-    _getColumnToField(columnName) {
-      if (!columnName) return undefined
-      const columnsMap = this.getParentOrDummyTable().getColumnsMap()
-      const col = columnsMap[columnName]
-      const obj = { field: columnName, type: col.getVegaType() }
-      if (col.isTemporal()) {
-        const timeUnit = col.getVegaTimeUnit()
-        if (timeUnit) obj.timeUnit = timeUnit
-      }
-      return obj
-    }
-    _adjustVegaSize() {
-      const adjustSize = !this.has("width")
-      if (adjustSize) {
-        const shadow = this.getStumpNode()
-          .findStumpNodeByChild("class divForExternalLibrary")
-          .getShadow()
-        this.set("width", Math.round((30 + shadow.getShadowOuterWidth()) / 20) + "")
-        this.set("height", Math.round((30 + shadow.getShadowOuterHeight()) / 20) + "")
-      }
-    }
-    _getElementForVega() {
-      return this.getStumpNode()
-        .findStumpNodeByChild("class divForExternalLibrary")
-        .getShadow()
-        .getShadowElement()
-    }
-    async _drawVega() {
-      // todo: don't rerun this if we dont need to.
-      await vegaEmbed(this._getElementForVega(), this._getVegaSpec())
-      // this._adjustVegaSize()
-    }
-    treeComponentDidUpdate() {
-      super.treeComponentDidUpdate()
-      if (this.isNodeJs()) return undefined
-      this._drawVega()
-    }
-    treeComponentDidMount() {
-      this.treeComponentDidUpdate()
-    }
-    _getVegaData() {
-      return {
-        values: this.getParentOrDummyTable()
-          .cloneNativeJavascriptTypedRows()
-          .slice(0, this._getRowDisplayLimit())
-      }
-    }
-    _getVegaTitle() {
-      return this.getContent()
-    }
-    _getVegaSpec() {
-      return {
-        description: "A simple bar chart with embedded data.",
-        data: this._getVegaData(),
-        width: this._tileWidth,
-        height: this._tileHeight,
-        mark: this._getVegaMarkObj(),
-        encoding: this._getEncodingMap(),
-        transform: this._getVegaTransform(),
-        title: this._getVegaTitle(),
-        config: this._getVegaConfig()
-      }
-    }
-    _getVegaTransform() {
-      return undefined
-    }
-    _getVegaConfig() {
-      return undefined
-    }
-    _getEncodingMap() {
-      return {}
-    }
-    // todo: add type
-    _getVegaMarkObj() {
-      return { type: this._getVegaMark(), tooltip: { content: "data" } }
-    }
-    _getVegaMark() {
-      return this.markName
-    }
-  }
-
-  class vegaBarNode extends abstractVegaNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          colorColumn: colorColumnNode,
-          shapeColumn: shapeColumnNode,
-          xColumn: xColumnNode,
-          yColumn: yColumnNode
-        }),
-        undefined
-      )
-    }
-    get columnPredictionHints() {
-      return `xColumn
-yColumn isString=false,!xColumn`
-    }
-    _getEncodingMap() {
-      const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.colorColumnKey])
-      return {
-        x: this._getColumnToField(columnNames[0]),
-        y: this._getColumnToField(columnNames[1]),
-        color: this._getColumnToField(columnNames[2])
-      }
-    }
-  }
-
-  class vegaLineNode extends vegaBarNode {
-    get markName() {
-      return `line`
-    }
-  }
-
-  class vegaAreaNode extends vegaLineNode {
-    get markName() {
-      return `area`
-    }
-  }
-
-  class vegaScatterNode extends vegaBarNode {
-    get markName() {
-      return `point`
-    }
-    _getEncodingMap() {
-      const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.colorColumnKey, this.shapeColumnKey])
-      return {
-        x: this._getColumnToField(columnNames[0]),
-        y: this._getColumnToField(columnNames[1]),
-        color: this._getColumnToField(columnNames[2]),
-        shape: this._getColumnToField(columnNames[3])
-      }
-    }
-  }
-
-  class vegaBubbleNode extends vegaScatterNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { sizeColumn: sizeColumnNode, colorColumn: colorColumnNode }),
-        undefined
-      )
-    }
-    get columnPredictionHints() {
-      return `sizeColumn isString=false
-xColumn isString=false`
-    }
-    get dummyDataSetName() {
-      return `gapMinder`
-    }
-    get markName() {
-      return `circle`
-    }
-    _getEncodingMap() {
-      const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.sizeColumnKey, this.colorColumnKey])
-      return {
-        y: {
-          field: columnNames[1],
-          type: "quantitative",
-          scale: { zero: false },
-          axis: { minExtent: 30 }
-        },
-        x: this._getColumnToField(columnNames[0]),
-        size: { field: columnNames[2], type: "quantitative" },
-        color: { value: "#000" }
-      }
-    }
-  }
-
-  class vegaEmojiNode extends vegaBarNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { yColumn: yColumnNode, emojiColumn: emojiColumnNode }),
-        undefined
-      )
-    }
-    get dummyDataSetName() {
-      return `emojis`
-    }
-    get columnPredictionHints() {
-      return `emojiColumn isString=true
-yColumn isString=false`
-    }
-    _getVegaConfig() {
-      return { view: { stroke: "" } }
-    }
-    _getVegaMark() {
-      return { type: "text", baseline: "middle" }
-    }
-    _getEncodingMap() {
-      const columnNames = this.mapSettingNamesToColumnNames([this.yColumnKey, "emoji"])
-      return {
-        x: { field: columnNames[1], type: "nominal", axis: null },
-        y: { field: columnNames[0], type: "quantitative", axis: null, sort: null },
-        text: { field: columnNames[1], type: "nominal" },
-        size: { value: 65 }
-      }
-    }
-  }
-
-  class vegaHistogramNode extends abstractVegaNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { xColumn: xColumnNode }),
-        undefined
-      )
-    }
-    get dummyDataSetName() {
-      return `wordCounts`
-    }
-    get columnPredictionHints() {
-      return `xColumn isString=false`
-    }
-    _getEncodingMap() {
-      const columnName = this.getContent() || this.mapSettingNamesToColumnNames([this.xColumnKey])[0]
-      return {
-        x: {
-          bin: true,
-          field: columnName,
-          type: "quantitative"
-        },
-        y: {
-          aggregate: "count",
-          type: "quantitative"
-        }
-      }
-    }
-  }
-
-  class vegaExampleNode extends abstractVegaNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-    get vegaExampleNameCell() {
-      return this.getWord(1)
-    }
-    _getVegaSpec() {
-      return this._spec
-    }
-    async _fetchSpec() {
-      // todo: localtesting.
-      if (this.isNodeJs()) return undefined
-      const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
-      const url = `ohayo/packages/vega/ignore/vega-lite/examples/compiled/${exampleName}.vg.json`
-      const res = await this.getWebApp()
-        .getWillowBrowser()
-        .httpGetUrl(url)
-      const spec = JSON.parse(res.text)
-      // rewrite data urls
-      spec.data.forEach(row => {
-        if (row.url) row.url = row.url.replace("data/", "packages/vega/datasets/")
-      })
-      this._spec = spec
-      return spec
-    }
-    // todo: clean this up.
-    async fetchTableInputs() {
-      const spec = await this._fetchSpec()
-      if (this.isNodeJs()) return { rows: [] }
-      const el = jQuery("<div></div>")[0]
-      const embedded = await vegaEmbed(el, spec)
-      const rows = await this._getVegaPostTransformOutputRows(spec, embedded)
-      return { rows: rows }
-    }
-    async _getVegaPostTransformOutputRows(spec, embedded) {
-      const tableName = spec.data[0] && spec.data[0].name
-      if (tableName) return embedded.view.data(tableName)
-      // const values = spec.data.values
-      // if (values && values.entries) return Array.from(values.entries())
-      // if (typeof values === "function") return []
-      // else if (values) return values
-      return []
-    }
-  }
-
-  class calendarHeatNode extends abstractHeaderlessChartTileNode {
+  class calendarHeatNode extends abstractChartNode {
     createParser() {
       return new jtree.TreeNode.Parser(
         undefined,
@@ -27401,260 +26876,58 @@ ${quinSvgs}
     }
   }
 
-  class iconsIconNode extends abstractHeaderlessChartTileNode {}
-
-  class iconsHumanNode extends iconsIconNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { genderColumn: genderColumnNode, headSize: headSizeNode }),
-        undefined
-      )
+  class challengePlayNode extends abstractChartNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
     }
-    get dummyDataSetName() {
-      return `patients`
+    get challengeIdCell() {
+      return parseInt(this.getWord(1))
     }
-    get bodyStumpTemplate() {
-      return `div
- bern
-  {bern}`
-    }
-    get columnPredictionHints() {
-      return `headSize isString=false
-genderColumn isString=true`
-    }
-    getTileBodyStumpCode() {
-      // Now, what if there is no input table?
-      const table = this.getParentOrDummyTable()
-      const rows = table.getRows()
-      // Now, what if we are using dummy input table?
-      const headSizeColumn = this.getSettingsStruct().headSize
-      const genderColumn = this.getSettingsStruct().genderColumn
-      const reducts = table.getColumnByName(headSizeColumn).getReductions()
-      const headColMax = reducts.max
-      const bern = rows
-        .map(row => {
-          const typedRow = row.rowToObjectWithOnlyNativeJavascriptTypes()
-          const value = typedRow[headSizeColumn]
-          // TODO: ADD TYPINGS
-          const genderVal = typedRow[genderColumn].toLowerCase()
-          const gender = genderVal === "male" ? "blue" : "pink"
-          let character = "O"
-          let percent = value / headColMax
-          if (isNaN(value)) {
-            character = "x"
-            percent = reducts.median / headColMax
-          }
-          const title = row.getHoverTitle()
-          percent = Math.round(18 * percent)
-          return `<span title="${title}" style="font-size:${percent}px; color:${gender};">${character}</span>`
-        })
-        .join(" ")
-      return this.qFormat(this.bodyStumpTemplate, { bern: bern })
-    }
-  }
-
-  class iconsCircleNode extends iconsIconNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { radius: radiusNode }),
-        undefined
-      )
-    }
-    get bodyStumpTemplate() {
-      return `div
- bern
-  {bern}`
-    }
-    get dummyDataSetName() {
-      return `playerGoals`
-    }
-    get columnPredictionHints() {
-      return `radius isString=false`
-    }
-    getTileBodyStumpCode() {
-      const column = this.getSettingsStruct().radius
-      const bern = this.getParentOrDummyTable()
-        .getRows()
-        .map(row => `<span style="font-size:${row.rowToObjectWithOnlyNativeJavascriptTypes()[column] / 3}em;">O</span>`)
-        .join(" ")
-      return this.qFormat(this.bodyStumpTemplate, { bern: bern })
-    }
-  }
-
-  class markdownToHtmlNode extends abstractHeaderlessChartTileNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
-        undefined
-      )
-    }
-    get dummyDataSetName() {
-      return `markdown`
+    get challengeAnswerCell() {
+      return this.getWordsFrom(2).map(val => parseFloat(val))
     }
     get tileSize() {
-      return `400 400`
+      return `640 240`
     }
-    get bodyStumpTemplate() {
-      return `div
+    getProgramTemplate(id) {
+      const challengeNode = this._getChallengeNode(parseInt(id))
+      return {
+        template: challengeNode.getNode("solution").childrenToString(),
+        name: "challenge-" + id + "-solution.ohayo"
+      }
+    }
+    _getChallengeNode(challengeId) {
+      const challenges =
+        typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("ohayo/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
+      return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
+    }
+    getTileBodyStumpCode() {
+      const challengeId = parseInt(this.getWord(1))
+      const answer = this.getWord(2)
+      const challengeNode = this._getChallengeNode(challengeId)
+      const isCorrect = answer === challengeNode.get("answer")
+      const theme = this.getTheme()
+      const color = answer ? (isCorrect ? theme.successColor : theme.errorColor) : theme.warningColor
+      const answerMessage = answer !== undefined ? (isCorrect ? "CORRECT!" : "Wrong.") : ""
+      return `h3 Challenge #${challengeId}
+ style color:${color}
+br
+div ${challengeNode.evalTemplateString(`Question: {question}`)}
  class TileSelectable
- bern
-  {md}`
-    }
-    getTileBodyStumpCode() {
-      return this.qFormat(this.bodyStumpTemplate, { md: marked(this.getPipishInput()) })
-    }
-  }
-
-  class treenotationOutlineNode extends abstractHeaderlessChartTileNode {
-    get bodyStumpTemplate() {
-      return `pre
- style overflow: scroll; width: 100%; height: 100%; margin: 0; box-sizing: border-box; font-family: monospace; line-height: 13px;
- bern
-  {bern}`
-    }
-    get tileSize() {
-      return `800 500`
-    }
-    get dummyDataSetName() {
-      return `outerSpace`
-    }
-    _getTheBern() {
-      return new jtree.TreeNode(this.getPipishInput()).toOutline()
-    }
-    getTileBodyStumpCode() {
-      return this.qFormat(this.bodyStumpTemplate, { bern: this._getTheBern() })
-    }
-  }
-
-  class treenotationDotlineNode extends treenotationOutlineNode {
-    get dummyDataSetName() {
-      return `outerSpace`
-    }
-    get dots() {
-      return true
-    }
-    _getTheBern() {
-      return new jtree.TreeNode(this.getPipishInput()).toMappedOutline(
-        node =>
-          "o" +
-          node
-            .getLine()
-            .split(" ")
-            .map(word => "º")
-            .join("")
-      )
-    }
-  }
-
-  class abstractTextNode extends abstractChartNode {
-    createParser() {
-      return new jtree.TreeNode.Parser(
-        undefined,
-        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
-        undefined
-      )
-    }
-    get stringCell() {
-      return this.getWordsFrom(0)
-    }
-    get bodyStumpTemplate() {
-      return `div
- class TileSelectable
- bern
-  {content}`
-    }
-    getTileBodyStumpCode() {
-      return this.qFormat(this.bodyStumpTemplate, { content: this.content ? jtree.Utils.linkify(this.content) : "" })
-    }
-  }
-
-  class abstractInstructionsNode extends abstractTextNode {
-    get content() {
-      return `Instructions go here.`
-    }
-    get tileSize() {
-      return `600 240`
-    }
-  }
-
-  class amazonHistoryNode extends abstractInstructionsNode {
-    get dummyDataSetName() {
-      return `amazonPurchases`
-    }
-    get content() {
-      return `Step 1. Go to https://www.amazon.com/gp/b2b/reports to download your Amazon order history.<br> Step 2. Add the data here.`
-    }
-  }
-
-  class fitbitAllNode extends abstractInstructionsNode {
-    get content() {
-      return `Step 1. Go to <a target="_blank" href="https://www.fitbit.com/settings/data/export">https://www.fitbit.com/settings/data/export</a> to download your Fitbit data.<br> Step 2. Drop the CSV onto this page.`
-    }
-  }
-
-  class abstractComingSoonNode extends abstractTextNode {
-    get content() {
-      return `Instructions go here.`
-    }
-    get tileSize() {
-      return `600 240`
-    }
-  }
-
-  class datawrapperComingSoonNode extends abstractComingSoonNode {
-    get content() {
-      return `We don't have support yet for https://www.datawrapper.de/`
-    }
-  }
-
-  class dcjsComingSoonNode extends abstractComingSoonNode {
-    get content() {
-      return `We don't have support yet for https://github.com/dc-js/dc.js`
-    }
-  }
-
-  class finosPerspectiveComingSoonNode extends abstractComingSoonNode {
-    get content() {
-      return `We don't have support yet for https://perspective.finos.org/`
-    }
-  }
-
-  class fivethirtyeightComingSoonNode extends abstractComingSoonNode {
-    get content() {
-      return `We don't have support yet for https://github.com/fivethirtyeight/data/`
-    }
-  }
-
-  class GovNode extends abstractComingSoonNode {
-    get content() {
-      return `We don't have support yet for https://www.data.gov/`
-    }
-  }
-
-  class highchartsComingSoonNode extends abstractComingSoonNode {
-    get content() {
-      return `We don't have support yet for https://www.highcharts.com/blog/snippets/3d-solar-system/`
-    }
-  }
-
-  class re3dataComingSoonNode extends abstractComingSoonNode {
-    get content() {
-      return `We don't have support yet for https://www.re3data.org/`
-    }
-  }
-
-  class zingComingSoonNode extends abstractComingSoonNode {
-    get content() {
-      return `We don't have support yet for https://www.zingchart.com/`
-    }
-  }
-
-  class editorHelloWorldNode extends abstractTextNode {
-    get content() {
-      return `Ohayo world!`
+br
+input
+ placeholder Enter your answer here. All answers are a number.
+ value ${answer !== undefined ? answer : ""}
+ style width: 300px;
+ name 2
+ changeCommand changeWordAndRenderCommand
+span ${answerMessage}
+ style color: ${color};
+br
+div
+ a See a solution
+  clickCommand createProgramFromTemplateCommand
+  value ${challengeId}`
     }
   }
 
@@ -27696,14 +26969,26 @@ So some tiles will have characterLimit, rowDisplayLimit, et cetera. And have "sp
 
   class debugCommandsNode extends abstractChartNode {
     get bodyStumpTemplate() {
-      return `a Run Speed Test on all Files in Working Directory
- clickCommand _runSpeedTestCommand
+      return `a Run Speed Test on all Templates
+ clickCommand _runTemplateSpeedTestCommand
+br
+a Open all Templates Command
+ clickCommand _openAllTemplatesCommand
 br
 a Run Tile Quality Check
  clickCommand _doTileQualityCheckCommand`
     }
     getTileBodyStumpCode() {
       return this.bodyStumpTemplate
+    }
+    _runTemplateSpeedTestCommand() {
+      return this.getWebApp()._runTemplateSpeedTestCommand()
+    }
+    _openAllTemplatesCommand() {
+      return this.getWebApp()._openAllTemplatesCommand()
+    }
+    _doTileQualityCheckCommand() {
+      return this.getWebApp()._doTileQualityCheckCommand()
     }
   }
 
@@ -27765,6 +27050,92 @@ a Run Tile Quality Check
     }
     treeComponentDidUpdate() {
       this._throwIfMethodNameIs("treeComponentDidUpdate")
+    }
+  }
+
+  class dtjsBasicNode extends abstractChartNode {
+    get rowStumpTemplate() {
+      return `tr
+ {cols}`
+    }
+    get cellStumpTemplate() {
+      return `td
+ bern
+  {box}`
+    }
+    get bodyStumpTemplate() {
+      return `div
+table
+ class DataTable
+ thead
+  tr
+   {headerRows}
+ tbody
+  {rows}`
+    }
+    get tileScript() {
+      return `ohayo/packages/dtjs/datatables.min.js`
+    }
+    get tileCssScript() {
+      return `ohayo/packages/dtjs/datatables.min.css`
+    }
+    get tileSize() {
+      return `1200 500`
+    }
+    getTileBodyStumpCode() {
+      const columnDefs = this.getParentOrDummyTable()
+        .getColumnsArray()
+        .slice(0, 10)
+      const headerRows = this._getHeaderRowsStumpCode(columnDefs.map(col => col.getColumnName()))
+      const rows = this._getTableRowsStumpCode(columnDefs)
+      return this.qFormat(this.bodyStumpTemplate, { headerRows, rows })
+    }
+    _getHeaderRowsStumpCode(columns) {
+      return columns.map(colName => `th ${colName}`).join("\n")
+    }
+    _getTableRowsStumpCode(columns) {
+      return this.getRowsWithRowDisplayLimit()
+        .slice(0, 10)
+        .map((row, index) => {
+          const cols = columns
+            .map(column => {
+              const box = row.getRowHtmlSafeValue(column.getColumnName()) // todo: cache?
+              return this.qFormat(this.cellStumpTemplate, { box })
+            })
+            .join("\n")
+          return this.qFormat(this.cellStumpTemplate, { cols })
+        })
+        .join("\n")
+    }
+    treeComponentWillUnmount() {
+      // cleanup
+    }
+    treeComponentDidUpdate() {
+      super.treeComponentDidUpdate()
+      const table = this.getParentOrDummyTable()
+      const columnDefs = this.getParentOrDummyTable()
+        .getColumnsArray()
+        .slice(0, 10)
+      const container = this.getStumpNode().findStumpNodeByChild("class DataTable")
+      if (this.isNodeJs()) return undefined
+      const width = this._tileWidth
+      const height = this._tileHeight
+      const shadow = container.getShadow()
+      const el = shadow.getShadowElement()
+      shadow.setShadowCss({ width, height })
+      const rows = this.getRowsWithRowDisplayLimit()
+      // todo: note, this is only works with jQuery
+      jQuery.fn.dataTable.ext.errMode = "throw"
+      this._dataTables = jQuery(el).DataTable({
+        data: this.getRowsAsDataTableArrayWithHeader(rows, columnDefs.map(col => col.getColumnName())).slice(1),
+        pageLength: 10,
+        scrollY: height
+        //"scrollCollapse": true,
+        //"paging": false
+      })
+    }
+    treeComponentDidMount() {
+      this.treeComponentDidUpdate()
     }
   }
 
@@ -27913,6 +27284,242 @@ a Run Tile Quality Check
     }
   }
 
+  class abstractHtmlNode extends abstractChartNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { style: styleNode, content: contentNode }),
+        undefined
+      )
+    }
+    get htmlCell() {
+      return this.getWordsFrom(0)
+    }
+    get bodyStumpTemplate() {
+      return `{tag}
+ {style}
+ {src}
+ bern
+  {content}`
+    }
+    get hakonTemplate() {
+      return `.abstractHtmlNode
+ code
+  user-select text`
+    }
+    getTileFooterStumpCode() {
+      return this.getTileMenuButtonStumpCode()
+    }
+    async fetchTableInputs() {
+      return { rows: [{ text: this.getHtmlContent() }] }
+    }
+    getHtmlContent() {
+      return this.getWordsFrom(2).join(" ") || "No html content to show."
+    }
+    getTag() {
+      return this.getWord(1) || "div" // todo: verify this is legal tag.
+    }
+    getSrc() {
+      return this.getSettingsStruct().src
+    }
+    getTileBodyStumpCode() {
+      return this.qFormat(this.bodyStumpTemplate, {
+        tag: this.getTag(),
+        style: this.style ? `style ${this.style}` : "",
+        src: this.getSrc() ? `src ${this.getSrc()}` : "",
+        content: this.getHtmlContent() || ""
+      })
+    }
+  }
+
+  class htmlTextNode extends abstractHtmlNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get htmlTextTagCell() {
+      return this.getWord(1)
+    }
+    get htmlCell() {
+      return this.getWordsFrom(2)
+    }
+  }
+
+  class htmlPrintAsNode extends abstractHtmlNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get htmlTextTagCell() {
+      return this.getWord(1)
+    }
+    getHtmlContent() {
+      return this.getPipishInput()
+    }
+  }
+
+  class abstractHTMLFixedTagTileNode extends abstractHtmlNode {
+    getHtmlContent() {
+      return this.getContent()
+    }
+    getTag() {
+      return this.htmlTagName
+    }
+  }
+
+  class htmlH1Node extends abstractHTMLFixedTagTileNode {
+    get htmlCell() {
+      return this.getWordsFrom(0)
+    }
+    get style() {
+      return `text-align:center;`
+    }
+    get htmlTagName() {
+      return `h1`
+    }
+    get tileSize() {
+      return `600 75`
+    }
+  }
+
+  class abstractHTMLContentIsSrcTileNode extends abstractHTMLFixedTagTileNode {
+    getHtmlContent() {
+      return ""
+    }
+    getSrc() {
+      return this.getContent() || super.getSrc()
+    }
+  }
+
+  class htmlImgNode extends abstractHTMLContentIsSrcTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get urlCell() {
+      return this.getWord(1)
+    }
+    get style() {
+      return `width:100%;`
+    }
+    get htmlTagName() {
+      return `img`
+    }
+  }
+
+  class htmlIframeNode extends abstractHTMLContentIsSrcTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get urlCell() {
+      return this.getWord(1)
+    }
+    get htmlTagName() {
+      return `iframe`
+    }
+  }
+
+  class htmlCustomNode extends abstractChartNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
+        undefined
+      )
+    }
+    get bodyStumpTemplate() {
+      return `div
+ bern
+  {content}`
+    }
+    getTileBodyStumpCode() {
+      // https://meta.stackexchange.com/questions/1777/what-html-tags-are-allowed-on-stack-exchange-sites
+      // todo: sanitize tags
+      const contentNode = this.getNode("content")
+      const content = contentNode ? contentNode.childrenToString() : "No HTML content to show"
+      return this.qFormat(this.bodyStumpTemplate, { content })
+    }
+  }
+
+  class iconsIconNode extends abstractChartNode {}
+
+  class iconsHumanNode extends iconsIconNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { genderColumn: genderColumnNode, headSize: headSizeNode }),
+        undefined
+      )
+    }
+    get dummyDataSetName() {
+      return `patients`
+    }
+    get bodyStumpTemplate() {
+      return `div
+ bern
+  {bern}`
+    }
+    get columnPredictionHints() {
+      return `headSize isString=false
+genderColumn isString=true`
+    }
+    getTileBodyStumpCode() {
+      // Now, what if there is no input table?
+      const table = this.getParentOrDummyTable()
+      const rows = table.getRows()
+      // Now, what if we are using dummy input table?
+      const headSizeColumn = this.getSettingsStruct().headSize
+      const genderColumn = this.getSettingsStruct().genderColumn
+      const reducts = table.getColumnByName(headSizeColumn).getReductions()
+      const headColMax = reducts.max
+      const bern = rows
+        .map(row => {
+          const typedRow = row.rowToObjectWithOnlyNativeJavascriptTypes()
+          const value = typedRow[headSizeColumn]
+          // TODO: ADD TYPINGS
+          const genderVal = typedRow[genderColumn].toLowerCase()
+          const gender = genderVal === "male" ? "blue" : "pink"
+          let character = "O"
+          let percent = value / headColMax
+          if (isNaN(value)) {
+            character = "x"
+            percent = reducts.median / headColMax
+          }
+          const title = row.getHoverTitle()
+          percent = Math.round(18 * percent)
+          return `<span title="${title}" style="font-size:${percent}px; color:${gender};">${character}</span>`
+        })
+        .join(" ")
+      return this.qFormat(this.bodyStumpTemplate, { bern: bern })
+    }
+  }
+
+  class iconsCircleNode extends iconsIconNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { radius: radiusNode }),
+        undefined
+      )
+    }
+    get bodyStumpTemplate() {
+      return `div
+ bern
+  {bern}`
+    }
+    get dummyDataSetName() {
+      return `playerGoals`
+    }
+    get columnPredictionHints() {
+      return `radius isString=false`
+    }
+    getTileBodyStumpCode() {
+      const column = this.getSettingsStruct().radius
+      const bern = this.getParentOrDummyTable()
+        .getRows()
+        .map(row => `<span style="font-size:${row.rowToObjectWithOnlyNativeJavascriptTypes()[column] / 3}em;">O</span>`)
+        .join(" ")
+      return this.qFormat(this.bodyStumpTemplate, { bern: bern })
+    }
+  }
+
   class listBasicNode extends abstractChartNode {
     createParser() {
       return new jtree.TreeNode.Parser(
@@ -27991,6 +27598,142 @@ link isLink`
     }
   }
 
+  class markdownToHtmlNode extends abstractChartNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { content: contentNode }),
+        undefined
+      )
+    }
+    get dummyDataSetName() {
+      return `markdown`
+    }
+    get tileSize() {
+      return `400 400`
+    }
+    get bodyStumpTemplate() {
+      return `div
+ class TileSelectable
+ bern
+  {md}`
+    }
+    getTileBodyStumpCode() {
+      return this.qFormat(this.bodyStumpTemplate, { md: marked(this.getPipishInput()) })
+    }
+  }
+
+  class abstractShowTileNode extends abstractChartNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get columnNameCell() {
+      return this.getWord(1)
+    }
+    get titleCell() {
+      return this.getWordsFrom(2)
+    }
+    get bodyStumpTemplate() {
+      return `h6 {title}
+h3 {number}`
+    }
+    get hakonTemplate() {
+      return `.abstractShowTileNode
+ h3
+  text-align center
+ h6
+  text-align center
+  height 40px
+  overflow hidden`
+    }
+    get dummyDataSetName() {
+      return `stockPrice`
+    }
+    get tileSize() {
+      return `140 120`
+    }
+    getTileBodyStumpCode() {
+      const columnName = this.getWord(1)
+      if (!columnName) return `No data for ${this.getFirstWord()}`
+      const table = this.getParentOrDummyTable()
+      const col = table.getTableColumnByName(columnName)
+      if (!col) {
+        console.log(`No column named ${columnName}`)
+        return ""
+      }
+      const reductionName = this.reductionName || this.getWord(0).split(".")[1]
+      const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
+      const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
+      return this.qFormat(this.bodyStumpTemplate, { title, number })
+    }
+  }
+
+  class showRowCountNode extends abstractShowTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get titleCell() {
+      return this.getWordsFrom(1)
+    }
+    get defaultTitle() {
+      return `Total rows`
+    }
+    get dummyDataSetName() {
+      return `stockPrice`
+    }
+    get tileSize() {
+      return `140 120`
+    }
+    getTileBodyStumpCode() {
+      const title = this.getWordsFrom(1).join(" ") || this.defaultTitle
+      return this.qFormat(this.bodyStumpTemplate, { title, number: this._getNumber() })
+    }
+    _getNumber() {
+      return this.getParentOrDummyTable().getRowCount()
+    }
+  }
+
+  class showColumnCountNode extends showRowCountNode {
+    get defaultTitle() {
+      return `Total columns`
+    }
+    _getNumber() {
+      return this.getParentOrDummyTable().getColumnNames().length
+    }
+  }
+
+  class showStaticNode extends abstractShowTileNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get numberCell() {
+      return parseFloat(this.getWord(1))
+    }
+    get titleCell() {
+      return this.getWordsFrom(2)
+    }
+    getTileBodyStumpCode() {
+      const title = this.getWordsFrom(2).join(" ")
+      return this.qFormat(this.bodyStumpTemplate, { title, number: this.getWord(1) || "" })
+    }
+  }
+
+  class showValueNode extends abstractShowTileNode {
+    get reductionName() {
+      return `median`
+    }
+  }
+
+  class showMedianNode extends abstractShowTileNode {}
+
+  class showSumNode extends abstractShowTileNode {}
+
+  class showMeanNode extends abstractShowTileNode {}
+
+  class showMinNode extends abstractShowTileNode {}
+
+  class showMaxNode extends abstractShowTileNode {}
+
   class tablesBasicNode extends abstractChartNode {
     createParser() {
       return new jtree.TreeNode.Parser(
@@ -27998,9 +27741,6 @@ link isLink`
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { columnLimit: columnLimitNode }),
         undefined
       )
-    }
-    get titleCell() {
-      return this.getWordsFrom(0)
     }
     get bodyStumpTemplate() {
       return `div
@@ -28066,13 +27806,7 @@ link isLink`
   cursor pointer
   background-color {lightGrey}
   border 1px solid {lineColor}
-  border-bottom-color {greyish}
- input,textarea
-  border 0
-  font-size 14px
-  box-sizing border-box
-  padding 0
-  font-family {fonts}`
+  border-bottom-color {greyish}`
     }
     get customBodyStyle() {
       return `padding:0px;`
@@ -28085,9 +27819,6 @@ link isLink`
     }
     get rowDisplayLimit() {
       return 100
-    }
-    getTileHeaderBern() {
-      return this.getContent() || super.getTileHeaderBern()
     }
     _getTableRowsStumpCode(columns) {
       return this.getRowsWithRowDisplayLimit()
@@ -28341,6 +28072,337 @@ class visjs`
     }
   }
 
+  class treenotationOutlineNode extends abstractChartNode {
+    get bodyStumpTemplate() {
+      return `pre
+ style overflow: scroll; width: 100%; height: 100%; margin: 0; box-sizing: border-box; font-family: monospace; line-height: 13px;
+ bern
+  {bern}`
+    }
+    get tileSize() {
+      return `800 500`
+    }
+    get dummyDataSetName() {
+      return `outerSpace`
+    }
+    _getTheBern() {
+      return new jtree.TreeNode(this.getPipishInput()).toOutline()
+    }
+    getTileBodyStumpCode() {
+      return this.qFormat(this.bodyStumpTemplate, { bern: this._getTheBern() })
+    }
+  }
+
+  class treenotationDotlineNode extends treenotationOutlineNode {
+    get dummyDataSetName() {
+      return `outerSpace`
+    }
+    get dots() {
+      return true
+    }
+    _getTheBern() {
+      return new jtree.TreeNode(this.getPipishInput()).toMappedOutline(
+        node =>
+          "o" +
+          node
+            .getLine()
+            .split(" ")
+            .map(word => "º")
+            .join("")
+      )
+    }
+  }
+
+  class abstractVegaNode extends abstractChartNode {
+    get titleCell() {
+      return this.getWordsFrom(0)
+    }
+    get bodyStumpTemplate() {
+      return `div
+ class divForExternalLibrary`
+    }
+    get markName() {
+      return `bar`
+    }
+    get dummyDataSetName() {
+      return `stockPrice`
+    }
+    get tileScript() {
+      return `ohayo/packages/vega/vega.combined.min.js`
+    }
+    get tileSize() {
+      return `800 300`
+    }
+    // todo: I don't think vega handles . in column names.
+    getTileBodyStumpCode() {
+      return this.bodyStumpTemplate
+    }
+    _getColumnToField(columnName) {
+      if (!columnName) return undefined
+      const columnsMap = this.getParentOrDummyTable().getColumnsMap()
+      const col = columnsMap[columnName]
+      const obj = { field: columnName, type: col.getVegaType() }
+      if (col.isTemporal()) {
+        const timeUnit = col.getVegaTimeUnit()
+        if (timeUnit) obj.timeUnit = timeUnit
+      }
+      return obj
+    }
+    _getElementForVega() {
+      return this.getStumpNode()
+        .findStumpNodeByChild("class divForExternalLibrary")
+        .getShadow()
+        .getShadowElement()
+    }
+    async _drawVega() {
+      // todo: don't rerun this if we dont need to.
+      await vegaEmbed(this._getElementForVega(), this._getVegaSpec())
+    }
+    treeComponentDidUpdate() {
+      super.treeComponentDidUpdate()
+      if (this.isNodeJs()) return undefined
+      this._drawVega()
+    }
+    treeComponentDidMount() {
+      this.treeComponentDidUpdate()
+    }
+    _getVegaData() {
+      return {
+        values: this.getParentOrDummyTable()
+          .cloneNativeJavascriptTypedRows()
+          .slice(0, this._getRowDisplayLimit())
+      }
+    }
+    _getVegaTitle() {
+      return this.getContent()
+    }
+    _getVegaSpec() {
+      return {
+        description: "A simple bar chart with embedded data.",
+        data: this._getVegaData(),
+        width: this._tileWidth,
+        height: this._tileHeight,
+        mark: this._getVegaMarkObj(),
+        encoding: this._getEncodingMap(),
+        transform: this._getVegaTransform(),
+        title: this._getVegaTitle(),
+        config: this._getVegaConfig()
+      }
+    }
+    _getVegaTransform() {
+      return undefined
+    }
+    _getVegaConfig() {
+      return undefined
+    }
+    _getEncodingMap() {
+      return {}
+    }
+    // todo: add type
+    _getVegaMarkObj() {
+      return { type: this._getVegaMark(), tooltip: { content: "data" } }
+    }
+    _getVegaMark() {
+      return this.markName
+    }
+  }
+
+  class vegaBarNode extends abstractVegaNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
+          colorColumn: colorColumnNode,
+          shapeColumn: shapeColumnNode,
+          xColumn: xColumnNode,
+          yColumn: yColumnNode
+        }),
+        undefined
+      )
+    }
+    get columnPredictionHints() {
+      return `xColumn
+yColumn isString=false,!xColumn`
+    }
+    _getEncodingMap() {
+      const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.colorColumnKey])
+      return {
+        x: this._getColumnToField(columnNames[0]),
+        y: this._getColumnToField(columnNames[1]),
+        color: this._getColumnToField(columnNames[2])
+      }
+    }
+  }
+
+  class vegaLineNode extends vegaBarNode {
+    get markName() {
+      return `line`
+    }
+  }
+
+  class vegaAreaNode extends vegaLineNode {
+    get markName() {
+      return `area`
+    }
+  }
+
+  class vegaScatterNode extends vegaBarNode {
+    get markName() {
+      return `point`
+    }
+    _getEncodingMap() {
+      const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.colorColumnKey, this.shapeColumnKey])
+      return {
+        x: this._getColumnToField(columnNames[0]),
+        y: this._getColumnToField(columnNames[1]),
+        color: this._getColumnToField(columnNames[2]),
+        shape: this._getColumnToField(columnNames[3])
+      }
+    }
+  }
+
+  class vegaBubbleNode extends vegaScatterNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { sizeColumn: sizeColumnNode, colorColumn: colorColumnNode }),
+        undefined
+      )
+    }
+    get columnPredictionHints() {
+      return `sizeColumn isString=false
+xColumn isString=false`
+    }
+    get dummyDataSetName() {
+      return `gapMinder`
+    }
+    get markName() {
+      return `circle`
+    }
+    _getEncodingMap() {
+      const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.sizeColumnKey, this.colorColumnKey])
+      return {
+        y: {
+          field: columnNames[1],
+          type: "quantitative",
+          scale: { zero: false },
+          axis: { minExtent: 30 }
+        },
+        x: this._getColumnToField(columnNames[0]),
+        size: { field: columnNames[2], type: "quantitative" },
+        color: { value: "#000" }
+      }
+    }
+  }
+
+  class vegaEmojiNode extends vegaBarNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { yColumn: yColumnNode, emojiColumn: emojiColumnNode }),
+        undefined
+      )
+    }
+    get dummyDataSetName() {
+      return `emojis`
+    }
+    get columnPredictionHints() {
+      return `emojiColumn isString=true
+yColumn isString=false`
+    }
+    _getVegaConfig() {
+      return { view: { stroke: "" } }
+    }
+    _getVegaMark() {
+      return { type: "text", baseline: "middle" }
+    }
+    _getEncodingMap() {
+      const columnNames = this.mapSettingNamesToColumnNames([this.yColumnKey, "emoji"])
+      return {
+        x: { field: columnNames[1], type: "nominal", axis: null },
+        y: { field: columnNames[0], type: "quantitative", axis: null, sort: null },
+        text: { field: columnNames[1], type: "nominal" },
+        size: { value: 65 }
+      }
+    }
+  }
+
+  class vegaHistogramNode extends abstractVegaNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { xColumn: xColumnNode }),
+        undefined
+      )
+    }
+    get dummyDataSetName() {
+      return `wordCounts`
+    }
+    get columnPredictionHints() {
+      return `xColumn isString=false`
+    }
+    _getEncodingMap() {
+      const columnName = this.getContent() || this.mapSettingNamesToColumnNames([this.xColumnKey])[0]
+      return {
+        x: {
+          bin: true,
+          field: columnName,
+          type: "quantitative"
+        },
+        y: {
+          aggregate: "count",
+          type: "quantitative"
+        }
+      }
+    }
+  }
+
+  class vegaExampleNode extends abstractVegaNode {
+    get tileKeywordCell() {
+      return this.getWord(0)
+    }
+    get vegaExampleNameCell() {
+      return this.getWord(1)
+    }
+    _getVegaSpec() {
+      return this._spec
+    }
+    async _fetchSpec() {
+      // todo: localtesting.
+      if (this.isNodeJs()) return undefined
+      const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
+      const url = `ohayo/packages/vega/ignore/vega-lite/examples/compiled/${exampleName}.vg.json`
+      const res = await this.getWebApp()
+        .getWillowBrowser()
+        .httpGetUrl(url)
+      const spec = JSON.parse(res.text)
+      // rewrite data urls
+      spec.data.forEach(row => {
+        if (row.url) row.url = row.url.replace("data/", "packages/vega/datasets/")
+      })
+      this._spec = spec
+      return spec
+    }
+    // todo: clean this up.
+    async fetchTableInputs() {
+      const spec = await this._fetchSpec()
+      if (this.isNodeJs()) return { rows: [] }
+      const el = jQuery("<div></div>")[0]
+      const embedded = await vegaEmbed(el, spec)
+      const rows = await this._getVegaPostTransformOutputRows(spec, embedded)
+      return { rows: rows }
+    }
+    async _getVegaPostTransformOutputRows(spec, embedded) {
+      const tableName = spec.data[0] && spec.data[0].name
+      if (tableName) return embedded.view.data(tableName)
+      // const values = spec.data.values
+      // if (values && values.entries) return Array.from(values.entries())
+      // if (typeof values === "function") return []
+      // else if (values) return values
+      return []
+    }
+  }
+
   class DidYouMeanTileNode extends abstractTileTreeComponentNode {
     get bodyStumpTemplate() {
       return `div
@@ -28371,9 +28433,6 @@ class visjs`
     getErrors() {
       return [new jtree.UnknownNodeTypeError(this)]
     }
-    getTileHeaderBern() {
-      return ""
-    }
   }
 
   class abstractDocTileNode extends abstractTileTreeComponentNode {
@@ -28385,26 +28444,16 @@ class visjs`
  class {classes}
  id {id}
  div
-  class TileHeaderGrabber
- div
-  class TileBody HeaderLess
+  class TileBody
   {body}
  div
   class TileFooter
-  {footer}
- div
-  class TileFooterGrabber`
+  {footer}`
     }
     get bodyStumpTemplate() {
       return `{tagName}
  bern
   {content}`
-    }
-    get headerHeight() {
-      return 0
-    }
-    get footerHeight() {
-      return 0
     }
     _getBody() {
       return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
@@ -28497,93 +28546,6 @@ class visjs`
 
   class docToolingNode extends docCommentNode {}
 
-  class abstractPickerTileNode extends abstractTileTreeComponentNode {
-    get tileHeader() {
-      return `Gallery`
-    }
-    get categoryBreakStumpTemplate() {
-      return `div {category}
- class PickerCategory`
-    }
-    get itemStumpTemplate() {
-      return `{categoryBreak}
-a {name}
- br
-  span {description}
- title {description}
- tabindex -1
- value {value}
- clickCommand {command}`
-    }
-    get hakonTemplate() {
-      return `.PickerTileNode
- .PickerCategory
-  width 100%
-  margin-top 20px
-  text-align center
- .TileBody
-  display flex
-  flex-flow row wrap
-  a
-   &:hover
-    background-color {borderColor}
-   padding 10px
-   margin 5px
-   height 30px
-   background-color {backgroundColor}
-   border 1px solid {borderColor}
-   overflow hidden
-   text-align center
-   text-overflow ellipsis
-   font-size 14px
-   width 120px
-   span
-    font-size 70%`
-    }
-    get needsData() {
-      return false
-    }
-    get tileSize() {
-      return `480 420`
-    }
-    async fetchTableInputs() {
-      return { rows: this.getChoices().map(obj => obj.toObject()) }
-    }
-    getTileBodyStumpCode() {
-      let lastCat = ""
-      return this.getChoices()
-        .map(choice => {
-          choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
-          lastCat = choice.category
-          return this.qFormat(this.itemStumpTemplate, choice)
-        })
-        .join("\n")
-    }
-    getTileHeaderBern() {
-      return this.tileHeader
-    }
-  }
-
-  class PickerTileNode extends abstractPickerTileNode {
-    get tileHeader() {
-      return `Tile Gallery`
-    }
-    getChoices() {
-      const allChoices = this.getRootNode()
-        .getHandGrammarProgram()
-        .getTopNodeTypeDefinitions()
-      const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(OhayoConstants.noPicker))
-      const theChoices = filteredChoices.length ? filteredChoices : allChoices
-      return theChoices.map(nodeDefinition => {
-        const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
-        const name = nodeId.split(".")[1] || ""
-        const category = lodash.upperFirst(nodeId.split(".")[0])
-        const description = nodeDefinition.getDescription()
-        return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
-      })
-    }
-  }
-
   class abstractProviderNode extends abstractTileTreeComponentNode {
     get tileFooterTemplate() {
       return `span Rows Out: {outputCount} Columns Out: {columnCount} Time: {time}s Parser: {parserId} {errorMessageHtml}
@@ -28594,15 +28556,11 @@ a {name}
  class {classes}
  id {id}
  div
-  class TileHeaderGrabber
- div
-  class TileBody HeaderLess
+  class TileBody
   {body}
  div
   class TileFooter
-  {footer}
- div
-  class TileFooterGrabber`
+  {footer}`
     }
     get tileSize() {
       return `140 60`
@@ -30611,17 +30569,13 @@ class LargeLabel`
       return `140 120`
     }
     getRowClass() {
+      // todo: remove?
       class FileRow extends Row {
         destroyRow(app) {
           return app.deleteFileCommand(this.getRowOriginalValue("link"))
         }
       }
       return FileRow
-    }
-    getTileHeaderBern() {
-      return this.getWebApp()
-        .getDefaultDisk()
-        .getPathBase()
     }
     async fetchTableInputs() {
       const files = await this.getWebApp()
@@ -30756,107 +30710,6 @@ class LargeLabel`
     }
     async fetchTableInputs() {
       return new TableParser().parseTableInputsFromString(this.getDataContent(), this.getParserId())
-    }
-  }
-
-  class abstractTemplatePickerTileNode extends abstractProviderNode {
-    get tileHeader() {
-      return `Gallery`
-    }
-    get categoryBreakStumpTemplate() {
-      return `div {category}
- class PickerCategory`
-    }
-    get itemStumpTemplate() {
-      return `{categoryBreak}
-a {name}
- br
-  span {description}
- title {description}
- tabindex -1
- value {value}
- class pickerItemButton
- clickCommand {command}`
-    }
-    get hakonTemplate() {
-      return `.abstractTemplatePickerTileNode
- .PickerCategory
-  width 100%
-  margin-top 20px
-  text-align center
- .TileBody
-  display flex
-  flex-flow row wrap
-  a
-   &:hover
-    background-color {borderColor}
-   padding 10px
-   margin 5px
-   height 30px
-   background-color {backgroundColor}
-   border 1px solid {borderColor}
-   overflow hidden
-   text-align center
-   text-overflow ellipsis
-   font-size 14px
-   width 120px
-   span
-    font-size 70%`
-    }
-    get tileSize() {
-      return `480 420`
-    }
-    async fetchTableInputs() {
-      return { rows: this.getChoices() }
-    }
-    getTileBodyStumpCode() {
-      let lastCat = ""
-      return this.getChoices()
-        .map(choice => {
-          choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
-          lastCat = choice.category
-          return this.qFormat(this.itemStumpTemplate, choice)
-        })
-        .join("\n")
-    }
-    getTileHeaderBern() {
-      return this.tileHeader
-    }
-  }
-
-  class templatesListNode extends abstractTemplatePickerTileNode {
-    get tileHeader() {
-      return `Template Gallery`
-    }
-    getChoices() {
-      // todo: cleanup.
-      const choices = this._getTheTemplates().map(node => {
-        const id = node
-          .getWord(1)
-          .replace("templates/", "")
-          .replace(this.ohayoFileExtensionKey, "")
-        return {
-          command: "createProgramFromTemplateCommand",
-          name: node.get("data doc.title"),
-          value: id,
-          category: lodash.upperFirst(node.get("data doc.categories")),
-          description: ""
-        }
-      })
-      return lodash.sortBy(choices, "category")
-    }
-    _getTheTemplates() {
-      // todo: trim?
-      return typeof TemplatesStamp === "undefined"
-        ? jtree.TreeNode.fromDisk("ohayo/packages/templates/Templates.stamp").trim()
-        : new jtree.TreeNode(TemplatesStamp).trim()
-    }
-    getProgramTemplate(id) {
-      const node = this._getTheTemplates().filter(node => node.getContent() === `templates/${id}${this.ohayoFileExtensionKey}`)[0]
-      return {
-        template: node.getNode("data").childrenToString(),
-        name: id + this.ohayoFileExtensionKey
-      }
     }
   }
 
@@ -31148,12 +31001,6 @@ a {name}
     }
   }
 
-  class docDefaultHiddenNode extends abstractDocSettingNode {
-    get tileKeywordCell() {
-      return this.getWord(0)
-    }
-  }
-
   class docDateNode extends abstractDocSettingNode {
     get dateCell() {
       return this.getWordsFrom(0)
@@ -31289,42 +31136,6 @@ a {name}
       return new jtree.TreeNode.Parser(
         DidYouMeanTileNode,
         Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), {
-          "challenge.list": challengeListNode,
-          "samples.list": samplesListNode,
-          "vega.data.list": vegaDataListNode,
-          "vega.example.list": vegaExampleListNode,
-          "asciichart.line": asciiChartNode,
-          "challenge.play": challengePlayNode,
-          "dtjs.basic": dtjsBasicNode,
-          "html.text": htmlTextNode,
-          "html.printAs": htmlPrintAsNode,
-          "html.h1": htmlH1Node,
-          "html.img": htmlImgNode,
-          "html.iframe": htmlIframeNode,
-          "html.custom": htmlCustomNode,
-          "show.rowCount": showRowCountNode,
-          "show.columnCount": showColumnCountNode,
-          "show.static": showStaticNode,
-          "show.value": showValueNode,
-          "show.median": showMedianNode,
-          "show.sum": showSumNode,
-          "show.mean": showMeanNode,
-          "show.min": showMinNode,
-          "show.max": showMaxNode,
-          "vega.bar": vegaBarNode,
-          "vega.line": vegaLineNode,
-          "vega.area": vegaAreaNode,
-          "vega.scatter": vegaScatterNode,
-          "vega.bubble": vegaBubbleNode,
-          "vega.emoji": vegaEmojiNode,
-          "vega.histogram": vegaHistogramNode,
-          "vega.example": vegaExampleNode,
-          "calendar.heat": calendarHeatNode,
-          "icons.human": iconsHumanNode,
-          "icons.circle": iconsCircleNode,
-          "markdown.toHtml": markdownToHtmlNode,
-          "treenotation.outline": treenotationOutlineNode,
-          "treenotation.dotline": treenotationDotlineNode,
           "amazon.history": amazonHistoryNode,
           "fitbit.all": fitbitAllNode,
           "datawrapper.comingSoon": datawrapperComingSoonNode,
@@ -31336,21 +31147,59 @@ a {name}
           "re3data.comingSoon": re3dataComingSoonNode,
           "zing.comingSoon": zingComingSoonNode,
           "editor.helloWorld": editorHelloWorldNode,
+          "challenge.list": challengeListNode,
+          "samples.list": samplesListNode,
+          "vega.data.list": vegaDataListNode,
+          "vega.example.list": vegaExampleListNode,
+          "doc.picker": PickerTileNode,
+          "templates.list": templatesListNode,
+          "asciichart.line": asciiChartNode,
+          "calendar.heat": calendarHeatNode,
+          "challenge.play": challengePlayNode,
           "debug.dump": debugDumpNode,
           "web.dump": webDumpNode,
           "debug.commands": debugCommandsNode,
           "debug.sleep": debugSleepNode,
           "debug.noop": debugNoOpNode,
           "debug.throw": debugThrowNode,
+          "dtjs.basic": dtjsBasicNode,
           "editor.gallery": editorGalleryNode,
           "handsontable.basic": handsontableBasicNode,
+          "html.text": htmlTextNode,
+          "html.printAs": htmlPrintAsNode,
+          "html.h1": htmlH1Node,
+          "html.img": htmlImgNode,
+          "html.iframe": htmlIframeNode,
+          "html.custom": htmlCustomNode,
+          "icons.human": iconsHumanNode,
+          "icons.circle": iconsCircleNode,
           "list.basic": listBasicNode,
           "list.links": listLinksNode,
+          "markdown.toHtml": markdownToHtmlNode,
+          "show.rowCount": showRowCountNode,
+          "show.columnCount": showColumnCountNode,
+          "show.static": showStaticNode,
+          "show.value": showValueNode,
+          "show.median": showMedianNode,
+          "show.sum": showSumNode,
+          "show.mean": showMeanNode,
+          "show.min": showMinNode,
+          "show.max": showMaxNode,
           "tables.basic": tablesBasicNode,
           "tables.interesting": tablesInterestingNode,
           "tables.dump": tablesDumpNode,
           "text.wordcloud": textWordcloudNode,
           "treenotation.3d": treenotation3dNode,
+          "treenotation.outline": treenotationOutlineNode,
+          "treenotation.dotline": treenotationDotlineNode,
+          "vega.bar": vegaBarNode,
+          "vega.line": vegaLineNode,
+          "vega.area": vegaAreaNode,
+          "vega.scatter": vegaScatterNode,
+          "vega.bubble": vegaBubbleNode,
+          "vega.emoji": vegaEmojiNode,
+          "vega.histogram": vegaHistogramNode,
+          "vega.example": vegaExampleNode,
           "tiles.didyoumean": DidYouMeanTileNode,
           "doc.title": docTitleNode,
           "doc.subtitle": docSubtitleNode,
@@ -31358,7 +31207,6 @@ a {name}
           "doc.ref": docReferenceNode,
           "doc.comment": docCommentNode,
           "doc.tooling": docToolingNode,
-          "doc.picker": PickerTileNode,
           "github.info": githubInfoNode,
           "disk.browse": diskBrowseNode,
           "disk.read": diskReadNode,
@@ -31466,13 +31314,11 @@ a {name}
           "random.float": randomFloatNode,
           "random.int": randomIntNode,
           "samples.tinyIris": samplesTinyIrisNode,
-          "templates.list": templatesListNode,
           "assert.rowCount": assertRowCountNode,
           "print.text": printNode,
           "print.csv": printCsvNode,
           "doc.categories": docCategoriesNode,
           "doc.author": docAuthorNode,
-          "doc.defaultHidden": docDefaultHiddenNode,
           "doc.date": docDateNode,
           "#!": hashBangNode
         }),
@@ -31495,9 +31341,6 @@ a {name}
     }
     getTab() {
       return this._tab
-    }
-    tilesAreVisible() {
-      return !this.has(OhayoConstants.defaultHidden)
     }
     async loadAndIncrementalRender() {
       const app = this.getTab().getRootNode()
@@ -31725,8 +31568,6 @@ abstractTileTreeComponentNode
  string monthKey month
  string yearKey year
  catchAllNodeType catchAllErrorNode
- int headerHeight 30
- int footerHeight 30
  string hiddenKey hidden
  string visibleKey visible
  string tileLoadingTemplate
@@ -31742,7 +31583,10 @@ abstractTileTreeComponentNode
   div Error occurred. See console.
    class OhayoError
  string pencilStumpTemplate
-  span ▾
+  span +
+   class TileInsertBetweenButton
+   clickCommand insertTileBetweenCommand
+  span ▼
    class TileDropDownButton
    clickCommand toggleTileMenuCommand
  string errorStateStumpTemplate
@@ -31750,25 +31594,16 @@ abstractTileTreeComponentNode
    class {classes}
    id {id}
    div
-    class TileHeaderGrabber
-   div ERROR
-    class TileHeader
-   div
     class TileBody
+    div ERROR
     {content}
    div
     class TileFooter
     {footer}
-   div
-    class TileFooterGrabber
  string tileStumpTemplate
   div
    class {classes}
    id {id}
-   div
-    class TileHeaderGrabber
-   div {header}
-    class TileHeader
    div
     style {bodyStyle}
     class TileBody
@@ -31776,8 +31611,6 @@ abstractTileTreeComponentNode
    div
     class TileFooter
     {footer}
-   div
-    class TileFooterGrabber
  string inspectionStumpTemplate
   div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
   div Messages:
@@ -32021,7 +31854,6 @@ abstractTileTreeComponentNode
    return this.qFormat(this.tileStumpTemplate, {
     classes: this.getCssClassNames().join(" "),
     id: this.getTreeComponentId(),
-    header: this.getTileHeaderBern(),
     bodyStyle: this.customBodyStyle || "",
     body: this._getBodyStumpCodeCache() || "",
     footer: this.getTileFooterStumpCode()
@@ -32030,9 +31862,6 @@ abstractTileTreeComponentNode
   _getBodyStumpCodeCache() {
    if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
    return this._bodyStumpCodeCache
-  }
-  getTileHeaderBern() {
-   return \`\${this.getFirstWord()}\`
   }
   getTileBodyStumpCode() {
    return \`\`
@@ -32050,6 +31879,14 @@ abstractTileTreeComponentNode
    if (!this._errorCount) this._errorCount = 0
    this._errorCount++
    this.getRootNode().goRed(err)
+  }
+  insertTileBetweenCommand() {
+   const tab = this.getTab()
+   const current = this.childrenToString()
+   this.getChildTiles().forEach(tile => tile.unmountAndDestroy())
+   const newNode = this.appendLineAndChildren("doc.picker", current)
+   tab.autosaveTab()
+   this.getRootNode().loadAndIncrementalRender()
   }
   getWall() {
    return this.getWebApp().getAppWall()
@@ -32129,8 +31966,10 @@ abstractTileTreeComponentNode
    })
   }
   isVisible() {
+   if (this.has(this.visibleKey)) return true
    if (this.visible === false) return false
-   return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
+   if (this.has(this.hiddenKey)) return false
+   return true
   }
   _isMaximized() {
    return this.has(OhayoConstants.maximized)
@@ -32175,8 +32014,9 @@ abstractTileTreeComponentNode
    this.setFirstWord(newValue)
    const newNode = this.duplicate()
    // todo: destroy or something? how do we reparse.
-   this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
+   this.getChildTiles().forEach(tile => tile.unmountAndDestroy())
    this.unmountAndDestroy()
+   tab.autosaveTab()
    this.getRootNode().loadAndIncrementalRender()
   }
   changeParentCommand(pathVector) {
@@ -32189,10 +32029,15 @@ abstractTileTreeComponentNode
    this.unmountAndDestroy()
    return this.getTab().autosaveAndRender()
   }
-  destroyTileCommand() {
-   this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
+  async removeTileCommand() {
+   const tab = this.getTab()
+   this.getChildTiles().forEach(tile => {
+    tile.unmount()
+    tile.shiftLeft()
+   })
    this.unmountAndDestroy()
-   return this.getTab().autosaveAndRender()
+   tab.autosaveTab()
+   this.getRootNode().loadAndIncrementalRender()
   }
   getNewDataCommand() {
    // todo: have some type of paging system to fetch new data.
@@ -32371,35 +32216,87 @@ abstractChartNode
     .getRows()
     .slice(0, this._getRowDisplayLimit())
   }
-abstractHeaderlessChartTileNode
- abstract
- extends abstractChartNode
- int headerHeight 0
- string tileStumpTemplate
+abstractTextNode
+ catchAllCellType stringCell
+ frequency 0
+ description Prints a message
+ inScope contentNode
+ string bodyStumpTemplate
   div
-   class {classes}
-   id {id}
-   div
-    class TileHeaderGrabber
-   div
-    class TileBody HeaderLess
-    {body}
-   div
-    class TileFooter
-    {footer}
-   div
-    class TileFooterGrabber
+   class TileSelectable
+   bern
+    {content}
  javascript
-  toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileMenuButtonStumpCode() })
+  getTileBodyStumpCode() {
+   return this.qFormat(this.bodyStumpTemplate, { content: this.content ? jtree.Utils.linkify(this.content) : "" })
   }
-abstractEmptyFooterTileNode
+ extends abstractChartNode
  abstract
- extends abstractHeaderlessChartTileNode
- int footerHeight 0
+abstractInstructionsNode
+ string tileSize 600 240
+ string content Instructions go here.
+ extends abstractTextNode
+ abstract
+amazonHistoryNode
+ description Instructions on how to get your Amazon order history.
+ string content Step 1. Go to https://www.amazon.com/gp/b2b/reports to download your Amazon order history.<br> Step 2. Add the data here.
+ string dummyDataSetName amazonPurchases
+ extends abstractInstructionsNode
+ crux amazon.history
+fitbitAllNode
+ description Instructions on how to get your Fitbit data.
+ string content Step 1. Go to <a target="_blank" href="https://www.fitbit.com/settings/data/export">https://www.fitbit.com/settings/data/export</a> to download your Fitbit data.<br> Step 2. Drop the CSV onto this page.
+ extends abstractInstructionsNode
+ crux fitbit.all
+abstractComingSoonNode
+ frequency 0
+ description Coming soon
+ string tileSize 600 240
+ string content Instructions go here.
+ extends abstractTextNode
+ abstract
+datawrapperComingSoonNode
+ string content We don't have support yet for https://www.datawrapper.de/
+ extends abstractComingSoonNode
+ crux datawrapper.comingSoon
+dcjsComingSoonNode
+ string content We don't have support yet for https://github.com/dc-js/dc.js
+ extends abstractComingSoonNode
+ crux dcjs.comingSoon
+finosPerspectiveComingSoonNode
+ string content We don't have support yet for https://perspective.finos.org/
+ extends abstractComingSoonNode
+ crux finos.perspective.comingSoon
+fivethirtyeightComingSoonNode
+ string content We don't have support yet for https://github.com/fivethirtyeight/data/
+ extends abstractComingSoonNode
+ crux fivethirtyeight.comingSoon
+GovNode
+ string content We don't have support yet for https://www.data.gov/
+ extends abstractComingSoonNode
+ crux gov.comingSoon
+highchartsComingSoonNode
+ string content We don't have support yet for https://www.highcharts.com/blog/snippets/3d-solar-system/
+ extends abstractComingSoonNode
+ crux highcharts.comingSoon
+re3dataComingSoonNode
+ string content We don't have support yet for https://www.re3data.org/
+ extends abstractComingSoonNode
+ crux re3data.comingSoon
+zingComingSoonNode
+ string content We don't have support yet for https://www.zingchart.com/
+ extends abstractComingSoonNode
+ crux zing.comingSoon
+editorHelloWorldNode
+ description Prints hello world
+ example Say hello.
+  editor.helloWorld
+ string content Ohayo world!
+ extends abstractTextNode
+ crux editor.helloWorld
 abstractSnippetGalleryNode
  string tileSize 600 240
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  abstract
  string bodyStumpTemplate
   h4 {title}
@@ -32531,10 +32428,119 @@ vegaExampleListNode
   getSnippetTemplate(id) {
    return \`vega.example \${id}\`
   }
+abstractPickerTileNode
+ extends abstractChartNode
+ string tileSize 480 420
+ boolean needsData false
+ abstract
+ string hakonTemplate
+  .abstractPickerTileNode
+   .PickerCategory
+    width 100%
+    margin-top 20px
+    text-align center
+   .TileBody
+    display flex
+    flex-flow row wrap
+    a
+     &:hover
+      background-color {borderColor}
+     padding 10px
+     margin 5px
+     height 30px
+     background-color {backgroundColor}
+     border 1px solid {borderColor}
+     overflow hidden
+     text-align center
+     text-overflow ellipsis
+     font-size 14px
+     width 120px
+     span
+      font-size 70%
+ string itemStumpTemplate
+  {categoryBreak}
+  a {name}
+   br
+    span {description}
+   title {description}
+   tabindex -1
+   value {value}
+   class pickerItemButton
+   clickCommand {command}
+ string categoryBreakStumpTemplate
+  div {category}
+   class PickerCategory
+ javascript
+  async fetchTableInputs() {
+   return { rows: this.getChoices() }
+  }
+  getTileBodyStumpCode() {
+   let lastCat = ""
+   return this.getChoices()
+    .map(choice => {
+     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
+     lastCat = choice.category
+     return this.qFormat(this.itemStumpTemplate, choice)
+    })
+    .join("\\n")
+  }
+PickerTileNode
+ extends abstractPickerTileNode
+ description Displays list of available tiles.
+ crux doc.picker
+ javascript
+  getChoices() {
+   const allChoices = this.getRootNode()
+    .getHandGrammarProgram()
+    .getTopNodeTypeDefinitions()
+   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(OhayoConstants.noPicker))
+   const theChoices = filteredChoices.length ? filteredChoices : allChoices
+   return theChoices.map(nodeDefinition => {
+    const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
+    const name = nodeId.split(".")[1] || ""
+    const category = lodash.upperFirst(nodeId.split(".")[0])
+    const description = nodeDefinition.getDescription()
+    return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
+   })
+  }
+templatesListNode
+ extends abstractPickerTileNode
+ description Displays templates.
+ frequency .22
+ crux templates.list
+ javascript
+  getChoices() {
+   // todo: cleanup.
+   const choices = this.getWebApp()
+    .getStandardTemplates()
+    .map(node => {
+     const id = node
+      .getWord(1)
+      .replace("templates/", "")
+      .replace(this.ohayoFileExtensionKey, "")
+     return {
+      command: "createProgramFromTemplateCommand",
+      name: node.get("data doc.title"),
+      value: id,
+      category: lodash.upperFirst(node.get("data doc.categories")),
+      description: ""
+     }
+    })
+   return lodash.sortBy(choices, "category")
+  }
+  getProgramTemplate(id) {
+   const node = this.getWebApp()
+    .getStandardTemplates()
+    .filter(node => node.getContent() === \`templates/\${id}\${this.ohayoFileExtensionKey}\`)[0]
+   return {
+    template: node.getNode("data").childrenToString(),
+    name: id + this.ohayoFileExtensionKey
+   }
+  }
 asciiChartNode
  description Lightweight ASCII line chart from the library https://github.com/kroitor/asciichart
  string tileScript ohayo/packages/asciichart/asciichart.js
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  crux asciichart.line
  catchAllCellType titleCell
  inScope yColumnNode
@@ -32561,623 +32567,6 @@ asciiChartNode
    const leftPad = Math.max(0, Math.floor((chart.split("\\n")[0].length - title.length) / 2))
    return this.qFormat(this.bodyStumpTemplate, { title: " ".repeat(leftPad) + title, chart })
   }
-challengePlayNode
- cells tileKeywordCell challengeIdCell
- description Learn ohayo by trying a challenge.
- catchAllCellType challengeAnswerCell
- tags aTileThatCreatesPrograms
- example
-  challenge.list
-  challenge.play 1
-  challenge.play 2
- string tileSize 640 240
- extends abstractEmptyFooterTileNode
- crux challenge.play
- javascript
-  getProgramTemplate(id) {
-   const challengeNode = this._getChallengeNode(parseInt(id))
-   return {
-    template: challengeNode.getNode("solution").childrenToString(),
-    name: "challenge-" + id + "-solution.ohayo"
-   }
-  }
-  _getChallengeNode(challengeId) {
-   const challenges = typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("ohayo/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
-   return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
-  }
-  getTileBodyStumpCode() {
-   const challengeId = parseInt(this.getWord(1))
-   const answer = this.getWord(2)
-   const challengeNode = this._getChallengeNode(challengeId)
-   const isCorrect = answer === challengeNode.get("answer")
-   const theme = this.getTheme()
-   const color = answer ? (isCorrect ? theme.successColor : theme.errorColor) : theme.warningColor
-   const answerMessage = answer !== undefined ? (isCorrect ? "CORRECT!" : "Wrong.") : ""
-   return \`h3 Challenge #\${challengeId}
-   style color:\${color}
-  br
-  div \${challengeNode.evalTemplateString(\`Question: {question}\`)}
-   class TileSelectable
-  br
-  input
-   placeholder Enter your answer here. All answers are a number.
-   value \${answer !== undefined ? answer : ""}
-   style width: 300px;
-   name 2
-   changeCommand changeWordAndRenderCommand
-  span \${answerMessage}
-   style color: \${color};
-  br
-  div
-   a See a solution
-    clickCommand createProgramFromTemplateCommand
-    value \${challengeId}\`
-  }
-dtjsBasicNode
- description A spreadsheet-like table.
- string tileSize 1200 500
- string tileCssScript ohayo/packages/dtjs/datatables.min.css
- string tileScript ohayo/packages/dtjs/datatables.min.js
- extends abstractEmptyFooterTileNode
- crux dtjs.basic
- string bodyStumpTemplate
-  div
-  table
-   class DataTable
-   thead
-    tr
-     {headerRows}
-   tbody
-    {rows}
- string cellStumpTemplate
-  td
-   bern
-    {box}
- string rowStumpTemplate
-  tr
-   {cols}
- javascript
-  getTileBodyStumpCode() {
-   const columnDefs = this.getParentOrDummyTable()
-    .getColumnsArray()
-    .slice(0, 10)
-   const headerRows = this._getHeaderRowsStumpCode(columnDefs.map(col => col.getColumnName()))
-   const rows = this._getTableRowsStumpCode(columnDefs)
-   return this.qFormat(this.bodyStumpTemplate, { headerRows, rows })
-  }
-  _getHeaderRowsStumpCode(columns) {
-   return columns.map(colName => \`th \${colName}\`).join("\\n")
-  }
-  _getTableRowsStumpCode(columns) {
-   return this.getRowsWithRowDisplayLimit()
-    .slice(0, 10)
-    .map((row, index) => {
-     const cols = columns
-      .map(column => {
-       const box = row.getRowHtmlSafeValue(column.getColumnName()) // todo: cache?
-       return this.qFormat(this.cellStumpTemplate, { box })
-      })
-      .join("\\n")
-     return this.qFormat(this.cellStumpTemplate, { cols })
-    })
-    .join("\\n")
-  }
-  treeComponentWillUnmount() {
-   // cleanup
-  }
-  treeComponentDidUpdate() {
-   super.treeComponentDidUpdate()
-   const table = this.getParentOrDummyTable()
-   const columnDefs = this.getParentOrDummyTable()
-    .getColumnsArray()
-    .slice(0, 10)
-   const container = this.getStumpNode().findStumpNodeByChild("class DataTable")
-   if (this.isNodeJs()) return undefined
-   const width = this._tileWidth
-   const height = this._tileHeight
-   const shadow = container.getShadow()
-   const el = shadow.getShadowElement()
-   shadow.setShadowCss({ width, height })
-   const rows = this.getRowsWithRowDisplayLimit()
-   // todo: note, this is only works with jQuery
-   jQuery.fn.dataTable.ext.errMode = "throw"
-   this._dataTables = jQuery(el).DataTable({
-    data: this.getRowsAsDataTableArrayWithHeader(rows, columnDefs.map(col => col.getColumnName())).slice(1),
-    pageLength: 10,
-    scrollY: height
-    //"scrollCollapse": true,
-    //"paging": false
-   })
-  }
-  treeComponentDidMount() {
-   this.treeComponentDidUpdate()
-  }
-abstractHtmlNode
- catchAllCellType htmlCell
- frequency 0
- description An HTML element
- inScope styleNode contentNode
- extends abstractEmptyFooterTileNode
- string hakonTemplate
-  .abstractHtmlNode
-   code
-    user-select text
- abstract
- string bodyStumpTemplate
-  {tag}
-   {style}
-   {src}
-   bern
-    {content}
- javascript
-  getTileFooterStumpCode() {
-   return this.getTileMenuButtonStumpCode()
-  }
-  async fetchTableInputs() {
-   return { rows: [{ text: this.getHtmlContent() }] }
-  }
-  getHtmlContent() {
-   return this.getWordsFrom(2).join(" ") || "No html content to show."
-  }
-  getTag() {
-   return this.getWord(1) || "div" // todo: verify this is legal tag.
-  }
-  getSrc() {
-   return this.getSettingsStruct().src
-  }
-  getTileBodyStumpCode() {
-   return this.qFormat(this.bodyStumpTemplate, { tag: this.getTag(), style: this.style ? \`style \${this.style}\` : "", src: this.getSrc() ? \`src \${this.getSrc()}\` : "", content: this.getHtmlContent() || "" })
-  }
-htmlTextNode
- description Displays fixed text in the given HTML element.
- cells tileKeywordCell htmlTextTagCell
- catchAllCellType htmlCell
- frequency .002
- extends abstractHtmlNode
- crux html.text
-htmlPrintAsNode
- description Displays input table in the given HTML element.
- cells tileKeywordCell htmlTextTagCell
- frequency .002
- javascript
-  getHtmlContent() {
-   return this.getPipishInput()
-  }
- extends abstractHtmlNode
- crux html.printAs
-abstractHTMLFixedTagTileNode
- abstract
- extends abstractHtmlNode
- javascript
-  getHtmlContent() {
-   return this.getContent()
-  }
-  getTag() {
-   return this.htmlTagName
-  }
-htmlH1Node
- catchAllCellType htmlCell
- description Displays an H1 Header with fixed text
- example A title
-  html.h1 Hello world
- frequency .002
- string tileSize 600 75
- string htmlTagName h1
- string style text-align:center;
- extends abstractHTMLFixedTagTileNode
- crux html.h1
-abstractHTMLContentIsSrcTileNode
- abstract
- extends abstractHTMLFixedTagTileNode
- javascript
-  getHtmlContent() {
-   return ""
-  }
-  getSrc() {
-   return this.getContent() || super.getSrc()
-  }
-htmlImgNode
- description Displays an image from given url.
- cells tileKeywordCell urlCell
- frequency .002
- string htmlTagName img
- string style width:100%;
- extends abstractHTMLContentIsSrcTileNode
- crux html.img
-htmlIframeNode
- description Displays an iframe from given url.
- cells tileKeywordCell urlCell
- string htmlTagName iframe
- extends abstractHTMLContentIsSrcTileNode
- crux html.iframe
-htmlCustomNode
- description Display custom HTML.
- example Hello world
-  html.custom
-   content
-    <h1>Hello world</h1>
- inScope contentNode
- extends abstractEmptyFooterTileNode
- crux html.custom
- string bodyStumpTemplate
-  div
-   bern
-    {content}
- javascript
-  getTileBodyStumpCode() {
-   // https://meta.stackexchange.com/questions/1777/what-html-tags-are-allowed-on-stack-exchange-sites
-   // todo: sanitize tags
-   const contentNode = this.getNode("content")
-   const content = contentNode ? contentNode.childrenToString() : "No HTML content to show"
-   return this.qFormat(this.bodyStumpTemplate, { content })
-  }
-abstractShowTileNode
- cells tileKeywordCell columnNameCell
- catchAllCellType titleCell
- frequency .02
- example A dashboard for a Seattle family's water bill.
-  samples.waterBill
-   hidden
-   vega.scatter
-   tables.basic
-   show.mean Amount
-   show.median Amount
-   show.sum Amount
-   show.min Amount
-   show.max Amount
- string tileSize 140 120
- string dummyDataSetName stockPrice
- extends abstractEmptyFooterTileNode
- abstract
- string hakonTemplate
-  .abstractShowTileNode
-   h3
-    text-align center
-   h6
-    text-align center
-    height 40px
-    overflow hidden
- string bodyStumpTemplate
-  h6 {title}
-  h3 {number}
- javascript
-  getTileBodyStumpCode() {
-   const columnName = this.getWord(1)
-   if (!columnName) return \`No data for \${this.getFirstWord()}\`
-   const table = this.getParentOrDummyTable()
-   const col = table.getTableColumnByName(columnName)
-   if (!col) {
-    console.log(\`No column named \${columnName}\`)
-    return ""
-   }
-   const reductionName = this.reductionName || this.getWord(0).split(".")[1]
-   const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
-   const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
-   return this.qFormat(this.bodyStumpTemplate, { title, number })
-  }
-showRowCountNode
- catchAllCellType titleCell
- description Show the total number of rows
- frequency .02
- string tileSize 140 120
- string dummyDataSetName stockPrice
- cells tileKeywordCell
- extends abstractShowTileNode
- string defaultTitle Total rows
- crux show.rowCount
- javascript
-  getTileBodyStumpCode() {
-   const title = this.getWordsFrom(1).join(" ") || this.defaultTitle
-   return this.qFormat(this.bodyStumpTemplate, { title, number: this._getNumber() })
-  }
-  _getNumber() {
-   return this.getParentOrDummyTable().getRowCount()
-  }
-showColumnCountNode
- extends showRowCountNode
- string defaultTitle Total columns
- description Show the total number of columns
- crux show.columnCount
- javascript
-  _getNumber() {
-   return this.getParentOrDummyTable().getColumnNames().length
-  }
-showStaticNode
- description Show a hard coded number
- extends abstractShowTileNode
- example
-  show.static 20 Sales
- cells tileKeywordCell numberCell
- catchAllCellType titleCell
- crux show.static
- javascript
-  getTileBodyStumpCode() {
-   const title = this.getWordsFrom(2).join(" ")
-   return this.qFormat(this.bodyStumpTemplate, { title, number: this.getWord(1) || "" })
-  }
-showValueNode
- description Show the value of a column with 1 row
- extends abstractShowTileNode
- crux show.value
- string reductionName median
-showMedianNode
- description Show the median value of a column
- extends abstractShowTileNode
- crux show.median
-showSumNode
- description Show the sum of a column
- extends abstractShowTileNode
- crux show.sum
-showMeanNode
- description Show the mean of a column
- extends abstractShowTileNode
- crux show.mean
-showMinNode
- description Show the min value of a column
- extends abstractShowTileNode
- crux show.min
-showMaxNode
- description Show the max value of a column
- extends abstractShowTileNode
- crux show.max
-abstractVegaNode
- frequency .1
- catchAllCellType titleCell
- string tileSize 800 300
- string tileScript ohayo/packages/vega/vega.combined.min.js
- string dummyDataSetName stockPrice
- string markName bar
- extends abstractEmptyFooterTileNode
- abstract
- string bodyStumpTemplate
-  div
-   class divForExternalLibrary
- javascript
-  // todo: I don't think vega handles . in column names.
-  getTileBodyStumpCode() {
-   return this.bodyStumpTemplate
-  }
-  _getColumnToField(columnName) {
-   if (!columnName) return undefined
-   const columnsMap = this.getParentOrDummyTable().getColumnsMap()
-   const col = columnsMap[columnName]
-   const obj = { field: columnName, type: col.getVegaType() }
-   if (col.isTemporal()) {
-    const timeUnit = col.getVegaTimeUnit()
-    if (timeUnit) obj.timeUnit = timeUnit
-   }
-   return obj
-  }
-  _adjustVegaSize() {
-   const adjustSize = !this.has("width")
-   if (adjustSize) {
-    const shadow = this.getStumpNode()
-     .findStumpNodeByChild("class divForExternalLibrary")
-     .getShadow()
-    this.set("width", Math.round((30 + shadow.getShadowOuterWidth()) / 20) + "")
-    this.set("height", Math.round((30 + shadow.getShadowOuterHeight()) / 20) + "")
-   }
-  }
-  _getElementForVega() {
-   return this.getStumpNode()
-    .findStumpNodeByChild("class divForExternalLibrary")
-    .getShadow()
-    .getShadowElement()
-  }
-  async _drawVega() {
-   // todo: don't rerun this if we dont need to.
-   await vegaEmbed(this._getElementForVega(), this._getVegaSpec())
-   // this._adjustVegaSize()
-  }
-  treeComponentDidUpdate() {
-   super.treeComponentDidUpdate()
-   if (this.isNodeJs()) return undefined
-   this._drawVega()
-  }
-  treeComponentDidMount() {
-   this.treeComponentDidUpdate()
-  }
-  _getVegaData() {
-   return {
-    values: this.getParentOrDummyTable()
-     .cloneNativeJavascriptTypedRows()
-     .slice(0, this._getRowDisplayLimit())
-   }
-  }
-  _getVegaTitle() {
-   return this.getContent()
-  }
-  _getVegaSpec() {
-   return {
-    description: "A simple bar chart with embedded data.",
-    data: this._getVegaData(),
-    width: this._tileWidth,
-    height: this._tileHeight,
-    mark: this._getVegaMarkObj(),
-    encoding: this._getEncodingMap(),
-    transform: this._getVegaTransform(),
-    title: this._getVegaTitle(),
-    config: this._getVegaConfig()
-   }
-  }
-  _getVegaTransform() {
-   return undefined
-  }
-  _getVegaConfig() {
-   return undefined
-  }
-  _getEncodingMap() {
-   return {}
-  }
-  // todo: add type
-  _getVegaMarkObj() {
-   return { type: this._getVegaMark(), tooltip: { content: "data" } }
-  }
-  _getVegaMark() {
-   return this.markName
-  }
-vegaBarNode
- description A bar chart
- inScope xColumnNode yColumnNode colorColumnNode shapeColumnNode
- javascript
-  _getEncodingMap() {
-   const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.colorColumnKey])
-   return {
-    x: this._getColumnToField(columnNames[0]),
-    y: this._getColumnToField(columnNames[1]),
-    color: this._getColumnToField(columnNames[2])
-   }
-  }
- string columnPredictionHints
-  xColumn
-  yColumn isString=false,!xColumn
- extends abstractVegaNode
- crux vega.bar
-vegaLineNode
- description A line chart
- string markName line
- extends vegaBarNode
- crux vega.line
-vegaAreaNode
- description An area chart
- string markName area
- extends vegaLineNode
- crux vega.area
-vegaScatterNode
- description A scatterplot
- string markName point
- extends vegaBarNode
- crux vega.scatter
- javascript
-  _getEncodingMap() {
-   const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.colorColumnKey, this.shapeColumnKey])
-   return {
-    x: this._getColumnToField(columnNames[0]),
-    y: this._getColumnToField(columnNames[1]),
-    color: this._getColumnToField(columnNames[2]),
-    shape: this._getColumnToField(columnNames[3])
-   }
-  }
-vegaBubbleNode
- description A bubble plot
- inScope sizeColumnNode colorColumnNode
- string markName circle
- string dummyDataSetName gapMinder
- string columnPredictionHints
-  sizeColumn isString=false
-  xColumn isString=false
- extends vegaScatterNode
- crux vega.bubble
- javascript
-  _getEncodingMap() {
-   const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.sizeColumnKey, this.colorColumnKey])
-   return {
-    y: {
-     field: columnNames[1],
-     type: "quantitative",
-     scale: { zero: false },
-     axis: { minExtent: 30 }
-    },
-    x: this._getColumnToField(columnNames[0]),
-    size: { field: columnNames[2], type: "quantitative" },
-    color: { value: "#000" }
-   }
-  }
-vegaEmojiNode
- description A bar chart with emojis
- frequency .001
- inScope yColumnNode emojiColumnNode
- string columnPredictionHints
-  emojiColumn isString=true
-  yColumn isString=false
- string dummyDataSetName emojis
- javascript
-  _getVegaConfig() {
-   return { view: { stroke: "" } }
-  }
-  _getVegaMark() {
-   return { type: "text", baseline: "middle" }
-  }
-  _getEncodingMap() {
-   const columnNames = this.mapSettingNamesToColumnNames([this.yColumnKey, "emoji"])
-   return {
-    x: { field: columnNames[1], type: "nominal", axis: null },
-    y: { field: columnNames[0], type: "quantitative", axis: null, sort: null },
-    text: { field: columnNames[1], type: "nominal" },
-    size: { value: 65 }
-   }
-  }
- extends vegaBarNode
- crux vega.emoji
-vegaHistogramNode
- description A histogram
- inScope xColumnNode
- javascript
-  _getEncodingMap() {
-   const columnName = this.getContent() || this.mapSettingNamesToColumnNames([this.xColumnKey])[0]
-   return {
-    x: {
-     bin: true,
-     field: columnName,
-     type: "quantitative"
-    },
-    y: {
-     aggregate: "count",
-     type: "quantitative"
-    }
-   }
-  }
- string columnPredictionHints
-  xColumn isString=false
- string dummyDataSetName wordCounts
- extends abstractVegaNode
- crux vega.histogram
-vegaExampleNode
- description Shows a chart from the Vega Example Gallery
- frequency .001
- cells tileKeywordCell vegaExampleNameCell
- example
-  vega.example trellis_anscombe
- extends abstractVegaNode
- crux vega.example
- javascript
-  _getVegaSpec() {
-   return this._spec
-  }
-  async _fetchSpec() {
-   // todo: localtesting.
-   if (this.isNodeJs()) return undefined
-   const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
-   const url = \`ohayo/packages/vega/ignore/vega-lite/examples/compiled/\${exampleName}.vg.json\`
-   const res = await this.getWebApp()
-    .getWillowBrowser()
-    .httpGetUrl(url)
-   const spec = JSON.parse(res.text)
-   // rewrite data urls
-   spec.data.forEach(row => {
-    if (row.url) row.url = row.url.replace("data/", "packages/vega/datasets/")
-   })
-   this._spec = spec
-   return spec
-  }
-  // todo: clean this up.
-  async fetchTableInputs() {
-   const spec = await this._fetchSpec()
-   if (this.isNodeJs()) return { rows: [] }
-   const el = jQuery("<div></div>")[0]
-   const embedded = await vegaEmbed(el, spec)
-   const rows = await this._getVegaPostTransformOutputRows(spec, embedded)
-   return { rows: rows }
-  }
-  async _getVegaPostTransformOutputRows(spec, embedded) {
-   const tableName = spec.data[0] && spec.data[0].name
-   if (tableName) return embedded.view.data(tableName)
-   // const values = spec.data.values
-   // if (values && values.entries) return Array.from(values.entries())
-   // if (typeof values === "function") return []
-   // else if (values) return values
-   return []
-  }
 calendarHeatNode
  description Shows which days have higher counts.
  inScope countNode dayColumnNode
@@ -33186,7 +32575,7 @@ calendarHeatNode
   count getPrimitiveTypeName=number
   dayColumn getPrimitiveTypeName=day
  string dummyDataSetName waterBill
- extends abstractHeaderlessChartTileNode
+ extends abstractChartNode
  crux calendar.heat
  string bodyStumpTemplate
   div
@@ -33323,225 +32712,58 @@ calendarHeatNode
    const keyG = this._getLegend(quins, squareSideWithPadding, { top: 110, left: 60 })
    return \`<svg width="\${width}" height="\${height}">\${dayNamesG + squaresG + monthNamesG + keyG}</svg>\`
   }
-iconsIconNode
- extends abstractHeaderlessChartTileNode
- abstract
-iconsHumanNode
- description Assuming each row in your data represents a human, creates a human icon.
+challengePlayNode
+ cells tileKeywordCell challengeIdCell
+ description Learn ohayo by trying a challenge.
+ catchAllCellType challengeAnswerCell
+ tags aTileThatCreatesPrograms
  example
-  samples.patients
-   icons.human
- inScope genderColumnNode headSizeNode
- string columnPredictionHints
-  headSize isString=false
-  genderColumn isString=true
- string bodyStumpTemplate
-  div
-   bern
-    {bern}
- javascript
-  getTileBodyStumpCode() {
-   // Now, what if there is no input table?
-   const table = this.getParentOrDummyTable()
-   const rows = table.getRows()
-   // Now, what if we are using dummy input table?
-   const headSizeColumn = this.getSettingsStruct().headSize
-   const genderColumn = this.getSettingsStruct().genderColumn
-   const reducts = table.getColumnByName(headSizeColumn).getReductions()
-   const headColMax = reducts.max
-   const bern = rows
-    .map(row => {
-     const typedRow = row.rowToObjectWithOnlyNativeJavascriptTypes()
-     const value = typedRow[headSizeColumn]
-     // TODO: ADD TYPINGS
-     const genderVal = typedRow[genderColumn].toLowerCase()
-     const gender = genderVal === "male" ? "blue" : "pink"
-     let character = "O"
-     let percent = value / headColMax
-     if (isNaN(value)) {
-      character = "x"
-      percent = reducts.median / headColMax
-     }
-     const title = row.getHoverTitle()
-     percent = Math.round(18 * percent)
-     return \`<span title="\${title}" style="font-size:\${percent}px; color:\${gender};">\${character}</span>\`
-    })
-    .join(" ")
-   return this.qFormat(this.bodyStumpTemplate, { bern: bern })
-  }
- string dummyDataSetName patients
- extends iconsIconNode
- crux icons.human
-iconsCircleNode
- description Displays a simple icon for each row of your data.
- example
-  samples.iris
-   icons.circle
-    radius Petal.Length
- inScope radiusNode
- string columnPredictionHints
-  radius isString=false
- string dummyDataSetName playerGoals
- extends iconsIconNode
- crux icons.circle
- string bodyStumpTemplate
-  div
-   bern
-    {bern}
- javascript
-  getTileBodyStumpCode() {
-   const column = this.getSettingsStruct().radius
-   const bern = this.getParentOrDummyTable()
-    .getRows()
-    .map(row => \`<span style="font-size:\${row.rowToObjectWithOnlyNativeJavascriptTypes()[column] / 3}em;">O</span>\`)
-    .join(" ")
-   return this.qFormat(this.bodyStumpTemplate, { bern: bern })
-  }
-markdownToHtmlNode
- description Displays Markdown rendered as HTML.
- example Show a text editor and some rendered Markdown.
-  data.inline
-   parser text
-   content
-    # My header
-    ## My subheader
-    
-    Hello world
-   markdown.toHtml
- inScope contentNode
- string bodyStumpTemplate
-  div
-   class TileSelectable
-   bern
-    {md}
- javascript
-  getTileBodyStumpCode() {
-   return this.qFormat(this.bodyStumpTemplate, { md: marked(this.getPipishInput()) })
-  }
- string tileSize 400 400
- string dummyDataSetName markdown
- extends abstractHeaderlessChartTileNode
- crux markdown.toHtml
-treenotationOutlineNode
- description A simple pretty text-only view of a Tree Notation document.
- example Outer space
-  samples.outerSpace
-   treenotation.outline
- string dummyDataSetName outerSpace
- string tileSize 800 500
- extends abstractHeaderlessChartTileNode
- crux treenotation.outline
- string bodyStumpTemplate
-  pre
-   style overflow: scroll; width: 100%; height: 100%; margin: 0; box-sizing: border-box; font-family: monospace; line-height: 13px;
-   bern
-    {bern}
- javascript
-  _getTheBern() {
-   return new jtree.TreeNode(this.getPipishInput()).toOutline()
-  }
-  getTileBodyStumpCode() {
-   return this.qFormat(this.bodyStumpTemplate, { bern: this._getTheBern() })
-  }
-treenotationDotlineNode
- description A simple pretty icon-only visualization of the structure of a Tree Notation doc.
- example Outer space
-  samples.outerSpace
-   treenotation.dotline
- boolean dots true
- string dummyDataSetName outerSpace
- javascript
-  _getTheBern() {
-   return new jtree.TreeNode(this.getPipishInput()).toMappedOutline(
-    node =>
-     "o" +
-     node
-      .getLine()
-      .split(" ")
-      .map(word => "º")
-      .join("")
-   )
-  }
- extends treenotationOutlineNode
- crux treenotation.dotline
-abstractTextNode
- catchAllCellType stringCell
- frequency 0
- description Prints a message
- inScope contentNode
- string bodyStumpTemplate
-  div
-   class TileSelectable
-   bern
-    {content}
- javascript
-  getTileBodyStumpCode() {
-   return this.qFormat(this.bodyStumpTemplate, { content: this.content ? jtree.Utils.linkify(this.content) : "" })
-  }
+  challenge.list
+  challenge.play 1
+  challenge.play 2
+ string tileSize 640 240
  extends abstractChartNode
- abstract
-abstractInstructionsNode
- string tileSize 600 240
- string content Instructions go here.
- extends abstractTextNode
- abstract
-amazonHistoryNode
- description Instructions on how to get your Amazon order history.
- string content Step 1. Go to https://www.amazon.com/gp/b2b/reports to download your Amazon order history.<br> Step 2. Add the data here.
- string dummyDataSetName amazonPurchases
- extends abstractInstructionsNode
- crux amazon.history
-fitbitAllNode
- description Instructions on how to get your Fitbit data.
- string content Step 1. Go to <a target="_blank" href="https://www.fitbit.com/settings/data/export">https://www.fitbit.com/settings/data/export</a> to download your Fitbit data.<br> Step 2. Drop the CSV onto this page.
- extends abstractInstructionsNode
- crux fitbit.all
-abstractComingSoonNode
- frequency 0
- description Coming soon
- string tileSize 600 240
- string content Instructions go here.
- extends abstractTextNode
- abstract
-datawrapperComingSoonNode
- string content We don't have support yet for https://www.datawrapper.de/
- extends abstractComingSoonNode
- crux datawrapper.comingSoon
-dcjsComingSoonNode
- string content We don't have support yet for https://github.com/dc-js/dc.js
- extends abstractComingSoonNode
- crux dcjs.comingSoon
-finosPerspectiveComingSoonNode
- string content We don't have support yet for https://perspective.finos.org/
- extends abstractComingSoonNode
- crux finos.perspective.comingSoon
-fivethirtyeightComingSoonNode
- string content We don't have support yet for https://github.com/fivethirtyeight/data/
- extends abstractComingSoonNode
- crux fivethirtyeight.comingSoon
-GovNode
- string content We don't have support yet for https://www.data.gov/
- extends abstractComingSoonNode
- crux gov.comingSoon
-highchartsComingSoonNode
- string content We don't have support yet for https://www.highcharts.com/blog/snippets/3d-solar-system/
- extends abstractComingSoonNode
- crux highcharts.comingSoon
-re3dataComingSoonNode
- string content We don't have support yet for https://www.re3data.org/
- extends abstractComingSoonNode
- crux re3data.comingSoon
-zingComingSoonNode
- string content We don't have support yet for https://www.zingchart.com/
- extends abstractComingSoonNode
- crux zing.comingSoon
-editorHelloWorldNode
- description Prints hello world
- example Say hello.
-  editor.helloWorld
- string content Ohayo world!
- extends abstractTextNode
- crux editor.helloWorld
+ crux challenge.play
+ javascript
+  getProgramTemplate(id) {
+   const challengeNode = this._getChallengeNode(parseInt(id))
+   return {
+    template: challengeNode.getNode("solution").childrenToString(),
+    name: "challenge-" + id + "-solution.ohayo"
+   }
+  }
+  _getChallengeNode(challengeId) {
+   const challenges = typeof challengesTree === "undefined" ? jtree.TreeNode.fromDisk("ohayo/packages/challenge/challenges.tree") : new jtree.TreeNode(challengesTree)
+   return challenges.nodeAt(challengeId - 1) || challenges.nodeAt(0)
+  }
+  getTileBodyStumpCode() {
+   const challengeId = parseInt(this.getWord(1))
+   const answer = this.getWord(2)
+   const challengeNode = this._getChallengeNode(challengeId)
+   const isCorrect = answer === challengeNode.get("answer")
+   const theme = this.getTheme()
+   const color = answer ? (isCorrect ? theme.successColor : theme.errorColor) : theme.warningColor
+   const answerMessage = answer !== undefined ? (isCorrect ? "CORRECT!" : "Wrong.") : ""
+   return \`h3 Challenge #\${challengeId}
+   style color:\${color}
+  br
+  div \${challengeNode.evalTemplateString(\`Question: {question}\`)}
+   class TileSelectable
+  br
+  input
+   placeholder Enter your answer here. All answers are a number.
+   value \${answer !== undefined ? answer : ""}
+   style width: 300px;
+   name 2
+   changeCommand changeWordAndRenderCommand
+  span \${answerMessage}
+   style color: \${color};
+  br
+  div
+   a See a solution
+    clickCommand createProgramFromTemplateCommand
+    value \${challengeId}\`
+  }
 debugDumpNode
  description Dumps data from content or dump's first column input as 1 concatenated string.
  example Print a poem.
@@ -33593,14 +32815,26 @@ debugCommandsNode
  extends abstractChartNode
  crux debug.commands
  string bodyStumpTemplate
-  a Run Speed Test on all Files in Working Directory
-   clickCommand _runSpeedTestCommand
+  a Run Speed Test on all Templates
+   clickCommand _runTemplateSpeedTestCommand
+  br
+  a Open all Templates Command
+   clickCommand _openAllTemplatesCommand
   br
   a Run Tile Quality Check
    clickCommand _doTileQualityCheckCommand
  javascript
   getTileBodyStumpCode() {
    return this.bodyStumpTemplate
+  }
+  _runTemplateSpeedTestCommand() {
+   return this.getWebApp()._runTemplateSpeedTestCommand()
+  }
+  _openAllTemplatesCommand() {
+   return this.getWebApp()._openAllTemplatesCommand()
+  }
+  _doTileQualityCheckCommand() {
+   return this.getWebApp()._doTileQualityCheckCommand()
   }
 debugSleepNode
  cells tileKeywordCell millisecondsCell dummyDataSetIdCell
@@ -33652,6 +32886,85 @@ debugThrowNode
   }
   treeComponentDidUpdate() {
    this._throwIfMethodNameIs("treeComponentDidUpdate")
+  }
+dtjsBasicNode
+ description A spreadsheet-like table.
+ string tileSize 1200 500
+ string tileCssScript ohayo/packages/dtjs/datatables.min.css
+ string tileScript ohayo/packages/dtjs/datatables.min.js
+ extends abstractChartNode
+ crux dtjs.basic
+ string bodyStumpTemplate
+  div
+  table
+   class DataTable
+   thead
+    tr
+     {headerRows}
+   tbody
+    {rows}
+ string cellStumpTemplate
+  td
+   bern
+    {box}
+ string rowStumpTemplate
+  tr
+   {cols}
+ javascript
+  getTileBodyStumpCode() {
+   const columnDefs = this.getParentOrDummyTable()
+    .getColumnsArray()
+    .slice(0, 10)
+   const headerRows = this._getHeaderRowsStumpCode(columnDefs.map(col => col.getColumnName()))
+   const rows = this._getTableRowsStumpCode(columnDefs)
+   return this.qFormat(this.bodyStumpTemplate, { headerRows, rows })
+  }
+  _getHeaderRowsStumpCode(columns) {
+   return columns.map(colName => \`th \${colName}\`).join("\\n")
+  }
+  _getTableRowsStumpCode(columns) {
+   return this.getRowsWithRowDisplayLimit()
+    .slice(0, 10)
+    .map((row, index) => {
+     const cols = columns
+      .map(column => {
+       const box = row.getRowHtmlSafeValue(column.getColumnName()) // todo: cache?
+       return this.qFormat(this.cellStumpTemplate, { box })
+      })
+      .join("\\n")
+     return this.qFormat(this.cellStumpTemplate, { cols })
+    })
+    .join("\\n")
+  }
+  treeComponentWillUnmount() {
+   // cleanup
+  }
+  treeComponentDidUpdate() {
+   super.treeComponentDidUpdate()
+   const table = this.getParentOrDummyTable()
+   const columnDefs = this.getParentOrDummyTable()
+    .getColumnsArray()
+    .slice(0, 10)
+   const container = this.getStumpNode().findStumpNodeByChild("class DataTable")
+   if (this.isNodeJs()) return undefined
+   const width = this._tileWidth
+   const height = this._tileHeight
+   const shadow = container.getShadow()
+   const el = shadow.getShadowElement()
+   shadow.setShadowCss({ width, height })
+   const rows = this.getRowsWithRowDisplayLimit()
+   // todo: note, this is only works with jQuery
+   jQuery.fn.dataTable.ext.errMode = "throw"
+   this._dataTables = jQuery(el).DataTable({
+    data: this.getRowsAsDataTableArrayWithHeader(rows, columnDefs.map(col => col.getColumnName())).slice(1),
+    pageLength: 10,
+    scrollY: height
+    //"scrollCollapse": true,
+    //"paging": false
+   })
+  }
+  treeComponentDidMount() {
+   this.treeComponentDidUpdate()
   }
 editorGalleryNode
  description Show a thumbnail of all the Ohayo documents in the input table.
@@ -33789,6 +33102,199 @@ handsontableBasicNode
   }
  extends abstractChartNode
  crux handsontable.basic
+abstractHtmlNode
+ catchAllCellType htmlCell
+ frequency 0
+ description An HTML element
+ inScope styleNode contentNode
+ extends abstractChartNode
+ string hakonTemplate
+  .abstractHtmlNode
+   code
+    user-select text
+ abstract
+ string bodyStumpTemplate
+  {tag}
+   {style}
+   {src}
+   bern
+    {content}
+ javascript
+  getTileFooterStumpCode() {
+   return this.getTileMenuButtonStumpCode()
+  }
+  async fetchTableInputs() {
+   return { rows: [{ text: this.getHtmlContent() }] }
+  }
+  getHtmlContent() {
+   return this.getWordsFrom(2).join(" ") || "No html content to show."
+  }
+  getTag() {
+   return this.getWord(1) || "div" // todo: verify this is legal tag.
+  }
+  getSrc() {
+   return this.getSettingsStruct().src
+  }
+  getTileBodyStumpCode() {
+   return this.qFormat(this.bodyStumpTemplate, { tag: this.getTag(), style: this.style ? \`style \${this.style}\` : "", src: this.getSrc() ? \`src \${this.getSrc()}\` : "", content: this.getHtmlContent() || "" })
+  }
+htmlTextNode
+ description Displays fixed text in the given HTML element.
+ cells tileKeywordCell htmlTextTagCell
+ catchAllCellType htmlCell
+ frequency .002
+ extends abstractHtmlNode
+ crux html.text
+htmlPrintAsNode
+ description Displays input table in the given HTML element.
+ cells tileKeywordCell htmlTextTagCell
+ frequency .002
+ javascript
+  getHtmlContent() {
+   return this.getPipishInput()
+  }
+ extends abstractHtmlNode
+ crux html.printAs
+abstractHTMLFixedTagTileNode
+ abstract
+ extends abstractHtmlNode
+ javascript
+  getHtmlContent() {
+   return this.getContent()
+  }
+  getTag() {
+   return this.htmlTagName
+  }
+htmlH1Node
+ catchAllCellType htmlCell
+ description Displays an H1 Header with fixed text
+ example A title
+  html.h1 Hello world
+ frequency .002
+ string tileSize 600 75
+ string htmlTagName h1
+ string style text-align:center;
+ extends abstractHTMLFixedTagTileNode
+ crux html.h1
+abstractHTMLContentIsSrcTileNode
+ abstract
+ extends abstractHTMLFixedTagTileNode
+ javascript
+  getHtmlContent() {
+   return ""
+  }
+  getSrc() {
+   return this.getContent() || super.getSrc()
+  }
+htmlImgNode
+ description Displays an image from given url.
+ cells tileKeywordCell urlCell
+ frequency .002
+ string htmlTagName img
+ string style width:100%;
+ extends abstractHTMLContentIsSrcTileNode
+ crux html.img
+htmlIframeNode
+ description Displays an iframe from given url.
+ cells tileKeywordCell urlCell
+ string htmlTagName iframe
+ extends abstractHTMLContentIsSrcTileNode
+ crux html.iframe
+htmlCustomNode
+ description Display custom HTML.
+ example Hello world
+  html.custom
+   content
+    <h1>Hello world</h1>
+ inScope contentNode
+ extends abstractChartNode
+ crux html.custom
+ string bodyStumpTemplate
+  div
+   bern
+    {content}
+ javascript
+  getTileBodyStumpCode() {
+   // https://meta.stackexchange.com/questions/1777/what-html-tags-are-allowed-on-stack-exchange-sites
+   // todo: sanitize tags
+   const contentNode = this.getNode("content")
+   const content = contentNode ? contentNode.childrenToString() : "No HTML content to show"
+   return this.qFormat(this.bodyStumpTemplate, { content })
+  }
+iconsIconNode
+ extends abstractChartNode
+ abstract
+iconsHumanNode
+ description Assuming each row in your data represents a human, creates a human icon.
+ example
+  samples.patients
+   icons.human
+ inScope genderColumnNode headSizeNode
+ string columnPredictionHints
+  headSize isString=false
+  genderColumn isString=true
+ string bodyStumpTemplate
+  div
+   bern
+    {bern}
+ javascript
+  getTileBodyStumpCode() {
+   // Now, what if there is no input table?
+   const table = this.getParentOrDummyTable()
+   const rows = table.getRows()
+   // Now, what if we are using dummy input table?
+   const headSizeColumn = this.getSettingsStruct().headSize
+   const genderColumn = this.getSettingsStruct().genderColumn
+   const reducts = table.getColumnByName(headSizeColumn).getReductions()
+   const headColMax = reducts.max
+   const bern = rows
+    .map(row => {
+     const typedRow = row.rowToObjectWithOnlyNativeJavascriptTypes()
+     const value = typedRow[headSizeColumn]
+     // TODO: ADD TYPINGS
+     const genderVal = typedRow[genderColumn].toLowerCase()
+     const gender = genderVal === "male" ? "blue" : "pink"
+     let character = "O"
+     let percent = value / headColMax
+     if (isNaN(value)) {
+      character = "x"
+      percent = reducts.median / headColMax
+     }
+     const title = row.getHoverTitle()
+     percent = Math.round(18 * percent)
+     return \`<span title="\${title}" style="font-size:\${percent}px; color:\${gender};">\${character}</span>\`
+    })
+    .join(" ")
+   return this.qFormat(this.bodyStumpTemplate, { bern: bern })
+  }
+ string dummyDataSetName patients
+ extends iconsIconNode
+ crux icons.human
+iconsCircleNode
+ description Displays a simple icon for each row of your data.
+ example
+  samples.iris
+   icons.circle
+    radius Petal.Length
+ inScope radiusNode
+ string columnPredictionHints
+  radius isString=false
+ string dummyDataSetName playerGoals
+ extends iconsIconNode
+ crux icons.circle
+ string bodyStumpTemplate
+  div
+   bern
+    {bern}
+ javascript
+  getTileBodyStumpCode() {
+   const column = this.getSettingsStruct().radius
+   const bern = this.getParentOrDummyTable()
+    .getRows()
+    .map(row => \`<span style="font-size:\${row.rowToObjectWithOnlyNativeJavascriptTypes()[column] / 3}em;">O</span>\`)
+    .join(" ")
+   return this.qFormat(this.bodyStumpTemplate, { bern: bern })
+  }
 listBasicNode
  catchAllCellType columnNameCell
  description Show 1 column as a text list.
@@ -33850,13 +33356,146 @@ listLinksNode
   link isLink
  extends listBasicNode
  crux list.links
+markdownToHtmlNode
+ description Displays Markdown rendered as HTML.
+ example Show a text editor and some rendered Markdown.
+  data.inline
+   parser text
+   content
+    # My header
+    ## My subheader
+    
+    Hello world
+   markdown.toHtml
+ inScope contentNode
+ string bodyStumpTemplate
+  div
+   class TileSelectable
+   bern
+    {md}
+ javascript
+  getTileBodyStumpCode() {
+   return this.qFormat(this.bodyStumpTemplate, { md: marked(this.getPipishInput()) })
+  }
+ string tileSize 400 400
+ string dummyDataSetName markdown
+ extends abstractChartNode
+ crux markdown.toHtml
+abstractShowTileNode
+ cells tileKeywordCell columnNameCell
+ catchAllCellType titleCell
+ frequency .02
+ example A dashboard for a Seattle family's water bill.
+  samples.waterBill
+   hidden
+   vega.scatter
+   tables.basic
+   show.mean Amount
+   show.median Amount
+   show.sum Amount
+   show.min Amount
+   show.max Amount
+ string tileSize 140 120
+ string dummyDataSetName stockPrice
+ extends abstractChartNode
+ abstract
+ string hakonTemplate
+  .abstractShowTileNode
+   h3
+    text-align center
+   h6
+    text-align center
+    height 40px
+    overflow hidden
+ string bodyStumpTemplate
+  h6 {title}
+  h3 {number}
+ javascript
+  getTileBodyStumpCode() {
+   const columnName = this.getWord(1)
+   if (!columnName) return \`No data for \${this.getFirstWord()}\`
+   const table = this.getParentOrDummyTable()
+   const col = table.getTableColumnByName(columnName)
+   if (!col) {
+    console.log(\`No column named \${columnName}\`)
+    return ""
+   }
+   const reductionName = this.reductionName || this.getWord(0).split(".")[1]
+   const title = this.getWordsFrom(2).join(" ") || [columnName, reductionName].join(" ")
+   const number = this.toDisplayString(col.getReductions()[reductionName], columnName)
+   return this.qFormat(this.bodyStumpTemplate, { title, number })
+  }
+showRowCountNode
+ catchAllCellType titleCell
+ description Show the total number of rows
+ frequency .02
+ string tileSize 140 120
+ string dummyDataSetName stockPrice
+ cells tileKeywordCell
+ extends abstractShowTileNode
+ string defaultTitle Total rows
+ crux show.rowCount
+ javascript
+  getTileBodyStumpCode() {
+   const title = this.getWordsFrom(1).join(" ") || this.defaultTitle
+   return this.qFormat(this.bodyStumpTemplate, { title, number: this._getNumber() })
+  }
+  _getNumber() {
+   return this.getParentOrDummyTable().getRowCount()
+  }
+showColumnCountNode
+ extends showRowCountNode
+ string defaultTitle Total columns
+ description Show the total number of columns
+ crux show.columnCount
+ javascript
+  _getNumber() {
+   return this.getParentOrDummyTable().getColumnNames().length
+  }
+showStaticNode
+ description Show a hard coded number
+ extends abstractShowTileNode
+ example
+  show.static 20 Sales
+ cells tileKeywordCell numberCell
+ catchAllCellType titleCell
+ crux show.static
+ javascript
+  getTileBodyStumpCode() {
+   const title = this.getWordsFrom(2).join(" ")
+   return this.qFormat(this.bodyStumpTemplate, { title, number: this.getWord(1) || "" })
+  }
+showValueNode
+ description Show the value of a column with 1 row
+ extends abstractShowTileNode
+ crux show.value
+ string reductionName median
+showMedianNode
+ description Show the median value of a column
+ extends abstractShowTileNode
+ crux show.median
+showSumNode
+ description Show the sum of a column
+ extends abstractShowTileNode
+ crux show.sum
+showMeanNode
+ description Show the mean of a column
+ extends abstractShowTileNode
+ crux show.mean
+showMinNode
+ description Show the min value of a column
+ extends abstractShowTileNode
+ crux show.min
+showMaxNode
+ description Show the max value of a column
+ extends abstractShowTileNode
+ crux show.max
 tablesBasicNode
  frequency .1
  description Basic table with sorting.
  example Basic table with Iris data
   samples.iris
    tables.basic
- catchAllCellType titleCell
  inScope columnLimitNode
  int rowDisplayLimit 100
  int columnLimit 20
@@ -33894,12 +33533,6 @@ tablesBasicNode
     background-color {lightGrey}
     border 1px solid {lineColor}
     border-bottom-color {greyish}
-   input,textarea
-    border 0
-    font-size 14px
-    box-sizing border-box
-    padding 0
-    font-family {fonts}
  string cellStumpTemplate
   td
    bern
@@ -33917,9 +33550,6 @@ tablesBasicNode
    td {number}
    {cols}
  javascript
-  getTileHeaderBern() {
-   return this.getContent() || super.getTileHeaderBern()
-  }
   _getTableRowsStumpCode(columns) {
    return this.getRowsWithRowDisplayLimit()
     .map((row, index) => {
@@ -34166,6 +33796,295 @@ treenotation3dNode
    program.getTopDownArray().forEach(nodeToPoint)
    return points
   }
+treenotationOutlineNode
+ description A simple pretty text-only view of a Tree Notation document.
+ example Outer space
+  samples.outerSpace
+   treenotation.outline
+ string dummyDataSetName outerSpace
+ string tileSize 800 500
+ extends abstractChartNode
+ crux treenotation.outline
+ string bodyStumpTemplate
+  pre
+   style overflow: scroll; width: 100%; height: 100%; margin: 0; box-sizing: border-box; font-family: monospace; line-height: 13px;
+   bern
+    {bern}
+ javascript
+  _getTheBern() {
+   return new jtree.TreeNode(this.getPipishInput()).toOutline()
+  }
+  getTileBodyStumpCode() {
+   return this.qFormat(this.bodyStumpTemplate, { bern: this._getTheBern() })
+  }
+treenotationDotlineNode
+ description A simple pretty icon-only visualization of the structure of a Tree Notation doc.
+ example Outer space
+  samples.outerSpace
+   treenotation.dotline
+ boolean dots true
+ string dummyDataSetName outerSpace
+ javascript
+  _getTheBern() {
+   return new jtree.TreeNode(this.getPipishInput()).toMappedOutline(
+    node =>
+     "o" +
+     node
+      .getLine()
+      .split(" ")
+      .map(word => "º")
+      .join("")
+   )
+  }
+ extends treenotationOutlineNode
+ crux treenotation.dotline
+abstractVegaNode
+ frequency .1
+ catchAllCellType titleCell
+ string tileSize 800 300
+ string tileScript ohayo/packages/vega/vega.combined.min.js
+ string dummyDataSetName stockPrice
+ string markName bar
+ extends abstractChartNode
+ abstract
+ string bodyStumpTemplate
+  div
+   class divForExternalLibrary
+ javascript
+  // todo: I don't think vega handles . in column names.
+  getTileBodyStumpCode() {
+   return this.bodyStumpTemplate
+  }
+  _getColumnToField(columnName) {
+   if (!columnName) return undefined
+   const columnsMap = this.getParentOrDummyTable().getColumnsMap()
+   const col = columnsMap[columnName]
+   const obj = { field: columnName, type: col.getVegaType() }
+   if (col.isTemporal()) {
+    const timeUnit = col.getVegaTimeUnit()
+    if (timeUnit) obj.timeUnit = timeUnit
+   }
+   return obj
+  }
+  _getElementForVega() {
+   return this.getStumpNode()
+    .findStumpNodeByChild("class divForExternalLibrary")
+    .getShadow()
+    .getShadowElement()
+  }
+  async _drawVega() {
+   // todo: don't rerun this if we dont need to.
+   await vegaEmbed(this._getElementForVega(), this._getVegaSpec())
+  }
+  treeComponentDidUpdate() {
+   super.treeComponentDidUpdate()
+   if (this.isNodeJs()) return undefined
+   this._drawVega()
+  }
+  treeComponentDidMount() {
+   this.treeComponentDidUpdate()
+  }
+  _getVegaData() {
+   return {
+    values: this.getParentOrDummyTable()
+     .cloneNativeJavascriptTypedRows()
+     .slice(0, this._getRowDisplayLimit())
+   }
+  }
+  _getVegaTitle() {
+   return this.getContent()
+  }
+  _getVegaSpec() {
+   return {
+    description: "A simple bar chart with embedded data.",
+    data: this._getVegaData(),
+    width: this._tileWidth,
+    height: this._tileHeight,
+    mark: this._getVegaMarkObj(),
+    encoding: this._getEncodingMap(),
+    transform: this._getVegaTransform(),
+    title: this._getVegaTitle(),
+    config: this._getVegaConfig()
+   }
+  }
+  _getVegaTransform() {
+   return undefined
+  }
+  _getVegaConfig() {
+   return undefined
+  }
+  _getEncodingMap() {
+   return {}
+  }
+  // todo: add type
+  _getVegaMarkObj() {
+   return { type: this._getVegaMark(), tooltip: { content: "data" } }
+  }
+  _getVegaMark() {
+   return this.markName
+  }
+vegaBarNode
+ description A bar chart
+ inScope xColumnNode yColumnNode colorColumnNode shapeColumnNode
+ javascript
+  _getEncodingMap() {
+   const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.colorColumnKey])
+   return {
+    x: this._getColumnToField(columnNames[0]),
+    y: this._getColumnToField(columnNames[1]),
+    color: this._getColumnToField(columnNames[2])
+   }
+  }
+ string columnPredictionHints
+  xColumn
+  yColumn isString=false,!xColumn
+ extends abstractVegaNode
+ crux vega.bar
+vegaLineNode
+ description A line chart
+ string markName line
+ extends vegaBarNode
+ crux vega.line
+vegaAreaNode
+ description An area chart
+ string markName area
+ extends vegaLineNode
+ crux vega.area
+vegaScatterNode
+ description A scatterplot
+ string markName point
+ extends vegaBarNode
+ crux vega.scatter
+ javascript
+  _getEncodingMap() {
+   const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.colorColumnKey, this.shapeColumnKey])
+   return {
+    x: this._getColumnToField(columnNames[0]),
+    y: this._getColumnToField(columnNames[1]),
+    color: this._getColumnToField(columnNames[2]),
+    shape: this._getColumnToField(columnNames[3])
+   }
+  }
+vegaBubbleNode
+ description A bubble plot
+ inScope sizeColumnNode colorColumnNode
+ string markName circle
+ string dummyDataSetName gapMinder
+ string columnPredictionHints
+  sizeColumn isString=false
+  xColumn isString=false
+ extends vegaScatterNode
+ crux vega.bubble
+ javascript
+  _getEncodingMap() {
+   const columnNames = this.mapSettingNamesToColumnNames([this.xColumnKey, this.yColumnKey, this.sizeColumnKey, this.colorColumnKey])
+   return {
+    y: {
+     field: columnNames[1],
+     type: "quantitative",
+     scale: { zero: false },
+     axis: { minExtent: 30 }
+    },
+    x: this._getColumnToField(columnNames[0]),
+    size: { field: columnNames[2], type: "quantitative" },
+    color: { value: "#000" }
+   }
+  }
+vegaEmojiNode
+ description A bar chart with emojis
+ frequency .001
+ inScope yColumnNode emojiColumnNode
+ string columnPredictionHints
+  emojiColumn isString=true
+  yColumn isString=false
+ string dummyDataSetName emojis
+ javascript
+  _getVegaConfig() {
+   return { view: { stroke: "" } }
+  }
+  _getVegaMark() {
+   return { type: "text", baseline: "middle" }
+  }
+  _getEncodingMap() {
+   const columnNames = this.mapSettingNamesToColumnNames([this.yColumnKey, "emoji"])
+   return {
+    x: { field: columnNames[1], type: "nominal", axis: null },
+    y: { field: columnNames[0], type: "quantitative", axis: null, sort: null },
+    text: { field: columnNames[1], type: "nominal" },
+    size: { value: 65 }
+   }
+  }
+ extends vegaBarNode
+ crux vega.emoji
+vegaHistogramNode
+ description A histogram
+ inScope xColumnNode
+ javascript
+  _getEncodingMap() {
+   const columnName = this.getContent() || this.mapSettingNamesToColumnNames([this.xColumnKey])[0]
+   return {
+    x: {
+     bin: true,
+     field: columnName,
+     type: "quantitative"
+    },
+    y: {
+     aggregate: "count",
+     type: "quantitative"
+    }
+   }
+  }
+ string columnPredictionHints
+  xColumn isString=false
+ string dummyDataSetName wordCounts
+ extends abstractVegaNode
+ crux vega.histogram
+vegaExampleNode
+ description Shows a chart from the Vega Example Gallery
+ frequency .001
+ cells tileKeywordCell vegaExampleNameCell
+ example
+  vega.example trellis_anscombe
+ extends abstractVegaNode
+ crux vega.example
+ javascript
+  _getVegaSpec() {
+   return this._spec
+  }
+  async _fetchSpec() {
+   // todo: localtesting.
+   if (this.isNodeJs()) return undefined
+   const exampleName = this.getContent() || "area" // todo: pull this default from the gram?
+   const url = \`ohayo/packages/vega/ignore/vega-lite/examples/compiled/\${exampleName}.vg.json\`
+   const res = await this.getWebApp()
+    .getWillowBrowser()
+    .httpGetUrl(url)
+   const spec = JSON.parse(res.text)
+   // rewrite data urls
+   spec.data.forEach(row => {
+    if (row.url) row.url = row.url.replace("data/", "packages/vega/datasets/")
+   })
+   this._spec = spec
+   return spec
+  }
+  // todo: clean this up.
+  async fetchTableInputs() {
+   const spec = await this._fetchSpec()
+   if (this.isNodeJs()) return { rows: [] }
+   const el = jQuery("<div></div>")[0]
+   const embedded = await vegaEmbed(el, spec)
+   const rows = await this._getVegaPostTransformOutputRows(spec, embedded)
+   return { rows: rows }
+  }
+  async _getVegaPostTransformOutputRows(spec, embedded) {
+   const tableName = spec.data[0] && spec.data[0].name
+   if (tableName) return embedded.view.data(tableName)
+   // const values = spec.data.values
+   // if (values && values.entries) return Array.from(values.entries())
+   // if (typeof values === "function") return []
+   // else if (values) return values
+   return []
+  }
 DidYouMeanTileNode
  tags noPicker
  description Provides suggestions for misspelled tiles.
@@ -34200,12 +34119,7 @@ DidYouMeanTileNode
   getErrors() {
    return [new jtree.UnknownNodeTypeError(this)]
   }
-  getTileHeaderBern() {
-   return ""
-  }
 abstractDocTileNode
- int footerHeight 0
- int headerHeight 0
  tags noPicker
  cells tileKeywordCell
  extends abstractTileTreeComponentNode
@@ -34219,15 +34133,11 @@ abstractDocTileNode
    class {classes}
    id {id}
    div
-    class TileHeaderGrabber
-   div
-    class TileBody HeaderLess
+    class TileBody
     {body}
    div
     class TileFooter
     {footer}
-   div
-    class TileFooterGrabber
  javascript
   _getBody() {
    return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
@@ -34297,85 +34207,6 @@ docCommentNode
 docToolingNode
  extends docCommentNode
  crux doc.tooling
-abstractPickerTileNode
- extends abstractTileTreeComponentNode
- string tileSize 480 420
- boolean needsData false
- abstract
- string hakonTemplate
-  .PickerTileNode
-   .PickerCategory
-    width 100%
-    margin-top 20px
-    text-align center
-   .TileBody
-    display flex
-    flex-flow row wrap
-    a
-     &:hover
-      background-color {borderColor}
-     padding 10px
-     margin 5px
-     height 30px
-     background-color {backgroundColor}
-     border 1px solid {borderColor}
-     overflow hidden
-     text-align center
-     text-overflow ellipsis
-     font-size 14px
-     width 120px
-     span
-      font-size 70%
- string itemStumpTemplate
-  {categoryBreak}
-  a {name}
-   br
-    span {description}
-   title {description}
-   tabindex -1
-   value {value}
-   clickCommand {command}
- string categoryBreakStumpTemplate
-  div {category}
-   class PickerCategory
- string tileHeader Gallery
- javascript
-  async fetchTableInputs() {
-   return { rows: this.getChoices().map(obj => obj.toObject()) }
-  }
-  getTileBodyStumpCode() {
-   let lastCat = ""
-   return this.getChoices()
-    .map(choice => {
-     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
-     lastCat = choice.category
-     return this.qFormat(this.itemStumpTemplate, choice)
-    })
-    .join("\\n")
-  }
-  getTileHeaderBern() {
-   return this.tileHeader
-  }
-PickerTileNode
- extends abstractPickerTileNode
- description Displays list of available tiles.
- crux doc.picker
- string tileHeader Tile Gallery
- javascript
-  getChoices() {
-   const allChoices = this.getRootNode()
-    .getHandGrammarProgram()
-    .getTopNodeTypeDefinitions()
-   const filteredChoices = allChoices.filter(nodeDef => !(nodeDef.get(jtree.GrammarConstants.tags) || "").includes(OhayoConstants.noPicker))
-   const theChoices = filteredChoices.length ? filteredChoices : allChoices
-   return theChoices.map(nodeDefinition => {
-    const nodeId = nodeDefinition.get("crux") || nodeDefinition.getNodeTypeIdFromDefinition()
-    const name = nodeId.split(".")[1] || ""
-    const category = lodash.upperFirst(nodeId.split(".")[0])
-    const description = nodeDefinition.getDescription()
-    return { name, category, description, value: nodeId, command: "changeTileTypeCommand" }
-   })
-  }
 abstractProviderNode
  string tileSize 140 60
  extends abstractTileTreeComponentNode
@@ -34385,15 +34216,11 @@ abstractProviderNode
    class {classes}
    id {id}
    div
-    class TileHeaderGrabber
-   div
-    class TileBody HeaderLess
+    class TileBody
     {body}
    div
     class TileFooter
     {footer}
-   div
-    class TileFooterGrabber
  string tileFooterTemplate
   span Rows Out: {outputCount} Columns Out: {columnCount} Time: {time}s Parser: {parserId} {errorMessageHtml}
   {tileMenuButton}
@@ -34970,7 +34797,7 @@ redditAllNode
     hidden
     rows.sortBy score
      rows.reverse
-      tables.basic Top Stories on Reddit
+      tables.basic
     vega.scatter
      yColumn score
      xColumn created_utc
@@ -36122,10 +35949,12 @@ rowsSortByNode
   samples.waterBill
    rows.sortBy Amount
     rows.first 1
-     tables.basic Cheapest month
+     doc.subtitle Cheapest month
+     tables.basic
     rows.reverse
      rows.first 1
-      tables.basic Most expensive
+      doc.subtitle Most expensive
+      tables.basic
  extends abstractTransformerNode
  crux rows.sortBy
  string placeholderMessage Columns you want to sort by
@@ -36314,17 +36143,13 @@ editorFilesNode
  string tileSize 140 120
  javascript
   getRowClass() {
+   // todo: remove?
    class FileRow extends Row {
     destroyRow(app) {
      return app.deleteFileCommand(this.getRowOriginalValue("link"))
     }
    }
    return FileRow
-  }
-  getTileHeaderBern() {
-   return this.getWebApp()
-    .getDefaultDisk()
-    .getPathBase()
   }
   async fetchTableInputs() {
    const files = await this.getWebApp()
@@ -36434,101 +36259,6 @@ samplesTinyIrisNode
   }
   async fetchTableInputs() {
    return new TableParser().parseTableInputsFromString(this.getDataContent(), this.getParserId())
-  }
-abstractTemplatePickerTileNode
- extends abstractProviderNode
- todo This is duplicate code from picker. Add mixins to Grammar?
- string tileSize 480 420
- abstract
- string hakonTemplate
-  .abstractTemplatePickerTileNode
-   .PickerCategory
-    width 100%
-    margin-top 20px
-    text-align center
-   .TileBody
-    display flex
-    flex-flow row wrap
-    a
-     &:hover
-      background-color {borderColor}
-     padding 10px
-     margin 5px
-     height 30px
-     background-color {backgroundColor}
-     border 1px solid {borderColor}
-     overflow hidden
-     text-align center
-     text-overflow ellipsis
-     font-size 14px
-     width 120px
-     span
-      font-size 70%
- string itemStumpTemplate
-  {categoryBreak}
-  a {name}
-   br
-    span {description}
-   title {description}
-   tabindex -1
-   value {value}
-   class pickerItemButton
-   clickCommand {command}
- string categoryBreakStumpTemplate
-  div {category}
-   class PickerCategory
- string tileHeader Gallery
- javascript
-  async fetchTableInputs() {
-   return { rows: this.getChoices() }
-  }
-  getTileBodyStumpCode() {
-   let lastCat = ""
-   return this.getChoices()
-    .map(choice => {
-     choice.categoryBreak = lastCat !== choice.category ? this.qFormat(this.categoryBreakStumpTemplate, { category: choice.category }) : ""
-     lastCat = choice.category
-     return this.qFormat(this.itemStumpTemplate, choice)
-    })
-    .join("\\n")
-  }
-  getTileHeaderBern() {
-   return this.tileHeader
-  }
-templatesListNode
- extends abstractTemplatePickerTileNode
- description Displays templates.
- frequency .22
- crux templates.list
- string tileHeader Template Gallery
- javascript
-  getChoices() {
-   // todo: cleanup.
-   const choices = this._getTheTemplates().map(node => {
-    const id = node
-     .getWord(1)
-     .replace("templates/", "")
-     .replace(this.ohayoFileExtensionKey, "")
-    return {
-     command: "createProgramFromTemplateCommand",
-     name: node.get("data doc.title"),
-     value: id,
-     category: lodash.upperFirst(node.get("data doc.categories")),
-     description: ""
-    }
-   })
-   return lodash.sortBy(choices, "category")
-  }
-  _getTheTemplates() {
-   // todo: trim?
-   return typeof TemplatesStamp === "undefined" ? jtree.TreeNode.fromDisk("ohayo/packages/templates/Templates.stamp").trim() : new jtree.TreeNode(TemplatesStamp).trim()
-  }
-  getProgramTemplate(id) {
-   const node = this._getTheTemplates().filter(node => node.getContent() === \`templates/\${id}\${this.ohayoFileExtensionKey}\`)[0]
-   return {
-    template: node.getNode("data").childrenToString(),
-    name: id + this.ohayoFileExtensionKey
-   }
   }
 assertRowCountNode
  description Throw an error if row count not correct.
@@ -36782,16 +36512,6 @@ docAuthorNode
  catchAllCellType stringCell
  crux doc.author
  description Add one author per line.
-docDefaultHiddenNode
- crux doc.defaultHidden
- example
-  doc.defaultHidden
-  samples.portals
-   tables.basic
-    visible
- description Change default tile visibility to hidden.
- cells tileKeywordCell
- extends abstractDocSettingNode
 docDateNode
  description Date published.
  extends abstractDocSettingNode
@@ -36918,9 +36638,6 @@ ohayoNode
   getTab() {
    return this._tab
   }
-  tilesAreVisible() {
-   return !this.has(OhayoConstants.defaultHidden)
-  }
   async loadAndIncrementalRender() {
    const app = this.getTab().getRootNode()
    await Promise.all(this.getTiles().map(tile => tile.loadBrowserRequirements()))
@@ -37007,52 +36724,6 @@ schemaNode
         tileBlankLineNode: tileBlankLineNode,
         abstractTileTreeComponentNode: abstractTileTreeComponentNode,
         abstractChartNode: abstractChartNode,
-        abstractHeaderlessChartTileNode: abstractHeaderlessChartTileNode,
-        abstractEmptyFooterTileNode: abstractEmptyFooterTileNode,
-        abstractSnippetGalleryNode: abstractSnippetGalleryNode,
-        abstractTemplateGalleryNode: abstractTemplateGalleryNode,
-        challengeListNode: challengeListNode,
-        samplesListNode: samplesListNode,
-        vegaDataListNode: vegaDataListNode,
-        vegaExampleListNode: vegaExampleListNode,
-        asciiChartNode: asciiChartNode,
-        challengePlayNode: challengePlayNode,
-        dtjsBasicNode: dtjsBasicNode,
-        abstractHtmlNode: abstractHtmlNode,
-        htmlTextNode: htmlTextNode,
-        htmlPrintAsNode: htmlPrintAsNode,
-        abstractHTMLFixedTagTileNode: abstractHTMLFixedTagTileNode,
-        htmlH1Node: htmlH1Node,
-        abstractHTMLContentIsSrcTileNode: abstractHTMLContentIsSrcTileNode,
-        htmlImgNode: htmlImgNode,
-        htmlIframeNode: htmlIframeNode,
-        htmlCustomNode: htmlCustomNode,
-        abstractShowTileNode: abstractShowTileNode,
-        showRowCountNode: showRowCountNode,
-        showColumnCountNode: showColumnCountNode,
-        showStaticNode: showStaticNode,
-        showValueNode: showValueNode,
-        showMedianNode: showMedianNode,
-        showSumNode: showSumNode,
-        showMeanNode: showMeanNode,
-        showMinNode: showMinNode,
-        showMaxNode: showMaxNode,
-        abstractVegaNode: abstractVegaNode,
-        vegaBarNode: vegaBarNode,
-        vegaLineNode: vegaLineNode,
-        vegaAreaNode: vegaAreaNode,
-        vegaScatterNode: vegaScatterNode,
-        vegaBubbleNode: vegaBubbleNode,
-        vegaEmojiNode: vegaEmojiNode,
-        vegaHistogramNode: vegaHistogramNode,
-        vegaExampleNode: vegaExampleNode,
-        calendarHeatNode: calendarHeatNode,
-        iconsIconNode: iconsIconNode,
-        iconsHumanNode: iconsHumanNode,
-        iconsCircleNode: iconsCircleNode,
-        markdownToHtmlNode: markdownToHtmlNode,
-        treenotationOutlineNode: treenotationOutlineNode,
-        treenotationDotlineNode: treenotationDotlineNode,
         abstractTextNode: abstractTextNode,
         abstractInstructionsNode: abstractInstructionsNode,
         amazonHistoryNode: amazonHistoryNode,
@@ -37067,21 +36738,68 @@ schemaNode
         re3dataComingSoonNode: re3dataComingSoonNode,
         zingComingSoonNode: zingComingSoonNode,
         editorHelloWorldNode: editorHelloWorldNode,
+        abstractSnippetGalleryNode: abstractSnippetGalleryNode,
+        abstractTemplateGalleryNode: abstractTemplateGalleryNode,
+        challengeListNode: challengeListNode,
+        samplesListNode: samplesListNode,
+        vegaDataListNode: vegaDataListNode,
+        vegaExampleListNode: vegaExampleListNode,
+        abstractPickerTileNode: abstractPickerTileNode,
+        PickerTileNode: PickerTileNode,
+        templatesListNode: templatesListNode,
+        asciiChartNode: asciiChartNode,
+        calendarHeatNode: calendarHeatNode,
+        challengePlayNode: challengePlayNode,
         debugDumpNode: debugDumpNode,
         webDumpNode: webDumpNode,
         debugCommandsNode: debugCommandsNode,
         debugSleepNode: debugSleepNode,
         debugNoOpNode: debugNoOpNode,
         debugThrowNode: debugThrowNode,
+        dtjsBasicNode: dtjsBasicNode,
         editorGalleryNode: editorGalleryNode,
         handsontableBasicNode: handsontableBasicNode,
+        abstractHtmlNode: abstractHtmlNode,
+        htmlTextNode: htmlTextNode,
+        htmlPrintAsNode: htmlPrintAsNode,
+        abstractHTMLFixedTagTileNode: abstractHTMLFixedTagTileNode,
+        htmlH1Node: htmlH1Node,
+        abstractHTMLContentIsSrcTileNode: abstractHTMLContentIsSrcTileNode,
+        htmlImgNode: htmlImgNode,
+        htmlIframeNode: htmlIframeNode,
+        htmlCustomNode: htmlCustomNode,
+        iconsIconNode: iconsIconNode,
+        iconsHumanNode: iconsHumanNode,
+        iconsCircleNode: iconsCircleNode,
         listBasicNode: listBasicNode,
         listLinksNode: listLinksNode,
+        markdownToHtmlNode: markdownToHtmlNode,
+        abstractShowTileNode: abstractShowTileNode,
+        showRowCountNode: showRowCountNode,
+        showColumnCountNode: showColumnCountNode,
+        showStaticNode: showStaticNode,
+        showValueNode: showValueNode,
+        showMedianNode: showMedianNode,
+        showSumNode: showSumNode,
+        showMeanNode: showMeanNode,
+        showMinNode: showMinNode,
+        showMaxNode: showMaxNode,
         tablesBasicNode: tablesBasicNode,
         tablesInterestingNode: tablesInterestingNode,
         tablesDumpNode: tablesDumpNode,
         textWordcloudNode: textWordcloudNode,
         treenotation3dNode: treenotation3dNode,
+        treenotationOutlineNode: treenotationOutlineNode,
+        treenotationDotlineNode: treenotationDotlineNode,
+        abstractVegaNode: abstractVegaNode,
+        vegaBarNode: vegaBarNode,
+        vegaLineNode: vegaLineNode,
+        vegaAreaNode: vegaAreaNode,
+        vegaScatterNode: vegaScatterNode,
+        vegaBubbleNode: vegaBubbleNode,
+        vegaEmojiNode: vegaEmojiNode,
+        vegaHistogramNode: vegaHistogramNode,
+        vegaExampleNode: vegaExampleNode,
         DidYouMeanTileNode: DidYouMeanTileNode,
         abstractDocTileNode: abstractDocTileNode,
         docTitleNode: docTitleNode,
@@ -37090,8 +36808,6 @@ schemaNode
         docReferenceNode: docReferenceNode,
         docCommentNode: docCommentNode,
         docToolingNode: docToolingNode,
-        abstractPickerTileNode: abstractPickerTileNode,
-        PickerTileNode: PickerTileNode,
         abstractProviderNode: abstractProviderNode,
         abstractUrlNoCellsNode: abstractUrlNoCellsNode,
         abstractUrlNode: abstractUrlNode,
@@ -37215,8 +36931,6 @@ schemaNode
         randomFloatNode: randomFloatNode,
         randomIntNode: randomIntNode,
         samplesTinyIrisNode: samplesTinyIrisNode,
-        abstractTemplatePickerTileNode: abstractTemplatePickerTileNode,
-        templatesListNode: templatesListNode,
         assertRowCountNode: assertRowCountNode,
         printNode: printNode,
         printCsvNode: printCsvNode,
@@ -37267,7 +36981,6 @@ schemaNode
         abstractDocSettingNode: abstractDocSettingNode,
         docCategoriesNode: docCategoriesNode,
         docAuthorNode: docAuthorNode,
-        docDefaultHiddenNode: docDefaultHiddenNode,
         docDateNode: docDateNode,
         abstractDocSectionComponentNode: abstractDocSectionComponentNode,
         docSectionSubtitleNode: docSectionSubtitleNode,
@@ -37396,7 +37109,7 @@ window.TemplatesStamp = `file templates/amazon-purchase-history.ohayo
   doc.comment Delete the below line and replace with your data
   amazon.history
    columns.keep Category ItemTotal OrderDate Title
-    tables.basic All Amazon Purchases
+    tables.basic
     group.by Category
      reduce ItemTotal sum sum
      vega.bar Amount Spent by Category
@@ -37454,19 +37167,15 @@ file templates/country-names.ohayo
 file templates/country-populations.ohayo
  data
   doc.title Largest Countries by Population
-   visible
   samples.populations
    rows.sortBy Population2016
     vega.bar Population by Country
-     visible
      yColumn Population2016
      colorColumn Continent
     group.by Continent
      reduce Population2016 sum Population2016
      vega.bar Population by Region
-      visible
       yColumn Population2016
-  doc.defaultHidden
   doc.categories geography
 file templates/declaration-of-independence.ohayo
  data
@@ -37482,33 +37191,26 @@ file templates/declaration-of-independence.ohayo
 file templates/discovery-of-elements.ohayo
  data
   doc.title Discovery of the Elements
-   visible
   doc.subtitle What is the growth in known elements over time?
-   visible
   samples.periodicTable
    fill.missing Year 1000
     columns.keep Element Year
      rows.sortBy Year
       tables.basic
        rowDisplayLimit 200
-       visible
     group.by Year
      rows.sortBy Year
       rows.runningTotal count
        vega.bar Number of Elements Found Each Year
         xColumn Year
         yColumn count
-        visible
        vega.line Cumulative Number of Elements
         xColumn Year
         yColumn total
-        visible
    vega.scatter Year of Discovery by Atomic Number
     xColumn Year
     yColumn AtomicNumber
-    visible
   doc.categories chemistry
-  doc.defaultHidden
 file templates/git-repo-dashboard.ohayo
  data
   doc.title Desktop Only: Statistics for Local Git Repo
@@ -37563,8 +37265,6 @@ file templates/humanPopulation.ohayo
     vega.line Estimated Human Popuation
      yColumn populationInMillions
      xColumn when
-     visible
-  doc.defaultHidden
 file templates/life-expectancy.ohayo
  data
   doc.title Life Expectancy in the U.S.
@@ -37584,7 +37284,7 @@ file templates/loc-with-bars.ohayo
     show.sum lines Total LoC
     columns.keep name extension lines words bytes wordsPerLine
      rows.sortByReverse lines
-      tables.basic All files
+      tables.basic
     group.by extension
      reduce words sum words
      reduce bytes sum bytes
@@ -37593,29 +37293,24 @@ file templates/loc-with-bars.ohayo
       yColumn lines
      vega.bar Words
       yColumn words
-     tables.basic Top Extensions
+     tables.basic
   doc.categories programming
 file templates/logs.ohayo
  data
   doc.title Exponents
-   visible
   math.gen exp 0 1 .01
    vega.line 2.718^x from 0 to 1
-    visible
     xColumn input
     yColumn output
   math.gen exp 1 10 .1
    vega.line 2.718^x from 1 to 10
-    visible
     xColumn input
     yColumn output
   math.gen exp 10 20 .1
    vega.line 2.718^x from 10 to 20
-    visible
     xColumn input
     yColumn output
   doc.categories math
-  doc.defaultHidden
 file templates/most-popular-websites.ohayo
  data
   doc.title 500 Most Popular Websites
@@ -37648,7 +37343,7 @@ file templates/ohayo-grammar-analysis.ohayo
      hidden
      rows.first 10
       hidden
-      tables.basic Top 10 Words
+      tables.basic
 file templates/ohayo-product-stats.ohayo
  data
   doc.title Ohayo Product Stats
@@ -37745,22 +37440,6 @@ file templates/ohayo-reference.ohayo
    link http://ohayo.computer A whole sentence can be linked
   
   doc.section
-   subtitle Default visibilitiy
-   paragraph You can change the default visibility of a tile
-   paragraph The line below will hide all tiles by default.
-   code ohayo
-    doc.tiles hidden
-   paragraph When you hide all tiles, you'll need to opt-in to visible to show tiles.
-   code ohayo
-    samples.portals
-     vega.bar
-      visible
-   paragraph By default, all tiles are set to visible, which is equivalent to:
-   code
-    doc.tiles visible
-  
-  
-  doc.section
    subtitle Categories
    paragraph You might want to add some tags categorizing your document.
    code ohayo
@@ -37781,6 +37460,21 @@ file templates/ohayo-reference.ohayo
   
   doc.ref someRefId
    url https://en.wikipedia.org/wiki/Note_(typography)
+file templates/our-world-in-data.ohayo
+ data
+  doc.title Our World in Data
+  doc.subtitle Exploration of datasets in https://ourworldindata.org/
+  owid.list
+   vega.scatter Row Counts by ID
+    xColumn id
+    yColumn rowCount
+   vega.scatter
+    xColumn rowCount
+    yColumn columnCount
+   columns.describe
+    hidden
+    tables.basic
+  doc.categories dataScience
 file templates/pca-of-flowers.ohayo
  data
   doc.title PCA Demonstration
@@ -37830,8 +37524,8 @@ file templates/public-apis.ohayo
     hidden
     filter.where Cors = no
      hidden
-     tables.basic Fully open APIS
-   tables.basic All APIS
+     tables.basic
+   tables.basic
   doc.categories programming
 file templates/random.ohayo
  data
@@ -37855,7 +37549,7 @@ file templates/reddit.ohayo
    columns.keep title created_utc score subreddit url
     hidden
     rows.sortByReverse score
-     tables.basic Top Stories on Reddit
+     tables.basic
     vega.scatter
      yColumn score
      xColumn created_utc
@@ -37915,24 +37609,19 @@ file templates/trends-in-baby-names.ohayo
 file templates/trigonometry.ohayo
  data
   doc.title Trigonometric Functions
-   visible
   math.gen sin 0 10 .1
    vega.line Sin Wave
-    visible
     xColumn input
     yColumn output
   math.gen cos 0 10 .1
    vega.line Cos Wave
-    visible
     xColumn input
     yColumn output
   math.gen tan 0 10 .1
    vega.line Tan Wave
-    visible
     xColumn input
     yColumn output
   doc.categories math
-  doc.defaultHidden
 file templates/typescript-interface-generator.ohayo
  data
   doc.title TypeScript Interface Generator
@@ -38429,10 +38118,12 @@ const SpeedTestTemplate = (title, rows) =>
  html.h1 ${title}
  rows.sortBy timeToLoad
   rows.reverse
-   tables.basic Slow Load Times
+   doc.subtitle Slow Load Times
+   tables.basic
  rows.sortBy timeToRender
   rows.reverse
-   tables.basic Slow Render Times
+   doc.subtitle Slow Render Times
+   tables.basic
  show.mean timeToLoad
  show.mean timeToRender
  show.median timeToRender
@@ -39372,40 +39063,34 @@ input,textarea
  ${theme.disableTextSelect(1)}
  &.TileMaximized
   z-index 2
- .TileDropDownButton
-  opacity .3
+ .TileDropDownButton,.TileInsertBetweenButton
+  opacity .4
   cursor pointer
+  font-size 10px
+  line-height 12px
+ .TileDropDownButton
+  &:hover
+   opacity 1
+ .TileInsertBetweenButton
+  font-weight bold
+  &:hover
+   opacity 1
  &:hover
   z-index 2
-  .TileDropDownButton
-   opacity 1
-   color ${theme.greyish}
-   &:hover
-    color ${theme.foregroundColor}
- .TileHeader,.TileFooter
-  height 30px
-  line-height 30px
-  padding-left 5px
  .TileSelectable
 ${theme.enableTextSelect2}
  .TileBody
-  padding 5px
+  padding 15px 5px
   width 100%
   max-height 400px
   box-sizing border-box
   overflow scroll
- .TileHeaderGrabber,.TileFooterGrabber
-  width 100%
-  height 10px
- .TileHeader
-  font-size 14px
-  text-transform uppercase
-  text-align center
-  border-bottom 1px solid ${theme.borderColor}
-  overflow hidden
-  text-overflow ellipsis
  .TileFooter
   font-size 12px
+  height 20px
+  line-height 20px
+  padding-left 5px
+  padding-right 3px
   white-space nowrap
   color ${theme.midGray}
   background ${theme.tileBackgroundColor}
@@ -39987,8 +39672,6 @@ OhayoConstants.tileCssScript = "tileCssScript"
 OhayoConstants.tileScript = "tileScript"
 OhayoConstants.tileSize = "tileSize"
 OhayoConstants.abstractTileSetting = "abstractTileSetting"
-
-OhayoConstants.defaultHidden = "doc.defaultHidden"
 
 OhayoConstants.noPicker = "noPicker"
 
@@ -40604,7 +40287,7 @@ class TileMenuTreeComponent extends AbstractContextMenuTreeComponent {
     return this.getTargetTile().cloneTileCommand(uno, dos)
   }
   destroyFocusedTileCommand(uno, dos) {
-    return this.getTargetTile().destroyTileCommand(uno, dos)
+    return this.getTargetTile().removeTileCommand(uno, dos)
   }
   inspectFocusedTileCommand(uno, dos) {
     return this.getTargetTile().inspectTileCommand(uno, dos)
@@ -40725,20 +40408,6 @@ class WallTreeComponent extends AbstractTreeComponent {
   setGutterWidth(newWidth) {
     this.setWord(1, newWidth)
     return this
-  }
-
-  async insertAdjacentTileCommand() {
-    const app = this.getRootNode()
-    const tilesProgram = app.getMountedTilesProgram()
-    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
-    const newTiles = app
-      .getNodeCursors()
-      .slice(0, 1)
-      .map(cursor => cursor.appendLine(OhayoConstants.pickerTile))
-    const promise = await app.getMountedTab().autosaveAndRender()
-    tilesProgram.clearSelection()
-    newTiles.forEach(tile => tile.selectTile())
-    return promise
   }
 
   _getChildTreeComponents() {
@@ -41203,6 +40872,12 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     const newName = await this.createFileOnDefaultDisk(filename, sourceStr)
     const res = await this.openFullPathInNewTabAndFocus(newName, tabIndex)
     return res
+  }
+
+  async _createAndOpenInBackgroundTab(sourceStr, filename) {
+    const newName = await this.createFileOnDefaultDisk(filename, sourceStr)
+    const tab = await this._openFullDiskFilePathInNewTab(newName)
+    return tab
   }
 
   setMountedTab(tab) {
@@ -41691,7 +41366,14 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
 
     const shouldProceed = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${tabs.length} open files?`)
 
-    return shouldProceed ? Promise.all(tabs.map(tab => tab.unlinkTab())) : false
+    return shouldProceed
+      ? Promise.all(
+          tabs.map(tab => {
+            tab.unlinkTab()
+            this.closeTab(tab)
+          })
+        )
+      : false
   }
 
   async closeAllDropDownMenusCommand() {
@@ -41718,8 +41400,16 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     newTile.selectTile()
   }
 
-  insertAdjacentTileCommand() {
-    return this.getAppWall().insertAdjacentTileCommand()
+  async insertAdjacentTileCommand() {
+    // todo: remove?
+    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
+    const newTiles = this.getNodeCursors()
+      .slice(0, 1)
+      .map(cursor => cursor.appendLine(OhayoConstants.pickerTile))
+    const promise = await app.getMountedTab().autosaveAndRender()
+    this.mountedProgram.clearSelection()
+    newTiles.forEach(tile => tile.selectTile())
+    return promise
   }
 
   async appendTileCommand(line, children) {
@@ -42197,23 +41887,33 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
     const sourceCode2 = new jtree.TreeNode(`data.inline
- tables.basic Quality Check Results`)
+ doc.subtitle Quality Check Results
+ tables.basic`)
     sourceCode2.getNode("data.inline").appendLineAndChildren("content", new jtree.TreeNode(data).toCsv())
     const tab2 = await this._createAndOpen(sourceCode2.toString(), "tiles-quality-check-results" + StudioConstants.ohayoExtension)
 
     tab2.addStumpCodeMessageToLog(`div Created '${tab2.getFullTabFilePath()}'`)
   }
 
-  async _runSpeedTestCommand() {
-    const files = await this.getDefaultDisk().readFiles()
+  getStandardTemplates() {
+    return typeof TemplatesStamp === "undefined"
+      ? jtree.TreeNode.fromDisk(this._getProjectRootDir() + "ohayo/packages/templates/Templates.stamp").trim()
+      : new jtree.TreeNode(TemplatesStamp).trim()
+  }
+
+  async _openAllTemplatesCommand() {
+    return this._runTemplateSpeedTestCommand(false)
+  }
+
+  async _runTemplateSpeedTestCommand(closeAfterLoading = true) {
+    const templates = this.getStandardTemplates()
     const startTime = Date.now()
 
-    const timePromises = files.map(async file => {
-      const url = file.getFileLink()
-      const newTab = await this._openFullDiskFilePathInNewTab(url)
+    const timePromises = templates.map(async template => {
+      const newTab = await this._createAndOpenInBackgroundTab(template.getNode("data").childrenToString(), template.getWord(1).split("/")[1])
       const mountedTab = this.getMountedTab()
       this.setMountedTab(newTab)
-      if (mountedTab) this.closeTab(mountedTab)
+      if (closeAfterLoading && mountedTab) this.closeTab(mountedTab)
       this.renderApp()
       return newTab.getTabProgram().toRunTimeStats()
     })

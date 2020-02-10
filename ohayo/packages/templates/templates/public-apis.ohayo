@@ -9,6 +9,6 @@ publicapis.entries
   hidden
   filter.where Cors = no
    hidden
-   tables.basic Fully open APIS
- tables.basic All APIS
+   tables.basic
+ tables.basic
 doc.categories programming

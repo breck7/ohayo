@@ -1,28 +1,21 @@
 doc.title Discovery of the Elements
- visible
 doc.subtitle What is the growth in known elements over time?
- visible
 samples.periodicTable
  fill.missing Year 1000
   columns.keep Element Year
    rows.sortBy Year
     tables.basic
      rowDisplayLimit 200
-     visible
   group.by Year
    rows.sortBy Year
     rows.runningTotal count
      vega.bar Number of Elements Found Each Year
       xColumn Year
       yColumn count
-      visible
      vega.line Cumulative Number of Elements
       xColumn Year
       yColumn total
-      visible
  vega.scatter Year of Discovery by Atomic Number
   xColumn Year
   yColumn AtomicNumber
-  visible
 doc.categories chemistry
-doc.defaultHidden

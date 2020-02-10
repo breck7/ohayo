@@ -1,11 +1,11 @@
 tooling onsave jtree build produceOhayoGrammar
 abstractPickerTileNode
- extends abstractTileTreeComponentNode
+ extends abstractChartNode
  string tileSize 480 420
  boolean needsData false
  abstract
  string hakonTemplate
-  .PickerTileNode
+  .abstractPickerTileNode
    .PickerCategory
     width 100%
     margin-top 20px
@@ -36,14 +36,14 @@ abstractPickerTileNode
    title {description}
    tabindex -1
    value {value}
+   class pickerItemButton
    clickCommand {command}
  string categoryBreakStumpTemplate
   div {category}
    class PickerCategory
- string tileHeader Gallery
  javascript
   async fetchTableInputs() {
-   return { rows: this.getChoices().map(obj => obj.toObject()) }
+   return { rows: this.getChoices()}
   }
   getTileBodyStumpCode() {
    let lastCat = ""
@@ -55,14 +55,10 @@ abstractPickerTileNode
     })
     .join("\n")
   }
-  getTileHeaderBern() {
-   return this.tileHeader
-  }
 PickerTileNode
  extends abstractPickerTileNode
  description Displays list of available tiles.
  crux doc.picker
- string tileHeader Tile Gallery
  javascript
   getChoices() {
    const allChoices = this.getRootNode()

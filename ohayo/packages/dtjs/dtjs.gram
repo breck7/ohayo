@@ -4,7 +4,7 @@ dtjsBasicNode
  string tileSize 1200 500
  string tileCssScript ohayo/packages/dtjs/datatables.min.css
  string tileScript ohayo/packages/dtjs/datatables.min.js
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  crux dtjs.basic
  string bodyStumpTemplate
   div

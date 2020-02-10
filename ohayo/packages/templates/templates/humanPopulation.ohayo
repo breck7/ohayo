@@ -6,5 +6,3 @@ gen.range when -1000 2020 1
   vega.line Estimated Human Popuation
    yColumn populationInMillions
    xColumn when
-   visible
-doc.defaultHidden

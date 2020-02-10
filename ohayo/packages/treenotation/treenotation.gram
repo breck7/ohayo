@@ -167,7 +167,7 @@ treenotationOutlineNode
    treenotation.outline
  string dummyDataSetName outerSpace
  string tileSize 800 500
- extends abstractHeaderlessChartTileNode
+ extends abstractChartNode
  crux treenotation.outline
  string bodyStumpTemplate
   pre

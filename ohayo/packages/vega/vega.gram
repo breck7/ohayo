@@ -12,7 +12,7 @@ abstractVegaNode
  string tileScript ohayo/packages/vega/vega.combined.min.js
  string dummyDataSetName stockPrice
  string markName bar
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  abstract
  string bodyStumpTemplate
   div
@@ -33,16 +33,6 @@ abstractVegaNode
    }
    return obj
   }
-  _adjustVegaSize() {
-   const adjustSize = !this.has("width")
-   if (adjustSize) {
-    const shadow = this.getStumpNode()
-     .findStumpNodeByChild("class divForExternalLibrary")
-     .getShadow()
-    this.set("width", Math.round((30 + shadow.getShadowOuterWidth()) / 20) + "")
-    this.set("height", Math.round((30 + shadow.getShadowOuterHeight()) / 20) + "")
-   }
-  }
   _getElementForVega() {
    return this.getStumpNode()
     .findStumpNodeByChild("class divForExternalLibrary")
@@ -52,7 +42,6 @@ abstractVegaNode
   async _drawVega() {
    // todo: don't rerun this if we dont need to.
    await vegaEmbed(this._getElementForVega(), this._getVegaSpec())
-   // this._adjustVegaSize()
   }
   treeComponentDidUpdate() {
    super.treeComponentDidUpdate()

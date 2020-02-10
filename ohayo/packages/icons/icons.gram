@@ -1,6 +1,6 @@
 tooling onsave jtree build produceOhayoGrammar
 iconsIconNode
- extends abstractHeaderlessChartTileNode
+ extends abstractChartNode
  abstract
 iconsHumanNode
  description Assuming each row in your data represents a human, creates a human icon.

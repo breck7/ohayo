@@ -15,7 +15,7 @@ abstractShowTileNode
    show.max Amount
  string tileSize 140 120
  string dummyDataSetName stockPrice
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  abstract
  string hakonTemplate
   .abstractShowTileNode
