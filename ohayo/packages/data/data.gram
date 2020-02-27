@@ -131,7 +131,6 @@ dataInlineNode
   async fetchTableInputs() {
    return new TableParser().parseTableInputsFromString(this.getDataContent(), this.getParserId())
   }
- string tileSize 280 220
  extends abstractProviderNode
  crux data.inline
 dataLocalStorageNode

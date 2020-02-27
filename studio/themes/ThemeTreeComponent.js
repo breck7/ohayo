@@ -230,6 +230,7 @@ a
  padding 5px
  width 100%
  height 100%
+ min-height 200px
  box-sizing border-box
  outline 0
  border 0
