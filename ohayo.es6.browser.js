@@ -25652,7 +25652,7 @@ pre
   {footer}`
     }
     get pencilStumpTemplate() {
-      return `span +
+      return `span ➕
  class TileInsertBetweenButton
  clickCommand insertTileBetweenCommand
 span ▼
@@ -25958,9 +25958,8 @@ span ▼
       const selector = "#" + this.getTreeComponentId()
       const theme = this.getTheme()
       const visibleCss = this.isVisible() ? "" : "display: none"
-      const dimensionCss = ""
       const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
-      return `${selector} { ${visibleCss} ${dimensionCss} }
+      return `${selector} { ${visibleCss} }
       ${theme.hakonToCss(hakonCode)}`
     }
     handleTileError(err) {
@@ -25968,13 +25967,16 @@ span ▼
       this._errorCount++
       this.getRootNode().goRed(err)
     }
-    insertTileBetweenCommand() {
+    async insertTileBetweenCommand() {
       const tab = this.getTab()
-      const current = this.childrenToString()
-      this.getChildTiles().forEach(tile => tile.unmountAndDestroy())
-      const newNode = this.appendLineAndChildren("doc.picker", current)
+      const newNode = this.appendLine("doc.picker")
+      this.getChildTiles().forEach(tile => {
+        if (tile === newNode) return true
+        newNode.appendNode(tile)
+        tile.unmountAndDestroy()
+      })
       tab.autosaveTab()
-      this.getRootNode().loadAndIncrementalRender()
+      await this.getRootNode().loadAndIncrementalRender()
     }
     getWall() {
       return this.getWebApp().getAppWall()
@@ -25997,14 +25999,6 @@ span ▼
     }
     getTileMenuButtonStumpCode() {
       return this.qFormat(this.pencilStumpTemplate)
-    }
-    getSuggestedSize() {
-      const tileSize = this.tileSize || "280 220"
-      const parts = tileSize.split(" ").map(tileSize => parseInt(tileSize))
-      return {
-        width: parts[0],
-        height: parts[1]
-      }
     }
     // Tile child rendering is done at the wall level.
     _getChildTreeComponents() {
@@ -30452,9 +30446,6 @@ class LargeLabel`
         undefined
       )
     }
-    get tileSize() {
-      return `280 220`
-    }
     get bodyStumpTemplate() {
       return `textarea
  name content
@@ -31583,7 +31574,7 @@ abstractTileTreeComponentNode
   div Error occurred. See console.
    class OhayoError
  string pencilStumpTemplate
-  span +
+  span ➕
    class TileInsertBetweenButton
    clickCommand insertTileBetweenCommand
   span ▼
@@ -31870,9 +31861,8 @@ abstractTileTreeComponentNode
    const selector = "#" + this.getTreeComponentId()
    const theme = this.getTheme()
    const visibleCss = this.isVisible() ? "" : "display: none"
-   const dimensionCss = ""
    const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
-   return \`\${selector} { \${visibleCss} \${dimensionCss} }
+   return \`\${selector} { \${visibleCss} }
         \${theme.hakonToCss(hakonCode)}\`
   }
   handleTileError(err) {
@@ -31880,13 +31870,16 @@ abstractTileTreeComponentNode
    this._errorCount++
    this.getRootNode().goRed(err)
   }
-  insertTileBetweenCommand() {
+  async insertTileBetweenCommand() {
    const tab = this.getTab()
-   const current = this.childrenToString()
-   this.getChildTiles().forEach(tile => tile.unmountAndDestroy())
-   const newNode = this.appendLineAndChildren("doc.picker", current)
+   const newNode = this.appendLine("doc.picker")
+   this.getChildTiles().forEach(tile => {
+    if (tile === newNode) return true
+    newNode.appendNode(tile)
+    tile.unmountAndDestroy()
+   })
    tab.autosaveTab()
-   this.getRootNode().loadAndIncrementalRender()
+   await this.getRootNode().loadAndIncrementalRender()
   }
   getWall() {
    return this.getWebApp().getAppWall()
@@ -31909,14 +31902,6 @@ abstractTileTreeComponentNode
   }
   getTileMenuButtonStumpCode() {
    return this.qFormat(this.pencilStumpTemplate)
-  }
-  getSuggestedSize() {
-   const tileSize = this.tileSize || "280 220"
-   const parts = tileSize.split(" ").map(tileSize => parseInt(tileSize))
-   return {
-    width: parts[0],
-    height: parts[1]
-   }
   }
   // Tile child rendering is done at the wall level.
   _getChildTreeComponents() {
@@ -36040,7 +36025,6 @@ dataInlineNode
   async fetchTableInputs() {
    return new TableParser().parseTableInputsFromString(this.getDataContent(), this.getParserId())
   }
- string tileSize 280 220
  extends abstractProviderNode
  crux data.inline
 dataLocalStorageNode
@@ -38976,6 +38960,7 @@ a
  padding 5px
  width 100%
  height 100%
+ min-height 200px
  box-sizing border-box
  outline 0
  border 0
