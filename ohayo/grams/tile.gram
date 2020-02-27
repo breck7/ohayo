@@ -337,13 +337,17 @@ abstractTileTreeComponentNode
    this._errorCount++
    this.getRootNode().goRed(err)
   }
-  insertTileBetweenCommand() {
+  async insertTileBetweenCommand() {
     const tab = this.getTab()
-    const current = this.childrenToString()
-    this.getChildTiles().forEach(tile => tile.unmountAndDestroy())
-    const newNode = this.appendLineAndChildren("doc.picker", current)
+    const newNode = this.appendLine("doc.picker")
+    this.getChildTiles().forEach(tile => {
+      if (tile === newNode)
+        return true
+      newNode.appendNode(tile)
+      tile.unmountAndDestroy()
+    })
     tab.autosaveTab()
-    this.getRootNode().loadAndIncrementalRender()
+    await this.getRootNode().loadAndIncrementalRender()
   }
   getWall() {
    return this.getWebApp().getAppWall()
