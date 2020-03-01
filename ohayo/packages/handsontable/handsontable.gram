@@ -29,8 +29,8 @@ handsontableBasicNode
    const container = this.getStumpNode().findStumpNodeByChild("class hot")
    const app = this.getWebApp()
    if (this.isNodeJs()) return undefined
-   const width = this._tileWidth
-   const height = this._tileHeight
+   const width = this.getTileRunTimeWidth()
+   const height = this.getTileRunTimeHeight()
    this._hot = new Handsontable(container.getShadow().getShadowElement(), {
     data: data,
     rowHeaders: true,

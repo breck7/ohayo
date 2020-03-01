@@ -12,10 +12,10 @@ abstractChartNode
    const table = this.getParentOrDummyTable()
    return this.qFormat(this.tileFooterTemplate, {rowCount: table.getRowCount(), columnCount: table.getColumnCount(), tileMenuButton: this.getTileMenuButtonStumpCode()})
   }
-  get _tileWidth() {
+  getTileRunTimeWidth() {
    return this.isNodeJs() ? 456 : (jQuery(".WallTreeComponent").width() - 100)
   }
-  get _tileHeight() {
+  getTileRunTimeHeight() {
    return 300
   }
   toDisplayString(value, columnName) {

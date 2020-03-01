@@ -1,0 +1,13 @@
+doc.title Population of the Continents
+samples.populations
+ hidden
+ group.by Continent
+  reduce Population2016 sum Population
+  hidden
+  roughjs.pie Population of the Continents
+   label Continent
+   value Population
+  roughjs.bar Population of the Continents
+   label Continent
+   value Population
+doc.categories geography

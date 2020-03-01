@@ -1,0 +1,80 @@
+tooling onsave jtree build produceOhayoGrammar
+roughnessCell
+ extends intCell
+ todo add min of 0 and max of 20
+roughnessNode
+ cells tileSettingKeywordCell roughnessCell
+ description Roughness level of chart. Default is 1.
+ extends abstractTileSettingTerminalNode
+ crux roughness
+abstractRoughJsChartNode
+ description Create sketchy/hand-drawn styled charts https://github.com/jwilber/roughViz
+ string tileScript ohayo/packages/roughjs/roughviz.min.js
+ extends abstractChartNode
+ abstract
+ catchAllCellType titleCell
+ inScope roughnessNode
+ javascript
+  _getRoughId() {
+    return `rough${this._getUid()}`
+  }
+  treeComponentDidUpdate() {
+   super.treeComponentDidUpdate()
+   if (this.isNodeJs()) return undefined
+   this._drawRough()
+  }
+  treeComponentDidMount() {
+   this.treeComponentDidUpdate()
+  }
+  getTileBodyStumpCode() {
+   return this.qFormat(this.bodyStumpTemplate, { id: this._getRoughId() })
+  }
+  get _roughness() {
+    const value = this.get("roughness")
+    return value ? parseInt(value) : 1
+  }
+  _drawRough() {
+   const roughEl = new roughViz[this.roughChartType]({
+    title: this.getContent() || "",
+    element: '#' + this._getRoughId(),
+    roughness: this._roughness,
+    width: this.getTileRunTimeWidth(),
+    height: this.getTileRunTimeHeight(),
+    data: this._getRoughData()
+    })
+  }
+ string bodyStumpTemplate
+  div
+   id {id}
+abstractRoughJsLabelValueNode
+ extends abstractRoughJsChartNode
+ string dummyDataSetName stockPrice
+ abstract
+ string columnPredictionHints
+  value getPrimitiveTypeName=number
+ javascript
+  _getRoughData() {
+    const data = {labels: this._getValues("label"), values: this._getValues("value")}
+    console.log(data)
+    return data
+  }
+  _getValues(settingName) {
+    const columName = this.mapSettingNamesToColumnNames([settingName])[0]
+    const column = this.getParentOrDummyTable().getColumnByName(columName)
+    return column._getSummaryVector().values
+  }
+roughJsBarNode
+ crux roughjs.bar
+ inScope labelNode valueNode
+ extends abstractRoughJsLabelValueNode
+ string roughChartType Bar
+ example
+  samples.waterBill
+   roughjs.bar Past Year's Water Bill
+    label PaidOn
+    value Amount
+roughJsPieNode
+ inScope labelNode valueNode
+ crux roughjs.pie
+ extends abstractRoughJsLabelValueNode
+ string roughChartType Pie

@@ -15503,6 +15503,10 @@ class TreeNode extends AbstractNode {
   has(firstWord) {
     return this._hasFirstWord(firstWord)
   }
+  hasNode(node) {
+    const needle = node.toString()
+    return this.getChildren().some(node => node.toString() === needle)
+  }
   _hasFirstWord(firstWord) {
     return this._getIndex()[firstWord] !== undefined
   }
@@ -16464,7 +16468,7 @@ TreeNode.iris = `sepal_length,sepal_width,petal_length,petal_width,species
 4.9,2.5,4.5,1.7,virginica
 5.1,3.5,1.4,0.2,setosa
 5,3.4,1.5,0.2,setosa`
-TreeNode.getVersion = () => "49.6.1"
+TreeNode.getVersion = () => "49.8.0"
 class AbstractExtendibleTreeNode extends TreeNode {
   _getFromExtended(firstWordPath) {
     const hit = this._getNodeFromExtended(firstWordPath)
@@ -19886,7 +19890,7 @@ class Column {
   getColumnName() {
     return this._getColDefObject().name
   }
-  getSourceColumnName() {
+  _getSourceColumnName() {
     return this._colDefObject.source
   }
   isInvalidValue(value) {
@@ -20004,6 +20008,9 @@ class Column {
     if (map) return map
     this._map = this._getSummaryVector().map
     return this._map
+  }
+  getValues() {
+    return this._getSummaryVector().values
   }
   _getSummaryVector() {
     if (!this._summaryVector) this._summaryVector = this._createSummaryVector()
@@ -20275,7 +20282,7 @@ class Row {
   _getRowValueFromSourceColOrOriginalCol(colName) {
     const columns = this._table.getColumnsMap()
     const destColumn = columns[colName]
-    const sourceColName = destColumn.getSourceColumnName()
+    const sourceColName = destColumn._getSourceColumnName()
     const sourceCol = columns[sourceColName]
     // only use source if we still have access to it
     const val = sourceColName && sourceCol ? this._getRowValueFromOriginalOrSource(sourceColName, sourceCol.getPrimitiveTypeName(), destColumn.getPrimitiveTypeName()) : this.getRowOriginalValue(colName)
@@ -21407,9 +21414,15 @@ class PivotTable {
       })
       newRows.push(newRow)
     }
+    // todo: add tests. figure out this api better.
+    Object.values(columns).forEach(col => {
+      // For pivot columns, remove the source and reduction info for now. Treat things as immutable.
+      delete col.source
+      delete col.reduction
+    })
     return {
       rows: newRows,
-      columns: columns
+      columns
     }
   }
 }
@@ -25436,6 +25449,8 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "list.basic": listBasicNode,
           "list.links": listLinksNode,
           "markdown.toHtml": markdownToHtmlNode,
+          "roughjs.bar": roughJsBarNode,
+          "roughjs.pie": roughJsPieNode,
           "show.rowCount": showRowCountNode,
           "show.columnCount": showColumnCountNode,
           "show.static": showStaticNode,
@@ -26286,10 +26301,10 @@ span ▼
         tileMenuButton: this.getTileMenuButtonStumpCode()
       })
     }
-    get _tileWidth() {
+    getTileRunTimeWidth() {
       return this.isNodeJs() ? 456 : jQuery(".WallTreeComponent").width() - 100
     }
-    get _tileHeight() {
+    getTileRunTimeHeight() {
       return 300
     }
     toDisplayString(value, columnName) {
@@ -27112,8 +27127,8 @@ table
         .slice(0, 10)
       const container = this.getStumpNode().findStumpNodeByChild("class DataTable")
       if (this.isNodeJs()) return undefined
-      const width = this._tileWidth
-      const height = this._tileHeight
+      const width = this.getTileRunTimeWidth()
+      const height = this.getTileRunTimeHeight()
       const shadow = container.getShadow()
       const el = shadow.getShadowElement()
       shadow.setShadowCss({ width, height })
@@ -27257,8 +27272,8 @@ table
       const container = this.getStumpNode().findStumpNodeByChild("class hot")
       const app = this.getWebApp()
       if (this.isNodeJs()) return undefined
-      const width = this._tileWidth
-      const height = this._tileHeight
+      const width = this.getTileRunTimeWidth()
+      const height = this.getTileRunTimeHeight()
       this._hot = new Handsontable(container.getShadow().getShadowElement(), {
         data: data,
         rowHeaders: true,
@@ -27614,6 +27629,99 @@ link isLink`
     }
     getTileBodyStumpCode() {
       return this.qFormat(this.bodyStumpTemplate, { md: marked(this.getPipishInput()) })
+    }
+  }
+
+  class abstractRoughJsChartNode extends abstractChartNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { roughness: roughnessNode }),
+        undefined
+      )
+    }
+    get titleCell() {
+      return this.getWordsFrom(0)
+    }
+    get bodyStumpTemplate() {
+      return `div
+ id {id}`
+    }
+    get tileScript() {
+      return `ohayo/packages/roughjs/roughviz.min.js`
+    }
+    _getRoughId() {
+      return `rough${this._getUid()}`
+    }
+    treeComponentDidUpdate() {
+      super.treeComponentDidUpdate()
+      if (this.isNodeJs()) return undefined
+      this._drawRough()
+    }
+    treeComponentDidMount() {
+      this.treeComponentDidUpdate()
+    }
+    getTileBodyStumpCode() {
+      return this.qFormat(this.bodyStumpTemplate, { id: this._getRoughId() })
+    }
+    get _roughness() {
+      const value = this.get("roughness")
+      return value ? parseInt(value) : 1
+    }
+    _drawRough() {
+      const roughEl = new roughViz[this.roughChartType]({
+        title: this.getContent() || "",
+        element: "#" + this._getRoughId(),
+        roughness: this._roughness,
+        width: this.getTileRunTimeWidth(),
+        height: this.getTileRunTimeHeight(),
+        data: this._getRoughData()
+      })
+    }
+  }
+
+  class abstractRoughJsLabelValueNode extends abstractRoughJsChartNode {
+    get columnPredictionHints() {
+      return `value getPrimitiveTypeName=number`
+    }
+    get dummyDataSetName() {
+      return `stockPrice`
+    }
+    _getRoughData() {
+      const data = { labels: this._getValues("label"), values: this._getValues("value") }
+      console.log(data)
+      return data
+    }
+    _getValues(settingName) {
+      const columName = this.mapSettingNamesToColumnNames([settingName])[0]
+      const column = this.getParentOrDummyTable().getColumnByName(columName)
+      return column._getSummaryVector().values
+    }
+  }
+
+  class roughJsBarNode extends abstractRoughJsLabelValueNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { label: labelNode, value: valueNode }),
+        undefined
+      )
+    }
+    get roughChartType() {
+      return `Bar`
+    }
+  }
+
+  class roughJsPieNode extends abstractRoughJsLabelValueNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { label: labelNode, value: valueNode }),
+        undefined
+      )
+    }
+    get roughChartType() {
+      return `Pie`
     }
   }
 
@@ -27982,8 +28090,8 @@ class visjs`
       const horizontal = parseFloat(cameraPositionNode.getWord(2))
       const vertical = parseFloat(cameraPositionNode.getWord(3))
       const options = {
-        width: this._tileWidth + "px",
-        height: this._tileHeight - 80 + "px",
+        width: this.getTileRunTimeWidth() + "px",
+        height: this.getTileRunTimeHeight() - 80 + "px",
         style: "dot-color", // dot?
         showPerspective: false,
         showLegend: false,
@@ -28174,8 +28282,8 @@ class visjs`
       return {
         description: "A simple bar chart with embedded data.",
         data: this._getVegaData(),
-        width: this._tileWidth,
-        height: this._tileHeight,
+        width: this.getTileRunTimeWidth(),
+        height: this.getTileRunTimeHeight(),
         mark: this._getVegaMarkObj(),
         encoding: this._getEncodingMap(),
         transform: this._getVegaTransform(),
@@ -30920,6 +31028,15 @@ class LargeLabel`
     }
   }
 
+  class roughnessNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get roughnessCell() {
+      return parseInt(this.getWord(1))
+    }
+  }
+
   class cameraPositionNode extends abstractTileSettingTerminalNode {
     get tileSettingKeywordCell() {
       return this.getWord(0)
@@ -31167,6 +31284,8 @@ class LargeLabel`
           "list.basic": listBasicNode,
           "list.links": listLinksNode,
           "markdown.toHtml": markdownToHtmlNode,
+          "roughjs.bar": roughJsBarNode,
+          "roughjs.pie": roughJsPieNode,
           "show.rowCount": showRowCountNode,
           "show.columnCount": showColumnCountNode,
           "show.static": showStaticNode,
@@ -31513,6 +31632,9 @@ toCell
 incrementCell
  extends numberCell
 subredditNameCell
+roughnessCell
+ extends intCell
+ todo add min of 0 and max of 20
 delimiterCell
 startIndexCell
  extends intCell
@@ -32177,10 +32299,10 @@ abstractChartNode
    const table = this.getParentOrDummyTable()
    return this.qFormat(this.tileFooterTemplate, { rowCount: table.getRowCount(), columnCount: table.getColumnCount(), tileMenuButton: this.getTileMenuButtonStumpCode() })
   }
-  get _tileWidth() {
+  getTileRunTimeWidth() {
    return this.isNodeJs() ? 456 : jQuery(".WallTreeComponent").width() - 100
   }
-  get _tileHeight() {
+  getTileRunTimeHeight() {
    return 300
   }
   toDisplayString(value, columnName) {
@@ -32932,8 +33054,8 @@ dtjsBasicNode
     .slice(0, 10)
    const container = this.getStumpNode().findStumpNodeByChild("class DataTable")
    if (this.isNodeJs()) return undefined
-   const width = this._tileWidth
-   const height = this._tileHeight
+   const width = this.getTileRunTimeWidth()
+   const height = this.getTileRunTimeHeight()
    const shadow = container.getShadow()
    const el = shadow.getShadowElement()
    shadow.setShadowCss({ width, height })
@@ -33066,8 +33188,8 @@ handsontableBasicNode
    const container = this.getStumpNode().findStumpNodeByChild("class hot")
    const app = this.getWebApp()
    if (this.isNodeJs()) return undefined
-   const width = this._tileWidth
-   const height = this._tileHeight
+   const width = this.getTileRunTimeWidth()
+   const height = this.getTileRunTimeHeight()
    this._hot = new Handsontable(container.getShadow().getShadowElement(), {
     data: data,
     rowHeaders: true,
@@ -33366,6 +33488,77 @@ markdownToHtmlNode
  string dummyDataSetName markdown
  extends abstractChartNode
  crux markdown.toHtml
+abstractRoughJsChartNode
+ description Create sketchy/hand-drawn styled charts https://github.com/jwilber/roughViz
+ string tileScript ohayo/packages/roughjs/roughviz.min.js
+ extends abstractChartNode
+ abstract
+ catchAllCellType titleCell
+ inScope roughnessNode
+ javascript
+  _getRoughId() {
+   return \`rough\${this._getUid()}\`
+  }
+  treeComponentDidUpdate() {
+   super.treeComponentDidUpdate()
+   if (this.isNodeJs()) return undefined
+   this._drawRough()
+  }
+  treeComponentDidMount() {
+   this.treeComponentDidUpdate()
+  }
+  getTileBodyStumpCode() {
+   return this.qFormat(this.bodyStumpTemplate, { id: this._getRoughId() })
+  }
+  get _roughness() {
+   const value = this.get("roughness")
+   return value ? parseInt(value) : 1
+  }
+  _drawRough() {
+   const roughEl = new roughViz[this.roughChartType]({
+    title: this.getContent() || "",
+    element: "#" + this._getRoughId(),
+    roughness: this._roughness,
+    width: this.getTileRunTimeWidth(),
+    height: this.getTileRunTimeHeight(),
+    data: this._getRoughData()
+   })
+  }
+ string bodyStumpTemplate
+  div
+   id {id}
+abstractRoughJsLabelValueNode
+ extends abstractRoughJsChartNode
+ string dummyDataSetName stockPrice
+ abstract
+ string columnPredictionHints
+  value getPrimitiveTypeName=number
+ javascript
+  _getRoughData() {
+   const data = { labels: this._getValues("label"), values: this._getValues("value") }
+   console.log(data)
+   return data
+  }
+  _getValues(settingName) {
+   const columName = this.mapSettingNamesToColumnNames([settingName])[0]
+   const column = this.getParentOrDummyTable().getColumnByName(columName)
+   return column._getSummaryVector().values
+  }
+roughJsBarNode
+ crux roughjs.bar
+ inScope labelNode valueNode
+ extends abstractRoughJsLabelValueNode
+ string roughChartType Bar
+ example
+  samples.waterBill
+   roughjs.bar Past Year's Water Bill
+    label PaidOn
+    value Amount
+roughJsPieNode
+ inScope labelNode valueNode
+ crux roughjs.pie
+ extends abstractRoughJsLabelValueNode
+ string roughChartType Pie
 abstractShowTileNode
  cells tileKeywordCell columnNameCell
  catchAllCellType titleCell
@@ -33699,8 +33892,8 @@ treenotation3dNode
    const horizontal = parseFloat(cameraPositionNode.getWord(2))
    const vertical = parseFloat(cameraPositionNode.getWord(3))
    const options = {
-    width: this._tileWidth + "px",
-    height: this._tileHeight - 80 + "px",
+    width: this.getTileRunTimeWidth() + "px",
+    height: this.getTileRunTimeHeight() - 80 + "px",
     style: "dot-color", // dot?
     showPerspective: false,
     showLegend: false,
@@ -33883,8 +34076,8 @@ abstractVegaNode
    return {
     description: "A simple bar chart with embedded data.",
     data: this._getVegaData(),
-    width: this._tileWidth,
-    height: this._tileHeight,
+    width: this.getTileRunTimeWidth(),
+    height: this.getTileRunTimeHeight(),
     mark: this._getVegaMarkObj(),
     encoding: this._getEncodingMap(),
     transform: this._getVegaTransform(),
@@ -36454,6 +36647,11 @@ srcNode
  cells tileSettingKeywordCell urlCell
  extends abstractTileSettingTerminalNode
  crux src
+roughnessNode
+ cells tileSettingKeywordCell roughnessCell
+ description Roughness level of chart. Default is 1.
+ extends abstractTileSettingTerminalNode
+ crux roughness
 cameraPositionNode
  cells tileSettingKeywordCell cameraDistanceNumberCell horizontalNumberCell verticalNumberCell
  extends abstractTileSettingTerminalNode
@@ -36758,6 +36956,10 @@ schemaNode
         listBasicNode: listBasicNode,
         listLinksNode: listLinksNode,
         markdownToHtmlNode: markdownToHtmlNode,
+        abstractRoughJsChartNode: abstractRoughJsChartNode,
+        abstractRoughJsLabelValueNode: abstractRoughJsLabelValueNode,
+        roughJsBarNode: roughJsBarNode,
+        roughJsPieNode: roughJsPieNode,
         abstractShowTileNode: abstractShowTileNode,
         showRowCountNode: showRowCountNode,
         showColumnCountNode: showColumnCountNode,
@@ -36956,6 +37158,7 @@ schemaNode
         sizeNode: sizeNode,
         rowDisplayLimitNode: rowDisplayLimitNode,
         srcNode: srcNode,
+        roughnessNode: roughnessNode,
         cameraPositionNode: cameraPositionNode,
         treeLanguageNode: treeLanguageNode,
         abstractTileSettingNonTerminalNode: abstractTileSettingNonTerminalNode,
@@ -37194,6 +37397,20 @@ file templates/discovery-of-elements.ohayo
    vega.scatter Year of Discovery by Atomic Number
     xColumn Year
     yColumn AtomicNumber
+  doc.categories chemistry
+file templates/elements-by-phase.ohayo
+ data
+  doc.title Elements by Phase
+  samples.periodicTable
+   hidden
+   group.by Phase
+    hidden
+    roughjs.pie At Room Temperature Most Elements are Solids
+     label Phase
+     value count
+   columns.keep Element Phase
+    filter.where Phase = solid
+     tables.basic
   doc.categories chemistry
 file templates/git-repo-dashboard.ohayo
  data
@@ -37486,6 +37703,21 @@ file templates/planets-on-wikipedia.ohayo
       hidden
       text.wordcloud
   doc.categories wikipedia
+file templates/population-of-the-continents.ohayo
+ data
+  doc.title Population of the Continents
+  samples.populations
+   hidden
+   group.by Continent
+    reduce Population2016 sum Population
+    hidden
+    roughjs.pie Population of the Continents
+     label Continent
+     value Population
+    roughjs.bar Population of the Continents
+     label Continent
+     value Population
+  doc.categories geography
 file templates/portals.ohayo
  data
   doc.title Data Portals

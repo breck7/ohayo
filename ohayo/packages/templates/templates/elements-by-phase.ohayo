@@ -1,0 +1,12 @@
+doc.title Elements by Phase
+samples.periodicTable
+ hidden
+ group.by Phase
+  hidden
+  roughjs.pie At Room Temperature Most Elements are Solids
+   label Phase
+   value count
+ columns.keep Element Phase
+  filter.where Phase = solid
+   tables.basic
+doc.categories chemistry

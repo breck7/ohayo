@@ -65,8 +65,8 @@ abstractVegaNode
    return {
     description: "A simple bar chart with embedded data.",
     data: this._getVegaData(),
-    width: this._tileWidth,
-    height: this._tileHeight,
+    width: this.getTileRunTimeWidth(),
+    height: this.getTileRunTimeHeight(),
     mark: this._getVegaMarkObj(),
     encoding: this._getEncodingMap(),
     transform: this._getVegaTransform(),
