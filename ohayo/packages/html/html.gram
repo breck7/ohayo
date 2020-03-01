@@ -8,7 +8,7 @@ abstractHtmlNode
  frequency 0
  description An HTML element
  inScope styleNode contentNode
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  string hakonTemplate
   .abstractHtmlNode
    code
@@ -108,7 +108,7 @@ htmlCustomNode
    content
     <h1>Hello world</h1>
  inScope contentNode
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  crux html.custom
  string bodyStumpTemplate
   div

@@ -230,6 +230,7 @@ a
  padding 5px
  width 100%
  height 100%
+ min-height 200px
  box-sizing border-box
  outline 0
  border 0
@@ -317,40 +318,34 @@ input,textarea
  ${theme.disableTextSelect(1)}
  &.TileMaximized
   z-index 2
- .TileDropDownButton
-  opacity .3
+ .TileDropDownButton,.TileInsertBetweenButton
+  opacity .4
   cursor pointer
+  font-size 10px
+  line-height 12px
+ .TileDropDownButton
+  &:hover
+   opacity 1
+ .TileInsertBetweenButton
+  font-weight bold
+  &:hover
+   opacity 1
  &:hover
   z-index 2
-  .TileDropDownButton
-   opacity 1
-   color ${theme.greyish}
-   &:hover
-    color ${theme.foregroundColor}
- .TileHeader,.TileFooter
-  height 30px
-  line-height 30px
-  padding-left 5px
  .TileSelectable
 ${theme.enableTextSelect2}
  .TileBody
-  padding 5px
+  padding 15px 5px
   width 100%
   max-height 400px
   box-sizing border-box
   overflow scroll
- .TileHeaderGrabber,.TileFooterGrabber
-  width 100%
-  height 10px
- .TileHeader
-  font-size 14px
-  text-transform uppercase
-  text-align center
-  border-bottom 1px solid ${theme.borderColor}
-  overflow hidden
-  text-overflow ellipsis
  .TileFooter
   font-size 12px
+  height 20px
+  line-height 20px
+  padding-left 5px
+  padding-right 3px
   white-space nowrap
   color ${theme.midGray}
   background ${theme.tileBackgroundColor}

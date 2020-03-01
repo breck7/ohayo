@@ -43,20 +43,6 @@ class WallTreeComponent extends AbstractTreeComponent {
     return this
   }
 
-  async insertAdjacentTileCommand() {
-    const app = this.getRootNode()
-    const tilesProgram = app.getMountedTilesProgram()
-    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
-    const newTiles = app
-      .getNodeCursors()
-      .slice(0, 1)
-      .map(cursor => cursor.appendLine(OhayoConstants.pickerTile))
-    const promise = await app.getMountedTab().autosaveAndRender()
-    tilesProgram.clearSelection()
-    newTiles.forEach(tile => tile.selectTile())
-    return promise
-  }
-
   _getChildTreeComponents() {
     const tilesProgram = this.getRootNode().getMountedTilesProgram()
     return tilesProgram ? tilesProgram.getTiles() : []

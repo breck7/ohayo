@@ -4,8 +4,6 @@ OhayoConstants.tileScript = "tileScript"
 OhayoConstants.tileSize = "tileSize"
 OhayoConstants.abstractTileSetting = "abstractTileSetting"
 
-OhayoConstants.defaultHidden = "doc.defaultHidden"
-
 OhayoConstants.noPicker = "noPicker"
 
 OhayoConstants.selectedClass = "selected"

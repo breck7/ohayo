@@ -1,6 +1,7 @@
 #! /usr/bin/env node /usr/local/bin/jtree
 test reloadCommand
  createNewBlankProgramCommand
+  assertStringExcludes getStumpNodeString Row
   pasteCommand
    withParagraph
     data.inline
@@ -10,7 +11,7 @@ test reloadCommand
      tables.basic
    assertLengthIs getRenderedTilesDiagnostic 2
    assertStringIncludes getStumpNodeString Obama
-   assertStringIncludes getStumpNodeString tables.basic
+   assertStringIncludes getStumpNodeString Row
    fetchAndReloadFocusedTabCommand
     printProgramStatsCommand
 test createProgramFromFileCommand

@@ -7,17 +7,13 @@ editorFilesNode
  string tileSize 140 120
  javascript
   getRowClass() {
+    // todo: remove?
    class FileRow extends Row {
     destroyRow(app) {
      return app.deleteFileCommand(this.getRowOriginalValue("link"))
     }
    }
    return FileRow
-  }
-  getTileHeaderBern() {
-   return this.getWebApp()
-    .getDefaultDisk()
-    .getPathBase()
   }
   async fetchTableInputs() {
    const files = await this.getWebApp()

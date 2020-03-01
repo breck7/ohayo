@@ -4,7 +4,7 @@ dtjsBasicNode
  string tileSize 1200 500
  string tileCssScript ohayo/packages/dtjs/datatables.min.css
  string tileScript ohayo/packages/dtjs/datatables.min.js
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  crux dtjs.basic
  string bodyStumpTemplate
   div
@@ -59,8 +59,8 @@ dtjsBasicNode
     .slice(0, 10)
    const container = this.getStumpNode().findStumpNodeByChild("class DataTable")
    if (this.isNodeJs()) return undefined
-   const width = this._tileWidth
-   const height = this._tileHeight
+   const width = this.getTileRunTimeWidth()
+   const height = this.getTileRunTimeHeight()
    const shadow = container.getShadow()
    const el = shadow.getShadowElement()
    shadow.setShadowCss({ width, height })

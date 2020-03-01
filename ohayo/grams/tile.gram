@@ -21,8 +21,6 @@ abstractTileTreeComponentNode
  string monthKey month
  string yearKey year
  catchAllNodeType catchAllErrorNode
- int headerHeight 30
- int footerHeight 30
  string hiddenKey hidden
  string visibleKey visible
  string tileLoadingTemplate
@@ -38,7 +36,10 @@ abstractTileTreeComponentNode
   div Error occurred. See console.
    class OhayoError
  string pencilStumpTemplate
-  span ▾
+  span ➕
+   class TileInsertBetweenButton
+   clickCommand insertTileBetweenCommand
+  span ▼
    class TileDropDownButton
    clickCommand toggleTileMenuCommand
  string errorStateStumpTemplate
@@ -46,25 +47,16 @@ abstractTileTreeComponentNode
    class {classes}
    id {id}
    div
-    class TileHeaderGrabber
-   div ERROR
-    class TileHeader
-   div
     class TileBody
+    div ERROR
     {content}
    div
     class TileFooter
     {footer}
-   div
-    class TileFooterGrabber
  string tileStumpTemplate
   div
    class {classes}
    id {id}
-   div
-    class TileHeaderGrabber
-   div {header}
-    class TileHeader
    div
     style {bodyStyle}
     class TileBody
@@ -72,8 +64,6 @@ abstractTileTreeComponentNode
    div
     class TileFooter
     {footer}
-   div
-    class TileFooterGrabber
  string inspectionStumpTemplate
   div TileConstructor: {constructorName} ParentConstructor: {parentConstructorName}
   div Messages:
@@ -322,7 +312,6 @@ abstractTileTreeComponentNode
    return this.qFormat(this.tileStumpTemplate, {
     classes: this.getCssClassNames().join(" "),
     id: this.getTreeComponentId(),
-    header: this.getTileHeaderBern(),
     bodyStyle: this.customBodyStyle || "",
     body: this._getBodyStumpCodeCache() || "",
     footer: this.getTileFooterStumpCode()
@@ -332,9 +321,6 @@ abstractTileTreeComponentNode
    if (!this._bodyStumpCodeCache) this._bodyStumpCodeCache = this.getTileBodyStumpCode()
    return this._bodyStumpCodeCache
   }
-  getTileHeaderBern() {
-   return `${this.getFirstWord()}`
-  }
   getTileBodyStumpCode() {
    return ``
   }
@@ -342,15 +328,26 @@ abstractTileTreeComponentNode
    const selector = "#" + this.getTreeComponentId()
    const theme = this.getTheme()
    const visibleCss = this.isVisible() ? "" : "display: none"
-   const dimensionCss = ""
    const hakonCode = this.hakonTemplate ? new jtree.TreeNode(theme).evalTemplateString(this.hakonTemplate) : this.toHakonCode()
-   return `${selector} { ${visibleCss} ${dimensionCss} }
+   return `${selector} { ${visibleCss} }
         ${theme.hakonToCss(hakonCode)}`
   }
   handleTileError(err) {
    if (!this._errorCount) this._errorCount = 0
    this._errorCount++
    this.getRootNode().goRed(err)
+  }
+  async insertTileBetweenCommand() {
+    const tab = this.getTab()
+    const newNode = this.appendLine("doc.picker")
+    this.getChildTiles().forEach(tile => {
+      if (tile === newNode)
+        return true
+      newNode.appendNode(tile)
+      tile.unmountAndDestroy()
+    })
+    tab.autosaveTab()
+    await this.getRootNode().loadAndIncrementalRender()
   }
   getWall() {
    return this.getWebApp().getAppWall()
@@ -373,14 +370,6 @@ abstractTileTreeComponentNode
   }
   getTileMenuButtonStumpCode() {
    return this.qFormat(this.pencilStumpTemplate)
-  }
-  getSuggestedSize() {
-   const tileSize = this.tileSize || "280 220"
-   const parts = tileSize.split(" ").map(tileSize => parseInt(tileSize))
-   return {
-    width: parts[0],
-    height: parts[1]
-   }
   }
   // Tile child rendering is done at the wall level.
   _getChildTreeComponents() {
@@ -430,8 +419,10 @@ abstractTileTreeComponentNode
     })
   }
   isVisible() {
+   if (this.has(this.visibleKey)) return true
    if (this.visible === false) return false
-   return this.has(this.visibleKey) || (this.getRootNode().tilesAreVisible() && !this.has(this.hiddenKey))
+   if (this.has(this.hiddenKey)) return false
+   return true
   }
   _isMaximized() {
    return this.has(OhayoConstants.maximized)
@@ -476,7 +467,7 @@ abstractTileTreeComponentNode
    this.setFirstWord(newValue)
    const newNode = this.duplicate()
    // todo: destroy or something? how do we reparse.
-   this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
+   this.getChildTiles().forEach(tile => tile.unmountAndDestroy())
    this.unmountAndDestroy()
    tab.autosaveTab()
    this.getRootNode().loadAndIncrementalRender()
@@ -491,10 +482,15 @@ abstractTileTreeComponentNode
    this.unmountAndDestroy()
    return this.getTab().autosaveAndRender()
   }
-  destroyTileCommand() {
-   this.getTopDownArray().forEach(tile => tile.unmountAndDestroy())
+  async removeTileCommand() {
+   const tab = this.getTab()
+   this.getChildTiles().forEach(tile => {
+    tile.unmount()
+    tile.shiftLeft()
+   })
    this.unmountAndDestroy()
-   return this.getTab().autosaveAndRender()
+   tab.autosaveTab()
+   this.getRootNode().loadAndIncrementalRender()
   }
   getNewDataCommand() {
    // todo: have some type of paging system to fetch new data.

@@ -64,8 +64,8 @@ treenotation3dNode
    const horizontal = parseFloat(cameraPositionNode.getWord(2))
    const vertical = parseFloat(cameraPositionNode.getWord(3))
    const options = {
-    width: this._tileWidth + "px",
-    height: this._tileHeight - 80 + "px",
+    width: this.getTileRunTimeWidth() + "px",
+    height: this.getTileRunTimeHeight() - 80 + "px",
     style: "dot-color", // dot?
     showPerspective: false,
     showLegend: false,
@@ -167,7 +167,7 @@ treenotationOutlineNode
    treenotation.outline
  string dummyDataSetName outerSpace
  string tileSize 800 500
- extends abstractHeaderlessChartTileNode
+ extends abstractChartNode
  crux treenotation.outline
  string bodyStumpTemplate
   pre

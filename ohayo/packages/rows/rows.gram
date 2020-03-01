@@ -49,10 +49,12 @@ rowsSortByNode
   samples.waterBill
    rows.sortBy Amount
     rows.first 1
-     tables.basic Cheapest month
+     doc.subtitle Cheapest month
+     tables.basic
     rows.reverse
      rows.first 1
-      tables.basic Most expensive
+      doc.subtitle Most expensive
+      tables.basic
  extends abstractTransformerNode
  crux rows.sortBy
  string placeholderMessage Columns you want to sort by

@@ -75,6 +75,6 @@ test ohayoPrograms
    openFolderCommand localStorage/
     assertLengthIs getDefaultDisk.readFilesSync 1
     assertLengthIs getTabs 1
-    _runSpeedTestCommand
+    _runTemplateSpeedTestCommand
 test echoCommand
  echoCommand hello world

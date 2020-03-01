@@ -11,7 +11,7 @@ redditAllNode
     hidden
     rows.sortBy score
      rows.reverse
-      tables.basic Top Stories on Reddit
+      tables.basic
     vega.scatter
      yColumn score
      xColumn created_utc

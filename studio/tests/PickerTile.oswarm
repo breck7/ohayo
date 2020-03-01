@@ -8,3 +8,14 @@ test PickerTile
    assertStringIncludes getTextContent waterBill
    deleteSelectionCommand
     assertLengthIs getRenderedTilesDiagnostic 0
+test InsertBetween
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    data.inline
+     content
+      hello world
+   assertLengthIs getRenderedTilesDiagnostic 1
+   selectAllTilesCommand
+    executeCommandOnFirstSelectedTileCommand insertTileBetweenCommand
+     assertLengthIs getRenderedTilesDiagnostic 2

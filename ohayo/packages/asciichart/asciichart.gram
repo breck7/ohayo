@@ -2,7 +2,7 @@ tooling onsave jtree build produceOhayoGrammar
 asciiChartNode
  description Lightweight ASCII line chart from the library https://github.com/kroitor/asciichart
  string tileScript ohayo/packages/asciichart/asciichart.js
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  crux asciichart.line
  catchAllCellType titleCell
  inScope yColumnNode

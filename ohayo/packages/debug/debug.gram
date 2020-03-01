@@ -69,14 +69,26 @@ debugCommandsNode
  extends abstractChartNode
  crux debug.commands
  string bodyStumpTemplate
-  a Run Speed Test on all Files in Working Directory
-   clickCommand _runSpeedTestCommand
+  a Run Speed Test on all Templates
+   clickCommand _runTemplateSpeedTestCommand
+  br
+  a Open all Templates Command
+   clickCommand _openAllTemplatesCommand
   br
   a Run Tile Quality Check
    clickCommand _doTileQualityCheckCommand
  javascript
   getTileBodyStumpCode() {
    return this.bodyStumpTemplate
+  }
+  _runTemplateSpeedTestCommand() {
+    return this.getWebApp()._runTemplateSpeedTestCommand()
+  }
+  _openAllTemplatesCommand() {
+    return this.getWebApp()._openAllTemplatesCommand()
+  }
+  _doTileQualityCheckCommand() {
+    return this.getWebApp()._doTileQualityCheckCommand()
   }
 debugGrammarNode
  description Get the ohayo grammar

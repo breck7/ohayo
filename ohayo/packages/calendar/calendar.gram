@@ -7,7 +7,7 @@ calendarHeatNode
   count getPrimitiveTypeName=number
   dayColumn getPrimitiveTypeName=day
  string dummyDataSetName waterBill
- extends abstractHeaderlessChartTileNode
+ extends abstractChartNode
  crux calendar.heat
  string bodyStumpTemplate
   div

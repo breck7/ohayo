@@ -1,19 +1,14 @@
 doc.title Trigonometric Functions
- visible
 math.gen sin 0 10 .1
  vega.line Sin Wave
-  visible
   xColumn input
   yColumn output
 math.gen cos 0 10 .1
  vega.line Cos Wave
-  visible
   xColumn input
   yColumn output
 math.gen tan 0 10 .1
  vega.line Tan Wave
-  visible
   xColumn input
   yColumn output
 doc.categories math
-doc.defaultHidden

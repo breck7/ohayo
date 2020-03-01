@@ -48,7 +48,7 @@ class TileMenuTreeComponent extends AbstractContextMenuTreeComponent {
     return this.getTargetTile().cloneTileCommand(uno, dos)
   }
   destroyFocusedTileCommand(uno, dos) {
-    return this.getTargetTile().destroyTileCommand(uno, dos)
+    return this.getTargetTile().removeTileCommand(uno, dos)
   }
   inspectFocusedTileCommand(uno, dos) {
     return this.getTargetTile().inspectTileCommand(uno, dos)

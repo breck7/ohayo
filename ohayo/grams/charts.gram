@@ -12,10 +12,10 @@ abstractChartNode
    const table = this.getParentOrDummyTable()
    return this.qFormat(this.tileFooterTemplate, {rowCount: table.getRowCount(), columnCount: table.getColumnCount(), tileMenuButton: this.getTileMenuButtonStumpCode()})
   }
-  get _tileWidth() {
+  getTileRunTimeWidth() {
    return this.isNodeJs() ? 456 : (jQuery(".WallTreeComponent").width() - 100)
   }
-  get _tileHeight() {
+  getTileRunTimeHeight() {
    return 300
   }
   toDisplayString(value, columnName) {
@@ -36,32 +36,6 @@ abstractChartNode
     .getRows()
     .slice(0, this._getRowDisplayLimit())
   }
-abstractHeaderlessChartTileNode
- abstract
- extends abstractChartNode
- int headerHeight 0
- string tileStumpTemplate
-  div
-   class {classes}
-   id {id}
-   div
-    class TileHeaderGrabber
-   div
-    class TileBody HeaderLess
-    {body}
-   div
-    class TileFooter
-    {footer}
-   div
-    class TileFooterGrabber
- javascript
-  toStumpCode() {
-   return this.qFormat(this.tileStumpTemplate, { classes: this.getCssClassNames().join(" "), id: this.getTreeComponentId(), body: this._getBodyStumpCodeCache(), footer: this.getTileMenuButtonStumpCode() })
-  }
-abstractEmptyFooterTileNode
- abstract
- extends abstractHeaderlessChartTileNode
- int footerHeight 0
 abstractTextNode
  catchAllCellType stringCell
  frequency 0
@@ -80,7 +54,7 @@ abstractTextNode
  abstract
 abstractSnippetGalleryNode
  string tileSize 600 240
- extends abstractEmptyFooterTileNode
+ extends abstractChartNode
  abstract
  string bodyStumpTemplate
   h4 {title}

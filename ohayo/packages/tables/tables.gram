@@ -5,7 +5,6 @@ tablesBasicNode
  example Basic table with Iris data
   samples.iris
    tables.basic
- catchAllCellType titleCell
  inScope columnLimitNode
  int rowDisplayLimit 100
  int columnLimit 20
@@ -43,12 +42,6 @@ tablesBasicNode
     background-color {lightGrey}
     border 1px solid {lineColor}
     border-bottom-color {greyish}
-   input,textarea
-    border 0
-    font-size 14px
-    box-sizing border-box
-    padding 0
-    font-family {fonts}
  string cellStumpTemplate
   td
    bern
@@ -66,9 +59,6 @@ tablesBasicNode
    td {number}
    {cols}
  javascript
-  getTileHeaderBern() {
-   return this.getContent() || super.getTileHeaderBern()
-  }
   _getTableRowsStumpCode(columns) {
    return this.getRowsWithRowDisplayLimit()
     .map((row, index) => {

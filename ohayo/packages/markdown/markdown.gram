@@ -22,5 +22,5 @@ markdownToHtmlNode
   }
  string tileSize 400 400
  string dummyDataSetName markdown
- extends abstractHeaderlessChartTileNode
+ extends abstractChartNode
  crux markdown.toHtml

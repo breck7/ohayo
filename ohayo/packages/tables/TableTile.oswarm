@@ -5,10 +5,9 @@ test
    withParagraph
     samples.tinyIris
      rows.sortBy petal_length
-      tables.basic Flowz
+      tables.basic
    assertLengthIs getMountedTilesProgram.getTiles 3
    assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 8
-   assertStringIncludes getStumpNodeString Flowz
    assertStringIncludes getStumpNodeString virginica
    assertStringIncludes getStumpNodeString petal_length
    assertStringIncludes getStumpNodeString value species
@@ -17,10 +16,9 @@ test
   pasteCommand
    withParagraph
     samples.tinyIris
-     tables.basic Flowz
+     tables.basic
    assertLengthIs getMountedTilesProgram.getTiles 2
    assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 4
-   assertStringIncludes getStumpNodeString Flowz
    assertStringIncludes getStumpNodeString virginica
    assertStringIncludes getStumpNodeString petal_length
    assertStringIncludes getStumpNodeString value species

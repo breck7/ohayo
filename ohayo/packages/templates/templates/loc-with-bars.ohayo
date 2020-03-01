@@ -4,7 +4,7 @@ web.get /disk?path=/ohayo/studio&lineStats=true&recursive=true
   show.sum lines Total LoC
   columns.keep name extension lines words bytes wordsPerLine
    rows.sortByReverse lines
-    tables.basic All files
+    tables.basic
   group.by extension
    reduce words sum words
    reduce bytes sum bytes
@@ -13,5 +13,5 @@ web.get /disk?path=/ohayo/studio&lineStats=true&recursive=true
     yColumn lines
    vega.bar Words
     yColumn words
-   tables.basic Top Extensions
+   tables.basic
 doc.categories programming

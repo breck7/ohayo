@@ -355,6 +355,12 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     return res
   }
 
+  async _createAndOpenInBackgroundTab(sourceStr, filename) {
+    const newName = await this.createFileOnDefaultDisk(filename, sourceStr)
+    const tab = await this._openFullDiskFilePathInNewTab(newName)
+    return tab
+  }
+
   setMountedTab(tab) {
     const currentTab = this._getMountedTab()
     if (currentTab === tab) return this
@@ -841,7 +847,14 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
 
     const shouldProceed = await this.willowBrowser.confirmThen(`Are you sure you want to delete ${tabs.length} open files?`)
 
-    return shouldProceed ? Promise.all(tabs.map(tab => tab.unlinkTab())) : false
+    return shouldProceed
+      ? Promise.all(
+          tabs.map(tab => {
+            tab.unlinkTab()
+            this.closeTab(tab)
+          })
+        )
+      : false
   }
 
   async closeAllDropDownMenusCommand() {
@@ -868,8 +881,16 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
     newTile.selectTile()
   }
 
-  insertAdjacentTileCommand() {
-    return this.getAppWall().insertAdjacentTileCommand()
+  async insertAdjacentTileCommand() {
+    // todo: remove?
+    // todo: it seems like we don't want to have that insert multiple behavior. removed it for now.
+    const newTiles = this.getNodeCursors()
+      .slice(0, 1)
+      .map(cursor => cursor.appendLine(OhayoConstants.pickerTile))
+    const promise = await app.getMountedTab().autosaveAndRender()
+    this.mountedProgram.clearSelection()
+    newTiles.forEach(tile => tile.selectTile())
+    return promise
   }
 
   async appendTileCommand(line, children) {
@@ -1347,23 +1368,33 @@ ${StudioConstants.panel} ${defaultGutterWidth} ${menuHeight}
 
     tab.addStumpCodeMessageToLog(`div Created '${tab.getFullTabFilePath()}'`)
     const sourceCode2 = new jtree.TreeNode(`data.inline
- tables.basic Quality Check Results`)
+ doc.subtitle Quality Check Results
+ tables.basic`)
     sourceCode2.getNode("data.inline").appendLineAndChildren("content", new jtree.TreeNode(data).toCsv())
     const tab2 = await this._createAndOpen(sourceCode2.toString(), "tiles-quality-check-results" + StudioConstants.ohayoExtension)
 
     tab2.addStumpCodeMessageToLog(`div Created '${tab2.getFullTabFilePath()}'`)
   }
 
-  async _runSpeedTestCommand() {
-    const files = await this.getDefaultDisk().readFiles()
+  getStandardTemplates() {
+    return typeof TemplatesStamp === "undefined"
+      ? jtree.TreeNode.fromDisk(this._getProjectRootDir() + "ohayo/packages/templates/Templates.stamp").trim()
+      : new jtree.TreeNode(TemplatesStamp).trim()
+  }
+
+  async _openAllTemplatesCommand() {
+    return this._runTemplateSpeedTestCommand(false)
+  }
+
+  async _runTemplateSpeedTestCommand(closeAfterLoading = true) {
+    const templates = this.getStandardTemplates()
     const startTime = Date.now()
 
-    const timePromises = files.map(async file => {
-      const url = file.getFileLink()
-      const newTab = await this._openFullDiskFilePathInNewTab(url)
+    const timePromises = templates.map(async template => {
+      const newTab = await this._createAndOpenInBackgroundTab(template.getNode("data").childrenToString(), template.getWord(1).split("/")[1])
       const mountedTab = this.getMountedTab()
       this.setMountedTab(newTab)
-      if (mountedTab) this.closeTab(mountedTab)
+      if (closeAfterLoading && mountedTab) this.closeTab(mountedTab)
       this.renderApp()
       return newTab.getTabProgram().toRunTimeStats()
     })

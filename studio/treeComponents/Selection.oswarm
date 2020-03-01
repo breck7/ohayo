@@ -28,7 +28,7 @@ test selection
                executeCommandOnFirstSelectedTileCommand copyDataCommand
                 executeCommandOnFirstSelectedTileCommand copyTileCommand
                  executeCommandOnFirstSelectedTileCommand changeTileSettingAndRenderCommand boom title
-                  executeCommandOnFirstSelectedTileCommand destroyTileCommand
+                  executeCommandOnFirstSelectedTileCommand removeTileCommand
 test undoRedo
  createNewBlankProgramCommand
   pasteCommand data.inline

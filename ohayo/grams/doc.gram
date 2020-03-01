@@ -18,8 +18,6 @@ abstractDocSettingNode
  abstract
  boolean visible false
 abstractDocTileNode
- int footerHeight 0
- int headerHeight 0
  tags noPicker
  cells tileKeywordCell
  extends abstractTileTreeComponentNode
@@ -33,15 +31,11 @@ abstractDocTileNode
    class {classes}
    id {id}
    div
-    class TileHeaderGrabber
-   div
-    class TileBody HeaderLess
+    class TileBody
     {body}
    div
     class TileFooter
     {footer}
-   div
-    class TileFooterGrabber
  javascript
   _getBody() {
    return this.qFormat(this.bodyStumpTemplate, { content: this.getContent() || "", tagName: this.tagName })
@@ -139,16 +133,6 @@ docAuthorNode
  catchAllCellType stringCell
  crux doc.author
  description Add one author per line.
-docDefaultHiddenNode
- crux doc.defaultHidden
- example
-  doc.defaultHidden
-  samples.portals
-   tables.basic
-    visible
- description Change default tile visibility to hidden.
- cells tileKeywordCell
- extends abstractDocSettingNode
 docDateNode
  description Date published.
  extends abstractDocSettingNode
