@@ -7,6 +7,12 @@ roughnessNode
  description Roughness level of chart. Default is 1.
  extends abstractTileSettingTerminalNode
  crux roughness
+colorsNode
+ cells tileSettingKeywordCell
+ catchAllCellType anyCell
+ description Colors to use for the lines.
+ extends abstractTileSettingTerminalNode
+ crux colors
 abstractRoughJsChartNode
  description Create sketchy/hand-drawn styled charts https://github.com/jwilber/roughViz
  string tileScript ohayo/packages/roughjs/roughviz.min.js
@@ -33,15 +39,25 @@ abstractRoughJsChartNode
     const value = this.get("roughness")
     return value ? parseInt(value) : 1
   }
+  _getOptions() {
+    return {}
+  }
   _drawRough() {
-   const roughEl = new roughViz[this.roughChartType]({
+   const colors = this.get("colors") ? this.get("colors").split(" ") : undefined
+   const options = Object.assign(this._getOptions(), {
     title: this.getContent() || "",
     element: '#' + this._getRoughId(),
     roughness: this._roughness,
     width: this.getTileRunTimeWidth(),
     height: this.getTileRunTimeHeight(),
+    colors,
     data: this._getRoughData()
     })
+   const roughEl = new roughViz[this.roughChartType](options)
+  }
+  _getValues(settingName) {
+    const columName = this.mapSettingNamesToColumnNames([settingName])[0]
+    return this.getParentOrDummyTable().getColumnByName(columName).getValues()
   }
  string bodyStumpTemplate
   div
@@ -58,11 +74,6 @@ abstractRoughJsLabelValueNode
     console.log(data)
     return data
   }
-  _getValues(settingName) {
-    const columName = this.mapSettingNamesToColumnNames([settingName])[0]
-    const column = this.getParentOrDummyTable().getColumnByName(columName)
-    return column._getSummaryVector().values
-  }
 roughJsBarNode
  crux roughjs.bar
  inScope labelNode valueNode
@@ -73,6 +84,34 @@ roughJsBarNode
    roughjs.bar Past Year's Water Bill
     label PaidOn
     value Amount
+roughJsLineNode
+ inScope colorsNode
+ crux roughjs.line
+ extends abstractRoughJsChartNode
+ string roughChartType Line
+ example
+  samples.waterBill
+   roughjs.line Water Bill
+ javascript
+  _getNumericColumns() {
+    return Object.values(this.getParentOrDummyTable().getColumnsMap()).filter(col => col.isNumeric())
+  }
+  _getRoughData() {
+    const data = {}
+    const numerics = this._getNumericColumns()
+    numerics.forEach(col => {
+      data[col.getColumnName()] = col.getValues()
+      })
+    return data
+  }
+  _getOptions() {
+    const options = {}
+    const numerics = this._getNumericColumns()
+    numerics.forEach((col, index) => {
+      options["y" + index] = col.getColumnName()
+      })
+    return options
+  }
 roughJsPieNode
  inScope labelNode valueNode
  crux roughjs.pie

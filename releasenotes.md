@@ -1,3 +1,8 @@
+20.1.0 2020-3-8
+---------------
+- New: added roughjs.line tile
+- New: added columns.keepNumerics tile
+
 20.0.0 2020-3-1
 ---------------
 - New: added insert between button to tiles

@@ -23,7 +23,7 @@ asciiChartNode
     // todo: autodetect column
     const columName = this.mapSettingNamesToColumnNames(["yColumn"])[0]
     const column = this.getParentOrDummyTable().getColumnByName(columName)
-    const values = column._getSummaryVector().values
+    const values = column.getValues()
     const chart = asciichart.plot(values, {height: 15})
     const title = this.getContent() || ""
     const leftPad = Math.max(0, Math.floor((chart.split("\n")[0].length - title.length) / 2))

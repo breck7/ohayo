@@ -154,3 +154,16 @@ columnsKeepNode
     .filter(col => colsToKeep.includes(col.name))
     .map(col => col.name)
   }
+columnsKeepNumericsNode
+ description Keep only numeric columns
+ crux columns.keepNumerics
+ extends abstractColumnFilterTileNode
+ example Show 2 columns
+  samples.presidents
+   columns.keepNumerics
+    tables.basic
+ javascript
+  getColumnNamesToKeep() {
+   return Object.values(this.getParentOrDummyTable().getColumnsMap()).filter(col => col.isNumeric())
+    .map(col => col.getColumnName())
+  }

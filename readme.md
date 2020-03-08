@@ -60,6 +60,7 @@ workbenchdata
 |Tidyverse|https://www.tidyverse.org/|2016|https://en.wikipedia.org/wiki/Tidyverse|
 |Vega Editor|https://vega.github.io/editor/|2015||
 |Amazon QuickSight|https://aws.amazon.com/quicksight/|2015||
+|GapMinder Vizabi|https://vizabi.org/|2015||
 |xsv|https://github.com/BurntSushi/xsv|2014||
 |dplyr|https://dplyr.tidyverse.org/|2014||
 |JupyterLab|https://github.com/jupyterlab/jupyterlab|2014|https://en.wikipedia.org/wiki/Project_Jupyter|
@@ -79,7 +80,7 @@ workbenchdata
 |d3|https://d3js.org/|2011|https://en.wikipedia.org/wiki/D3.js|
 |Google Kaggle|https://www.kaggle.com/|2010|https://en.wikipedia.org/wiki/Kaggle|
 |ChartIO|https://chartio.com/|2010||
-|Google BigQuery|https://cloud.google.com/bigquery/|2015|https://en.wikipedia.org/wiki/BigQuery|
+|Google BigQuery|https://cloud.google.com/bigquery/|2010|https://en.wikipedia.org/wiki/BigQuery|
 |Wolfram Alpha|https://www.wolframalpha.com/|2009|https://en.wikipedia.org/wiki/Wolfram_Alpha|
 |LucidChart|https://www.lucidchart.com/|2008|https://en.wikipedia.org/wiki/Lucidchart|
 |Pandas|https://pandas.pydata.org/|2008|https://en.wikipedia.org/wiki/Pandas_(software)
