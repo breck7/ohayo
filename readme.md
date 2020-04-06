@@ -52,11 +52,12 @@ Ohayo is just one of my tools that are trying to make data science easier. Here'
 |Name|Website|Year|WikipediaPage|
 |-|-|-|-|
 |Grid Studio|https://github.com/ricklamers/gridstudio|2019||
-workbenchdata
 |Workbench|https://workbenchdata.com/|2018||
+|Data Illustrator|http://data-illustrator.com/|2018||
 |Observable|https://observablehq.com/|2017||
 |Idyll|https://idyll-lang.org/|2017||
 |Google Data Studio|https://datastudio.google.com/overview|2016|https://de.wikipedia.org/wiki/Google_Data_Studio|
+|Flourish|https://flourish.studio/|2016||
 |Tidyverse|https://www.tidyverse.org/|2016|https://en.wikipedia.org/wiki/Tidyverse|
 |Vega Editor|https://vega.github.io/editor/|2015||
 |Amazon QuickSight|https://aws.amazon.com/quicksight/|2015||
@@ -68,20 +69,24 @@ workbenchdata
 |xlwings|https://www.xlwings.org/|2013||
 |RAWGraphs|https://github.com/rawgraphs/raw|2013||
 |DataBricks|https://databricks.com/|2013|https://en.wikipedia.org/wiki/Databricks|
+|Quadrigram|https://www.quadrigram.com/|2012||
 |Julia|https://julialang.org/|2012|https://en.wikipedia.org/wiki/Julia_(programming_language)|
 |Looker|https://looker.com/|2012|https://en.wikipedia.org/wiki/Looker_(company)|
 |AirTable|https://airtable.com/|2012|https://en.wikipedia.org/wiki/Airtable|
 |Anaconda|https://www.anaconda.com/|2012|https://en.wikipedia.org/wiki/Anaconda_(Python_distribution)|
 |Plotly|https://plot.ly/|2012|https://en.wikipedia.org/wiki/Plotly|
 |DataWrapper|https://www.datawrapper.de/|2012||
+|Infogram|https://infogram.com/|2012|https://en.wikipedia.org/wiki/Infogram|
 |RStudio|https://www.rstudio.com/|2011|https://en.wikipedia.org/wiki/RStudio|
 |Microsoft SandDance|https://github.com/microsoft/SandDance|2011|https://en.wikipedia.org/wiki/Microsoft_Garage|
 |Microsoft PowerBI|https://powerbi.microsoft.com/en-us/|2011|https://en.wikipedia.org/wiki/Power_BI|
 |d3|https://d3js.org/|2011|https://en.wikipedia.org/wiki/D3.js|
+|piktochart|https://piktochart.com/|2011|https://en.wikipedia.org/wiki/Piktochart|
 |Google Kaggle|https://www.kaggle.com/|2010|https://en.wikipedia.org/wiki/Kaggle|
 |ChartIO|https://chartio.com/|2010||
 |Google BigQuery|https://cloud.google.com/bigquery/|2010|https://en.wikipedia.org/wiki/BigQuery|
 |Wolfram Alpha|https://www.wolframalpha.com/|2009|https://en.wikipedia.org/wiki/Wolfram_Alpha|
+|HighCharts|https://www.highcharts.com/|2009|https://en.wikipedia.org/wiki/Highcharts|
 |LucidChart|https://www.lucidchart.com/|2008|https://en.wikipedia.org/wiki/Lucidchart|
 |Pandas|https://pandas.pydata.org/|2008|https://en.wikipedia.org/wiki/Pandas_(software)
 |Apple Numbers|https://www.apple.com/numbers/|2007|https://en.wikipedia.org/wiki/Numbers_(spreadsheet)|
