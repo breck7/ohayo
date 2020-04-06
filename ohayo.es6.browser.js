@@ -25451,6 +25451,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "markdown.toHtml": markdownToHtmlNode,
           "roughjs.bar": roughJsBarNode,
           "roughjs.pie": roughJsPieNode,
+          "roughjs.line": roughJsLineNode,
           "show.rowCount": showRowCountNode,
           "show.columnCount": showColumnCountNode,
           "show.static": showStaticNode,
@@ -25554,6 +25555,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "columns.drop": columnsDropNode,
           "columns.dropConstants": columnsDropConstantsNode,
           "columns.keep": columnsKeepNode,
+          "columns.keepNumerics": columnsKeepNumericsNode,
           "rows.shuffle": rowsShuffleNode,
           "rows.reverse": rowsReverseNode,
           "filter.where": filterWhereNode,
@@ -26721,7 +26723,7 @@ a {name}
       // todo: autodetect column
       const columName = this.mapSettingNamesToColumnNames(["yColumn"])[0]
       const column = this.getParentOrDummyTable().getColumnByName(columName)
-      const values = column._getSummaryVector().values
+      const values = column.getValues()
       const chart = asciichart.plot(values, { height: 15 })
       const title = this.getContent() || ""
       const leftPad = Math.max(0, Math.floor((chart.split("\n")[0].length - title.length) / 2))
@@ -27668,15 +27670,27 @@ link isLink`
       const value = this.get("roughness")
       return value ? parseInt(value) : 1
     }
+    _getOptions() {
+      return {}
+    }
     _drawRough() {
-      const roughEl = new roughViz[this.roughChartType]({
+      const colors = this.get("colors") ? this.get("colors").split(" ") : undefined
+      const options = Object.assign(this._getOptions(), {
         title: this.getContent() || "",
         element: "#" + this._getRoughId(),
         roughness: this._roughness,
         width: this.getTileRunTimeWidth(),
         height: this.getTileRunTimeHeight(),
+        colors,
         data: this._getRoughData()
       })
+      const roughEl = new roughViz[this.roughChartType](options)
+    }
+    _getValues(settingName) {
+      const columName = this.mapSettingNamesToColumnNames([settingName])[0]
+      return this.getParentOrDummyTable()
+        .getColumnByName(columName)
+        .getValues()
     }
   }
 
@@ -27691,11 +27705,6 @@ link isLink`
       const data = { labels: this._getValues("label"), values: this._getValues("value") }
       console.log(data)
       return data
-    }
-    _getValues(settingName) {
-      const columName = this.mapSettingNamesToColumnNames([settingName])[0]
-      const column = this.getParentOrDummyTable().getColumnByName(columName)
-      return column._getSummaryVector().values
     }
   }
 
@@ -27722,6 +27731,38 @@ link isLink`
     }
     get roughChartType() {
       return `Pie`
+    }
+  }
+
+  class roughJsLineNode extends abstractRoughJsChartNode {
+    createParser() {
+      return new jtree.TreeNode.Parser(
+        undefined,
+        Object.assign(Object.assign({}, super.createParser()._getFirstWordMapAsObject()), { colors: colorsNode }),
+        undefined
+      )
+    }
+    get roughChartType() {
+      return `Line`
+    }
+    _getNumericColumns() {
+      return Object.values(this.getParentOrDummyTable().getColumnsMap()).filter(col => col.isNumeric())
+    }
+    _getRoughData() {
+      const data = {}
+      const numerics = this._getNumericColumns()
+      numerics.forEach(col => {
+        data[col.getColumnName()] = col.getValues()
+      })
+      return data
+    }
+    _getOptions() {
+      const options = {}
+      const numerics = this._getNumericColumns()
+      numerics.forEach((col, index) => {
+        options["y" + index] = col.getColumnName()
+      })
+      return options
     }
   }
 
@@ -30115,6 +30156,14 @@ input
     }
   }
 
+  class columnsKeepNumericsNode extends abstractColumnFilterTileNode {
+    getColumnNamesToKeep() {
+      return Object.values(this.getParentOrDummyTable().getColumnsMap())
+        .filter(col => col.isNumeric())
+        .map(col => col.getColumnName())
+    }
+  }
+
   class abstractTransformerNoParamsTileNode extends abstractTransformerNode {
     getTileBodyStumpCode() {
       return `span ${this.getFirstWord()}
@@ -31037,6 +31086,15 @@ class LargeLabel`
     }
   }
 
+  class colorsNode extends abstractTileSettingTerminalNode {
+    get tileSettingKeywordCell() {
+      return this.getWord(0)
+    }
+    get anyCell() {
+      return this.getWordsFrom(1)
+    }
+  }
+
   class cameraPositionNode extends abstractTileSettingTerminalNode {
     get tileSettingKeywordCell() {
       return this.getWord(0)
@@ -31286,6 +31344,7 @@ class LargeLabel`
           "markdown.toHtml": markdownToHtmlNode,
           "roughjs.bar": roughJsBarNode,
           "roughjs.pie": roughJsPieNode,
+          "roughjs.line": roughJsLineNode,
           "show.rowCount": showRowCountNode,
           "show.columnCount": showColumnCountNode,
           "show.static": showStaticNode,
@@ -31389,6 +31448,7 @@ class LargeLabel`
           "columns.drop": columnsDropNode,
           "columns.dropConstants": columnsDropConstantsNode,
           "columns.keep": columnsKeepNode,
+          "columns.keepNumerics": columnsKeepNumericsNode,
           "rows.shuffle": rowsShuffleNode,
           "rows.reverse": rowsReverseNode,
           "filter.where": filterWhereNode,
@@ -32668,7 +32728,7 @@ asciiChartNode
    // todo: autodetect column
    const columName = this.mapSettingNamesToColumnNames(["yColumn"])[0]
    const column = this.getParentOrDummyTable().getColumnByName(columName)
-   const values = column._getSummaryVector().values
+   const values = column.getValues()
    const chart = asciichart.plot(values, { height: 15 })
    const title = this.getContent() || ""
    const leftPad = Math.max(0, Math.floor((chart.split("\\n")[0].length - title.length) / 2))
@@ -33514,15 +33574,27 @@ abstractRoughJsChartNode
    const value = this.get("roughness")
    return value ? parseInt(value) : 1
   }
+  _getOptions() {
+   return {}
+  }
   _drawRough() {
-   const roughEl = new roughViz[this.roughChartType]({
+   const colors = this.get("colors") ? this.get("colors").split(" ") : undefined
+   const options = Object.assign(this._getOptions(), {
     title: this.getContent() || "",
     element: "#" + this._getRoughId(),
     roughness: this._roughness,
     width: this.getTileRunTimeWidth(),
     height: this.getTileRunTimeHeight(),
+    colors,
     data: this._getRoughData()
    })
+   const roughEl = new roughViz[this.roughChartType](options)
+  }
+  _getValues(settingName) {
+   const columName = this.mapSettingNamesToColumnNames([settingName])[0]
+   return this.getParentOrDummyTable()
+    .getColumnByName(columName)
+    .getValues()
   }
  string bodyStumpTemplate
   div
@@ -33539,11 +33611,6 @@ abstractRoughJsLabelValueNode
    console.log(data)
    return data
   }
-  _getValues(settingName) {
-   const columName = this.mapSettingNamesToColumnNames([settingName])[0]
-   const column = this.getParentOrDummyTable().getColumnByName(columName)
-   return column._getSummaryVector().values
-  }
 roughJsBarNode
  crux roughjs.bar
  inScope labelNode valueNode
@@ -33559,6 +33626,34 @@ roughJsPieNode
  crux roughjs.pie
  extends abstractRoughJsLabelValueNode
  string roughChartType Pie
+roughJsLineNode
+ inScope colorsNode
+ crux roughjs.line
+ extends abstractRoughJsChartNode
+ string roughChartType Line
+ example
+  samples.waterBill
+   roughjs.line Water Bill
+ javascript
+  _getNumericColumns() {
+   return Object.values(this.getParentOrDummyTable().getColumnsMap()).filter(col => col.isNumeric())
+  }
+  _getRoughData() {
+   const data = {}
+   const numerics = this._getNumericColumns()
+   numerics.forEach(col => {
+    data[col.getColumnName()] = col.getValues()
+   })
+   return data
+  }
+  _getOptions() {
+   const options = {}
+   const numerics = this._getNumericColumns()
+   numerics.forEach((col, index) => {
+    options["y" + index] = col.getColumnName()
+   })
+   return options
+  }
 abstractShowTileNode
  cells tileKeywordCell columnNameCell
  catchAllCellType titleCell
@@ -35750,6 +35845,20 @@ columnsKeepNode
     .filter(col => colsToKeep.includes(col.name))
     .map(col => col.name)
   }
+columnsKeepNumericsNode
+ description Keep only numeric columns
+ crux columns.keepNumerics
+ extends abstractColumnFilterTileNode
+ example Show 2 columns
+  samples.presidents
+   columns.keepNumerics
+    tables.basic
+ javascript
+  getColumnNamesToKeep() {
+   return Object.values(this.getParentOrDummyTable().getColumnsMap())
+    .filter(col => col.isNumeric())
+    .map(col => col.getColumnName())
+  }
 abstractTransformerNoParamsTileNode
  abstract
  extends abstractTransformerNode
@@ -36652,6 +36761,12 @@ roughnessNode
  description Roughness level of chart. Default is 1.
  extends abstractTileSettingTerminalNode
  crux roughness
+colorsNode
+ cells tileSettingKeywordCell
+ catchAllCellType anyCell
+ description Colors to use for the lines.
+ extends abstractTileSettingTerminalNode
+ crux colors
 cameraPositionNode
  cells tileSettingKeywordCell cameraDistanceNumberCell horizontalNumberCell verticalNumberCell
  extends abstractTileSettingTerminalNode
@@ -36960,6 +37075,7 @@ schemaNode
         abstractRoughJsLabelValueNode: abstractRoughJsLabelValueNode,
         roughJsBarNode: roughJsBarNode,
         roughJsPieNode: roughJsPieNode,
+        roughJsLineNode: roughJsLineNode,
         abstractShowTileNode: abstractShowTileNode,
         showRowCountNode: showRowCountNode,
         showColumnCountNode: showColumnCountNode,
@@ -37079,6 +37195,7 @@ schemaNode
         columnsDropNode: columnsDropNode,
         columnsDropConstantsNode: columnsDropConstantsNode,
         columnsKeepNode: columnsKeepNode,
+        columnsKeepNumericsNode: columnsKeepNumericsNode,
         abstractTransformerNoParamsTileNode: abstractTransformerNoParamsTileNode,
         rowsShuffleNode: rowsShuffleNode,
         rowsReverseNode: rowsReverseNode,
@@ -37159,6 +37276,7 @@ schemaNode
         rowDisplayLimitNode: rowDisplayLimitNode,
         srcNode: srcNode,
         roughnessNode: roughnessNode,
+        colorsNode: colorsNode,
         cameraPositionNode: cameraPositionNode,
         treeLanguageNode: treeLanguageNode,
         abstractTileSettingNonTerminalNode: abstractTileSettingNonTerminalNode,
@@ -40578,7 +40696,7 @@ a Export data to tree file
 window.TileMenuTreeComponent = TileMenuTreeComponent
 ;
 
-const Version = "20.0.0"
+const Version = "20.1.0"
 if (typeof exports !== "undefined") module.exports = Version
 ;
 
