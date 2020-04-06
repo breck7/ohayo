@@ -90,6 +90,10 @@ ohayoNode
    if (!this._outputTable) this._outputTable = new Table()
    return this._outputTable
   }
+  getRowsFromLastTable() {
+    const tiles = this.getTopDownArray()
+    return tiles[tiles.length - 1].getOutputOrInputTable().getRows()
+  }
   getAllRowsFromAllOutputTables() {
    return jtree.Utils.flatten(
     this.getTiles()

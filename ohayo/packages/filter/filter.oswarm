@@ -9,6 +9,14 @@ test columnsKeepDropsColumns
       filter.with vir
        tables.basic
    assertStringExcludes getStumpNodeString span petal_width
+test filterWithAny
+ createNewBlankProgramCommand
+  pasteCommand
+   withParagraph
+    samples.presidents
+     filter.withAny George Obama
+      tables.basic
+   assertLengthIs getMountedTilesProgram.getRowsFromLastTable 4
 test changeFilterViaTileUI
  createNewBlankProgramCommand
   assertLengthIs getMountedTilesProgram.getAllRowsFromAllOutputTables 0

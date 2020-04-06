@@ -40,7 +40,6 @@ filterWithNode
   getRowFilterFn() {
    const words = this.getWordsFrom(1)
    // todo: problem here is, getRows has too many columns if after a transformed column.
-   const rows = this.getParentOrDummyTable().getRows()
    if (!words.length) return undefined
    const len = words.length
    const expectedValue = this.expectedBooleanValue
@@ -57,3 +56,21 @@ filterWithoutNode
  extends filterWithNode
  crux filter.without
  boolean expectedBooleanValue false
+filterAnyNode
+ description Each row much contain any of these words
+ extends filterWithNode
+ crux filter.withAny
+ javascript
+  getRowFilterFn() {
+    const words = this.getWordsFrom(1)
+    if (!words.length) return undefined
+    const len = words.length
+    // todo: problem here is, getRows has too many columns if after a transformed column.
+    return row => {
+    const str = JSON.stringify(row)
+    for (let index = 0; index < len; index++) {
+     if (str.includes(words[index])) return true
+    }
+    return false
+   }
+  }
