@@ -25561,6 +25561,7 @@ window.TreeComponentFrameworkDebuggerComponent = TreeComponentFrameworkDebuggerC
           "filter.where": filterWhereNode,
           "filter.with": filterWithNode,
           "filter.without": filterWithoutNode,
+          "filter.withAny": filterAnyNode,
           "rows.first": rowsFirstNode,
           "rows.sample": rowsSampleNode,
           "rows.dropIfMissing": rowsDropIfMissingNode,
@@ -30238,7 +30239,6 @@ class LargeLabel`
     getRowFilterFn() {
       const words = this.getWordsFrom(1)
       // todo: problem here is, getRows has too many columns if after a transformed column.
-      const rows = this.getParentOrDummyTable().getRows()
       if (!words.length) return undefined
       const len = words.length
       const expectedValue = this.expectedBooleanValue
@@ -30255,6 +30255,22 @@ class LargeLabel`
   class filterWithoutNode extends filterWithNode {
     get expectedBooleanValue() {
       return false
+    }
+  }
+
+  class filterAnyNode extends filterWithNode {
+    getRowFilterFn() {
+      const words = this.getWordsFrom(1)
+      if (!words.length) return undefined
+      const len = words.length
+      // todo: problem here is, getRows has too many columns if after a transformed column.
+      return row => {
+        const str = JSON.stringify(row)
+        for (let index = 0; index < len; index++) {
+          if (str.includes(words[index])) return true
+        }
+        return false
+      }
     }
   }
 
@@ -31454,6 +31470,7 @@ class LargeLabel`
           "filter.where": filterWhereNode,
           "filter.with": filterWithNode,
           "filter.without": filterWithoutNode,
+          "filter.withAny": filterAnyNode,
           "rows.first": rowsFirstNode,
           "rows.sample": rowsSampleNode,
           "rows.dropIfMissing": rowsDropIfMissingNode,
@@ -31561,6 +31578,10 @@ class LargeLabel`
       // todo: remove this?
       if (!this._outputTable) this._outputTable = new Table()
       return this._outputTable
+    }
+    getRowsFromLastTable() {
+      const tiles = this.getTopDownArray()
+      return tiles[tiles.length - 1].getOutputOrInputTable().getRows()
     }
     getAllRowsFromAllOutputTables() {
       return jtree.Utils.flatten(
@@ -35931,7 +35952,6 @@ filterWithNode
   getRowFilterFn() {
    const words = this.getWordsFrom(1)
    // todo: problem here is, getRows has too many columns if after a transformed column.
-   const rows = this.getParentOrDummyTable().getRows()
    if (!words.length) return undefined
    const len = words.length
    const expectedValue = this.expectedBooleanValue
@@ -35948,6 +35968,24 @@ filterWithoutNode
  extends filterWithNode
  crux filter.without
  boolean expectedBooleanValue false
+filterAnyNode
+ description Each row much contain any of these words
+ extends filterWithNode
+ crux filter.withAny
+ javascript
+  getRowFilterFn() {
+   const words = this.getWordsFrom(1)
+   if (!words.length) return undefined
+   const len = words.length
+   // todo: problem here is, getRows has too many columns if after a transformed column.
+   return row => {
+    const str = JSON.stringify(row)
+    for (let index = 0; index < len; index++) {
+     if (str.includes(words[index])) return true
+    }
+    return false
+   }
+  }
 rowsFirstNode
  cells tileKeywordCell intCell
  description Return the first N rows.
@@ -36985,6 +37023,10 @@ ohayoNode
    if (!this._outputTable) this._outputTable = new Table()
    return this._outputTable
   }
+  getRowsFromLastTable() {
+   const tiles = this.getTopDownArray()
+   return tiles[tiles.length - 1].getOutputOrInputTable().getRows()
+  }
   getAllRowsFromAllOutputTables() {
    return jtree.Utils.flatten(
     this.getTiles()
@@ -37203,6 +37245,7 @@ schemaNode
         filterWhereNode: filterWhereNode,
         filterWithNode: filterWithNode,
         filterWithoutNode: filterWithoutNode,
+        filterAnyNode: filterAnyNode,
         rowsFirstNode: rowsFirstNode,
         rowsSampleNode: rowsSampleNode,
         rowsDropIfMissingNode: rowsDropIfMissingNode,

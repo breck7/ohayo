@@ -1,7 +1,8 @@
-20.1.0 2020-3-8
----------------
+20.1.0 2020-6-13
+----------------
 - New: added roughjs.line tile
 - New: added columns.keepNumerics tile
+- New: added filter.withAny tile
 
 20.0.0 2020-3-1
 ---------------
