@@ -53,20 +53,25 @@ Ohayo is just one of my tools that are trying to make data science easier. Here'
 |-|-|-|-|
 |Grid Studio|https://github.com/ricklamers/gridstudio|2019||
 |Workbench|https://workbenchdata.com/|2018||
+|ActionDesk|https://www.actiondesk.io/|2018||
 |Data Illustrator|http://data-illustrator.com/|2018||
 |Observable|https://observablehq.com/|2017||
 |Idyll|https://idyll-lang.org/|2017||
+|VisiData|https://www.visidata.org/|2017||
 |Google Data Studio|https://datastudio.google.com/overview|2016|https://de.wikipedia.org/wiki/Google_Data_Studio|
 |Flourish|https://flourish.studio/|2016||
 |Tidyverse|https://www.tidyverse.org/|2016|https://en.wikipedia.org/wiki/Tidyverse|
 |Vega Editor|https://vega.github.io/editor/|2015||
 |Amazon QuickSight|https://aws.amazon.com/quicksight/|2015||
 |GapMinder Vizabi|https://vizabi.org/|2015||
+|Toucan|https://toucantoco.com/en/|2015||
 |xsv|https://github.com/BurntSushi/xsv|2014||
+|metabase|https://www.metabase.com/|2014||
 |dplyr|https://dplyr.tidyverse.org/|2014||
 |JupyterLab|https://github.com/jupyterlab/jupyterlab|2014|https://en.wikipedia.org/wiki/Project_Jupyter|
 |OmniSci|https://www.omnisci.com/|2013|https://en.wikipedia.org/wiki/OmniSci|
 |xlwings|https://www.xlwings.org/|2013||
+|redash|https://redash.io/|2013||
 |RAWGraphs|https://github.com/rawgraphs/raw|2013||
 |DataBricks|https://databricks.com/|2013|https://en.wikipedia.org/wiki/Databricks|
 |Quadrigram|https://www.quadrigram.com/|2012||
@@ -76,6 +81,7 @@ Ohayo is just one of my tools that are trying to make data science easier. Here'
 |Anaconda|https://www.anaconda.com/|2012|https://en.wikipedia.org/wiki/Anaconda_(Python_distribution)|
 |Plotly|https://plot.ly/|2012|https://en.wikipedia.org/wiki/Plotly|
 |DataWrapper|https://www.datawrapper.de/|2012||
+|ThoughtSpot|https://www.thoughtspot.com/|2012|https://en.wikipedia.org/wiki/ThoughtSpot|
 |Infogram|https://infogram.com/|2012|https://en.wikipedia.org/wiki/Infogram|
 |RStudio|https://www.rstudio.com/|2011|https://en.wikipedia.org/wiki/RStudio|
 |Microsoft SandDance|https://github.com/microsoft/SandDance|2011|https://en.wikipedia.org/wiki/Microsoft_Garage|
@@ -85,6 +91,8 @@ Ohayo is just one of my tools that are trying to make data science easier. Here'
 |Google Kaggle|https://www.kaggle.com/|2010|https://en.wikipedia.org/wiki/Kaggle|
 |ChartIO|https://chartio.com/|2010||
 |Google BigQuery|https://cloud.google.com/bigquery/|2010|https://en.wikipedia.org/wiki/BigQuery|
+|OpenRefine|https://github.com/OpenRefine/OpenRefine|2010|https://en.wikipedia.org/wiki/OpenRefine|
+|Zoho Analytics|https://www.zoho.com/analytics/|2009||
 |Wolfram Alpha|https://www.wolframalpha.com/|2009|https://en.wikipedia.org/wiki/Wolfram_Alpha|
 |HighCharts|https://www.highcharts.com/|2009|https://en.wikipedia.org/wiki/Highcharts|
 |LucidChart|https://www.lucidchart.com/|2008|https://en.wikipedia.org/wiki/Lucidchart|
