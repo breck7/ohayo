@@ -51,6 +51,10 @@ Ohayo is just one of my tools that are trying to make data science easier. Here'
 
 |Name|Website|Year|WikipediaPage|
 |-|-|-|-|
+|Rows.com|https://rows.com/|2020||
+|Explo.co|http://explo.co/|2020||
+|Arquero|https://github.com/uwdata/arquero|2020||
+|Basedash|https://www.basedash.com/|2019||
 |Grid Studio|https://github.com/ricklamers/gridstudio|2019||
 |Workbench|https://workbenchdata.com/|2018||
 |ActionDesk|https://www.actiondesk.io/|2018||
@@ -75,6 +79,7 @@ Ohayo is just one of my tools that are trying to make data science easier. Here'
 |RAWGraphs|https://github.com/rawgraphs/raw|2013||
 |DataBricks|https://databricks.com/|2013|https://en.wikipedia.org/wiki/Databricks|
 |Quadrigram|https://www.quadrigram.com/|2012||
+|Snowflake|https://www.snowflake.com/|2012|https://en.wikipedia.org/wiki/Snowflake_Inc.|
 |Julia|https://julialang.org/|2012|https://en.wikipedia.org/wiki/Julia_(programming_language)|
 |Looker|https://looker.com/|2012|https://en.wikipedia.org/wiki/Looker_(company)|
 |AirTable|https://airtable.com/|2012|https://en.wikipedia.org/wiki/Airtable|
