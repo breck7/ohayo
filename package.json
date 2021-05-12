@@ -22,7 +22,7 @@
     "jtree": "^49.8.0",
     "lodash": "^4.17.13",
     "marked": "^0.6.3",
-    "mathjs": "^6.3.0",
+    "mathjs": "^7.5.1",
     "moment": "^2.24.0",
     "moment-parseformat": "^2.2.1",
     "mz": "^2.7.0",
