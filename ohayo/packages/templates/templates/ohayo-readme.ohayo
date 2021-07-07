@@ -1,14 +1,14 @@
 doc.title Ohayo Readme & Release Notes
-web.get readme.md
+web.get readme.scroll
  parser text
  hidden
- markdown.toHtml
-web.get releasenotes.md
+ web.dump
+web.get releaseNotes.scroll
  parser text
  hidden
- markdown.toHtml
-web.get ohayo/readme.md
+ web.dump
+web.get ohayo/readme.scroll
  parser text
  hidden
- markdown.toHtml
+ web.dump
 doc.categories ohayo

@@ -1,0 +1,728 @@
+title Release Notes
+skipIndexPage
+
+paragraph
+ Here's a list of the notable changes in Ohayo.
+
+section 20.1.0 2020-6-13
+list
+ - 🎉 added roughjs.line tile
+ - 🎉 added columns.keepNumerics tile
+ - 🎉 added filter.withAny tile
+
+section 20.0.0 2020-3-1
+list
+ - 🎉 added insert between button to tiles
+ - 🎉 roughjs.bar and roughjs.pie tiles
+ - 🎉 two new templates showing roughjs usage
+ - ⚠️ removed "title" content from tables.basic
+ - ⚠️ removed doc.defaultHidden
+ - 🏥 updated jtree with pivot table fix
+ - 🏥 when you delete a tile using the button it only deletes that tile
+ - 🏥 Bigger down arrow for tile dropdown menu
+ - 🏥 autosave tab after clicking tile picker command
+ - 🏥 debug.commands tile regression fix
+ - 🧹 test all templates command
+ - 🧹 removed TileHeader, TileGrabbers
+ - 🧹 removed duplicate TilePicker code
+
+section 19.3.0 2020-2-7
+list
+ - 🎉 owid.list tile
+
+section 19.2.0 2020-2-7
+list
+ - 🎉 text.template, row.sample, and asciichart.line tiles
+
+section 19.1.0 2020-02-05
+list
+ - 🎉 Text permalink, trim, and replace tiles
+ - 🏥 Rename and Clone Tab now preserve tab order
+ - 🏥 added test and fix for create program from tile example
+
+section 19.0.0 2020-02-04
+list
+ - 🎉 one click insert tile button
+ - 🎉 one click new file button
+ - 🎉 top menu simplified and tabs moved to top menu
+ - 🎉 file commands moved to tabs. Ability to use file commands on all tabs, not just focused tab.
+ - 🎉 speed improvements
+ - 🏥 fixed bug related to closing tabs
+ - 🏥 fixed bug related to closing last tab
+ - 🏥 fixed overflow tabs bug
+ - 🏥 fixed bugs related to toggling gutters/menu
+ - ⚠️ removed doc.layout and tree, bin, and custom layouts. Only layout is now column.
+- Removed: drag select tiles, resize tiles, move tiles
+- Removed: removed all context menus in favor of visible dropdowns
+ - 🧹 removed jquery-ui
+ - 🧹 refactored TCF components to better represent page state
+ - 🧹 removed windowSize
+
+section 18.0.0 2020-1-24
+list
+ - ⚠️ Maia language is now simply named Ohayo. "maia" file extension is now "ohayo"
+ - ⚠️ removed support for Fire, Hakon, Stump and all other Tree Languages
+ - ⚠️ removed compilation and execution commands
+ - 🧹 Merged separate Tiles language into Ohayo
+ - 🧹 Renamed OhayoApp to StudioApp
+ - 🏥 fixed css race condition in "New" drop down menu
+
+section 17.4.0 2020-1-24
+list
+ - 🏥 updated Jtree to fix windows return character bug
+ - 🎉 cdc tiles
+
+section 17.3.0 2020-1-23
+list
+ - 🎉 gen tiles
+ - 🎉 human population, tld, life expectancy templates
+ - 🎉 text.reverseSplit tile
+ - 🎉 owid tile
+ - 🏥 toggling focused mode now puts menu back in correct place
+ - 🧹 changed fab.html to dev.html
+ - ⚠️ date.heatcal is now calendar.heat
+
+section 17.2.0 2020-1-3
+list
+ - 🎉 pca tile
+ - 🏥 updated jtree to get clean columns name fix
+
+section 17.1.0 2019-12-14
+list
+ - 🎉 show.value tile
+ - 🎉 text.matches tile
+ - 🎉 github.info tile
+ - 🎉 GitHub basic info template and github comparison template
+ - 🎉 wikipedia.page tile
+ - 🎉 publicapis.entries tile
+ - 🎉 wikipedia, publicapi, and maia grammar templates
+ - 🧹 dataDomain property on web connected providers
+ - 🧹 abstractUrls node
+
+section 17.0.0 2019-12-12
+list
+ - 🎉 data.synth tile
+ - 🎉 schema.toSimple and schema.toTypescript tiles
+ - 🎉 data.usabilityScore tile
+ - 🎉 print.text and print.csv methods
+ - 🎉 isDataPublicDomain, dataUrl, and dataDescription properties for data usability score
+ - 🎉 text.firstLetter tile
+ - 🎉 columns.rename tile
+ - 🎉 fill.missing tile
+ - 🎉 templates: boiling point, periodic table, country-names, country pops, ohayo product, declaration, typescript interface generator
+ - 🎉 now gallery tiles pass through data
+ - 🎉 data.about tile
+ - 🎉 debug.grammar tile
+ - 🎉 moz.top500 tile
+ - ⚠️ shell.csv is now print.csv and shell.typescript is now schema.toTypescript
+ - ⚠️ text.substring tile now renames column to "substring". Use columns.rename for old behavior.
+ - 🏥 html tiles selectable
+ - 🏥 show.columnCount default title fix
+ - 🏥 fixed bugs in population.tsv
+ - 🧹 updated Jtree to 49.4.0
+ - 🧹 fabWithLocalStorage.html route
+
+section 16.4.0 2019-12-9
+list
+ - 🏥 column name autocomplete fixes and tests
+ - 🎉 Print error count onsave in code editor
+ - 🎉 templates now a provider
+ - 🎉 shell.typescript
+ - 🧹 Tile requirement loading code cleanup.
+
+section 16.3.0 2019-12-9
+list
+ - 🏥 data.localStorage editing bug fix
+ - 🎉 columns.cleanNames tile
+
+section 16.2.0 2019-12-9
+list
+ - 🏥 dropIfMissing fix
+ - 🧹 updated jtree to get deterministic table parsing
+
+section 16.1.0 2019-12-8
+list
+ - 🎉 rows.dropIfMissing tile
+ - 🧹 updated to Jtree 49
+ - 🧹 examples are now type checked
+ - 🧹 command line maia now doesn't print anything unless tiles do it
+
+section 16.0.1 2019-12-6
+list
+ - 🏥 whitespace in doc.code is now pre
+ - 🏥 doc.code code is escaped for html and added test
+ - 🏥 fixed uncaught error in code mirror editor on save
+ - 🧹 moved theme code to one place
+
+section 16.0.0 2019-12-6
+list
+ - 🎉 columns.drop, columns.dropConstants and show.columnCount tiles
+ - 🎉 samples.portals tile
+ - 🎉 portals and maia-reference templates
+ - 🎉 blank lines are allowed in Maia
+ - 🎉 doc.title, doc.subtitle, doc.section, doc.ref, doc.categories, doc.author, doc.date tiles
+ - ⚠️ comment is now doc.comment
+ - ⚠️ layout is now doc.layout
+ - ⚠️ defaultHidden is now doc.defaultHidden
+ - ⚠️ zoom is now doc.zoom
+ - ⚠️ tiles.picker is now doc.picker
+ - 🧹 transferred more JS to stump
+
+section 15.5.1 2019-12-3
+list
+ - 🏥 fixed autocomplete regression
+
+section 15.5.0 2019-12-02
+list
+ - 🧹 upgraded to Jtree 48
+
+section 15.4.0 2019-11-30
+list
+ - 🎉 more templates
+ - 🎉 template tile now has categories
+ - 🎉 math.gen tile
+ - 🎉 categories, zoom and defaultHidden doc level properties in Maia
+ - 🏥 random tiles fix
+ - 🧹 removed meyer css reset
+
+section 15.3.0 2019-11-29
+list
+ - 🎉 show.static tiles for issue #42.
+ - 🎉 footer styling is now more minimal.
+ - 🏥 fixed pencil icon too low in some tiles.
+ - 🧹 updated to JTree 47.1 for new stump and perf improvements from parser cacheing.
+ - 🧹 moved off nest method in grams and toward typed stump templates.
+
+section 15.2.0 2019-11-20
+list
+ - 🧹 Updated to JTree 46. Removed Commander Classes
+ - 🧹 switched some tests to use getTextContent
+ - 🏥 inplace cellTypeTree bug
+ - 🏥 for #36
+
+section 15.1.0 2019-11-19
+list
+ - 🎉 easier to create distributable copies via `jtree build buildDist destFolder`
+ - 🎉 experimenting with using background textures from transparenttextures.com
+
+section 15.0.0 2019-11-10
+list
+ - ⚠️ Flow is now named Maia
+ - ⚠️ in Flow acs.cases2019 is now cancer.cases
+
+section 14.0.3 2019-11-2
+list
+ - 🏥 hn fix
+
+section 14.0.2 2019-11-2
+list
+ - 🏥 deep link fixes and tests
+ - 🏥 hn fix
+
+section 14.0.1 2019-11-2
+list
+ - 🏥 you can now use server side storage not on local host
+ - 🧹 updated jtree
+
+section 14.0.0 2019-11-01
+list
+ - 🎉 Flow now works on the command line too
+ - 🎉 full source code released
+ - ⚠️ keyword for comment is now comment and not #
+ - 🧹 JTable moved to Jtree
+ - 🧹 Updated to TreeComponentFramework
+ - 🧹 Updated to Jtree 44.0.0 from 25.2.0
+ - 🧹 now compiled product is only 1 unminified js file
+
+section 13.0.0 2019-6-09
+list
+ - 🎉 bar tile now has colorColumn support
+ - 🎉 scatter tile now has colorColumn and shapeColumn support
+ - 🎉 filter comparisons now work for dates
+ - 🎉 groupBy multiple columns in pivot tables
+ - 🎉 math.log and rows.addOne tiles
+ - 🎉 improvements to tab styles, code editor style, web tile styles, provider shows output columns
+ - 🎉 show output columns in tile toolbar
+ - ⚠️ format property is now "parser"
+ - ⚠️ wordCount output column is now "word" instead of "name"
+ - ⚠️ show.count is now show.rowCount and there is no column param
+ - 🏥 removed some keyboard shortcuts so that hard refresh again works on Linux
+ - 🏥 large number of parsing and type fixed with new JTable code
+ - 🏥 missing columns bug when parsing tree rows
+ - 🏥 vega time unit fixes
+ - 🏥 persisting of column types after transformations
+ - 🧹 binder to JTable
+
+section 12.2.0 2019-6-04
+list
+ - 🎉 new tiles including rows.sortByReverse, text.length, text.toLowerCase
+ - 🎉 new templates including word cloud, cancer, and amazon
+ - 🎉 onsave in code editor will scroll current tile into view
+ - 🎉 ctrl+s in code editor now saves on Linux/Windows
+ - ⚠️ text.lc is now text.lineCount and text.wc is now text.wordCount
+ - 🏥 wordcloud sizing fix
+
+section 12.1.0 2019-6-03
+list
+ - 🎉 when appending a snippet, new tile should scroll into view
+ - 🎉 updated homepage title
+ - 🏥 text in markdown and other text tiles now selectable
+
+section 12.0.0 2019-6-03
+list
+ - 🎉 new tiles including rows.sortBy, rows.reverse, rows.shuffle, samples.babyNames
+ - 🎉 new condensed and more minimal style for provider and transformer tiles
+ - 🎉 deep links
+ - 🎉 all Tiles must have all code locally, and cannot fetch&eval remote js code
+ - 🎉 added rowDisplayLimit on chart tiles.
+ - 🎉 working dir and version # moved to top of help
+ - 🎉 vega charts accept title inline
+ - 🎉 now node tiles can do fs.readFile for shipped local datasets for better perf and testing
+ - 🎉 add answers to challenges inline
+ - ⚠️ removed "orderBy" property. use rows.sortBy and rows.reverse to achieve same behavior
+ - ⚠️ removed "rowLimit" property. use rows.first OR use rowDisplayLimit on chart tiles.
+ - ⚠️ removed "title" property. use inline title where available.
+ - ⚠️ removed "goog" tiles
+ - ⚠️ removed "youtube" tiles
+ - ⚠️ rows.countBy is now rows.addIndexColumn
+ - 🏥 fix for tiles downstream of columns.keep regetting those columns
+ - 🧹 updated jtree to 25.2 to fix flakey tests
+ - 🧹 Added debugTile grammarTree tile
+
+section 11.0.0 2019-5-30
+list
+ - 🎉 flow now has comments
+ - 🎉 codeeditor now some inline parameter hinting, inline error messages, inline error suggestion fixes
+ - 🎉 codeeditor now has error coloring for extra word errors
+ - 🎉 parameter hints on tile toolbar
+ - 🎉 improved styling for most tile default states
+ - ⚠️ filter.with and filter.without now search for words one at a time, instead of as searching for a joined string
+ - ⚠️ changed datatables.basic to dtjs.basic
+ - 🏥 fixed non-flow language basic tile loading regression and added tests
+ - 🏥 fixed tree layout incorrect top computation
+ - 🏥 fixed bug where clearing an input in the WallUI did not update source
+ - 🏥 restored proper code editor and console heights
+ - 🏥 deleting selection that had both parent and child didnt delete child fix and added test
+ - 🧹 package.json dependencies cleanup
+ - 🧹 updated jtree to 25.1.0
+
+section 10.4.0 2019-5-26
+list
+ - 🎉 improved scrolling behavior so only wall scrolls while editor and tabs stay
+ - 🎉 instant loading of new tabs
+ - 🎉 text.substring tile
+ - 🎉 filter now supports types
+ - 🎉 improved error highlighting
+- Fixes: web post, delete selection regression fix, date parsing fix, shift+selection regression, picker tile regression fix
+ - 🧹 increased branch coverage
+
+section 10.3.0 2019-5-24
+list
+ - 🎉 loading messages will appear for long-loading tiles
+ - 🎉 deleting a tile now shifts its children left instead of deleting them as well
+ - 🎉 hakon and stump editing support
+ - 🎉 added templates tile to homepage
+ - 🎉 trends in baby name template
+ - 🏥 lots of async fixes and more tests
+ - 🧹 debug.tiles
+
+section 10.2.0 2019-5-22
+list
+ - 🎉 startup is ~75ms faster (due to grammar parsing speed up in Jtree)
+ - 🎉 style improvements to html and show tiles
+ - 🎉 style changes to make console easier to read
+ - 🎉 heat calendar tile now has hover info
+ - 🎉 match.columnsFuzzy now takes column name params
+ - 🏥 filter tiles now don't re-add dropped columns
+ - 🏥 changes made to tiles directly in UI should now correctly update themselves and dependents
+ - 🏥 source code visualizer works better with correct cell type parsing now
+ - 🏥 syntax highlighting fixes from new jtree
+ - 🏥 when changing layout, console message appears correctly now
+ - 🏥 match.columnsFuzzy now outputs correct confidence score
+ - ⚠️ match.fuzzy is now match.columnsFuzzy
+ - 🧹 updated to jtree 24
+ - 🧹 moved column predictions to binder and improvs is now columnPredictionHints
+ - 🧹 updated swarm/trooper/gopher
+
+section 10.1.0 2019-5-18
+list
+ - 🎉 now works as an npm dependency
+ - 🎉 now have rename and move file commands
+ - 🎉 hn tiles
+ - 🎉 proxy cache in desktop version
+ - ⚠️ instead of "@settings layout" it is now just "layout"
+ - ⚠️ html.h2-h6, p, pre, tiles removed in favor of html.text and html.printAs
+ - ⚠️ html tiles have been refactored to be less ambiguous. Should be okay unless relying on undocumented behavior.
+ - ⚠️ editor.hello is now editor.helloWorld
+ - ⚠️ removed web.cache. LocalStorage has <7MB of space available, so not so useful. In memory cache + proxy cache + browser's normal cache still here.
+ - ⚠️ remove airtraffic tiles
+ - 🏥 fixed bug in filtering on string columns
+ - 🏥 added missing npm packages to package.json
+ - 🏥 better error reporting when server side write fails
+ - 🏥 correctly set server side cwd
+ - 🧹 HTTPResponse code cleanup
+ - 🧹 added "es6" to compiled min file routes
+
+section 10.0.0 2019-5-16
+list
+ - 🎉 column autocomplete
+ - 🎉 vega tiles
+ - 🎉 filter.where tile, text.split, debug.parserTest, many more sample tiles
+ - 🎉 rows.dropMissing tile
+ - 🎉 rows.countBy tile
+ - 🎉 "Copy data as Javascript" context menu option
+ - 🎉 added "reduce" setting for group.by tiles in place of columnsObject
+ - 🎉 close all files except open file menu option
+ - 🎉 new tile stubs: datatables, dcjs, amazon, fitbit
+ - 🎉 removed Google Analytics
+ - 🎉 tables.basic now takes a title inline
+ - 🎉 support for dropping multiple-table csv files
+ - 🎉 default layout is now tiled
+ - ⚠️ charts.kpi is now "show.{reduction} columnName Title words"
+ - ⚠️ "x" is now "xColumn" and "y" is "yColumn" tile wide
+ - ⚠️ gender is now genderColumn
+ - ⚠️ "visible false" is now "hidden"
+ - ⚠️ "data.local" is now "data.localStorage"
+ - ⚠️ "maximize true" is now "maximized"
+ - ⚠️ date.expand is now date.addColumns
+ - ⚠️ tables.advanced is now handsontable.basic
+ - ⚠️ filter.has and filter.includes are now filter.with
+ - ⚠️ filter.no is now filter.without
+ - ⚠️ removed filter.advanced tile
+ - ⚠️ limit property is now rowLimit and columnsLimit is now columnLimit
+ - ⚠️ remove columns property from table tiles. Use columns.keep
+ - ⚠️ removed columnsObject
+ - ⚠️ charts.heatcal is now date.heatcal
+ - ⚠️ "average" renamed to "mean" app-wide (in reductions)
+ - 🏥 rendering performance improvements
+ - 🏥 better parsing of Javascript dataTables
+ - 🏥 better tile error message handling
+ - 🏥 prevent back button navigation on left scroll overflow
+ - 🏥 better tile sizing in layouts
+ - 🏥 change parent fixed
+ - 🏥 fixes to column type parsing including USD and dates
+ - 🧹 binder moved to separate typescript project
+ - 🧹 plugins folder for easier plugin development and support for TypeScript tiles
+ - 🧹 updated to Jtree 22+
+
+section 9.0.0 2019-4-26
+list
+ - 🎉 sublime syntax highlighting for Flow
+ - 🎉 autocomplete for more words
+ - 🎉 improved CodeMirror syntax highlighting
+ - 🎉 filter tiles
+ - 🎉 introduced "working folder"
+ - 🎉 desktop app now has ability to open any file/folder. You can also switch between disk and localStorage
+ - 🎉 disk.read tile
+ - 🎉 "column" and "tiled" layout options
+ - 🎉 flowSamples folder and more data samples
+ - 🎉 more sample tiles including kaggle tile
+ - 🎉 columns and rows tiles
+ - ⚠️ ALL tiles now do not contain a trailing ">"
+ - ⚠️ slang property to content
+ - ⚠️ @wall to @settings
+ - ⚠️ apply.filter> to filter.advanced
+ - ⚠️ apply.group> to group.by
+ - ⚠️ samples.iris> to samples.tinyIris
+ - ⚠️ misc.flights> to airtraffic.flights and misc.delays> to airtraffic.delays
+ - ⚠️ misc.youtube> to youtube.play and misc.3d> to treenotation.3d
+ - ⚠️ social.reddit> to reddit.all, social.subreddits> to reddit.subs, social.subreddit> to reddit.sub
+ - ⚠️ social.hn> to hackernews.top
+ - ⚠️ apply.join> to join.by
+ - ⚠️ apply.types> to treenotation.wordTypes
+ - ⚠️ apply.fuzz> to match.fuzzy
+ - ⚠️ apply.convert apply.extend apply.parse removed
+ - ⚠️ stats.summary to columns.describe, stats.lc to text.lc stats.wc to text.wc
+ - ⚠️ charts.wordcloud to text.wordcloud
+ - ⚠️ views.markdwon to markdown.basic, views.outline to treenotation.outline, views.dotline to treenotation.dotline
+ - ⚠️ system.commands is now editor.commandHistory
+ - 🏥 fixed update bugs previously requiring manual reloading of tiles
+ - 🏥 text select bug fix
+ - 🏥 fixed bug previously requiring a reload after a file rename
+ - 🏥 tree layout works better
+ - 🏥 fixed web.get bug when a blank url is fetched
+ - 🏥 fixed bug where tile z-index stacking was reversed
+ - 🏥 when a tile has an error during rendering we catch it and display an error tile
+ - 🧹 file/folder/disk refactor
+ - 🧹 upgraded to jtree 19+ for new autocomplete and syntax highlighter
+ - 🧹 many more tests, @examples, @descriptions and tile quality checking
+
+section 8.1.0 2019-2-28
+list
+ - 🎉 autocomplete now opens on keypress
+ - 🎉 data.local> tile
+ - 🎉 url tiles default to caching
+ - 🎉 error message indicator on url tiles
+ - 🎉 default theme is now "workshop"
+ - 🎉 file drop now uses local data tile
+ - 🎉 improved table styling
+ - 🎉 Google tiles now have dummy data
+ - ⚠️ changed default local server port to 1111 from 8008
+ - ⚠️ data.auto> is now data.inline>
+ - 🏥 npm missing package dependencies fix
+ - 🏥 editor color fixes across themes
+ - 🏥 to advanced (HOT) table
+
+section 8.0.0 2019-02-10
+list
+ - 🎉 all previous versions of Ohayo accessible at v1/v2/vN.ohayo.computer
+ - ⚠️ all tile names are new. This version implements namespacing.
+ - 🎉 web get, post, and dump tiles.
+ - 🎉 better didyoumean tiles
+ - 🎉 added right click on tile and export to tree file option
+ - 🧹 updated jtree for perf gains
+
+section 7.1.0 2019-01-04
+list
+ - 🏥 fixed selection, editor, presidents, and other bugs
+ - 🎉 added iris, mtcars, and populations tiles
+ - 🎉 display improvements to morph tile
+ - 🎉 insert tile and reset ohayo keyboard shortcuts
+
+section 7.0.0 2017-12-7
+list
+ - 🎉 added npm install ohayo and ohayo cli command
+
+section 6.0.1 2017-11-24
+list
+ - 🎉 >img and >fuzz tiles
+ - 🏥 morph and other fixes
+
+section 6.0.0 2017-11-14
+list
+ - 🎉 switched focus to only data dashboards now that Tree Languages moved to JTree project
+
+section 5.4.1 2017-11-13
+list
+ - 🏥 >morph tile regression fix
+
+section 5.4.0 2017-11-13
+list
+ - 🧹 updated to jtree
+
+section 5.3.0 2017-11-8
+list
+ - 🧹 Updated to otree
+- Changes: removed rusty and turtle support for now
+
+section 5.2.1 2017-11-2
+list
+ - 🧹 updated to Tree 9
+
+section 5.2.0 2017-10-28
+list
+ - 🧹 updated to Tree 8
+
+section 5.1.4 2017-10-28
+list
+ - 🧹 code cleanup for TP 8
+
+section 5.1.3 2017-10-19
+list
+ - 🏥 changed some dangling ETN references to Tree Languages
+ - 🧹 some code cleanup to prepare for new TP library
+
+section 5.1.2 2017-9-22
+list
+ - 🧹 grammar file cleanup and prep work for v6.0 and more tests.
+
+section 5.1.1 2017-9-17
+list
+ - 🏥 some code mirror color highlighting fixes
+ - 🧹 grammar type checking, swarm grammar, grammar grammar, upgrade language, other fixes
+
+section 5.1.0 2017-9-16
+list
+ - 🎉 improved autocomplete
+ - 🎉 improved flow grammar highlighting
+ - ⚠️ >tags keyword in flow is now >types
+
+section 5.0.1 2017-9-15
+list
+ - 🏥 fixed regression in loading of 3D vis
+ - 🏥 parse subsettings correctly in flow
+ - 🧹 updated Tree to 7.1
+
+section 5.0.0 2017-9-14
+list
+ - 🎉 color word type highlighting for all languages
+ - 🎉 scoped autocomplete for all languages
+ - 🎉 100% word type checking for all languages
+ - 🎉 300% perf improvement when loading multiple programs
+ - ⚠️ removed a number of tiles from flow and updated others
+ - 🧹 Grammar CC, Blaze VM, sublime syntax, Tree 7, removed monad, auto to improvs, slot types, program errors
+ - 🧹 gopher & swarm improvements, Inspect, Profile, async/await, tape to tap, remove details, settings
+
+section 4.2.1 2017-9-6
+list
+ - 🏥 fixed bug where deleting tiles other than newest was not updating source editor
+
+section 4.2.0 2017-9-6
+list
+ - 🎉 create turtle or rusty files
+ - 🎉 ETNs now always in tree layout
+ - 🎉 line count block in flow
+ - 🎉 server storage for desktop app
+ - ⚠️ removed text, coder blocks in flow
+ - 🏥 html escape fix in data block
+ - 🏥 close last tab render fix
+ - 🏥 close all tabs render fix
+ - 🏥 fix to Fib example compilation in fire
+ - 🏥 tab change tiles not appearing render fix
+ - 🧹 FlexWall, Files & Folders, Removed Diff & JSSHA, Tests & Diagnostics
+
+section 4.1.1 2017-9-1
+list
+ - 🎉 shift+c type checking command
+ - 🧹 better support for typed ETNs
+
+section 4.1.0 2017-8-31
+list
+ - 🏥 heatcal and other flow tile fixes
+ - ⚠️ changed "pin" to width/height/top/left
+ - 🧹 82%
+
+section 4.0.0 2017-8-30
+list
+ - 🧹 SnapProgram Split, Wall, Tabs, Tiles, TileProcess, Dictionary improvements, Swarm Improvements, Details, App state storage, Commanders, Metrics, Gopher, 79%
+
+section 3.2.2 2017-8-24
+list
+ - 🎉 better typing output in flow
+ - ⚠️ in flow ">slots" is now ">tags"
+ - ⚠️ in fire "set$+" is now "join"
+ - 🧹 Upgrade to Tree 6.0.0, dictionary improvements (frequency, compiled, parameters, variable arity), cli improvements, swarm static
+
+section 3.2.1 2017-8-23
+list
+ - 🎉 drag and drop CSV support
+ - 🎉 program names cannot have spaces
+ - 🎉 groupBy now will group empty groups
+ - 🏥 Blank lines are now not visible by default
+ - 🏥 fix to some google charts
+ - 🧹 flows folder, line count & dashboard, ProgramRunner, dictionary compilation, more swarm files
+
+section 3.1.6 2017-8-23
+list
+ - 🎉 drag and drop files to create programs
+ - ⚠️ flow removed >input cog
+ - ⚠️ fire removed class and subclass
+ - 🧹 merged wall into swarm, stumpprogram, willowprogram, removed WithChildren usage, collapsedNode, stump/bern/monad
+
+section 3.1.5 2017-8-22
+list
+ - 🏥 update to hello world demo fire program
+
+section 3.1.4 2017-8-22
+list
+ - 🎉 added "New from URL" command
+ - 🎉 cork theme
+ - 🎉 cmd+\ shortcut in the code editor to clear console
+ - 🎉 added >flights and >delays cogs to flow
+ - 🎉 many flow cogs are now hidden by default
+ - 🎉 3d vis of programs now keeps z-index at 1 for words, also dotSize param added, and better tag/type/slots
+ - 🏥 edits via toolbar not immediately reflected (thanks DZ)
+ - 🏥 changing corkboard layout of a program now generates a log message
+ - 🏥 log messages are now rendered as they come in
+ - 🏥 cmd+a select all now shows border
+ - ⚠️ most fire cogs renamed (ie: ::$ to log$, =# to set#)
+ - ⚠️ >editor cog in flow is now >coder
+ - 🧹 blocks to cogs, slots, swarm, mash, dictionary improvements, corkboard, desktop routes
+
+section 3.1.3 2017-8-20
+list
+ - 🎉 changed "File" dropdown to "New" dropdown, removed open dropdown, and moved other "File" commands to program contextmenu
+ - 🏥 fixed recursive "pin" bug reported by DZ.
+ - 🧹 updated Tree Notation; switched to Tuples; removed structPath; dictionary instruction renaming; dictionary parsing work
+
+section 3.1.1 2017-8-18
+list
+ - 🏥 flow bugs in row parsing
+ - 🏥 bugs in 3d vis
+ - 🏥 word cloud fix
+ - 🎉 language detection
+ - 🧹 modularization
+
+section 3.1.0 2017-8-15
+list
+ - 🎉 added categories to keyboard shortcuts
+ - 🏥 row parsing bug fixes
+ - 🏥 node editor bug fixes
+ - 🧹 Switched to Dictionary from Blueprints
+ - 🧹 EOL Electron
+
+section 3.0.0 2017-8-8
+list
+ - 🎉 replaced textarea source editor with full fledged codemirror editor
+ - 🎉 added console output to gutter and load on open
+ - 🎉 source editor starts open
+ - 🎉 press Command+s to save and render blocks visualization of code in source editor
+ - 🎉 press Command+enter to build and execute the selected tree in source editor
+ - 🎉 press Command+shift+enter to build and print the selected tree to the console
+ - 🎉 autocomplete in source editor using ctrl+spacebar
+ - 🏥 lots of rendering and other bug fixes
+ - ⚠️ removed the search/open program input box
+
+section 2.2.0 2017-8-04
+list
+ - ⚠️ flow. removed ">output" block. Use ">dump"
+ - ⚠️ flow. removed ">echo" block. Use ">text".
+ - 🎉 flow. Added "replacer" block.
+
+section 2.1.0 2017-7-31
+list
+ - 🎉 added >settings block, which by default is hidden and includes program settings like layout
+ - 🎉 shift+m shortcut to generate mini map
+ - ⚠️ changed "layout" property in flow to be a sub property of the settings block node
+ - 🏥 resize and move block bug fixes
+ - 🏥 shift+v fix when you are analyzing a program that contains an unknown node type
+ - 🧹 more tests and fixes.
+
+section 2.0.0 2017-7-27
+list
+ - 🎉 added "Hello World" fire example
+ - 🎉 added shift+v keyboard shortcut to visualize a program
+ - 🎉 added shift+e shortcut to execute a program
+ - 🎉 Flow. added "echo" block
+ - 🎉 Flow. added "wordcloud" block
+ - 🧹 replaced HTML and DOM operations with Stump ETN and Willow.
+ - ⚠️ Flow. renamed "out" block to "dump"
+ - ⚠️ Fire. Renamed lots of node types "fn" is now "=fn", "." is now "=.>>", "call" is now ">>".
+ - 🧹 updated Tree Notation library to 5.0
+ - 🧹 bug fixes and more tests
+
+section 1.2.4 2017-7-02
+list
+ - 🧹 bug fixes, tests, and speed improvements
+
+section 1.2.3 2017-6-28
+list
+ - 🧹 bug fixes and more tests
+
+section 1.2.1 2017-6-26
+list
+ - 🎉 Last mounted program is now restored when you refresh the page
+ - 🎉 Blocks can now be moved from the top or the bottom
+ - 🎉 "Save" button to compile output modal window
+ - 🎉 keyboard shortcut for saving compiled output
+ - 🎉 open many command
+ - 🎉 Added descriptions for Fire blocks
+ - 🏥 Compile command improvements and modal bug fix
+ - 🏥 for 3D ETN rendering
+ - 🏥 for programs larger than browser window
+ - 🧹 Fire block bug fixes and improvements
+ - 🧹 More tests
+
+section 1.1.0 2017-6-25
+list
+ - ⚠️ Programs no longer have "etn" property. Instead, uses file extension. Defaults to Flow.
+ - 🎉 Added create fire/flow program to reflect above change.
+ - 🎉 added 3D flow chart block
+ - 🧹 Improvements to Flow column guesser
+ - 🧹 Bug fixes and more tests
+
+section 1.0.3 2017-6-23
+list
+ - 🎉 "If you're not embarrassed when you ship your first version, you waited too long"
+ - ⚠️ "We don't believe in shipping a product before it's ready, and we need a little more time"
+ - 🎉 This is somewhere in the middle. Ready for researchers, not ready for professionals

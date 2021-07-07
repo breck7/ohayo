@@ -2,7 +2,7 @@ tooling onsave jtree build produceOhayoGrammar
 webGetNode
  description Get a URL and parse the fetched data.
  example Fetch a TSV from the web and show results
-  web.get https://raw.githubusercontent.com/treenotation/ohayo/master/ohayo/packages/samples/iris.tsv
+  web.get https://raw.githubusercontent.com/treenotation/ohayo/main/ohayo/packages/samples/iris.tsv
    tables.basic
  frequency .1
  string placeholderMessage Enter a url.

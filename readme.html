@@ -1,0 +1,656 @@
+<!doctype html>
+<!--
+
+ This page was compiled by 📜 Scroll, the public domain
+ static site publishing software.
+ 
+ https://scroll.pub
+ 
+ Generally you don't want to edit it by hand.
+
+ Scroll v21.3.0
+
+-->
+<html lang="en-US">
+ <head>
+  <meta charset="utf-8"></meta>
+  <title>Ohayo - Ohayo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"></meta>
+  <meta name="description" content="Ohayo is a data science studio at voicespeed. Ohayo is public domain software."></meta>
+  <meta name="generator" content="Scroll v21.3.0"></meta>
+  <meta property="og:title" content="Ohayo"></meta>
+  <meta property="og:description" content="Ohayo is a fast and free tool for data science. Ohayo consists of a very high level programming language and a visual web studio for that language. The goal of Ohayo is to enable people to do data science at the speed of voice. You can see a short clip of Ohayo in action here."></meta>
+  <meta property="og:image" content="https://ohayo.computer/slides.gif"></meta>
+  <meta name="twitter:card" content="summary_large_image"></meta>
+  <style>html,body,div,span,h1,h2,h3,h4,p,ol,ul,table {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: baseline;
+  border-spacing: 0;
+}
+html {
+  background-color: rgb(244,244,244);
+  font-family: Exchange,Georgia,serif;
+  color: #000;
+  font-size: 14px;
+  hyphens: auto;
+}
+.scrollHeaderComponent {
+  border-bottom: 1px solid rgb(204,204,204);
+  text-align: center;
+  padding-bottom: 8px;
+}
+.scrollNameComponent a {
+  text-decoration: none;
+  color: #000;
+}
+.scrollTopRightBarComponent {
+  text-align: right;
+  position: absolute;
+  right: 25px;
+  top: 3px;
+}
+.scrollSocialMediaIconsComponent svg {
+  width: 30px;
+  fill: rgba(204,204,204, .5);
+  margin-left: 15px;
+}
+.scrollSocialMediaIconsComponent svg:hover {
+  fill: #333;
+}
+.scrollFooterComponent {
+  border-top: 1px solid rgb(204,204,204);
+  margin-top: 8px;
+  padding-top: 8px;
+  text-align: center;
+}
+.scrollCommunityLinkComponent {
+  display: block;
+  font-family: Verdana;
+  font-weight: 100;
+  margin: .5em;
+  padding-bottom: 1em;
+  text-decoration: none;
+  color: rgba(204,204,204,.5);
+}
+.scrollIndexPageComponent,.scrollArticlePageComponent {
+  column-count: auto;
+  column-fill: balance;
+  column-width: 35ch;
+  column-gap: 20px;
+  column-rule: 1px solid rgb(204,204,204);
+  padding-left: 20px;
+  padding-right: 20px;
+  margin: auto;
+}
+.scrollArticlePageComponent {
+  column-rule: none;
+  padding-top: 8px;
+}
+.scrollIndexPageArticleContainerComponent {
+  border-bottom: 1px solid rgb(204,204,204);
+  padding: 1ch 0;
+  break-inside: avoid;
+  text-align: justify;
+  margin-bottom: .5em;
+}
+.scrollTitleComponent {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: .25em;
+}
+.scrollTitleComponent a {
+  text-decoration: none;
+  color: #000;
+}
+.scrollArticleDateComponent {
+  font-style: italic;
+  font-size: 80%;
+}
+.scrollParagraphComponent {
+  text-indent: 1em;
+  margin-top: 0.4em;
+  line-height: 1.4em;
+}
+.scrollQuoteComponent {
+  break-inside: avoid;
+  display: block;
+  margin: .5em 0;
+  padding: .5em;
+  background: rgba(204,204,204,.5);
+  white-space: pre-line;
+  border-left: .5em solid rgba(204,204,204,.8);
+}
+.scrollQuestionComponent,.scrollSectionComponent,.scrollSubsectionComponent {
+  text-align: center;
+  margin: .2em;
+}
+.scrollCodeBlockComponent {
+  overflow: auto;
+  font-size: 80%;
+  hyphens: none;
+  white-space: pre;
+  border-left: .5em solid rgba(204,204,204,.8);
+  break-inside: avoid;
+  display: block;
+  margin: .5em 0;
+  padding: .5em;
+  background: rgba(204,204,204,.5);
+}
+.scrollTableComponent {
+  table-layout: fixed;
+  margin: .5em 0;
+  overflow: hidden;
+  font-size: 80%;
+  width: 100%;
+  hyphens: none;
+  border: 1px solid rgba(224,224,224,.8);
+}
+.scrollTableComponent td,.scrollTableComponent th {
+  padding: 3px;
+  overflow: hidden;
+}
+.scrollTableComponent th {
+  border-bottom: 2px solid rgba(0,0,0,.6);
+  text-align: left;
+}
+.scrollTableComponent tr:nth-child(even) {
+  background: rgba(224,224,224,.6);
+}
+.scrollUnorderedListComponent,.scrollOrderedListComponent {
+  text-align: left;
+  line-height: 1.4em;
+  padding-left: 1em;
+  margin-top: 0.4em;
+}
+.scrollArticleSourceLinkComponent {
+  text-align: center;
+  font-size: 80%;
+  margin: 0;
+  margin-top: 0.4em;
+  line-height: 1.4em;
+}
+.scrollArticleSourceLinkComponent a {
+  color: #000;
+  text-decoration: none;
+}
+.scrollDialogueComponent span {
+  font-family: Verdana;
+  margin-top: 5px;
+  padding: 5px 20px;
+  border-radius: 15px;
+  display: inline-block;
+}
+.scrollDialogueComponentLeft {
+  text-align: left;
+}
+.scrollDialogueComponentLeft span {
+  background: rgba(204,204,204, .5);
+}
+.scrollDialogueComponentRight {
+  text-align: right;
+}
+.scrollDialogueComponentRight span {
+  color: white;
+  background: rgb(0,132,255);
+}
+.scrollImageComponent {
+  display: block;
+  text-align: center;
+}
+.scrollImageComponent img {
+  max-width: 35ch;
+  height: auto;
+}
+</style>
+</head>
+ <body>
+  <div class="scrollHeaderComponent">
+   <div class="scrollTopRightBarComponent">
+    <div class="scrollSocialMediaIconsComponent">
+     <a href="https://github.com/publicdomaincompany/ohayo"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub icon</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a>
+</div>
+</div>
+   <h2 class="scrollNameComponent">
+    <a href="index.html">Ohayo</a>
+</h2>
+   <div>Ohayo is a data science studio at voicespeed. Ohayo is public domain software.</div>
+</div>
+  <div class="scrollArticlePageComponent" style=""><h1 class="scrollTitleComponent"><a href="readme.html">Ohayo</a></h1>
+
+
+<p class="scrollParagraphComponent">Ohayo is a fast and free tool for data science. Ohayo consists of a very high level programming language and a visual web studio for that language. The goal of Ohayo is to enable people to do data science at the speed of voice. You can see a short clip of Ohayo in action <a href="https://youtube.com/watch?v=qqyGHmUlKoc">here</a>.</p>
+
+<p class="scrollParagraphComponent">You can try ohayo at <a href="https://ohayo.computer">https://ohayo.computer</a>, download Ohayo on <a href="https://github.com/publicdomaincompany/ohayo">GitHub</a>, try Ohayo hosted on <a href="https://github.ohayo.computer">GitHub</a>, or install it using `npm install ohayo`.</p>
+
+<a href="slides.gif" class="scrollImageComponent" target="_blank"><img src="slides.gif" width="720" height="540" loading="lazy"/></a>
+
+<h3 class="scrollSectionComponent">Key Concepts</h3>
+
+<h4 class="scrollSubsectionComponent">OhayoLang</h4>
+
+<p class="scrollParagraphComponent">Ohayo the <a href="https://github.com/publicdomaincompany/ohayo/tree/main/ohayo">language</a> is a Tree Language, built using <a href="https://treenotation.org/">TreeNotation</a>. Ohayo is a dataflow language.</p>
+
+<h4 class="scrollSubsectionComponent">Scripts</h4>
+
+<p class="scrollParagraphComponent">OhayoLang is a scripting language like any other and you can write programs in it by hand or using the Ohayo Studio. OhayoLang scripts generally have the file extension ".ohayo".</p>
+
+<h4 class="scrollSubsectionComponent">Tiles</h4>
+
+<p class="scrollParagraphComponent">An Ohayo program is composed of Tiles. Tiles can display UI to the user. Tiles are recursive and can be the parent of other tiles. Tiles are namespaced and all must contain at least one ".".</p>
+
+<h4 class="scrollSubsectionComponent">Tile Properties</h4>
+
+<p class="scrollParagraphComponent">Tiles can define and use their own Properties. The names of Tile Properties cannot contain a ".".</p>
+
+<h4 class="scrollSubsectionComponent">DataTables</h4>
+
+<p class="scrollParagraphComponent">All Tiles can access the tables of their ancestor tiles and also pass on a new table to their descendants. The data tables currently use the <a href="https://github.com/publicdomaincompany/jtree/tree/main/jtable">jTable</a> library.</p>
+
+<h4 class="scrollSubsectionComponent">Common Tile Types</h4>
+
+<p class="scrollParagraphComponent">All Tiles extend from a base class. The three most common core Tile Types are Provider, Transformer, and Chart. In data science you have 3 main kinds of things: datasets, data transformations, and visualizations. Datasets include everything from weather forecasts to emails to business transactions. There are millions of possible datasets. In Ohayo tiles that provide datasets generally extend the Provider base tile type. Transformations are things like filtering, grouping, and joining. In Ohayo tiles that transform data generally extend the Transformer tile type. Charts include bar charts, line charts, scatterplots and word clouds. In Ohayo charts generally extend the Chart base tile type.</p>
+
+<h4 class="scrollSubsectionComponent">Creating Tiles</h4>
+
+<p class="scrollParagraphComponent">If you need a new tile—to add a new user friendly data source or visualization type, for example—you can implement it using TypeScript/Javascript/Grammar language. See the <a href="https://github.com/publicdomaincompany/ohayo/tree/main/ohayo/packages">packages</a> folder for examples. Documentation for this will come out later in 2020.</p>
+
+<h3 class="scrollSectionComponent">BETA!</h3>
+
+<p class="scrollParagraphComponent">Ohayo is still beta and iterating frequently. Post feedback here or on the TreeNotation <a href="https://www.reddit.com/r/treenotation/">subreddit</a>. Ohayo hopefully will be stable by July 2020.</p>
+
+<h3 class="scrollSectionComponent">Marketing Jumbo</h3>
+
+<p class="scrollParagraphComponent">If you are looking for some marketing-speak, here you go:</p>
+
+<ol class="scrollOrderedListComponent">
+<li>The simplest syntax possible. No parentheses, no brackets, no semicolons. Just words you can speak.</li>
+<li>Write by hand or program visually. The first visual editor that generates perfectly clean code.</li>
+<li>Autocomplete like you've never seen before. AI powered autocomplete that keeps getting better.</li>
+<li>Free and open source. The price is $0, and extensions and collaboration are welcome.</li>
+<li>No installing required. Run Ohayo instantly in your browser, even on your mobile device.</li>
+<li>No tracking, no cookies. Ohayo doesn't track users, use cookies, or store your data.</li>
+<li>Secure by design. Your data stays on your machines, we never see it.</li>
+<li>Runs anywhere. Run it from our sites, host it yourself, or run it on your local machine.</li>
+</ol>
+
+<h3 class="scrollSectionComponent">Other Tools For Data Scientists</h3>
+
+<p class="scrollParagraphComponent">Ohayo is just one of my tools that are trying to make data science easier. Here's a list of related products:</p>
+
+<table class="scrollTableComponent"><thead><tr><th>Name</th>
+
+<th>Website</th>
+
+<th>Year</th>
+
+<th>Wikipedia</th>
+</tr></thead>
+<tbody><tr><td>Rows.com</td>
+<td><a href="https://rows.com/">🌎</a></td>
+<td>2020</td>
+<td></td>
+</tr>
+<tr><td>Explo.co</td>
+<td><a href="https://explo.co/">🌎</a></td>
+<td>2020</td>
+<td></td>
+</tr>
+<tr><td>Arquero</td>
+<td><a href="https://github.com/uwdata/arquero">🌎</a></td>
+<td>2020</td>
+<td></td>
+</tr>
+<tr><td>Basedash</td>
+<td><a href="https://www.basedash.com/">🌎</a></td>
+<td>2019</td>
+<td></td>
+</tr>
+<tr><td>Grid Studio</td>
+<td><a href="https://github.com/ricklamers/gridstudio">🌎</a></td>
+<td>2019</td>
+<td></td>
+</tr>
+<tr><td>Workbench</td>
+<td><a href="https://workbenchdata.com/">🌎</a></td>
+<td>2018</td>
+<td></td>
+</tr>
+<tr><td>ActionDesk</td>
+<td><a href="https://www.actiondesk.io/">🌎</a></td>
+<td>2018</td>
+<td></td>
+</tr>
+<tr><td>Data Illustrator</td>
+<td><a href="https://data-illustrator.com/">🌎</a></td>
+<td>2018</td>
+<td></td>
+</tr>
+<tr><td>Observable</td>
+<td><a href="https://observablehq.com/">🌎</a></td>
+<td>2017</td>
+<td></td>
+</tr>
+<tr><td>Idyll</td>
+<td><a href="https://idyll-lang.org/">🌎</a></td>
+<td>2017</td>
+<td></td>
+</tr>
+<tr><td>VisiData</td>
+<td><a href="https://www.visidata.org/">🌎</a></td>
+<td>2017</td>
+<td></td>
+</tr>
+<tr><td>Google Data Studio</td>
+<td><a href="https://datastudio.google.com/overview">🌎</a></td>
+<td>2016</td>
+<td><a href="https://de.wikipedia.org/wiki/Google_Data_Studio">📖</a></td>
+</tr>
+<tr><td>Flourish</td>
+<td><a href="https://flourish.studio/">🌎</a></td>
+<td>2016</td>
+<td></td>
+</tr>
+<tr><td>Tidyverse</td>
+<td><a href="https://www.tidyverse.org/">🌎</a></td>
+<td>2016</td>
+<td><a href="https://en.wikipedia.org/wiki/Tidyverse">📖</a></td>
+</tr>
+<tr><td>Vega Editor</td>
+<td><a href="https://vega.github.io/editor/">🌎</a></td>
+<td>2015</td>
+<td></td>
+</tr>
+<tr><td>Amazon QuickSight</td>
+<td><a href="https://aws.amazon.com/quicksight/">🌎</a></td>
+<td>2015</td>
+<td></td>
+</tr>
+<tr><td>GapMinder Vizabi</td>
+<td><a href="https://vizabi.org/">🌎</a></td>
+<td>2015</td>
+<td></td>
+</tr>
+<tr><td>Toucan</td>
+<td><a href="https://toucantoco.com/en/">🌎</a></td>
+<td>2015</td>
+<td></td>
+</tr>
+<tr><td>xsv</td>
+<td><a href="https://github.com/BurntSushi/xsv">🌎</a></td>
+<td>2014</td>
+<td></td>
+</tr>
+<tr><td>metabase</td>
+<td><a href="https://www.metabase.com/">🌎</a></td>
+<td>2014</td>
+<td></td>
+</tr>
+<tr><td>dplyr</td>
+<td><a href="https://dplyr.tidyverse.org/">🌎</a></td>
+<td>2014</td>
+<td></td>
+</tr>
+<tr><td>JupyterLab</td>
+<td><a href="https://github.com/jupyterlab/jupyterlab">🌎</a></td>
+<td>2014</td>
+<td><a href="https://en.wikipedia.org/wiki/Project_Jupyter">📖</a></td>
+</tr>
+<tr><td>OmniSci</td>
+<td><a href="https://www.omnisci.com/">🌎</a></td>
+<td>2013</td>
+<td><a href="https://en.wikipedia.org/wiki/OmniSci">📖</a></td>
+</tr>
+<tr><td>xlwings</td>
+<td><a href="https://www.xlwings.org/">🌎</a></td>
+<td>2013</td>
+<td></td>
+</tr>
+<tr><td>redash</td>
+<td><a href="https://redash.io/">🌎</a></td>
+<td>2013</td>
+<td></td>
+</tr>
+<tr><td>RAWGraphs</td>
+<td><a href="https://github.com/rawgraphs/raw">🌎</a></td>
+<td>2013</td>
+<td></td>
+</tr>
+<tr><td>DataBricks</td>
+<td><a href="https://databricks.com/">🌎</a></td>
+<td>2013</td>
+<td><a href="https://en.wikipedia.org/wiki/Databricks">📖</a></td>
+</tr>
+<tr><td>Quadrigram</td>
+<td><a href="https://www.quadrigram.com/">🌎</a></td>
+<td>2012</td>
+<td></td>
+</tr>
+<tr><td>Snowflake</td>
+<td><a href="https://www.snowflake.com/">🌎</a></td>
+<td>2012</td>
+<td><a href="https://en.wikipedia.org/wiki/Snowflake_Inc">📖</a>.</td>
+</tr>
+<tr><td>Julia</td>
+<td><a href="https://julialang.org/">🌎</a></td>
+<td>2012</td>
+<td><a href="https://en.wikipedia.org/wiki/Julia_(programming_language)">📖</a></td>
+</tr>
+<tr><td>Looker</td>
+<td><a href="https://looker.com/">🌎</a></td>
+<td>2012</td>
+<td><a href="https://en.wikipedia.org/wiki/Looker_(company)">📖</a></td>
+</tr>
+<tr><td>AirTable</td>
+<td><a href="https://airtable.com/">🌎</a></td>
+<td>2012</td>
+<td><a href="https://en.wikipedia.org/wiki/Airtable">📖</a></td>
+</tr>
+<tr><td>Anaconda</td>
+<td><a href="https://www.anaconda.com/">🌎</a></td>
+<td>2012</td>
+<td><a href="https://en.wikipedia.org/wiki/Anaconda_(Python_distribution)">📖</a></td>
+</tr>
+<tr><td>Plotly</td>
+<td><a href="https://plot.ly/">🌎</a></td>
+<td>2012</td>
+<td><a href="https://en.wikipedia.org/wiki/Plotly">📖</a></td>
+</tr>
+<tr><td>DataWrapper</td>
+<td><a href="https://www.datawrapper.de/">🌎</a></td>
+<td>2012</td>
+<td></td>
+</tr>
+<tr><td>ThoughtSpot</td>
+<td><a href="https://www.thoughtspot.com/">🌎</a></td>
+<td>2012</td>
+<td><a href="https://en.wikipedia.org/wiki/ThoughtSpot">📖</a></td>
+</tr>
+<tr><td>Infogram</td>
+<td><a href="https://infogram.com/">🌎</a></td>
+<td>2012</td>
+<td><a href="https://en.wikipedia.org/wiki/Infogram">📖</a></td>
+</tr>
+<tr><td>RStudio</td>
+<td><a href="https://www.rstudio.com/">🌎</a></td>
+<td>2011</td>
+<td><a href="https://en.wikipedia.org/wiki/RStudio">📖</a></td>
+</tr>
+<tr><td>Microsoft SandDance</td>
+<td><a href="https://github.com/microsoft/SandDance">🌎</a></td>
+<td>2011</td>
+<td><a href="https://en.wikipedia.org/wiki/Microsoft_Garage">📖</a></td>
+</tr>
+<tr><td>Microsoft PowerBI</td>
+<td><a href="https://powerbi.microsoft.com/en-us/">🌎</a></td>
+<td>2011</td>
+<td><a href="https://en.wikipedia.org/wiki/Power_BI">📖</a></td>
+</tr>
+<tr><td>d3</td>
+<td><a href="https://d3js.org/">🌎</a></td>
+<td>2011</td>
+<td><a href="https://en.wikipedia.org/wiki/D3.js">📖</a></td>
+</tr>
+<tr><td>piktochart</td>
+<td><a href="https://piktochart.com/">🌎</a></td>
+<td>2011</td>
+<td><a href="https://en.wikipedia.org/wiki/Piktochart">📖</a></td>
+</tr>
+<tr><td>Google Kaggle</td>
+<td><a href="https://www.kaggle.com/">🌎</a></td>
+<td>2010</td>
+<td><a href="https://en.wikipedia.org/wiki/Kaggle">📖</a></td>
+</tr>
+<tr><td>ChartIO</td>
+<td><a href="https://chartio.com/">🌎</a></td>
+<td>2010</td>
+<td></td>
+</tr>
+<tr><td>Google BigQuery</td>
+<td><a href="https://cloud.google.com/bigquery/">🌎</a></td>
+<td>2010</td>
+<td><a href="https://en.wikipedia.org/wiki/BigQuery">📖</a></td>
+</tr>
+<tr><td>OpenRefine</td>
+<td><a href="https://github.com/OpenRefine/OpenRefine">🌎</a></td>
+<td>2010</td>
+<td><a href="https://en.wikipedia.org/wiki/OpenRefine">📖</a></td>
+</tr>
+<tr><td>Zoho Analytics</td>
+<td><a href="https://www.zoho.com/analytics/">🌎</a></td>
+<td>2009</td>
+<td></td>
+</tr>
+<tr><td>Wolfram Alpha</td>
+<td><a href="https://www.wolframalpha.com/">🌎</a></td>
+<td>2009</td>
+<td><a href="https://en.wikipedia.org/wiki/Wolfram_Alpha">📖</a></td>
+</tr>
+<tr><td>HighCharts</td>
+<td><a href="https://www.highcharts.com/">🌎</a></td>
+<td>2009</td>
+<td><a href="https://en.wikipedia.org/wiki/Highcharts">📖</a></td>
+</tr>
+<tr><td>LucidChart</td>
+<td><a href="https://www.lucidchart.com/">🌎</a></td>
+<td>2008</td>
+<td><a href="https://en.wikipedia.org/wiki/Lucidchart">📖</a></td>
+</tr>
+<tr><td>Pandas</td>
+<td><a href="https://pandas.pydata.org/">🌎</a></td>
+<td>2008</td>
+<td><a href="https://en.wikipedia.org/wiki/Pandas_(software">📖</a></td>
+</tr>
+<tr><td>Apple Numbers</td>
+<td><a href="https://www.apple.com/numbers/">🌎</a></td>
+<td>2007</td>
+<td><a href="https://en.wikipedia.org/wiki/Numbers_(spreadsheet)">📖</a></td>
+</tr>
+<tr><td>scikit-learn</td>
+<td><a href="https://scikit-learn.org/stable/">🌎</a></td>
+<td>2007</td>
+<td><a href="https://en.wikipedia.org/wiki/Scikit-learn">📖</a></td>
+</tr>
+<tr><td>Smartsheet</td>
+<td><a href="https://www.smartsheet.com/">🌎</a></td>
+<td>2006</td>
+<td><a href="https://en.wikipedia.org/wiki/Smartsheet">📖</a></td>
+</tr>
+<tr><td>Google Sheets</td>
+<td><a href="https://www.google.com/sheets/about/">🌎</a></td>
+<td>2006</td>
+<td><a href="https://en.wikipedia.org/wiki/Google_Sheets">📖</a></td>
+</tr>
+<tr><td>Alteryx</td>
+<td><a href="https://www.alteryx.com/">🌎</a></td>
+<td>2006</td>
+<td><a href="https://en.wikipedia.org/wiki/Alteryx">📖</a></td>
+</tr>
+<tr><td>RapidMiner</td>
+<td><a href="https://rapidminer.com/">🌎</a></td>
+<td>2006</td>
+<td><a href="https://en.wikipedia.org/wiki/RapidMiner">📖</a></td>
+</tr>
+<tr><td>Sisense</td>
+<td><a href="https://www.sisense.com/">🌎</a></td>
+<td>2004</td>
+<td><a href="https://en.wikipedia.org/wiki/Sisense">📖</a></td>
+</tr>
+<tr><td>KNIME</td>
+<td><a href="https://www.knime.com/">🌎</a></td>
+<td>2004</td>
+<td></td>
+</tr>
+<tr><td>Matplotlib</td>
+<td><a href="https://matplotlib.org/">🌎</a></td>
+<td>2003</td>
+<td><a href="https://en.wikipedia.org/wiki/Matplotlib">📖</a></td>
+</tr>
+<tr><td>Tableau</td>
+<td><a href="https://www.tableau.com/">🌎</a></td>
+<td>2003</td>
+<td><a href="https://en.wikipedia.org/wiki/Tableau_Software">📖</a></td>
+</tr>
+<tr><td>Visual-Paradigm Chart Maker</td>
+<td><a href="https://online.visual-paradigm.com/features/chart-maker/pyramid-chart-maker/">🌎</a></td>
+<td>2002</td>
+<td><a href="https://en.wikipedia.org/wiki/Visual_Paradigm">📖</a></td>
+</tr>
+<tr><td>NumPy</td>
+<td><a href="https://www.numpy.org/">🌎</a></td>
+<td>1995</td>
+<td><a href="https://en.wikipedia.org/wiki/NumPy">📖</a></td>
+</tr>
+<tr><td>Qlik</td>
+<td><a href="https://www.qlik.com/">🌎</a></td>
+<td>1993</td>
+<td><a href="https://en.wikipedia.org/wiki/Qlik">📖</a></td>
+</tr>
+<tr><td>JMP</td>
+<td><a href="https://www.jmp.com/">🌎</a></td>
+<td>1989</td>
+<td><a href="https://en.wikipedia.org/wiki/JMP_(statistical_software)">📖</a></td>
+</tr>
+<tr><td>Mathematica</td>
+<td><a href="https://www.wolfram.com/mathematica/">🌎</a></td>
+<td>1988</td>
+<td><a href="https://en.wikipedia.org/wiki/Wolfram_Mathematica">📖</a></td>
+</tr>
+<tr><td>Microsoft Excel</td>
+<td><a href="https://products.office.com/en-us/excel">🌎</a></td>
+<td>1987</td>
+<td><a href="https://en.wikipedia.org/wiki/Microsoft_Excel">📖</a></td>
+</tr>
+<tr><td>MATLAB</td>
+<td><a href="https://mathworks.com/products/matlab">🌎</a></td>
+<td>1984</td>
+<td><a href="https://en.wikipedia.org/wiki/MATLAB">📖</a></td>
+</tr>
+<tr><td>SAS</td>
+<td><a href="https://www.sas.com/">🌎</a></td>
+<td>1976</td>
+<td><a href="https://en.wikipedia.org/wiki/SAS_language">📖</a></td>
+</tr>
+<tr><td>SPSS</td>
+<td><a href="https://www.ibm.com/us-en/marketplace/spss-statistics">🌎</a></td>
+<td>1968</td>
+<td><a href="https://en.wikipedia.org/wiki/SPSS">📖</a></td>
+</tr></tbody></table>
+
+<h3 class="scrollSectionComponent">How to Give Feedback</h3>
+
+<p class="scrollParagraphComponent">Open an issue here, the Tree Notation <a href="https://www.reddit.com/r/treenotation/">subreddit</a> or email ohayo@treenotation.org.</p>
+
+<h3 class="scrollSectionComponent">❤️ Public Domain ❤️</h3>
+<p class="scrollArticleSourceLinkComponent"><a href="https://github.com/publicdomaincompany/ohayo/blob/main/readme.scroll">Article source</a></p></div>
+  <div class="scrollFooterComponent">
+   <div class="scrollSocialMediaIconsComponent">
+    <a href="mailto:ohayo@publicdomaincompany.com"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Gmail icon</title><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg></a>
+    <a href="https://twitter.com/publicdomainpub"><svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Twitter icon</title><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg></a>
+    <a href="https://github.com/publicdomaincompany/ohayo"><svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub icon</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></a>
+</div>
+   <a href="https://scroll.pub" class="scrollCommunityLinkComponent">Built with Scroll v21.3.0</a>
+</div>
+</body>
+</html>

@@ -27,7 +27,7 @@ samplesTelescopesNode
   ## Provenance
   This list was put together by a group of remote workers in a Google spreadsheet in 2017 and hasn't been updated in a while.
  boolean isDataPublicDomain true
- string dataUrl https://github.com/treenotation/ohayo/blob/master/ohayo/packages/samples/telescopes.tsv
+ string dataUrl https://github.com/treenotation/ohayo/blob/main/ohayo/packages/samples/telescopes.tsv
  tags astronomy
  frequency .03
  example Display list of links to telescope websites.
@@ -62,7 +62,7 @@ samplesFlights14Node
 samplesSiNode
  description A description of The International System of Units (SI) aka the metric system.
  boolean isDataPublicDomain true
- string dataUrl https://github.com/treenotation/ohayo/blob/master/ohayo/packages/samples/si.tree
+ string dataUrl https://github.com/treenotation/ohayo/blob/main/ohayo/packages/samples/si.tree
  example View outline of SI system.
   samples.si
    treenotation.outline
@@ -74,7 +74,7 @@ samplesSiNode
 samplesPortalNode
  description A list of online data portals.
  boolean isDataPublicDomain true
- string dataUrl https://github.com/treenotation/ohayo/blob/master/ohayo/packages/samples/portals.ssv
+ string dataUrl https://github.com/treenotation/ohayo/blob/main/ohayo/packages/samples/portals.ssv
  frequency .03
  string url ohayo/packages/samples/portals.ssv
  extends abstractFixedDatasetFromOhayoCollectionNode

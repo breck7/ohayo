@@ -1,0 +1,152 @@
+title Ohayo
+skipIndexPage
+
+paragraph
+ Ohayo is a fast and free tool for data science. Ohayo consists of a very high level programming language and a visual web studio for that language. The goal of Ohayo is to enable people to do data science at the speed of voice. You can see a short clip of Ohayo in action here🔗youtube.com/watch?v=qqyGHmUlKoc.
+
+paragraph
+ You can try ohayo at https://ohayo.computer🔗ohayo.computer, download Ohayo on GitHub🔗github.com/publicdomaincompany/ohayo, try Ohayo hosted on GitHub🔗github.ohayo.computer, or install it using `npm install ohayo`.
+
+image slides.gif
+
+section Key Concepts
+
+subsection OhayoLang
+
+paragraph
+ Ohayo the language🔗github.com/publicdomaincompany/ohayo/tree/main/ohayo is a Tree Language, built using TreeNotation🔗treenotation.org/. Ohayo is a dataflow language.
+
+subsection Scripts
+
+paragraph
+ OhayoLang is a scripting language like any other and you can write programs in it by hand or using the Ohayo Studio. OhayoLang scripts generally have the file extension ".ohayo".
+
+subsection Tiles
+
+paragraph
+ An Ohayo program is composed of Tiles. Tiles can display UI to the user. Tiles are recursive and can be the parent of other tiles. Tiles are namespaced and all must contain at least one ".".
+
+subsection Tile Properties
+
+paragraph
+ Tiles can define and use their own Properties. The names of Tile Properties cannot contain a ".".
+
+subsection DataTables
+
+paragraph
+ All Tiles can access the tables of their ancestor tiles and also pass on a new table to their descendants. The data tables currently use the jTable🔗github.com/publicdomaincompany/jtree/tree/main/jtable library.
+
+subsection Common Tile Types
+
+paragraph
+ All Tiles extend from a base class. The three most common core Tile Types are Provider, Transformer, and Chart. In data science you have 3 main kinds of things: datasets, data transformations, and visualizations. Datasets include everything from weather forecasts to emails to business transactions. There are millions of possible datasets. In Ohayo tiles that provide datasets generally extend the Provider base tile type. Transformations are things like filtering, grouping, and joining. In Ohayo tiles that transform data generally extend the Transformer tile type. Charts include bar charts, line charts, scatterplots and word clouds. In Ohayo charts generally extend the Chart base tile type.
+
+subsection Creating Tiles
+
+paragraph
+ If you need a new tile—to add a new user friendly data source or visualization type, for example—you can implement it using TypeScript/Javascript/Grammar language. See the packages🔗github.com/publicdomaincompany/ohayo/tree/main/ohayo/packages folder for examples. Documentation for this will come out later in 2020.
+
+section BETA!
+
+paragraph
+ Ohayo is still beta and iterating frequently. Post feedback here or on the TreeNotation subreddit🔗www.reddit.com/r/treenotation/. Ohayo hopefully will be stable by July 2020.
+
+section Marketing Jumbo
+
+paragraph
+ If you are looking for some marketing-speak, here you go:
+
+orderedList
+ 1. The simplest syntax possible. No parentheses, no brackets, no semicolons. Just words you can speak.
+ 2. Write by hand or program visually. The first visual editor that generates perfectly clean code.
+ 3. Autocomplete like you've never seen before. AI powered autocomplete that keeps getting better.
+ 4. Free and open source. The price is $0, and extensions and collaboration are welcome.
+ 5. No installing required. Run Ohayo instantly in your browser, even on your mobile device.
+ 6. No tracking, no cookies. Ohayo doesn't track users, use cookies, or store your data.
+ 7. Secure by design. Your data stays on your machines, we never see it.
+ 8. Runs anywhere. Run it from our sites, host it yourself, or run it on your local machine.
+
+section Other Tools For Data Scientists
+
+paragraph
+ Ohayo is just one of my tools that are trying to make data science easier. Here's a list of related products:
+
+pipeTable
+ Name|Website|Year|Wikipedia
+ Rows.com|🌎🔗rows.com/|2020|
+ Explo.co|🌎🔗explo.co/|2020|
+ Arquero|🌎🔗github.com/uwdata/arquero|2020|
+ Basedash|🌎🔗www.basedash.com/|2019|
+ Grid Studio|🌎🔗github.com/ricklamers/gridstudio|2019|
+ Workbench|🌎🔗workbenchdata.com/|2018|
+ ActionDesk|🌎🔗www.actiondesk.io/|2018|
+ Data Illustrator|🌎🔗data-illustrator.com/|2018|
+ Observable|🌎🔗observablehq.com/|2017|
+ Idyll|🌎🔗idyll-lang.org/|2017|
+ VisiData|🌎🔗www.visidata.org/|2017|
+ Google Data Studio|🌎🔗datastudio.google.com/overview|2016|📖🔗de.wikipedia.org/wiki/Google_Data_Studio
+ Flourish|🌎🔗flourish.studio/|2016|
+ Tidyverse|🌎🔗www.tidyverse.org/|2016|📖🔗en.wikipedia.org/wiki/Tidyverse
+ Vega Editor|🌎🔗vega.github.io/editor/|2015|
+ Amazon QuickSight|🌎🔗aws.amazon.com/quicksight/|2015|
+ GapMinder Vizabi|🌎🔗vizabi.org/|2015|
+ Toucan|🌎🔗toucantoco.com/en/|2015|
+ xsv|🌎🔗github.com/BurntSushi/xsv|2014|
+ metabase|🌎🔗www.metabase.com/|2014|
+ dplyr|🌎🔗dplyr.tidyverse.org/|2014|
+ JupyterLab|🌎🔗github.com/jupyterlab/jupyterlab|2014|📖🔗en.wikipedia.org/wiki/Project_Jupyter
+ OmniSci|🌎🔗www.omnisci.com/|2013|📖🔗en.wikipedia.org/wiki/OmniSci
+ xlwings|🌎🔗www.xlwings.org/|2013|
+ redash|🌎🔗redash.io/|2013|
+ RAWGraphs|🌎🔗github.com/rawgraphs/raw|2013|
+ DataBricks|🌎🔗databricks.com/|2013|📖🔗en.wikipedia.org/wiki/Databricks
+ Quadrigram|🌎🔗www.quadrigram.com/|2012|
+ Snowflake|🌎🔗www.snowflake.com/|2012|📖🔗en.wikipedia.org/wiki/Snowflake_Inc.
+ Julia|🌎🔗julialang.org/|2012|📖🔗en.wikipedia.org/wiki/Julia_(programming_language)
+ Looker|🌎🔗looker.com/|2012|📖🔗en.wikipedia.org/wiki/Looker_(company)
+ AirTable|🌎🔗airtable.com/|2012|📖🔗en.wikipedia.org/wiki/Airtable
+ Anaconda|🌎🔗www.anaconda.com/|2012|📖🔗en.wikipedia.org/wiki/Anaconda_(Python_distribution)
+ Plotly|🌎🔗plot.ly/|2012|📖🔗en.wikipedia.org/wiki/Plotly
+ DataWrapper|🌎🔗www.datawrapper.de/|2012|
+ ThoughtSpot|🌎🔗www.thoughtspot.com/|2012|📖🔗en.wikipedia.org/wiki/ThoughtSpot
+ Infogram|🌎🔗infogram.com/|2012|📖🔗en.wikipedia.org/wiki/Infogram
+ RStudio|🌎🔗www.rstudio.com/|2011|📖🔗en.wikipedia.org/wiki/RStudio
+ Microsoft SandDance|🌎🔗github.com/microsoft/SandDance|2011|📖🔗en.wikipedia.org/wiki/Microsoft_Garage
+ Microsoft PowerBI|🌎🔗powerbi.microsoft.com/en-us/|2011|📖🔗en.wikipedia.org/wiki/Power_BI
+ d3|🌎🔗d3js.org/|2011|📖🔗en.wikipedia.org/wiki/D3.js
+ piktochart|🌎🔗piktochart.com/|2011|📖🔗en.wikipedia.org/wiki/Piktochart
+ Google Kaggle|🌎🔗www.kaggle.com/|2010|📖🔗en.wikipedia.org/wiki/Kaggle
+ ChartIO|🌎🔗chartio.com/|2010|
+ Google BigQuery|🌎🔗cloud.google.com/bigquery/|2010|📖🔗en.wikipedia.org/wiki/BigQuery
+ OpenRefine|🌎🔗github.com/OpenRefine/OpenRefine|2010|📖🔗en.wikipedia.org/wiki/OpenRefine
+ Zoho Analytics|🌎🔗www.zoho.com/analytics/|2009|
+ Wolfram Alpha|🌎🔗www.wolframalpha.com/|2009|📖🔗en.wikipedia.org/wiki/Wolfram_Alpha
+ HighCharts|🌎🔗www.highcharts.com/|2009|📖🔗en.wikipedia.org/wiki/Highcharts
+ LucidChart|🌎🔗www.lucidchart.com/|2008|📖🔗en.wikipedia.org/wiki/Lucidchart
+ Pandas|🌎🔗pandas.pydata.org/|2008|📖🔗en.wikipedia.org/wiki/Pandas_(software
+ Apple Numbers|🌎🔗www.apple.com/numbers/|2007|📖🔗en.wikipedia.org/wiki/Numbers_(spreadsheet)
+ scikit-learn|🌎🔗scikit-learn.org/stable/|2007|📖🔗en.wikipedia.org/wiki/Scikit-learn
+ Smartsheet|🌎🔗www.smartsheet.com/|2006|📖🔗en.wikipedia.org/wiki/Smartsheet
+ Google Sheets|🌎🔗www.google.com/sheets/about/|2006|📖🔗en.wikipedia.org/wiki/Google_Sheets
+ Alteryx|🌎🔗www.alteryx.com/|2006|📖🔗en.wikipedia.org/wiki/Alteryx
+ RapidMiner|🌎🔗rapidminer.com/|2006|📖🔗en.wikipedia.org/wiki/RapidMiner
+ Sisense|🌎🔗www.sisense.com/|2004|📖🔗en.wikipedia.org/wiki/Sisense
+ KNIME|🌎🔗www.knime.com/|2004|
+ Matplotlib|🌎🔗matplotlib.org/|2003|📖🔗en.wikipedia.org/wiki/Matplotlib
+ Tableau|🌎🔗www.tableau.com/|2003|📖🔗en.wikipedia.org/wiki/Tableau_Software
+ Visual-Paradigm Chart Maker|🌎🔗online.visual-paradigm.com/features/chart-maker/pyramid-chart-maker/|2002|📖🔗en.wikipedia.org/wiki/Visual_Paradigm
+ NumPy|🌎🔗www.numpy.org/|1995|📖🔗en.wikipedia.org/wiki/NumPy
+ Qlik|🌎🔗www.qlik.com/|1993|📖🔗en.wikipedia.org/wiki/Qlik
+ JMP|🌎🔗www.jmp.com/|1989|📖🔗en.wikipedia.org/wiki/JMP_(statistical_software)
+ Mathematica|🌎🔗www.wolfram.com/mathematica/|1988|📖🔗en.wikipedia.org/wiki/Wolfram_Mathematica
+ Microsoft Excel|🌎🔗products.office.com/en-us/excel|1987|📖🔗en.wikipedia.org/wiki/Microsoft_Excel
+ MATLAB|🌎🔗mathworks.com/products/matlab|1984|📖🔗en.wikipedia.org/wiki/MATLAB
+ SAS|🌎🔗www.sas.com/|1976|📖🔗en.wikipedia.org/wiki/SAS_language
+ SPSS|🌎🔗www.ibm.com/us-en/marketplace/spss-statistics|1968|📖🔗en.wikipedia.org/wiki/SPSS
+
+section How to Give Feedback
+
+paragraph
+ Open an issue here, the Tree Notation subreddit🔗www.reddit.com/r/treenotation/ or email ohayo@treenotation.org.
+
+section ❤️ Public Domain ❤️
