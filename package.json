@@ -21,7 +21,7 @@
     "glob": "^7.1.4",
     "jtree": "^49.8.0",
     "lodash": "^4.17.13",
-    "marked": "^0.6.3",
+    "marked": "^4.0.10",
     "mathjs": "^7.5.1",
     "moment": "^2.24.0",
     "moment-parseformat": "^2.2.1",
