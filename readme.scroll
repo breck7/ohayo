@@ -1,11 +1,16 @@
 title Ohayo
 skipIndexPage
 
-paragraph
- Ohayo is a fast and free tool for data science. Ohayo consists of a very high level programming language and a visual web studio for that language. The goal of Ohayo is to enable people to do data science at the speed of voice. You can see a short clip of Ohayo in action here🔗youtube.com/watch?v=qqyGHmUlKoc.
+aftertext
+ Ohayo is a fast and free tool for data science. Ohayo consists of a very high level programming language and a visual web studio for that language. The goal of Ohayo is to enable people to do data science at the speed of voice. You can see a short clip of Ohayo in action here.
+ link https://youtube.com/watch?v=qqyGHmUlKoc here
 
-paragraph
- You can try ohayo at https://ohayo.computer🔗ohayo.computer, download Ohayo on GitHub🔗github.com/publicdomaincompany/ohayo, try Ohayo hosted on GitHub🔗github.ohayo.computer, or install it using `npm install ohayo`.
+aftertext
+ You can try ohayo at https://ohayo.computer, download Ohayo on GitHub, try Ohayo hosted on GitHub, or install it using `npm install ohayo`.
+ link https://ohayo.computer https://ohayo.computer
+ link https://github.com/breck7/ohayo GitHub
+ link https://github.ohayo.computer GitHub
+ wrapsOn
 
 image slides.gif
 
@@ -13,47 +18,55 @@ section Key Concepts
 
 subsection OhayoLang
 
-paragraph
- Ohayo the language🔗github.com/publicdomaincompany/ohayo/tree/main/ohayo is a Tree Language, built using TreeNotation🔗treenotation.org/. Ohayo is a dataflow language.
+aftertext
+ Ohayo the language is a Tree Language, built using TreeNotation. Ohayo is a dataflow language.
+ link https://github.com/breck7/ohayo/tree/main/ohayo language
+ link https://treenotation.org/ TreeNotation
 
 subsection Scripts
 
-paragraph
- OhayoLang is a scripting language like any other and you can write programs in it by hand or using the Ohayo Studio. OhayoLang scripts generally have the file extension ".ohayo".
+aftertext
+ OhayoLang is a scripting language like any other and you can write programs in it by hand or using the Ohayo Studio. OhayoLang scripts generally have the file extension `.ohayo`.
+ wrapsOn
 
 subsection Tiles
 
-paragraph
- An Ohayo program is composed of Tiles. Tiles can display UI to the user. Tiles are recursive and can be the parent of other tiles. Tiles are namespaced and all must contain at least one ".".
+aftertext
+ An Ohayo program is composed of Tiles. Tiles can display UI to the user. Tiles are recursive and can be the parent of other tiles. Tiles are namespaced and all must contain at least one `.`.
+ wrapsOn
 
 subsection Tile Properties
 
-paragraph
- Tiles can define and use their own Properties. The names of Tile Properties cannot contain a ".".
+aftertext
+ Tiles can define and use their own Properties. The names of Tile Properties cannot contain a `.`.
+ wrapsOn
 
 subsection DataTables
 
-paragraph
- All Tiles can access the tables of their ancestor tiles and also pass on a new table to their descendants. The data tables currently use the jTable🔗github.com/publicdomaincompany/jtree/tree/main/jtable library.
+aftertext
+ All Tiles can access the tables of their ancestor tiles and also pass on a new table to their descendants. The data tables currently use the jTable library.
+ link https://github.com/breck7/jtree/tree/main/jtable jTable
 
 subsection Common Tile Types
 
-paragraph
+aftertext
  All Tiles extend from a base class. The three most common core Tile Types are Provider, Transformer, and Chart. In data science you have 3 main kinds of things: datasets, data transformations, and visualizations. Datasets include everything from weather forecasts to emails to business transactions. There are millions of possible datasets. In Ohayo tiles that provide datasets generally extend the Provider base tile type. Transformations are things like filtering, grouping, and joining. In Ohayo tiles that transform data generally extend the Transformer tile type. Charts include bar charts, line charts, scatterplots and word clouds. In Ohayo charts generally extend the Chart base tile type.
 
 subsection Creating Tiles
 
-paragraph
- If you need a new tile—to add a new user friendly data source or visualization type, for example—you can implement it using TypeScript/Javascript/Grammar language. See the packages🔗github.com/publicdomaincompany/ohayo/tree/main/ohayo/packages folder for examples. Documentation for this will come out later in 2020.
+aftertext
+ If you need a new tile—to add a new user friendly data source or visualization type, for example—you can implement it using TypeScript/Javascript/Grammar language. See the packages folder for examples. Documentation for this will come out later in 2020.
+ link https://github.com/breck7/ohayo/tree/main/ohayo/packages packages
 
 section BETA!
 
-paragraph
- Ohayo is still beta and iterating frequently. Post feedback here or on the TreeNotation subreddit🔗www.reddit.com/r/treenotation/. Ohayo hopefully will be stable by July 2020.
+aftertext
+ Ohayo is still beta and iterating frequently. Post feedback here or on the TreeNotation subreddit. Ohayo hopefully will be stable by July 2020.
+ link https://www.reddit.com/r/treenotation/ subreddit
 
 section Marketing Jumbo
 
-paragraph
+aftertext
  If you are looking for some marketing-speak, here you go:
 
 orderedList
@@ -68,85 +81,86 @@ orderedList
 
 section Other Tools For Data Scientists
 
-paragraph
+aftertext
  Ohayo is just one of my tools that are trying to make data science easier. Here's a list of related products:
 
 pipeTable
- Name|Website|Year|Wikipedia
- Rows.com|🌎🔗rows.com/|2020|
- Explo.co|🌎🔗explo.co/|2020|
- Arquero|🌎🔗github.com/uwdata/arquero|2020|
- Basedash|🌎🔗www.basedash.com/|2019|
- Grid Studio|🌎🔗github.com/ricklamers/gridstudio|2019|
- Workbench|🌎🔗workbenchdata.com/|2018|
- ActionDesk|🌎🔗www.actiondesk.io/|2018|
- Data Illustrator|🌎🔗data-illustrator.com/|2018|
- Observable|🌎🔗observablehq.com/|2017|
- Idyll|🌎🔗idyll-lang.org/|2017|
- VisiData|🌎🔗www.visidata.org/|2017|
- Google Data Studio|🌎🔗datastudio.google.com/overview|2016|📖🔗de.wikipedia.org/wiki/Google_Data_Studio
- Flourish|🌎🔗flourish.studio/|2016|
- Tidyverse|🌎🔗www.tidyverse.org/|2016|📖🔗en.wikipedia.org/wiki/Tidyverse
- Vega Editor|🌎🔗vega.github.io/editor/|2015|
- Amazon QuickSight|🌎🔗aws.amazon.com/quicksight/|2015|
- GapMinder Vizabi|🌎🔗vizabi.org/|2015|
- Toucan|🌎🔗toucantoco.com/en/|2015|
- xsv|🌎🔗github.com/BurntSushi/xsv|2014|
- metabase|🌎🔗www.metabase.com/|2014|
- dplyr|🌎🔗dplyr.tidyverse.org/|2014|
- JupyterLab|🌎🔗github.com/jupyterlab/jupyterlab|2014|📖🔗en.wikipedia.org/wiki/Project_Jupyter
- OmniSci|🌎🔗www.omnisci.com/|2013|📖🔗en.wikipedia.org/wiki/OmniSci
- xlwings|🌎🔗www.xlwings.org/|2013|
- redash|🌎🔗redash.io/|2013|
- RAWGraphs|🌎🔗github.com/rawgraphs/raw|2013|
- DataBricks|🌎🔗databricks.com/|2013|📖🔗en.wikipedia.org/wiki/Databricks
- Quadrigram|🌎🔗www.quadrigram.com/|2012|
- Snowflake|🌎🔗www.snowflake.com/|2012|📖🔗en.wikipedia.org/wiki/Snowflake_Inc.
- Julia|🌎🔗julialang.org/|2012|📖🔗en.wikipedia.org/wiki/Julia_(programming_language)
- Looker|🌎🔗looker.com/|2012|📖🔗en.wikipedia.org/wiki/Looker_(company)
- AirTable|🌎🔗airtable.com/|2012|📖🔗en.wikipedia.org/wiki/Airtable
- Anaconda|🌎🔗www.anaconda.com/|2012|📖🔗en.wikipedia.org/wiki/Anaconda_(Python_distribution)
- Plotly|🌎🔗plot.ly/|2012|📖🔗en.wikipedia.org/wiki/Plotly
- DataWrapper|🌎🔗www.datawrapper.de/|2012|
- ThoughtSpot|🌎🔗www.thoughtspot.com/|2012|📖🔗en.wikipedia.org/wiki/ThoughtSpot
- Infogram|🌎🔗infogram.com/|2012|📖🔗en.wikipedia.org/wiki/Infogram
- RStudio|🌎🔗www.rstudio.com/|2011|📖🔗en.wikipedia.org/wiki/RStudio
- Microsoft SandDance|🌎🔗github.com/microsoft/SandDance|2011|📖🔗en.wikipedia.org/wiki/Microsoft_Garage
- Microsoft PowerBI|🌎🔗powerbi.microsoft.com/en-us/|2011|📖🔗en.wikipedia.org/wiki/Power_BI
- d3|🌎🔗d3js.org/|2011|📖🔗en.wikipedia.org/wiki/D3.js
- piktochart|🌎🔗piktochart.com/|2011|📖🔗en.wikipedia.org/wiki/Piktochart
- Google Kaggle|🌎🔗www.kaggle.com/|2010|📖🔗en.wikipedia.org/wiki/Kaggle
- ChartIO|🌎🔗chartio.com/|2010|
- Google BigQuery|🌎🔗cloud.google.com/bigquery/|2010|📖🔗en.wikipedia.org/wiki/BigQuery
- OpenRefine|🌎🔗github.com/OpenRefine/OpenRefine|2010|📖🔗en.wikipedia.org/wiki/OpenRefine
- Zoho Analytics|🌎🔗www.zoho.com/analytics/|2009|
- Wolfram Alpha|🌎🔗www.wolframalpha.com/|2009|📖🔗en.wikipedia.org/wiki/Wolfram_Alpha
- HighCharts|🌎🔗www.highcharts.com/|2009|📖🔗en.wikipedia.org/wiki/Highcharts
- LucidChart|🌎🔗www.lucidchart.com/|2008|📖🔗en.wikipedia.org/wiki/Lucidchart
- Pandas|🌎🔗pandas.pydata.org/|2008|📖🔗en.wikipedia.org/wiki/Pandas_(software
- Apple Numbers|🌎🔗www.apple.com/numbers/|2007|📖🔗en.wikipedia.org/wiki/Numbers_(spreadsheet)
- scikit-learn|🌎🔗scikit-learn.org/stable/|2007|📖🔗en.wikipedia.org/wiki/Scikit-learn
- Smartsheet|🌎🔗www.smartsheet.com/|2006|📖🔗en.wikipedia.org/wiki/Smartsheet
- Google Sheets|🌎🔗www.google.com/sheets/about/|2006|📖🔗en.wikipedia.org/wiki/Google_Sheets
- Alteryx|🌎🔗www.alteryx.com/|2006|📖🔗en.wikipedia.org/wiki/Alteryx
- RapidMiner|🌎🔗rapidminer.com/|2006|📖🔗en.wikipedia.org/wiki/RapidMiner
- Sisense|🌎🔗www.sisense.com/|2004|📖🔗en.wikipedia.org/wiki/Sisense
- KNIME|🌎🔗www.knime.com/|2004|
- Matplotlib|🌎🔗matplotlib.org/|2003|📖🔗en.wikipedia.org/wiki/Matplotlib
- Tableau|🌎🔗www.tableau.com/|2003|📖🔗en.wikipedia.org/wiki/Tableau_Software
- Visual-Paradigm Chart Maker|🌎🔗online.visual-paradigm.com/features/chart-maker/pyramid-chart-maker/|2002|📖🔗en.wikipedia.org/wiki/Visual_Paradigm
- NumPy|🌎🔗www.numpy.org/|1995|📖🔗en.wikipedia.org/wiki/NumPy
- Qlik|🌎🔗www.qlik.com/|1993|📖🔗en.wikipedia.org/wiki/Qlik
- JMP|🌎🔗www.jmp.com/|1989|📖🔗en.wikipedia.org/wiki/JMP_(statistical_software)
- Mathematica|🌎🔗www.wolfram.com/mathematica/|1988|📖🔗en.wikipedia.org/wiki/Wolfram_Mathematica
- Microsoft Excel|🌎🔗products.office.com/en-us/excel|1987|📖🔗en.wikipedia.org/wiki/Microsoft_Excel
- MATLAB|🌎🔗mathworks.com/products/matlab|1984|📖🔗en.wikipedia.org/wiki/MATLAB
- SAS|🌎🔗www.sas.com/|1976|📖🔗en.wikipedia.org/wiki/SAS_language
- SPSS|🌎🔗www.ibm.com/us-en/marketplace/spss-statistics|1968|📖🔗en.wikipedia.org/wiki/SPSS
+ Name|NameLink|Year|Wikipedia|WikipediaLink
+ Rows.com|https://rows.com/|2020||
+ Explo.co|https://explo.co/|2020||
+ Arquero|https://github.com/uwdata/arquero|2020||
+ Basedash|https://www.basedash.com/|2019||
+ Grid Studio|https://github.com/ricklamers/gridstudio|2019||
+ Workbench|https://workbenchdata.com/|2018||
+ ActionDesk|https://www.actiondesk.io/|2018||
+ Data Illustrator|https://data-illustrator.com/|2018||
+ Observable|https://observablehq.com/|2017||
+ Idyll|https://idyll-lang.org/|2017||
+ VisiData|https://www.visidata.org/|2017||
+ Google Data Studio|https://datastudio.google.com/overview|2016|W|https://de.wikipedia.org/wiki/Google_Data_Studio
+ Flourish|https://flourish.studio/|2016||
+ Tidyverse|https://www.tidyverse.org/|2016|W|https://en.wikipedia.org/wiki/Tidyverse
+ Vega Editor|https://vega.github.io/editor/|2015||
+ Amazon QuickSight|https://aws.amazon.com/quicksight/|2015||
+ GapMinder Vizabi|https://vizabi.org/|2015||
+ Toucan|https://toucantoco.com/en/|2015||
+ xsv|https://github.com/BurntSushi/xsv|2014||
+ metabase|https://www.metabase.com/|2014||
+ dplyr|https://dplyr.tidyverse.org/|2014||
+ JupyterLab|https://github.com/jupyterlab/jupyterlab|2014|W|https://en.wikipedia.org/wiki/Project_Jupyter
+ OmniSci|https://www.omnisci.com/|2013|W|https://en.wikipedia.org/wiki/OmniSci
+ xlwings|https://www.xlwings.org/|2013||
+ redash|https://redash.io/|2013||
+ RAWGraphs|https://github.com/rawgraphs/raw|2013||
+ DataBricks|https://databricks.com/|2013|W|https://en.wikipedia.org/wiki/Databricks
+ Quadrigram|https://www.quadrigram.com/|2012||
+ Snowflake|https://www.snowflake.com/|2012|W|https://en.wikipedia.org/wiki/Snowflake_Inc.
+ Julia|https://julialang.org/|2012|W|https://en.wikipedia.org/wiki/Julia_(programming_language)
+ Looker|https://looker.com/|2012|W|https://en.wikipedia.org/wiki/Looker_(company)
+ AirTable|https://airtable.com/|2012|W|https://en.wikipedia.org/wiki/Airtable
+ Anaconda|https://www.anaconda.com/|2012|W|https://en.wikipedia.org/wiki/Anaconda_(Python_distribution)
+ Plotly|https://plot.ly/|2012|W|https://en.wikipedia.org/wiki/Plotly
+ DataWrapper|https://www.datawrapper.de/|2012||
+ ThoughtSpot|https://www.thoughtspot.com/|2012|W|https://en.wikipedia.org/wiki/ThoughtSpot
+ Infogram|https://infogram.com/|2012|W|https://en.wikipedia.org/wiki/Infogram
+ RStudio|https://www.rstudio.com/|2011|W|https://en.wikipedia.org/wiki/RStudio
+ Microsoft SandDance|https://github.com/microsoft/SandDance|2011|W|https://en.wikipedia.org/wiki/Microsoft_Garage
+ Microsoft PowerBI|https://powerbi.microsoft.com/en-us/|2011|W|https://en.wikipedia.org/wiki/Power_BI
+ d3|https://d3js.org/|2011|W|https://en.wikipedia.org/wiki/D3.js
+ piktochart|https://piktochart.com/|2011|W|https://en.wikipedia.org/wiki/Piktochart
+ Google Kaggle|https://www.kaggle.com/|2010|W|https://en.wikipedia.org/wiki/Kaggle
+ ChartIO|https://chartio.com/|2010||
+ Google BigQuery|https://cloud.google.com/bigquery/|2010|W|https://en.wikipedia.org/wiki/BigQuery
+ OpenRefine|https://github.com/OpenRefine/OpenRefine|2010|W|https://en.wikipedia.org/wiki/OpenRefine
+ Zoho Analytics|https://www.zoho.com/analytics/|2009||
+ Wolfram Alpha|https://www.wolframalpha.com/|2009|W|https://en.wikipedia.org/wiki/Wolfram_Alpha
+ HighCharts|https://www.highcharts.com/|2009|W|https://en.wikipedia.org/wiki/Highcharts
+ LucidChart|https://www.lucidchart.com/|2008|W|https://en.wikipedia.org/wiki/Lucidchart
+ Pandas|https://pandas.pydata.org/|2008|W|https://en.wikipedia.org/wiki/Pandas_(software
+ Apple Numbers|https://www.apple.com/numbers/|2007|W|https://en.wikipedia.org/wiki/Numbers_(spreadsheet)
+ scikit-learn|https://scikit-learn.org/stable/|2007|W|https://en.wikipedia.org/wiki/Scikit-learn
+ Smartsheet|https://www.smartsheet.com/|2006|W|https://en.wikipedia.org/wiki/Smartsheet
+ Google Sheets|https://www.google.com/sheets/about/|2006|W|https://en.wikipedia.org/wiki/Google_Sheets
+ Alteryx|https://www.alteryx.com/|2006|W|https://en.wikipedia.org/wiki/Alteryx
+ RapidMiner|https://rapidminer.com/|2006|W|https://en.wikipedia.org/wiki/RapidMiner
+ Sisense|https://www.sisense.com/|2004|W|https://en.wikipedia.org/wiki/Sisense
+ KNIME|https://www.knime.com/|2004||
+ Matplotlib|https://matplotlib.org/|2003|W|https://en.wikipedia.org/wiki/Matplotlib
+ Tableau|https://www.tableau.com/|2003|W|https://en.wikipedia.org/wiki/Tableau_Software
+ Visual-Paradigm Chart Maker|https://online.visual-paradigm.com/features/chart-maker/pyramid-chart-maker/|2002|W|https://en.wikipedia.org/wiki/Visual_Paradigm
+ NumPy|https://www.numpy.org/|1995|W|https://en.wikipedia.org/wiki/NumPy
+ Qlik|https://www.qlik.com/|1993|W|https://en.wikipedia.org/wiki/Qlik
+ JMP|https://www.jmp.com/|1989|W|https://en.wikipedia.org/wiki/JMP_(statistical_software)
+ Mathematica|https://www.wolfram.com/mathematica/|1988|W|https://en.wikipedia.org/wiki/Wolfram_Mathematica
+ Microsoft Excel|https://products.office.com/en-us/excel|1987|W|https://en.wikipedia.org/wiki/Microsoft_Excel
+ MATLAB|https://mathworks.com/products/matlab|1984|W|https://en.wikipedia.org/wiki/MATLAB
+ SAS|https://www.sas.com/|1976|W|https://en.wikipedia.org/wiki/SAS_language
+ SPSS|https://www.ibm.com/us-en/marketplace/spss-statistics|1968|W|https://en.wikipedia.org/wiki/SPSS
 
 section How to Give Feedback
 
-paragraph
- Open an issue here, the Tree Notation subreddit🔗www.reddit.com/r/treenotation/ or email ohayo@treenotation.org.
+aftertext
+ Open an issue here, the Tree Notation subreddit or email ohayo@treenotation.org.
+ link https://www.reddit.com/r/treenotation/ subreddit
 
 section ❤️ Public Domain ❤️

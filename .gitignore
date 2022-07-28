@@ -6,3 +6,5 @@ builder.js
 notes.txt
 dist/
 syntax.sh
+*.html
+*.xml
