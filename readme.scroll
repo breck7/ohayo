@@ -1,73 +1,57 @@
 title Ohayo
-skipIndexPage
 
-aftertext
- Ohayo is a fast and free tool for data science. Ohayo consists of a very high level programming language and a visual web studio for that language. The goal of Ohayo is to enable people to do data science at the speed of voice. You can see a short clip of Ohayo in action here.
- link https://youtube.com/watch?v=qqyGHmUlKoc here
+* Ohayo is a fast and free tool for data science. Ohayo consists of a very high level programming language and a visual web studio for that language. The goal of Ohayo is to enable people to do data science at the speed of voice. You can see a short clip of Ohayo in action here.
+ https://youtube.com/watch?v=qqyGHmUlKoc here
 
-aftertext
- You can try ohayo at https://ohayo.computer, download Ohayo on GitHub, try Ohayo hosted on GitHub, or install it using `npm install ohayo`.
- link https://ohayo.computer https://ohayo.computer
- link https://github.com/breck7/ohayo GitHub
- link https://github.ohayo.computer GitHub
- wrapsOn
+* You can try ohayo at https://ohayo.computer, download Ohayo on GitHub, try Ohayo hosted on GitHub, or install it using `npm install ohayo`.
+ https://ohayo.computer https://ohayo.computer
+ https://github.com/breck7/ohayo GitHub
+ https://github.ohayo.computer GitHub
 
 image slides.gif
 
-section Key Concepts
+# Key Concepts
 
-subsection OhayoLang
+## OhayoLang
 
-aftertext
- Ohayo the language is a Tree Language, built using TreeNotation. Ohayo is a dataflow language.
- link https://github.com/breck7/ohayo/tree/main/ohayo language
- link https://treenotation.org/ TreeNotation
+* Ohayo the language is a Tree Language, built using TreeNotation. Ohayo is a dataflow language.
+ https://github.com/breck7/ohayo/tree/main/ohayo language
+ https://treenotation.org/ TreeNotation
 
-subsection Scripts
+## Scripts
 
-aftertext
- OhayoLang is a scripting language like any other and you can write programs in it by hand or using the Ohayo Studio. OhayoLang scripts generally have the file extension `.ohayo`.
- wrapsOn
+* OhayoLang is a scripting language like any other and you can write programs in it by hand or using the Ohayo Studio. OhayoLang scripts generally have the file extension `.ohayo`.
 
-subsection Tiles
+## Tiles
 
-aftertext
- An Ohayo program is composed of Tiles. Tiles can display UI to the user. Tiles are recursive and can be the parent of other tiles. Tiles are namespaced and all must contain at least one `.`.
- wrapsOn
+* An Ohayo program is composed of Tiles. Tiles can display UI to the user. Tiles are recursive and can be the parent of other tiles. Tiles are namespaced and all must contain at least one `.`.
 
-subsection Tile Properties
+## Tile Properties
 
-aftertext
- Tiles can define and use their own Properties. The names of Tile Properties cannot contain a `.`.
- wrapsOn
+* Tiles can define and use their own Properties. The names of Tile Properties cannot contain a `.`.
 
-subsection DataTables
+## DataTables
 
-aftertext
- All Tiles can access the tables of their ancestor tiles and also pass on a new table to their descendants. The data tables currently use the jTable library.
- link https://github.com/breck7/jtree/tree/main/jtable jTable
+* All Tiles can access the tables of their ancestor tiles and also pass on a new table to their descendants. The data tables currently use the jTable library.
+ https://github.com/breck7/jtree/tree/main/jtable jTable
 
-subsection Common Tile Types
+## Common Tile Types
 
-aftertext
- All Tiles extend from a base class. The three most common core Tile Types are Provider, Transformer, and Chart. In data science you have 3 main kinds of things: datasets, data transformations, and visualizations. Datasets include everything from weather forecasts to emails to business transactions. There are millions of possible datasets. In Ohayo tiles that provide datasets generally extend the Provider base tile type. Transformations are things like filtering, grouping, and joining. In Ohayo tiles that transform data generally extend the Transformer tile type. Charts include bar charts, line charts, scatterplots and word clouds. In Ohayo charts generally extend the Chart base tile type.
+* All Tiles extend from a base class. The three most common core Tile Types are Provider, Transformer, and Chart. In data science you have 3 main kinds of things: datasets, data transformations, and visualizations. Datasets include everything from weather forecasts to emails to business transactions. There are millions of possible datasets. In Ohayo tiles that provide datasets generally extend the Provider base tile type. Transformations are things like filtering, grouping, and joining. In Ohayo tiles that transform data generally extend the Transformer tile type. Charts include bar charts, line charts, scatterplots and word clouds. In Ohayo charts generally extend the Chart base tile type.
 
-subsection Creating Tiles
+## Creating Tiles
 
-aftertext
- If you need a new tile—to add a new user friendly data source or visualization type, for example—you can implement it using TypeScript/Javascript/Grammar language. See the packages folder for examples. Documentation for this will come out later in 2020.
- link https://github.com/breck7/ohayo/tree/main/ohayo/packages packages
+* If you need a new tile—to add a new user friendly data source or visualization type, for example—you can implement it using TypeScript/Javascript/Grammar language. See the packages folder for examples. Documentation for this will come out later in 2020.
+ https://github.com/breck7/ohayo/tree/main/ohayo/packages packages
 
-section BETA!
+# BETA!
 
-aftertext
- Ohayo is still beta and iterating frequently. Post feedback here or on the TreeNotation subreddit. Ohayo hopefully will be stable by July 2023.
- link https://www.reddit.com/r/treenotation/ subreddit
+* Ohayo is still beta and iterating frequently. Post feedback here or on the TreeNotation subreddit. Ohayo hopefully will be stable by July 2023.
+ https://www.reddit.com/r/treenotation/ subreddit
 
-section Marketing Jumbo
+# Marketing Jumbo
 
-aftertext
- If you are looking for some marketing-speak, here you go:
+* If you are looking for some marketing-speak, here you go:
 
 orderedList
  1. The simplest syntax possible. No parentheses, no brackets, no semicolons. Just words you can speak.
@@ -79,10 +63,9 @@ orderedList
  7. Secure by design. Your data stays on your machines, we never see it.
  8. Runs anywhere. Run it from our sites, host it yourself, or run it on your local machine.
 
-section Other Tools For Data Scientists
+# Other Tools For Data Scientists
 
-aftertext
- Ohayo is just one of my tools that are trying to make data science easier. Here's a list of related products:
+* Ohayo is just one of my tools that are trying to make data science easier. Here's a list of related products:
 
 pipeTable
  Name|NameLink|Year|Wikipedia|WikipediaLink
@@ -157,10 +140,11 @@ pipeTable
  SAS|https://www.sas.com/|1976|W|https://en.wikipedia.org/wiki/SAS_language
  SPSS|https://www.ibm.com/us-en/marketplace/spss-statistics|1968|W|https://en.wikipedia.org/wiki/SPSS
 
-section How to Give Feedback
+# How to Give Feedback
 
-aftertext
- Open an issue here, the Tree Notation subreddit or email ohayo@treenotation.org.
- link https://www.reddit.com/r/treenotation/ subreddit
+* Open an issue here, the Tree Notation subreddit or email ohayo@treenotation.org.
+ https://www.reddit.com/r/treenotation/ subreddit
 
-section ❤️ Public Domain ❤️
+# ❤️ Public Domain ❤️
+
+import settings.scroll
