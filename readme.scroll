@@ -3,10 +3,10 @@ title Ohayo
 * Ohayo is a fast and free tool for data science. Ohayo consists of a very high level programming language and a visual web studio for that language. The goal of Ohayo is to enable people to do data science at the speed of voice. You can see a short clip of Ohayo in action here.
  https://youtube.com/watch?v=qqyGHmUlKoc here
 
-* You can try ohayo at https://ohayo.computer, download Ohayo on GitHub, try Ohayo hosted on GitHub, or install it using `npm install ohayo`.
- https://ohayo.computer https://ohayo.computer
+* You can try ohayo at https://ohayo.breckyunits.com, download Ohayo on GitHub, try Ohayo hosted on GitHub, or install it using `npm install ohayo`.
+ https://ohayo.breckyunits.com https://ohayo.breckyunits.com
  https://github.com/breck7/ohayo GitHub
- https://github.ohayo.computer GitHub
+ https://github.ohayo.breckyunits.com GitHub
 
 image slides.gif
 

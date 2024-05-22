@@ -2,6 +2,9 @@ title Release Notes
 
 * Here's a list of the notable changes in Ohayo.
 
+# 20.1.1 2024-5-22
+- 🧹 updated domain name to save a few bucks ;)
+
 # 20.1.0 2020-6-13
 list
  - 🎉 added roughjs.line tile
@@ -463,7 +466,7 @@ list
 
 # 8.0.0 2019-02-10
 list
- - 🎉 all previous versions of Ohayo accessible at v1/v2/vN.ohayo.computer
+ - 🎉 all previous versions of Ohayo accessible at v1/v2/vN.ohayo.breckyunits.com
  - ⚠️ all tile names are new. This version implements namespacing.
  - 🎉 web get, post, and dump tiles.
  - 🎉 better didyoumean tiles

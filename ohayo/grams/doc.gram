@@ -97,7 +97,7 @@ docSectionLinkNode
   }
  example
   doc.section
-   link http://ohayo.computer Ohayo
+   link http://ohayo.breckyunits.com Ohayo
 docSectionCodeNode
  extends abstractDocSectionComponentNode
  crux code

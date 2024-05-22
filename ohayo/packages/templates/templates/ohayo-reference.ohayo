@@ -37,11 +37,11 @@ debug.ohayoGrammarTree
 
 doc.section
  subtitle Secondary Notation (aka Text Styling)
- paragraph Words can be bolded[bold] or italicized[em] or monospaced[mono] or linked[link http://ohayo.computer] or footnoted[ref someRefId].
+ paragraph Words can be bolded[bold] or italicized[em] or monospaced[mono] or linked[link http://ohayo.breckyunits.com] or footnoted[ref someRefId].
 
 doc.section
  subtitle Links
- link http://ohayo.computer A whole sentence can be linked
+ link http://ohayo.breckyunits.com A whole sentence can be linked
 
 doc.section
  subtitle Categories
